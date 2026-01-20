@@ -72,8 +72,8 @@ export default function LayoutSwitcher({
           );
         })}
         
-        {/* Combined button */}
-        {onCombinedPanelModeChange && (
+        {/* Combined button - hidden for now */}
+        {/* {onCombinedPanelModeChange && (
           <button
             type="button"
             onClick={handleToggleCombined}
@@ -102,7 +102,7 @@ export default function LayoutSwitcher({
           >
             Combined
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );

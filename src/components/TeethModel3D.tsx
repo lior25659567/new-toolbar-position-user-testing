@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Center, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, useGLTF, Center, Environment } from '@react-three/drei';
 import { STLLoader, PLYLoader } from 'three-stdlib';
 import * as THREE from 'three';
 
@@ -271,21 +271,21 @@ function PLYModel({ url, monochrome = false, feedback = false }: { url: string; 
         vertexColors: false,
       });
     } else {
-      // Realistic dental material with vertex colors - darker with high gloss
+      // Realistic dental material with vertex colors - darker, natural look
       return new THREE.MeshPhysicalMaterial({
         vertexColors: true,
-        color: new THREE.Color(0xeeeeee),
-        roughness: 0.02,
-        metalness: 0.15,
+        color: new THREE.Color(0xc8c8c0),
+        roughness: 0.35,
+        metalness: 0.02,
         side: THREE.DoubleSide,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.02,
-        reflectivity: 1.2,
-        envMapIntensity: 2.5,
-        ior: 1.6,
-        sheen: 0.3,
-        sheenRoughness: 0.2,
-        sheenColor: new THREE.Color(0xffffff),
+        clearcoat: 0.4,
+        clearcoatRoughness: 0.25,
+        reflectivity: 0.5,
+        envMapIntensity: 0.6,
+        ior: 1.45,
+        sheen: 0.1,
+        sheenRoughness: 0.4,
+        sheenColor: new THREE.Color(0xe8e8e0),
       });
     }
   }, [monochrome]);
@@ -314,6 +314,45 @@ function LoadingSpinner() {
   );
 }
 
+// Camera controller for zoom animation - only triggers on margin line toggle
+function CameraController({ zoomIn }: { zoomIn: boolean }) {
+  const { camera } = useThree();
+  const prevZoomIn = useRef(zoomIn);
+  
+  const zoomedPosition = new THREE.Vector3(0, -1.2, 2.5); // Zoomed in position
+  const defaultPosition = new THREE.Vector3(0, -2, 4.5); // Default position
+  
+  // Instantly move camera when zoomIn state changes
+  useEffect(() => {
+    if (prevZoomIn.current !== zoomIn) {
+      const targetPos = zoomIn ? zoomedPosition : defaultPosition;
+      
+      // Quick smooth animation using requestAnimationFrame
+      const startPos = camera.position.clone();
+      const duration = 300; // 300ms animation
+      const startTime = Date.now();
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic for smooth deceleration
+        const eased = 1 - Math.pow(1 - progress, 3);
+        
+        camera.position.lerpVectors(startPos, targetPos, eased);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      animate();
+      prevZoomIn.current = zoomIn;
+    }
+  }, [zoomIn, camera]);
+  
+  return null;
+}
+
 interface TeethModel3DProps {
   modelUrl?: string; // Path to the 3D model (GLB/GLTF)
   width?: string | number;
@@ -323,6 +362,7 @@ interface TeethModel3DProps {
   autoRotate?: boolean;
   monochrome?: boolean; // Stone/gray texture mode
   feedback?: boolean; // Show blue marks for missing scan areas
+  zoomIn?: boolean; // Zoom in on the model (for margin line view)
   className?: string;
 }
 
@@ -335,6 +375,7 @@ export default function TeethModel3D({
   autoRotate = false,
   monochrome = false,
   feedback = false,
+  zoomIn = false,
   className = '',
 }: TeethModel3DProps) {
   return (
@@ -361,35 +402,40 @@ export default function TeethModel3D({
           alpha: true,
           preserveDrawingBuffer: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2,
+          toneMappingExposure: 0.7,
         }}
         style={{ touchAction: 'none' }}
         dpr={[1, 2]}
       >
-        {/* Lighting - optimized for realistic dental models */}
-        <ambientLight intensity={0.5} />
+        {/* Lighting - darker, more realistic dental model lighting */}
+        <ambientLight intensity={0.15} />
         <directionalLight 
           position={[5, 8, 5]} 
-          intensity={1.5} 
+          intensity={0.8} 
           castShadow
+          color="#f5f0e8"
         />
         <directionalLight 
           position={[-5, 5, -5]} 
-          intensity={0.8}
+          intensity={0.35}
+          color="#e8eef5"
         />
         <directionalLight 
           position={[0, -3, 5]} 
-          intensity={0.6}
+          intensity={0.25}
         />
         <directionalLight 
           position={[0, 5, -5]} 
-          intensity={0.4}
+          intensity={0.2}
         />
-        <pointLight position={[0, 10, 0]} intensity={0.5} color="#fff5e6" />
-        <pointLight position={[3, 0, 3]} intensity={0.3} color="#e6f0ff" />
+        <pointLight position={[0, 10, 0]} intensity={0.2} color="#fff5e6" />
+        <pointLight position={[3, 0, 3]} intensity={0.15} color="#e6f0ff" />
 
-        {/* Environment for realistic reflections */}
-        <Environment preset="studio" background={false} />
+        {/* Environment for subtle realistic reflections */}
+        <Environment preset="apartment" background={false} />
+
+        {/* Camera zoom controller */}
+        <CameraController zoomIn={zoomIn} />
 
         {/* Model */}
         <Suspense fallback={<LoadingSpinner />}>
@@ -405,14 +451,6 @@ export default function TeethModel3D({
             <PlaceholderTeeth />
           )}
         </Suspense>
-
-        {/* Shadow */}
-        <ContactShadows 
-          position={[0, -1.5, 0]} 
-          opacity={0.3} 
-          scale={10} 
-          blur={2} 
-        />
 
         {/* Controls - improved X and Y rotation */}
         {showControls && (

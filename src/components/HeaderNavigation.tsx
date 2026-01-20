@@ -369,26 +369,30 @@ function Dropdown1({ patientName }: { patientName: string }) {
       <div 
         className="flex items-center gap-[12px] cursor-pointer group"
       >
-        {/* Patient Avatar - Circular profile image */}
+        {/* Patient Avatar - Initials */}
         <div
           style={{ 
-            width: '40px', 
-            height: '40px',
+            width: '44px', 
+            height: '44px',
             borderRadius: '50%',
-            overflow: 'hidden',
             flexShrink: 0,
-            backgroundColor: '#F3F4F6'
+            backgroundColor: '#E8F4F8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          <img 
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
-            alt="Patient"
+          <span 
             style={{ 
-              width: '100%', 
-              height: '100%',
-              objectFit: 'cover'
+              color: '#007BA3',
+              fontSize: '15px',
+              fontWeight: 600,
+              fontFamily: "'Roboto', sans-serif",
+              letterSpacing: '0.02em'
             }}
-          />
+          >
+            MY
+          </span>
         </div>
         
         {/* Patient Name */}

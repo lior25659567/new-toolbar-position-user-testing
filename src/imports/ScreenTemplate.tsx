@@ -62,6 +62,8 @@ function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> })
 function Component3DModelView({ activeButtons }: { activeButtons: Set<number> }) {
   // Check if monochrome button (index 0) is active
   const isMonochrome = activeButtons.has(0);
+  // Check if margin line button (index 3) is active for zoom
+  const isMarginLineActive = activeButtons.has(3);
   // No feedback on View page
   
   // Always show the 3D interactive model - centered and larger
@@ -79,6 +81,7 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
         showControls={true}
         autoRotate={false}
         monochrome={isMonochrome}
+        zoomIn={isMarginLineActive}
       />
     </div>
   );
