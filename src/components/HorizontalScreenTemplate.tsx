@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-vyw91xr0mn";
 import imgScreenshot20240318At1457BackgroundRemoved from "figma:asset/a1dfc57a055d32f098369f51df6fd0791a341b87.png";
+import TeethModel3D from "./TeethModel3D";
+import upperJawModel from "@/assets/3d-models/upper-jaw.ply?url";
 import imgScreenshot20240318At1457BackgroundRemovedGrayscale from "figma:asset/d986e19df0e9c14222abc9c62ff49e0276238d2a.png";
 import imgScreenshot20240318At1457BackgroundRemovedFeedback from "figma:asset/7235f98944aa9efc68796aee3f4ed01c409cbea7.png";
 import imgScreenshot20240318At1457BackgroundRemovedGrayscaleFeedback from "figma:asset/d8e804204d336774af7dc7e2a6b5aeb59aa2b508.png";
@@ -23,171 +25,41 @@ import { HorizontalTopToolbarView } from "./HorizontalTopToolbarView";
 
 // Import all the same components from ScreenTemplate
 function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> }) {
-  // When both monochrome (0) and feedback (1) buttons are active, show grayscale with blue markers
-  if (activeButtons.has(0) && activeButtons.has(1)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <div className="absolute bottom-[14.62%] left-0 right-[3.87%] top-[13.81%]" data-name="Screenshot 2024-03-18 at 14.57 Background Removed">
-          <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemovedGrayscaleFeedback} />
-        </div>
-      </div>
-    );
-  }
-
-  // When first button (index 0) is active, show grayscale dental arch top-down view
-  if (activeButtons.has(0)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <div className="absolute bottom-[14.62%] left-0 right-[3.87%] top-[13.81%]" data-name="Screenshot 2024-03-18 at 14.57 Background Removed">
-          <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemovedGrayscale} />
-        </div>
-      </div>
-    );
-  }
-
-  // When feedback button (index 1) is active, show dental arch with blue markers
-  if (activeButtons.has(1)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <div className="absolute inset-[14.06%_2.37%_14.12%_-2%]" data-name="Screenshot 2024-03-18 at 14.57 Background Removed">
-          <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemovedFeedback} />
-        </div>
-      </div>
-    );
-  }
-
-  // Default view when no button is selected - dental arch top-down view centered on screen
+  // Always show the 3D interactive model - centered and larger
   return (
-    <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-      <div className="absolute inset-[14.06%_2.37%_14.12%_-2%]" data-name="Screenshot 2024-03-18 at 14.57 Background Removed">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemoved} />
-      </div>
+    <div 
+      className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
+      data-name="3D model - Mary"
+      style={{ width: '800px', height: '800px' }}
+    >
+      <TeethModel3D
+        modelUrl={upperJawModel}
+        width="100%"
+        height="100%"
+        backgroundColor="transparent"
+        showControls={true}
+        autoRotate={false}
+      />
     </div>
   );
 }
 
 function Component3DModelView({ activeButtons }: { activeButtons: Set<number> }) {
-  // When both Occulsgram (2) and Monochrome (0) buttons are active, show monochrome heatmap
-  if (activeButtons.has(0) && activeButtons.has(2)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <motion.div 
-          className="absolute inset-[14.06%_2.37%_14.12%_-2%]" 
-          data-name="Screenshot 2024-03-18 at 14.57 Background Removed"
-          animate={{
-            scale: activeButtons.has(3) ? 2.5 : 1,
-          }}
-          transition={{
-            duration: 0.6,
-            ease: "easeInOut"
-          }}
-        >
-          <img alt="Occlusion heatmap monochrome" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgOcclusionHeatmapMonochrome} />
-        </motion.div>
-      </div>
-    );
-  }
-
-  // When both monochrome (0) and Review Tool (1) buttons are active, show grayscale
-  if (activeButtons.has(0) && activeButtons.has(1)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <motion.div 
-          className="absolute bottom-[14.62%] left-0 right-[3.87%] top-[13.81%]" 
-          data-name="Screenshot 2024-03-18 at 14.57 Background Removed"
-          animate={{
-            scale: activeButtons.has(3) ? 2.5 : 1,
-          }}
-          transition={{
-            duration: 0.6,
-            ease: "easeInOut"
-          }}
-        >
-          <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemovedGrayscale} />
-        </motion.div>
-      </div>
-    );
-  }
-
-  // When Review Tool button (index 1) is active (without monochrome), show standard view
-  if (activeButtons.has(1)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <motion.div 
-          className="absolute inset-[14.06%_2.37%_14.12%_-2%]" 
-          data-name="Screenshot 2024-03-18 at 14.57 Background Removed"
-          animate={{
-            scale: activeButtons.has(3) ? 2.5 : 1,
-          }}
-          transition={{
-            duration: 0.6,
-            ease: "easeInOut"
-          }}
-        >
-          <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemoved} />
-        </motion.div>
-      </div>
-    );
-  }
-
-  // When monochrome button (index 0) is active without Occulsgram, show grayscale
-  if (activeButtons.has(0)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <motion.div 
-          className="absolute bottom-[14.62%] left-0 right-[3.87%] top-[13.81%]" 
-          data-name="Screenshot 2024-03-18 at 14.57 Background Removed"
-          animate={{
-            scale: activeButtons.has(3) ? 2.5 : 1,
-          }}
-          transition={{
-            duration: 0.6,
-            ease: "easeInOut"
-          }}
-        >
-          <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemovedGrayscale} />
-        </motion.div>
-      </div>
-    );
-  }
-
-  // When Occulsgram button (index 2) is active without monochrome, show color heatmap
-  if (activeButtons.has(2)) {
-    return (
-      <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-        <motion.div 
-          className="absolute inset-[14.06%_2.37%_14.12%_-2%]" 
-          data-name="Screenshot 2024-03-18 at 14.57 Background Removed"
-          animate={{
-            scale: activeButtons.has(3) ? 2.5 : 1,
-          }}
-          transition={{
-            duration: 0.6,
-            ease: "easeInOut"
-          }}
-        >
-          <img alt="Occlusion heatmap" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgOcclusionHeatmap} />
-        </motion.div>
-      </div>
-    );
-  }
-
-  // Default view - standard dental arch
+  // Always show the 3D interactive model - centered and larger
   return (
-    <div className="absolute left-1/2 size-[700px] top-[calc(50%+29px)] translate-x-[-50%] translate-y-[-50%]" data-name="3D model - Mary">
-      <motion.div 
-        className="absolute inset-[14.06%_2.37%_14.12%_-2%]" 
-        data-name="Screenshot 2024-03-18 at 14.57 Background Removed"
-        animate={{
-          scale: activeButtons.has(3) ? 2.5 : 1,
-        }}
-        transition={{
-          duration: 0.6,
-          ease: "easeInOut"
-        }}
-      >
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full" src={imgScreenshot20240318At1457BackgroundRemoved} />
-      </motion.div>
+    <div 
+      className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
+      data-name="3D model - View"
+      style={{ width: '800px', height: '800px' }}
+    >
+      <TeethModel3D
+        modelUrl={upperJawModel}
+        width="100%"
+        height="100%"
+        backgroundColor="transparent"
+        showControls={true}
+        autoRotate={false}
+      />
     </div>
   );
 }
