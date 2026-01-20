@@ -33,12 +33,17 @@ import LayoutSwitcher from "../components/LayoutSwitcher";
 import CombinedReviewMarginPanel from "../components/CombinedReviewMarginPanel";
 
 function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> }) {
+  // Check if monochrome button (index 0) is active
+  const isMonochrome = activeButtons.has(0);
+  // Check if feedback button (index 1) is active
+  const isFeedback = activeButtons.has(1);
+  
   // Always show the 3D interactive model - centered and larger
   return (
     <div 
       className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
       data-name="3D model - Mary"
-      style={{ width: '800px', height: '800px' }}
+      style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px' }}
     >
       <TeethModel3D
         modelUrl={upperJawModel}
@@ -47,18 +52,24 @@ function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> })
         backgroundColor="transparent"
         showControls={true}
         autoRotate={false}
+        monochrome={isMonochrome}
+        feedback={isFeedback}
       />
     </div>
   );
 }
 
 function Component3DModelView({ activeButtons }: { activeButtons: Set<number> }) {
+  // Check if monochrome button (index 0) is active
+  const isMonochrome = activeButtons.has(0);
+  // No feedback on View page
+  
   // Always show the 3D interactive model - centered and larger
   return (
     <div 
       className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
       data-name="3D model - View"
-      style={{ width: '800px', height: '800px' }}
+      style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px' }}
     >
       <TeethModel3D
         modelUrl={upperJawModel}
@@ -67,6 +78,7 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
         backgroundColor="transparent"
         showControls={true}
         autoRotate={false}
+        monochrome={isMonochrome}
       />
     </div>
   );
