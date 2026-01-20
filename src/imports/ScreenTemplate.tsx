@@ -87,6 +87,36 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
   );
 }
 
+// Shared 3D model component that stays mounted across page switches
+function Component3DModelShared({ activeButtons, isViewPage }: { activeButtons: Set<number>; isViewPage: boolean }) {
+  // Check if monochrome button (index 0) is active
+  const isMonochrome = activeButtons.has(0);
+  // Check if feedback button (index 1) is active - only for scan page
+  const isFeedback = !isViewPage && activeButtons.has(1);
+  // Check if margin line button (index 3) is active for zoom - only for view page
+  const isMarginLineActive = isViewPage && activeButtons.has(3);
+  
+  return (
+    <div 
+      className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
+      data-name="3D model - Shared"
+      style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px' }}
+    >
+      <TeethModel3D
+        modelUrl={upperJawModel}
+        width="100%"
+        height="100%"
+        backgroundColor="transparent"
+        showControls={true}
+        autoRotate={false}
+        monochrome={isMonochrome}
+        feedback={isFeedback}
+        zoomIn={isMarginLineActive}
+      />
+    </div>
+  );
+}
+
 function Group74() {
   return (
     <div className="absolute inset-[15.83%_14.99%_25.83%_11.67%]">
@@ -2478,8 +2508,11 @@ export default function ScreenTemplate({
 
   return (
     <div className="relative size-full" data-name="Screen template" style={{ backgroundColor: '#F4F4F4' }}>
-      {currentPage === 'scan' && <Component3DModelMary activeButtons={activeButtons} />}
-      {currentPage === 'view' && <Component3DModelView activeButtons={viewActiveButtons} />}
+      {/* Render single 3D Model - shared between scan and view to preserve camera state */}
+      <Component3DModelShared 
+        activeButtons={currentPage === 'scan' ? activeButtons : viewActiveButtons}
+        isViewPage={currentPage === 'view'}
+      />
       {currentPage === 'scan' && activeButtons.has(2) && (
         <div className="absolute left-[14px] bottom-[14px]">
           <PrepReviewPanel />

@@ -79,6 +79,36 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
   );
 }
 
+// Shared 3D model component that stays mounted across page switches
+function Component3DModelShared({ activeButtons, isViewPage }: { activeButtons: Set<number>; isViewPage: boolean }) {
+  // Check if monochrome button (index 0) is active
+  const isMonochrome = activeButtons.has(0);
+  // Check if feedback button (index 1) is active - only for scan page
+  const isFeedback = !isViewPage && activeButtons.has(1);
+  // Check if margin line button (index 3) is active for zoom - only for view page
+  const isMarginLineActive = isViewPage && activeButtons.has(3);
+  
+  return (
+    <div 
+      className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
+      data-name="3D model - Shared"
+      style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px' }}
+    >
+      <TeethModel3D
+        modelUrl={upperJawModel}
+        width="100%"
+        height="100%"
+        backgroundColor="transparent"
+        showControls={true}
+        autoRotate={false}
+        monochrome={isMonochrome}
+        feedback={isFeedback}
+        zoomIn={isMarginLineActive}
+      />
+    </div>
+  );
+}
+
 // Copy all other helper components from ScreenTemplate (WizardNavigation, HeaderTopBarITero, etc.)
 // I'll continue with the rest of the file...
 
@@ -211,9 +241,11 @@ export default function HorizontalScreenTemplate({
   return (
     <div className="relative size-full" data-name="Screen template" style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 1920 1080\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'1\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(69.6 39.825 -70.448 38.956 960 573.75)\\'><stop stop-color=\\'rgba(178,205,227,1)\\' offset=\\'0\\'/><stop stop-color=\\'rgba(221,235,242,1)\\' offset=\\'0.94792\\'/></radialGradient></defs></svg>')" }}>
       
-      {/* Render 3D Model based on current page */}
-      {currentPage === 'scan' && <Component3DModelMary activeButtons={activeButtons} />}
-      {currentPage === 'view' && <Component3DModelView activeButtons={viewActiveButtons} />}
+      {/* Render single 3D Model - shared between scan and view to preserve camera state */}
+      <Component3DModelShared 
+        activeButtons={currentPage === 'scan' ? activeButtons : viewActiveButtons}
+        isViewPage={currentPage === 'view'}
+      />
       
       {/* Camera placeholder for scan page */}
       {currentPage === 'scan' && (
