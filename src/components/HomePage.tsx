@@ -4,14 +4,12 @@ import React from 'react';
 
 interface LayoutCardProps {
   title: string;
-  description: string;
   icon: React.ReactNode;
   onClick: () => void;
   shortcut: string;
-  features: string[];
 }
 
-function LayoutCard({ title, description, icon, onClick, shortcut, features }: LayoutCardProps) {
+function LayoutCard({ title, icon, onClick, shortcut }: LayoutCardProps) {
   return (
     <div 
       onClick={onClick}
@@ -58,42 +56,11 @@ function LayoutCard({ title, description, icon, onClick, shortcut, features }: L
           fontSize: '18px',
           fontWeight: 600,
           color: '#1a1a1a',
-          margin: '0 0 8px 0',
+          margin: '0 0 16px 0',
           letterSpacing: '-0.02em',
         }}>
           {title}
         </h3>
-        
-        {/* Description */}
-        <p style={{
-          fontSize: '13px',
-          color: '#666666',
-          lineHeight: 1.5,
-          margin: '0 0 16px 0',
-        }}>
-          {description}
-        </p>
-        
-        {/* Feature tags */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
-          {features.map((feature, index) => (
-            <span 
-              key={index}
-              style={{
-                padding: '4px 10px',
-                fontSize: '11px',
-                color: '#555555',
-                backgroundColor: '#F0F0F0',
-                borderRadius: '100px',
-              }}
-            >
-              {feature}
-            </span>
-          ))}
-        </div>
-        
-        {/* Divider */}
-        <div style={{ width: '100%', height: '1px', backgroundColor: '#EEEEEE', marginBottom: '12px' }} />
         
         {/* Shortcut info */}
         <div style={{ 
@@ -237,29 +204,23 @@ export default function HomePage({
       <div style={{ display: 'flex', gap: '20px' }}>
         <LayoutCard
           title="Vertical"
-          description="Tools positioned on the right side of your screen for quick and easy access while scanning."
           icon={<VerticalLayoutIcon />}
           onClick={() => onSelectLayout('vertical')}
           shortcut="1"
-          features={['Right side', 'Quick access']}
         />
         
         <LayoutCard
           title="Top"
-          description="Horizontal toolbar at the top right corner, keeping your main workspace clear."
           icon={<TopLayoutIcon />}
           onClick={() => onSelectLayout('horizontal-top')}
           shortcut="2"
-          features={['Top corner', 'Minimal']}
         />
         
         <LayoutCard
           title="Bottom"
-          description="Tools positioned at the bottom of your screen for a different scanning experience."
           icon={<BottomLayoutIcon />}
           onClick={() => onSelectLayout('horizontal-bottom')}
           shortcut="3"
-          features={['Bottom bar', 'Wide layout']}
         />
       </div>
       

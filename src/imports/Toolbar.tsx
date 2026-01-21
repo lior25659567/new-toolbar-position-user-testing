@@ -34,7 +34,7 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
   );
 }
 
-function AohsButton({ isActive, onClick, buttonIndex }: { isActive: boolean; onClick: () => void; buttonIndex?: number }) {
+function AohsButton({ isActive, onClick, buttonIndex, isExpanded = false }: { isActive: boolean; onClick: () => void; buttonIndex?: number; isExpanded?: boolean }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   
@@ -50,9 +50,10 @@ function AohsButton({ isActive, onClick, buttonIndex }: { isActive: boolean; onC
   
   return (
     <motion.div 
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-all duration-200"
       style={{
-        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent',
+        border: isExpanded ? (isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent')) : 'none'
       }}
       data-name="AOHS button"
       onClick={onClick}
@@ -153,7 +154,7 @@ function FeedbackNew({ isActive = false }: { isActive?: boolean }) {
   );
 }
 
-function AohsButton1({ isActive, onClick, buttonIndex }: { isActive: boolean; onClick: () => void; buttonIndex?: number }) {
+function AohsButton1({ isActive, onClick, buttonIndex, isExpanded = false }: { isActive: boolean; onClick: () => void; buttonIndex?: number; isExpanded?: boolean }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   
@@ -169,9 +170,10 @@ function AohsButton1({ isActive, onClick, buttonIndex }: { isActive: boolean; on
   
   return (
     <motion.div 
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-all duration-200"
       style={{
-        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent',
+        border: isExpanded ? (isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent')) : 'none'
       }}
       data-name="AOHS button"
       onClick={onClick}
@@ -281,7 +283,7 @@ function PrepEditToTest({ isActive = false }: { isActive?: boolean }) {
   );
 }
 
-function AohsButton2({ isActive, onClick, buttonIndex }: { isActive: boolean; onClick: () => void; buttonIndex?: number }) {
+function AohsButton2({ isActive, onClick, buttonIndex, isExpanded = false }: { isActive: boolean; onClick: () => void; buttonIndex?: number; isExpanded?: boolean }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   
@@ -297,9 +299,10 @@ function AohsButton2({ isActive, onClick, buttonIndex }: { isActive: boolean; on
   
   return (
     <motion.div
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-all duration-200"
       style={{
-        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent',
+        border: isExpanded ? (isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent')) : 'none'
       }}
       data-name="AOHS button"
       onClick={onClick}
@@ -403,6 +406,76 @@ function AohsButton3({ onClick, isExpanded }: { onClick: () => void; isExpanded:
   );
 }
 
+// Expanded button row wrapper - wraps icon + text with proper styling
+function ExpandedButtonRow({ 
+  isActive, 
+  onClick, 
+  buttonIndex, 
+  label, 
+  renderIcon 
+}: { 
+  isActive: boolean; 
+  onClick: () => void; 
+  buttonIndex: number;
+  label: string;
+  renderIcon: (isHighlighted: boolean) => React.ReactNode;
+}) {
+  const [pressedButton, setPressedButton] = useState<number | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const handleTapStart = () => {
+    setPressedButton(buttonIndex);
+  };
+  
+  const handleTapEnd = () => {
+    setTimeout(() => setPressedButton(null), 300);
+  };
+
+  const isHighlighted = isActive || isHovered;
+
+  return (
+    <motion.div 
+      className="flex flex-row items-center px-[8px] py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200"
+      style={{
+        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
+        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+      }}
+      onClick={onClick}
+      onTapStart={handleTapStart}
+      onTapEnd={handleTapEnd}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileTap={{ 
+        scale: 0.9,
+        transition: {
+          type: "spring" as const,
+          stiffness: 600,
+          damping: 15
+        }
+      }}
+      whileHover={{ scale: 1.02 }}
+    >
+      {pressedButton === buttonIndex && (
+        <motion.div
+          className="absolute inset-0 rounded-full pointer-events-none z-10"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 2.5, opacity: [0, 0.5, 0] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          style={{
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%)',
+            filter: 'blur(12px)',
+          }}
+        />
+      )}
+      <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]">
+        {renderIcon(isHighlighted)}
+      </div>
+      <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: isHighlighted ? '#008EC2' : '#000000' }}>{label}</p>
+    </motion.div>
+  );
+}
+
 // Expanded Toolbar - all buttons with horizontal text labels
 function ExpandedToolbar({
   activeButtons,
@@ -417,22 +490,31 @@ function ExpandedToolbar({
     <div className="bg-white flex flex-col flex-1 gap-[8px] items-stretch p-[8px] relative rounded-[8px] font-['Roboto']">
       
       {/* Monochrome */}
-      <div className="flex flex-row items-center justify-start gap-[8px] relative">
-        <AohsButton isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} buttonIndex={0} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(0) ? '#008EC2' : '#000000' }}>Monochrome</p>
-      </div>
+      <ExpandedButtonRow 
+        isActive={activeButtons.has(0)} 
+        onClick={() => onButtonClick(0)} 
+        buttonIndex={0} 
+        label="Monochrome"
+        renderIcon={(isHighlighted) => <MonoChomrNew isActive={isHighlighted} />}
+      />
 
       {/* Feedback */}
-      <div className="flex flex-row items-center justify-start gap-[8px] relative">
-        <AohsButton1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} buttonIndex={1} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(1) ? '#008EC2' : '#000000' }}>Scan assist</p>
-      </div>
+      <ExpandedButtonRow 
+        isActive={activeButtons.has(1)} 
+        onClick={() => onButtonClick(1)} 
+        buttonIndex={1} 
+        label="Scan assist"
+        renderIcon={(isHighlighted) => <FeedbackNew isActive={isHighlighted} />}
+      />
 
       {/* Prep Edit */}
-      <div className="flex flex-row items-center justify-start gap-[8px] relative">
-        <AohsButton2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} buttonIndex={2} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(2) ? '#008EC2' : '#000000' }}>Prep edit</p>
-      </div>
+      <ExpandedButtonRow 
+        isActive={activeButtons.has(2)} 
+        onClick={() => onButtonClick(2)} 
+        buttonIndex={2} 
+        label="Prep edit"
+        renderIcon={(isHighlighted) => <PrepEditToTest isActive={isHighlighted} />}
+      />
 
       {/* Collapse Button */}
       <AohsButton3 onClick={() => onButtonClick(3)} isExpanded={true} />
