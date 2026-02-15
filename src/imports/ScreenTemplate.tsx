@@ -31,6 +31,8 @@ import PrepReviewPanel from "./PrepReviewPanel";
 import LayerPanel from "./LayerPanel-97-10893";
 import LayoutSwitcher from "../components/LayoutSwitcher";
 import CombinedReviewMarginPanel from "../components/CombinedReviewMarginPanel";
+import ScanTabs from "../components/ScanTabs";
+import type { ScanTab } from "../components/ScanTabs";
 
 function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> }) {
   // Check if monochrome button (index 0) is active
@@ -2419,6 +2421,10 @@ export default function ScreenTemplate({
   onViewButtonClick: externalOnViewButtonClick,
   combinedPanelMode = false,
   onCombinedPanelModeChange,
+  hideLayoutSwitcher = false,
+  showScanTabs = false,
+  scanTabs: externalScanTabs,
+  onScanTabsChange: externalOnScanTabsChange,
 }: {
   initialPage?: string;
   microAnimations?: boolean;
@@ -2432,6 +2438,10 @@ export default function ScreenTemplate({
   onViewButtonClick?: (index: number) => void;
   combinedPanelMode?: boolean;
   onCombinedPanelModeChange?: (enabled: boolean) => void;
+  hideLayoutSwitcher?: boolean;
+  showScanTabs?: boolean;
+  scanTabs?: ScanTab[];
+  onScanTabsChange?: (tabs: ScanTab[]) => void;
 } = {}) {
   // Use external state if provided, otherwise use local state (for backward compatibility)
   const [localCurrentPage, setLocalCurrentPage] = useState<string>(initialPage);
@@ -2445,6 +2455,9 @@ export default function ScreenTemplate({
   const currentPage = isUsingExternalState ? initialPage : localCurrentPage;
   const activeButtons = externalActiveButtons !== undefined ? externalActiveButtons : localActiveButtons;
   const viewActiveButtons = externalViewActiveButtons !== undefined ? externalViewActiveButtons : localViewActiveButtons;
+
+  // Offset for scan tabs (64px when tabs are shown on scan page)
+  const tabsOffset = showScanTabs && currentPage === 'scan' ? 64 : 0;
 
   const handleButtonClick = externalOnButtonClick || ((index: number) => {
     setLocalActiveButtons(prev => {
@@ -2535,7 +2548,19 @@ export default function ScreenTemplate({
         currentStep={currentPage as 'info' | 'scan' | 'view' | 'send'} 
         patientName="Patient: Mina Y." 
         onStepChange={(step) => handlePageChange(step)}
+        jawImageOffset={tabsOffset}
+        scanTabs={externalScanTabs}
       />
+
+      {/* Scan Tabs - only shown when showScanTabs is true (DedicatedTopToolbarPage) */}
+      {showScanTabs && currentPage === 'scan' && (
+        <div className="absolute top-[72px] left-0 right-0 z-40" style={{ width: '100%' }}>
+          <ScanTabs
+            tabs={externalScanTabs}
+            onTabsChange={externalOnScanTabsChange}
+          />
+        </div>
+      )}
 
       {currentPage === 'scan' && layout === 'vertical' && (
         <>
@@ -2688,14 +2713,14 @@ export default function ScreenTemplate({
       )}
       {currentPage === 'scan' && layout === 'horizontal-top' && (
         <>
-          <div className="absolute right-[17px] top-[93px]">
+          <div className="absolute right-[17px]" style={{ top: `${93 + tabsOffset}px` }}>
             <HorizontalTopToolbarScan activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
           </div>
         </>
       )}
       {currentPage === 'view' && layout === 'horizontal-top' && (
         <>
-          <div className="absolute right-[17px] top-[93px]">
+          <div className="absolute right-[17px]" style={{ top: `${93 + tabsOffset}px` }}>
             <HorizontalTopToolbarView activeButtons={viewActiveButtons} onButtonClick={handleViewButtonClick} microAnimations={microAnimations} />
           </div>
           {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
@@ -2768,9 +2793,9 @@ export default function ScreenTemplate({
         </>
       )}
       
-      {/* Layout switcher for scan and view pages - positioned below HeaderNavigation/jaw image with 16px gap */}
-      {(currentPage === 'scan' || currentPage === 'view') && (onBackToHome || onNavigateToLayout) && (
-        <div className="absolute z-50" style={{ top: 'calc(96px + 467px + 16px)', left: '14px' }}>
+      {/* Layout switcher for scan and view pages - positioned below HeaderNavigation/tabs/jaw image with 16px gap */}
+      {!hideLayoutSwitcher && (currentPage === 'scan' || currentPage === 'view') && (onBackToHome || onNavigateToLayout) && (
+        <div className="absolute z-50" style={{ top: `calc(${96 + tabsOffset}px + 467px + 16px)`, left: '14px' }}>
           <LayoutSwitcher
             currentLayout={
               layout === 'vertical' ? 'vertical' 

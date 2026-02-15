@@ -562,14 +562,14 @@ export function HorizontalTopToolbarScan({
 
   if (isExpanded) {
     return (
-      <div className="content-stretch flex items-stretch relative rounded-[8px] font-['Roboto'] overflow-hidden">
+      <div className="content-stretch flex items-stretch relative rounded-[8px] font-['Roboto'] overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
         <ExpandedToolbar activeButtons={activeButtons} onButtonClick={onButtonClick} microAnimations={microAnimations} stackVertical={stackVertical} />
       </div>
     );
   }
 
   return (
-    <div className="content-stretch flex items-start relative rounded-[8px] h-[76px] font-['Roboto'] overflow-hidden">
+    <div className="content-stretch flex items-start relative rounded-[8px] h-[76px] font-['Roboto'] overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
       <Frame4 activeButtons={activeButtons} onButtonClick={onButtonClick} />
       <div className="flex h-[76px] items-center justify-center relative shrink-0 w-[76px] bg-white" style={{ "--transform-inner-width": "60", "--transform-inner-height": "60" } as React.CSSProperties}>
         <Frame3 onButtonClick={onButtonClick} isExpanded={isExpanded} />

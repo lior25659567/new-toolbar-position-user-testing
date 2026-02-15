@@ -111,7 +111,7 @@ function ArrowsRightArrow() {
 
 export default function CameraNiri() {
   return (
-    <div className="relative size-full" data-name="camera NIRI">
+    <div className="relative size-full" data-name="camera NIRI" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', borderRadius: '4px' }}>
       <div className="absolute inset-[-0.47%_-0.93%]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 440 860">
           <g filter="url(#filter0_f_83_2708)" id="Rectangle 932">

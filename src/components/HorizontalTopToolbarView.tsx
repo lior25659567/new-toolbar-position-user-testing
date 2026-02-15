@@ -110,7 +110,7 @@ function IconButton({
       data-name="AOHS button"
       onClick={onClick}
       onTapStart={handleTapStart}
-      onTapEnd={handleTapEnd}
+      onTap={handleTapEnd}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       {...animationProps}
@@ -234,31 +234,29 @@ function Frame4({
   );
 }
 
-// Chevron Icon - points right when collapsed, left when expanded  
+// Chevron Icon - identical to ViewLayersPanel: 0° = down, 180° = up
+// Uses motion initial/animate so it animates even when the component remounts on toggle
 function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
   return (
-    <motion.div 
-      className="relative shrink-0 size-[32px]" 
-      data-name="ChevronIcon"
-      animate={{ 
-        rotate: isExpanded ? 180 : 90,
-        scale: [1, 1.1, 1]
-      }}
-      transition={{ 
-        rotate: { duration: 0.3, ease: "easeInOut" },
-        scale: { duration: 0.2, ease: "easeOut" }
-      }}
+    <motion.div
+      className="relative shrink-0 flex items-center justify-center"
+      style={{ width: '32px', height: '32px' }}
+      initial={{ rotate: isExpanded ? 0 : 180 }}
+      animate={{ rotate: isExpanded ? 180 : 0 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <svg 
-        className="block size-full" 
-        fill="none" 
+      <svg
+        className="block"
+        width="32"
+        height="32"
+        fill="none"
         viewBox="0 0 24 24"
       >
-        <path 
-          d="M6 9L12 15L18 9" 
-          stroke="#717182" 
-          strokeWidth="1" 
-          strokeLinecap="round" 
+        <path
+          d="M6 9L12 15L18 9"
+          stroke="#717182"
+          strokeWidth="1"
+          strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
@@ -325,7 +323,14 @@ function AohsButton6({ onClick, isExpanded }: { onClick: () => void; isExpanded:
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ 
+        scale: 0.88,
+        transition: {
+          type: "spring" as const,
+          stiffness: 600,
+          damping: 15
+        }
+      }}
     >
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <Button isExpanded={isExpanded} isHovered={isHovered} />
@@ -337,9 +342,7 @@ function Frame3({ onButtonClick, isExpanded }: { onButtonClick: (index: number) 
   return (
     <div className="bg-white content-stretch flex flex-col h-[76px] items-center justify-center relative rounded-bl-[4px] rounded-br-[4px] w-[76px]">
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="rotate-[270deg]">
-          <AohsButton6 onClick={() => onButtonClick(6)} isExpanded={isExpanded} />
-        </div>
+        <AohsButton6 onClick={() => onButtonClick(6)} isExpanded={isExpanded} />
       </div>
     </div>
   );
@@ -362,6 +365,7 @@ export function HorizontalTopToolbarView({
     return (
       <motion.div 
         className="content-stretch flex items-stretch relative rounded-[8px] font-['Roboto'] overflow-hidden"
+        style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}
         initial={{ width: 'auto', opacity: 0 }}
         animate={{ width: 'auto', opacity: 1 }}
         exit={{ width: 'auto', opacity: 0 }}
@@ -378,6 +382,7 @@ export function HorizontalTopToolbarView({
   return (
     <motion.div 
       className="content-stretch flex items-start relative rounded-[8px] h-[76px] font-['Roboto'] overflow-hidden"
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}
       initial={{ width: 'auto', opacity: 0 }}
       animate={{ width: 'auto', opacity: 1 }}
       exit={{ width: 'auto', opacity: 0 }}

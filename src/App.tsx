@@ -1,11 +1,10 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import ScreenTemplate from "./imports/ScreenTemplate";
 import HomePage from "./components/HomePage";
+import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top'>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function App() {
   const [viewActiveButtons, setViewActiveButtons] = useState<Set<number>>(new Set());
   const [combinedPanelMode, setCombinedPanelMode] = useState<boolean>(false);
 
-  const handleSelectLayout = (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom') => {
+  const handleSelectLayout = (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => {
     setCurrentView(layout);
   };
 
@@ -37,7 +36,7 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom') => {
+  const handleNavigateToLayout = (layout: 'home' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => {
     setCurrentView(layout);
   };
   
@@ -176,6 +175,17 @@ export default function App() {
           onViewButtonClick={handleViewButtonClick}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
+        />
+      )}
+
+      {currentView === 'dedicated-top' && (
+        <DedicatedTopToolbarPage
+          onBackToHome={handleBackToHome}
+          activeButtons={activeButtons}
+          viewActiveButtons={viewActiveButtons}
+          onPageChange={handlePageChange}
+          onButtonClick={handleButtonClick}
+          onViewButtonClick={handleViewButtonClick}
         />
       )}
 

@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 interface LayoutCardProps {
@@ -152,7 +150,7 @@ function BottomLayoutIcon() {
 export default function HomePage({ 
   onSelectLayout,
 }: { 
-  onSelectLayout: (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom') => void;
+  onSelectLayout: (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => void;
   combinedPanelMode?: boolean;
   onCombinedPanelModeChange?: (enabled: boolean) => void;
 }) {
@@ -162,6 +160,7 @@ export default function HomePage({
       if (e.key === '1') onSelectLayout('vertical');
       if (e.key === '2') onSelectLayout('horizontal-top');
       if (e.key === '3') onSelectLayout('horizontal-bottom');
+      if (e.key === '4') onSelectLayout('dedicated-top');
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -201,7 +200,7 @@ export default function HomePage({
       </div>
       
       {/* Cards container */}
-      <div style={{ display: 'flex', gap: '20px' }}>
+      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <LayoutCard
           title="Vertical"
           icon={<VerticalLayoutIcon />}
@@ -221,6 +220,13 @@ export default function HomePage({
           icon={<BottomLayoutIcon />}
           onClick={() => onSelectLayout('horizontal-bottom')}
           shortcut="3"
+        />
+        
+        <LayoutCard
+          title="Dedicated Top"
+          icon={<TopLayoutIcon />}
+          onClick={() => onSelectLayout('dedicated-top')}
+          shortcut="4"
         />
       </div>
       

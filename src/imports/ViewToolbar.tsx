@@ -513,6 +513,7 @@ export default function ViewToolbar({ activeButtons, onButtonClick, microAnimati
     <div 
       className="bg-white box-border content-stretch flex flex-col gap-[8px] items-center justify-center px-0 py-[8px] relative rounded-[12px] w-full" 
       data-name="Toolbar"
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}
     >
       <Frame6 activeButtons={activeButtons} onButtonClick={onButtonClick} microAnimations={microAnimations} />
     </div>

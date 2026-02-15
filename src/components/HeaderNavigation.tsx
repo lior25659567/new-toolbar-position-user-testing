@@ -1,6 +1,8 @@
 import React from 'react';
 import svgPaths from '@/imports/svg-tl25ixc7nv';
 import jawNavigationImage from '@/assets/jaw-selector-lower.png';
+import ViewLayersPanel from './ViewLayersPanel';
+import type { ScanTab } from './ScanTabs';
 
 // ============================================================================
 // HEADER NAVIGATION COMPONENT
@@ -15,6 +17,8 @@ interface HeaderNavigationProps {
   currentStep?: WizardStep;
   patientName?: string;
   onStepChange?: (step: WizardStep) => void;
+  jawImageOffset?: number;
+  scanTabs?: ScanTab[];
 }
 
 // ============================================================================
@@ -429,8 +433,12 @@ function Dropdown1({ patientName }: { patientName: string }) {
 export default function HeaderNavigation({ 
   currentStep = 'scan', 
   patientName = 'Patient: Mina Y.',
-  onStepChange 
+  onStepChange,
+  jawImageOffset = 0,
+  scanTabs,
 }: HeaderNavigationProps) {
+  const isViewMode = currentStep === 'view';
+
   return (
     <div className="relative w-full">
       <div className="bg-white flex items-center justify-between gap-[16px] px-[16px] py-[4px] relative w-full" data-name="Header Scan component" style={{ height: '72px', minHeight: '72px', maxHeight: '72px' }}>
@@ -445,14 +453,18 @@ export default function HeaderNavigation({
           <NavigatonIcons />
         </div>
       </div>
-      {/* Jaw Navigation image positioned below navigation, top-left aligned */}
-      <div className="absolute left-[16px]" style={{ top: '96px' }}>
-        <img 
-          src={jawNavigationImage} 
-          alt="Jaw Navigation" 
-          className="block"
-          style={{ width: '301px', height: '467px' }}
-        />
+      {/* Left panel: Jaw image in scan mode, Layers panel in view mode */}
+      <div className="absolute left-[16px]" style={{ top: `${93 + jawImageOffset}px` }}>
+        {isViewMode && scanTabs ? (
+          <ViewLayersPanel scanTabs={scanTabs} />
+        ) : (
+          <img 
+            src={jawNavigationImage} 
+            alt="Jaw Navigation" 
+            className="block"
+            style={{ width: '301px', height: '467px' }}
+          />
+        )}
       </div>
     </div>
   );

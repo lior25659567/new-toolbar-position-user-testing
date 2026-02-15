@@ -284,7 +284,8 @@ function ReviewToolImages() {
 export default function CombinedReviewMarginPanel() {
   return (
     <div 
-      className="flex flex-col p-[16px] relative w-[432px] bg-[#f5f5f5] rounded-[4px] shadow-lg gap-[16px]" 
+      className="flex flex-col p-[16px] relative w-[432px] bg-[#f5f5f5] rounded-[4px] gap-[16px]"
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }} 
       style={{ height: 'calc(100vh - 109px)' }}
       data-name="Combined Review Margin Panel"
     >
