@@ -1,4 +1,5 @@
 import React from "react";
+import { PrimaryButton, SecondaryButton, IconButton } from "../design-system";
 
 // SVG Icons as components
 function DragHandle() {
@@ -82,9 +83,9 @@ export default function Panel() {
             Trim tool
           </h2>
         </div>
-        <button className="flex items-center justify-center size-8 rounded-lg hover:bg-gray-100 transition-colors">
+        <IconButton aria-label="Close panel">
           <CloseIcon />
-        </button>
+        </IconButton>
       </div>
       
       {/* Action Buttons - 24px padding on sides, 32px padding on top */}
@@ -93,31 +94,26 @@ export default function Panel() {
         style={{ padding: '32px 24px 24px 24px' }}
       >
         {/* Trim Button */}
-        <button 
-          className="flex items-center justify-center gap-4 w-full rounded-lg transition-colors hover:opacity-90"
-          style={{ backgroundColor: '#009ACE', height: '60px', minHeight: '60px' }}
-        >
+        <PrimaryButton size={60} fullWidth>
           <ScissorsIcon />
-          <span className="text-[18px] font-medium tracking-[-0.44px]" style={{ fontFamily: 'Inter, sans-serif', color: 'white' }}>
-            Trim
-          </span>
-        </button>
-        
+          Trim
+        </PrimaryButton>
+
         {/* Undo and Confirm Buttons */}
         <div className="flex gap-2">
-          <button className="flex-1 flex flex-col items-center justify-center gap-1 bg-white border border-[#e5e7eb] rounded-lg hover:bg-gray-50 transition-colors" style={{ height: '60px', minHeight: '60px' }}>
-            <UndoIcon />
-            <span className="text-[14px] font-medium text-[#374151] tracking-[-0.15px]" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Undo
-            </span>
-          </button>
-          
-          <button className="flex-1 flex flex-col items-center justify-center gap-1 bg-white border border-[#e5e7eb] rounded-lg hover:bg-gray-50 transition-colors" style={{ height: '60px', minHeight: '60px' }}>
-            <ConfirmIcon />
-            <span className="text-[14px] font-medium text-[#374151] tracking-[-0.15px]" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Confirm
-            </span>
-          </button>
+          <div style={{ flex: '1 0 0', minWidth: 0 }}>
+            <SecondaryButton size={60} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
+              <UndoIcon />
+              <span style={{ fontSize: '16px' }}>Undo</span>
+            </SecondaryButton>
+          </div>
+
+          <div style={{ flex: '1 0 0', minWidth: 0 }}>
+            <SecondaryButton size={60} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
+              <ConfirmIcon />
+              <span style={{ fontSize: '16px' }}>Confirm</span>
+            </SecondaryButton>
+          </div>
         </div>
       </div>
     </div>

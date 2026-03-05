@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { PrimaryButton, SecondaryButton, IconButton } from "../design-system";
 
 // SVG Icons as components
 function DragHandle() {
@@ -20,10 +21,10 @@ function DragHandle() {
   );
 }
 
-function CloseIcon({ isHovered }: { isHovered?: boolean }) {
+function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M15 5L5 15M5 5L15 15" stroke={isHovered ? "#374151" : "#6B7280"} strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'stroke 0.2s ease' }}/>
+      <path d="M15 5L5 15M5 5L15 15" stroke="#6B7280" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -38,70 +39,17 @@ function SelectIcon() {
   );
 }
 
-function UndoIcon({ isHovered }: { isHovered?: boolean }) {
+function UndoIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 7V13H9" stroke={isHovered ? "#009ACE" : "#374151"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'stroke 0.2s ease' }}/>
-      <path d="M21 17C21 14.6131 20.0518 12.3239 18.364 10.636C16.6761 8.94821 14.3869 8 12 8C9.61305 8 7.32387 8.94821 5.63604 10.636L3 13" stroke={isHovered ? "#009ACE" : "#374151"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'stroke 0.2s ease' }}/>
+      <path d="M3 7V13H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M21 17C21 14.6131 20.0518 12.3239 18.364 10.636C16.6761 8.94821 14.3869 8 12 8C9.61305 8 7.32387 8.94821 5.63604 10.636L3 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 
-function PrimaryPanelButton({ children, icon }: { children: React.ReactNode; icon: React.ReactNode }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <button 
-      className="flex items-center justify-center gap-4 w-full rounded-lg transition-all duration-200"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        backgroundColor: isHovered ? '#0088B8' : '#009ACE', 
-        height: '60px', 
-        minHeight: '60px',
-        transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-        boxShadow: isHovered ? '0 4px 12px rgba(0, 154, 206, 0.3)' : 'none'
-      }}
-    >
-      {icon}
-      <span className="text-[18px] font-medium tracking-[-0.44px]" style={{ fontFamily: 'Inter, sans-serif', color: 'white' }}>
-        {children}
-      </span>
-    </button>
-  );
-}
-
-function SecondaryPanelButton({ children, icon }: { children: React.ReactNode; icon: React.ReactNode }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <button 
-      className="flex items-center justify-center gap-4 bg-white border rounded-lg transition-all duration-200 w-full"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        height: '60px', 
-        minHeight: '60px',
-        borderColor: isHovered ? '#009ACE' : '#e5e7eb',
-        backgroundColor: isHovered ? '#f0f9ff' : 'white',
-        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: isHovered ? '0 4px 8px rgba(0, 0, 0, 0.08)' : 'none'
-      }}
-    >
-      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<{ isHovered?: boolean }>, { isHovered }) : icon}
-      <span 
-        className="text-[14px] font-medium tracking-[-0.15px] transition-colors duration-200" 
-        style={{ fontFamily: 'Inter, sans-serif', color: isHovered ? '#009ACE' : '#374151' }}
-      >
-        {children}
-      </span>
-    </button>
-  );
-}
 
 export default function PrepReviewPanel() {
-  const [closeHovered, setCloseHovered] = useState(false);
-  
   return (
     <div 
       className="bg-white flex flex-col overflow-visible"
@@ -125,17 +73,9 @@ export default function PrepReviewPanel() {
             Prep review tool
           </h2>
         </div>
-        <button 
-          className="flex items-center justify-center size-8 rounded-lg transition-all duration-200"
-          onMouseEnter={() => setCloseHovered(true)}
-          onMouseLeave={() => setCloseHovered(false)}
-          style={{ 
-            backgroundColor: closeHovered ? '#f3f4f6' : 'transparent',
-            transform: closeHovered ? 'scale(1.1)' : 'scale(1)'
-          }}
-        >
-          <CloseIcon isHovered={closeHovered} />
-        </button>
+        <IconButton aria-label="Close panel">
+          <CloseIcon />
+        </IconButton>
       </div>
       
       {/* Action Buttons - 24px padding on sides, 32px padding on top */}
@@ -144,14 +84,16 @@ export default function PrepReviewPanel() {
         style={{ padding: '32px 24px 24px 24px' }}
       >
         {/* Select Button */}
-        <PrimaryPanelButton icon={<SelectIcon />}>
+        <PrimaryButton size={60} fullWidth>
+          <SelectIcon />
           Select
-        </PrimaryPanelButton>
-        
+        </PrimaryButton>
+
         {/* Erase & Rescan Button */}
-        <SecondaryPanelButton icon={<UndoIcon />}>
-          Erase & Rescan
-        </SecondaryPanelButton>
+        <SecondaryButton size={60} fullWidth>
+          <UndoIcon />
+          Erase &amp; Rescan
+        </SecondaryButton>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { PrimaryButton, SecondaryButton, IconButton } from "../design-system";
 // SVG Icons as components
 function DragHandle() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', cursor: 'grab' }}>
       <div style={{ display: 'flex', gap: '3px' }}>
         <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
         <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
@@ -29,18 +29,18 @@ function CloseIcon() {
   );
 }
 
-function ChevronLeft() {
+function ChevronLeftIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M15 18L9 12L15 6" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 
-function ChevronRight() {
+function ChevronRightIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M9 18L15 12L9 6" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -84,7 +84,8 @@ function ClearIcon() {
   );
 }
 
-export default function Panel() {
+export default function MarginLinePanel() {
+
   return (
     <div
       className="bg-white flex flex-col overflow-visible"
@@ -97,7 +98,7 @@ export default function Panel() {
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)'
       }}
     >
-      {/* Header */}
+      {/* Header - 72px height */}
       <div
         className="flex items-center justify-between"
         style={{ height: '72px', padding: '0 24px', borderBottom: '1px solid #f3f4f6' }}
@@ -118,10 +119,12 @@ export default function Panel() {
         className="flex items-center justify-between"
         style={{ padding: '24px 24px 0 24px' }}
       >
+        {/* Left Arrow */}
         <SecondaryButton size={44} style={{ width: '46px', height: '46px', padding: 0 }}>
-          <ChevronLeft />
+          <ChevronLeftIcon />
         </SecondaryButton>
 
+        {/* Tooth Info */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
           <span style={{ fontSize: '12px', fontWeight: 500, color: '#6a7282', textTransform: 'uppercase', letterSpacing: '0.3px', fontFamily: 'Inter, sans-serif' }}>
             TOOTH
@@ -134,8 +137,9 @@ export default function Panel() {
           </span>
         </div>
 
+        {/* Right Arrow */}
         <SecondaryButton size={44} style={{ width: '46px', height: '46px', padding: 0 }}>
-          <ChevronRight />
+          <ChevronRightIcon />
         </SecondaryButton>
       </div>
 
@@ -144,11 +148,13 @@ export default function Panel() {
         className="flex flex-col gap-2"
         style={{ padding: '24px 24px 24px 24px' }}
       >
+        {/* Detect Button */}
         <PrimaryButton size={60} fullWidth>
           <DetectIcon />
           Detect
         </PrimaryButton>
 
+        {/* Draw / Undo / Clear Buttons */}
         <div className="flex gap-2">
           <div style={{ flex: '1 0 0', minWidth: 0 }}>
             <SecondaryButton size={60} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
