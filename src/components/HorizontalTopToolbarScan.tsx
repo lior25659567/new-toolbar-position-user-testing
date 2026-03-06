@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { SecondaryButton } from "../design-system";
 import svgPaths from "../imports/svg-76kjqgrbiw";
 
 function InfoIcon() {
@@ -436,31 +437,28 @@ function Frame4({ activeButtons, onButtonClick }: { activeButtons: Set<number>; 
   );
 }
 
-// Chevron Icon - points right when collapsed, left when expanded
+// Chevron Icon - identical to view toolbar: 0° = down (collapsed), 180° = up (expanded)
 function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
   return (
-    <motion.div 
-      className="relative shrink-0 size-[32px]" 
-      data-name="ChevronIcon"
-      animate={{ 
-        rotate: isExpanded ? 180 : 90,
-        scale: [1, 1.1, 1]
-      }}
-      transition={{ 
-        rotate: { duration: 0.3, ease: "easeInOut" },
-        scale: { duration: 0.2, ease: "easeOut" }
-      }}
+    <motion.div
+      className="relative shrink-0 flex items-center justify-center"
+      style={{ width: '32px', height: '32px' }}
+      initial={{ rotate: isExpanded ? 0 : 180 }}
+      animate={{ rotate: isExpanded ? 180 : 0 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <svg 
-        className="block size-full" 
-        fill="none" 
+      <svg
+        className="block"
+        width="32"
+        height="32"
+        fill="none"
         viewBox="0 0 24 24"
       >
-        <path 
-          d="M6 9L12 15L18 9" 
-          stroke="#717182" 
-          strokeWidth="1" 
-          strokeLinecap="round" 
+        <path
+          d="M6 9L12 15L18 9"
+          stroke="#717182"
+          strokeWidth="1"
+          strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
@@ -468,81 +466,28 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
   );
 }
 
-// Collapse button with hover state
 function CollapseButton({ onClick }: { onClick: () => void }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
   return (
-    <motion.div 
-      className="flex items-center justify-center cursor-pointer relative shrink-0"
+    <SecondaryButton
+      size={60}
+      style={{ width: 60, padding: 0, minHeight: 60 }}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ 
-        scale: 0.88,
-        transition: {
-          type: "spring" as const,
-          stiffness: 600,
-          damping: 15
-        }
-      }}
     >
-      <div 
-        className="size-[60px] flex items-center justify-center rounded-[8px] transition-all duration-200"
-        style={{ 
-          border: `1px solid ${isHovered ? '#009ACE' : '#E5E7EB'}`,
-          backgroundColor: isHovered ? '#f0f9ff' : 'transparent'
-        }}
-      >
-        <ChevronIcon isExpanded={true} />
-      </div>
-    </motion.div>
-  );
-}
-
-function Button({ isExpanded, isHovered }: { isExpanded: boolean; isHovered?: boolean }) {
-  return (
-    <div 
-      className="content-stretch flex size-[60px] items-center justify-center relative rounded-[8px] shrink-0 transition-all duration-200" 
-      data-name="Button"
-      style={{ 
-        border: `1px solid ${isHovered ? '#009ACE' : '#E5E7EB'}`,
-        backgroundColor: isHovered ? '#f0f9ff' : 'transparent'
-      }}
-    >
-      <ChevronIcon isExpanded={isExpanded} />
-    </div>
-  );
-}
-
-function AohsButton3({ onClick, isExpanded }: { onClick: () => void; isExpanded: boolean }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <motion.div 
-      className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] size-[60px] cursor-pointer overflow-hidden" 
-      data-name="AOHS button"
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[8px]" />
-      <Button isExpanded={isExpanded} isHovered={isHovered} />
-    </motion.div>
+      <ChevronIcon isExpanded={true} />
+    </SecondaryButton>
   );
 }
 
 function Frame3({ onButtonClick, isExpanded }: { onButtonClick: (index: number) => void; isExpanded: boolean }) {
   return (
-    <div className="bg-white content-stretch flex flex-col h-[76px] items-center justify-center relative rounded-bl-[4px] rounded-br-[4px] w-[76px]">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="rotate-[270deg]">
-          <AohsButton3 onClick={() => onButtonClick(3)} isExpanded={isExpanded} />
-        </div>
-      </div>
+    <div className="bg-white flex h-[76px] w-[76px] items-center justify-center">
+      <SecondaryButton
+        size={60}
+        style={{ width: 60, padding: 0, minHeight: 60 }}
+        onClick={() => onButtonClick(3)}
+      >
+        <ChevronIcon isExpanded={isExpanded} />
+      </SecondaryButton>
     </div>
   );
 }

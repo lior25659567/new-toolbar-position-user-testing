@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import ScreenTemplate from "./imports/ScreenTemplate";
 import HomePage from "./components/HomePage";
 import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
+import { DesignSystemPage } from "./design-system";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top'>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => {
+  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => {
     setCurrentView(layout);
   };
   
@@ -105,9 +106,14 @@ export default function App() {
       {currentView === 'home' && (
         <HomePage 
           onSelectLayout={handleSelectLayout}
+          onOpenDesignSystem={() => setCurrentView('design-system')}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
         />
+      )}
+
+      {currentView === 'design-system' && (
+        <DesignSystemPage onBack={() => setCurrentView('home')} />
       )}
       
       {currentView === 'vertical' && (

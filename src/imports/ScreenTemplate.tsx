@@ -33,6 +33,7 @@ import LayoutSwitcher from "../components/LayoutSwitcher";
 import CombinedReviewMarginPanel from "../components/CombinedReviewMarginPanel";
 import ScanTabs from "../components/ScanTabs";
 import type { ScanTab } from "../components/ScanTabs";
+import { InfoPage } from "../info/components/InfoPage";
 
 function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> }) {
   // Check if monochrome button (index 0) is active
@@ -238,9 +239,13 @@ function Icon() {
   );
 }
 
-function HeaderWizardAtoms() {
+function HeaderWizardAtoms({ isActive, onClick }: { isActive?: boolean; onClick?: () => void }) {
   return (
-    <div className="relative shrink-0 size-[60px]" data-name="./Header/Wizard atoms">
+    <div
+      className={`relative shrink-0 size-[60px] ${onClick ? 'cursor-pointer' : ''} ${isActive ? 'bg-[#E0F2FE] rounded-[8px]' : ''}`}
+      data-name="./Header/Wizard atoms"
+      onClick={onClick}
+    >
       <Icon />
     </div>
   );
@@ -468,7 +473,7 @@ function HeaderWizardAtoms3() {
 function WizardNavigation({ currentPage, onPageChange }: { currentPage: string; onPageChange: (page: string) => void }) {
   return (
     <div className="absolute content-stretch flex gap-[5px] items-center justify-center left-[calc(50%+1px)] top-1/2 translate-x-[-50%] translate-y-[-50%]" data-name="wizard navigation">
-      <HeaderWizardAtoms />
+      <HeaderWizardAtoms isActive={currentPage === 'info'} onClick={() => onPageChange('info')} />
       <Component />
       <HeaderWizardAtoms1 isActive={currentPage === 'scan'} onClick={() => onPageChange('scan')} />
       <Component1 />
@@ -2521,11 +2526,19 @@ export default function ScreenTemplate({
 
   return (
     <div className="relative size-full" data-name="Screen template" style={{ backgroundColor: '#F4F4F4' }}>
+      {/* Info page - full layout without 3D model */}
+      {currentPage === 'info' && (
+        <div style={{ position: 'absolute', top: '72px', left: 0, right: 0, bottom: 0, zIndex: 10 }}>
+          <InfoPage onContinue={() => handlePageChange('scan')} />
+        </div>
+      )}
       {/* Render single 3D Model - shared between scan and view to preserve camera state */}
-      <Component3DModelShared 
-        activeButtons={currentPage === 'scan' ? activeButtons : viewActiveButtons}
-        isViewPage={currentPage === 'view'}
-      />
+      {currentPage !== 'info' && (
+        <Component3DModelShared
+          activeButtons={currentPage === 'scan' ? activeButtons : viewActiveButtons}
+          isViewPage={currentPage === 'view'}
+        />
+      )}
       {currentPage === 'scan' && activeButtons.has(2) && (
         <div className="absolute left-[14px] bottom-[14px]">
           <PrepReviewPanel />

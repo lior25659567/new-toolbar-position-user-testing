@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { SecondaryButton } from "../design-system";
 import svgPaths from "../imports/svg-34vouhfnvt";
 import NiriIonNew from "../imports/NiriIonNew";
 import OcculsgramNew from "../imports/OcculsgramNew";
@@ -66,7 +67,6 @@ function CollapsedToolbar({
 }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
-  const [expandHovered, setExpandHovered] = useState(false);
   
   const animationProps = microAnimations ? {
     animate: (isActive: boolean) => ({
@@ -290,20 +290,15 @@ function CollapsedToolbar({
       </div>
 
       {/* Expand button */}
-      <motion.div 
-        className="bg-white h-full flex items-center justify-center px-[12px] cursor-pointer rounded-r-[4px] transition-all duration-200" 
-        style={{ 
-          border: `1px solid ${expandHovered ? '#009ACE' : '#E5E7EB'}`,
-          backgroundColor: expandHovered ? '#f0f9ff' : 'transparent'
-        }}
-        onClick={() => onButtonClick(6)}
-        onMouseEnter={() => setExpandHovered(true)}
-        onMouseLeave={() => setExpandHovered(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <ExpandIcon />
-      </motion.div>
+      <div className="h-full flex items-center justify-center px-[8px]">
+        <SecondaryButton
+          size={60}
+          style={{ width: 60, padding: 0, minHeight: 60 }}
+          onClick={() => onButtonClick(6)}
+        >
+          <ExpandIcon />
+        </SecondaryButton>
+      </div>
     </div>
   );
 }
@@ -320,7 +315,6 @@ function ExpandedToolbar({
 }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
-  const [expandHovered, setExpandHovered] = useState(false);
   
   const animationProps = microAnimations ? {
     animate: (isActive: boolean) => ({
@@ -569,20 +563,15 @@ function ExpandedToolbar({
       </div>
 
       {/* Expand button */}
-      <motion.div 
-        className="bg-white h-full flex items-center justify-center px-[12px] cursor-pointer rounded-r-[4px] transition-all duration-200" 
-        style={{ 
-          border: `1px solid ${expandHovered ? '#009ACE' : '#E5E7EB'}`,
-          backgroundColor: expandHovered ? '#f0f9ff' : 'transparent'
-        }}
-        onClick={() => onButtonClick(6)}
-        onMouseEnter={() => setExpandHovered(true)}
-        onMouseLeave={() => setExpandHovered(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <ExpandIcon />
-      </motion.div>
+      <div className="h-full flex items-center justify-center px-[8px]">
+        <SecondaryButton
+          size={60}
+          style={{ width: 60, padding: 0, minHeight: 60 }}
+          onClick={() => onButtonClick(6)}
+        >
+          <ExpandIcon />
+        </SecondaryButton>
+      </div>
     </div>
   );
 }

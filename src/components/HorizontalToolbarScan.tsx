@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import svgPaths from "../imports/svg-34vouhfnvt";
 import feedbackSvgPaths from "../imports/svg-4m16l2fjs5";
+import { SecondaryButton } from "../design-system";
 
 // Monochrome Icon - Two overlapping squares
 function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
@@ -171,6 +172,90 @@ function ExpandIcon({ isExpanded }: { isExpanded: boolean }) {
   );
 }
 
+// Jaw Type Selector – upper / lower / both
+type JawType = 'upper' | 'lower' | 'both';
+
+function UpperJawIcon({ isActive }: { isActive: boolean }) {
+  const c = isActive ? '#009ACE' : '#999999';
+  const sw1 = isActive ? 1.6 : 1.8;
+  const sw2 = isActive ? 1 : 1.2;
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <path d="M5 21C5 21 5 10 14 10C23 10 23 21 23 21" stroke={c} strokeWidth={sw1} strokeLinecap="round" fill="none"/>
+      <path d="M7 16.5C7.5 15 8.5 14 9.5 14C10.5 14 11 15 11.5 14C12 13 12.5 12.5 14 12.5C15.5 12.5 16 13 16.5 14C17 15 17.5 14 18.5 14C19.5 14 20.5 15 21 16.5" stroke={c} strokeWidth={sw2} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+function LowerJawIcon({ isActive }: { isActive: boolean }) {
+  const c = isActive ? '#009ACE' : '#999999';
+  const sw1 = isActive ? 1.6 : 1.8;
+  const sw2 = isActive ? 1 : 1.2;
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <path d="M5 7C5 7 5 18 14 18C23 18 23 7 23 7" stroke={c} strokeWidth={sw1} strokeLinecap="round" fill="none"/>
+      <path d="M7 11.5C7.5 13 8.5 14 9.5 14C10.5 14 11 13 11.5 14C12 15 12.5 15.5 14 15.5C15.5 15.5 16 15 16.5 14C17 13 17.5 14 18.5 14C19.5 14 20.5 13 21 11.5" stroke={c} strokeWidth={sw2} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+function BothJawsIcon({ isActive }: { isActive: boolean }) {
+  const c = isActive ? '#009ACE' : '#999999';
+  const sw1 = isActive ? 1.6 : 1.8;
+  const sw2 = isActive ? 1 : 1.2;
+  const fillTint = isActive ? 'rgba(0, 154, 206, 0.1)' : 'none';
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <path d="M6 15C6 15 6 6 14 6C22 6 22 15 22 15" stroke={c} strokeWidth={sw1} strokeLinecap="round" fill={fillTint}/>
+      <path d="M8 11.5C8.5 10.5 9.5 10 10.5 10C11.5 10 12 10.5 13 10C13.5 9.5 13.5 9 14 9C14.5 9 14.5 9.5 15 10C16 10.5 16.5 10 17.5 10C18.5 10 19.5 10.5 20 11.5" stroke={c} strokeWidth={sw2} strokeLinecap="round" fill="none"/>
+      <path d="M6 13C6 13 6 22 14 22C22 22 22 13 22 13" stroke={c} strokeWidth={sw1} strokeLinecap="round" fill={fillTint}/>
+      <path d="M8 16.5C8.5 17.5 9.5 18 10.5 18C11.5 18 12 17.5 13 18C13.5 18.5 13.5 19 14 19C14.5 19 14.5 18.5 15 18C16 17.5 16.5 18 17.5 18C18.5 18 19.5 17.5 20 16.5" stroke={c} strokeWidth={sw2} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+function JawButton({ jaw, isActive, onClick }: { jaw: JawType; isActive: boolean; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false);
+  const active = isActive || hovered;
+  return (
+    <motion.div
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      style={{ backgroundColor: isActive ? '#E0F2FE' : hovered ? '#f5f5f5' : 'transparent' }}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.9, transition: { type: 'spring' as const, stiffness: 600, damping: 15 } }}
+    >
+      {jaw === 'upper' && <UpperJawIcon isActive={active} />}
+      {jaw === 'lower' && <LowerJawIcon isActive={active} />}
+      {jaw === 'both' && <BothJawsIcon isActive={active} />}
+    </motion.div>
+  );
+}
+
+function JawTypeRow({ activeJaw, onJawChange, onCollapse }: { activeJaw: JawType; onJawChange: (j: JawType) => void; onCollapse: () => void }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      padding: 8,
+      borderBottom: '1px solid #ebebeb',
+    }}>
+      <JawButton jaw="upper" isActive={activeJaw === 'upper'} onClick={() => onJawChange('upper')} />
+      <JawButton jaw="lower" isActive={activeJaw === 'lower'} onClick={() => onJawChange('lower')} />
+      <JawButton jaw="both"  isActive={activeJaw === 'both'}  onClick={() => onJawChange('both')}  />
+      <div style={{ flex: 1 }} />
+      <SecondaryButton
+        size={60}
+        style={{ width: 60, padding: 0, minHeight: 60 }}
+        onClick={onCollapse}
+      >
+        <ExpandIcon isExpanded={true} />
+      </SecondaryButton>
+    </div>
+  );
+}
+
 // Collapsed Toolbar - just icons (3 buttons)
 function CollapsedToolbar({
   activeButtons,
@@ -183,7 +268,6 @@ function CollapsedToolbar({
 }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
-  const [expandHovered, setExpandHovered] = useState(false);
   
   const animationProps = microAnimations ? {
     animate: (isActive: boolean) => ({
@@ -318,20 +402,15 @@ function CollapsedToolbar({
       </div>
 
       {/* Expand button */}
-      <motion.div 
-        className="bg-white h-full flex items-center justify-center px-[8px] cursor-pointer rounded-r-[4px] transition-all duration-200" 
-        style={{ 
-          border: `1px solid ${expandHovered ? '#009ACE' : '#E5E7EB'}`,
-          backgroundColor: expandHovered ? '#f0f9ff' : 'transparent'
-        }}
-        onClick={() => onButtonClick(3)}
-        onMouseEnter={() => setExpandHovered(true)}
-        onMouseLeave={() => setExpandHovered(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <ExpandIcon isExpanded={false} />
-      </motion.div>
+      <div className="h-full flex items-center justify-center px-[8px]">
+        <SecondaryButton
+          size={60}
+          style={{ width: 60, padding: 0, minHeight: 60 }}
+          onClick={() => onButtonClick(3)}
+        >
+          <ExpandIcon isExpanded={false} />
+        </SecondaryButton>
+      </div>
     </div>
   );
 }
@@ -348,7 +427,7 @@ function ExpandedToolbar({
 }) {
   const [pressedButton, setPressedButton] = useState<number | null>(null);
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
-  const [expandHovered, setExpandHovered] = useState(false);
+  const [activeJaw, setActiveJaw] = useState<JawType>('both');
   
   const animationProps = microAnimations ? {
     animate: (isActive: boolean) => ({
@@ -383,8 +462,12 @@ function ExpandedToolbar({
   };
 
   return (
-    <div className="bg-white rounded-[4px] flex items-center font-['Roboto'] p-[12px]">
-      <div className="flex items-center gap-[8px]">
+    <div className="bg-white rounded-[4px] flex flex-col font-['Roboto']">
+      {/* Jaw type selector row */}
+      <JawTypeRow activeJaw={activeJaw} onJawChange={setActiveJaw} onCollapse={() => onButtonClick(3)} />
+
+      {/* Tool buttons */}
+      <div className="flex items-center p-[12px] gap-[8px]">
         {/* Button 0: Monochrome */}
         <motion.div 
           className={`rounded-[8px] px-[8px] py-[4px] cursor-pointer flex flex-col items-center justify-center gap-[4px] min-h-[60px] relative overflow-hidden transition-colors duration-200`}
@@ -490,22 +573,6 @@ function ExpandedToolbar({
           <p className="font-['Roboto'] text-[12px] leading-[14px] whitespace-nowrap" style={{ color: activeButtons.has(2) || hoveredButton === 2 ? '#008EC2' : '#000000' }}>Prep edit</p>
         </motion.div>
       </div>
-
-      {/* Expand button */}
-      <motion.div 
-        className="bg-white h-full flex items-center justify-center px-[8px] cursor-pointer rounded-r-[4px] transition-all duration-200" 
-        style={{ 
-          border: `1px solid ${expandHovered ? '#009ACE' : '#E5E7EB'}`,
-          backgroundColor: expandHovered ? '#f0f9ff' : 'transparent'
-        }}
-        onClick={() => onButtonClick(3)}
-        onMouseEnter={() => setExpandHovered(true)}
-        onMouseLeave={() => setExpandHovered(false)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <ExpandIcon isExpanded={true} />
-      </motion.div>
     </div>
   );
 }

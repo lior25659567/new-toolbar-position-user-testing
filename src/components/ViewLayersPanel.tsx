@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import type { ScanTab } from './ScanTabs';
+import { SecondaryButton } from '../design-system';
 
 type JawSelection = 'upper' | 'lower' | 'both';
 
@@ -188,36 +189,14 @@ function PanelChevronIcon({ isExpanded }: { isExpanded: boolean }) {
 }
 
 function ExpandCollapseButton({ isExpanded, onClick }: { isExpanded: boolean; onClick: () => void }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <motion.div
+    <SecondaryButton
+      size={60}
+      style={{ width: 60, padding: 0, minHeight: 60 }}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="flex items-center justify-center cursor-pointer relative shrink-0"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{
-        scale: 0.88,
-        transition: {
-          type: 'spring' as const,
-          stiffness: 600,
-          damping: 15,
-        },
-      }}
     >
-      <div
-        className="flex items-center justify-center rounded-[8px] transition-all duration-200"
-        style={{
-          width: '60px',
-          height: '60px',
-          border: `1px solid ${isHovered ? '#009ACE' : '#E5E7EB'}`,
-          backgroundColor: isHovered ? '#f0f9ff' : 'transparent',
-        }}
-      >
-        <PanelChevronIcon isExpanded={isExpanded} />
-      </div>
-    </motion.div>
+      <PanelChevronIcon isExpanded={isExpanded} />
+    </SecondaryButton>
   );
 }
 
@@ -237,27 +216,26 @@ function JawButton({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <button
+    <motion.div
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 15 } }}
       style={{
         width: '60px',
         height: '60px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 0,
         borderRadius: '8px',
-        border: active ? '1.5px solid #009ACE' : '1.5px solid #E0E0E0',
-        backgroundColor: active ? '#E8F4F8' : hovered ? '#F5F5F5' : '#FFFFFF',
+        backgroundColor: active ? '#E0F2FE' : hovered ? '#f5f5f5' : 'transparent',
         cursor: 'pointer',
-        transition: 'all 0.15s ease',
         flexShrink: 0,
       }}
     >
       <JawIcon type={icon} active={active} />
-    </button>
+    </motion.div>
   );
 }
 

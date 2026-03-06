@@ -1,0 +1,50 @@
+import React from "react";
+import type { TagColor } from "../../types";
+import type { ToothSpec } from "../../types";
+import { Tooth } from "./Tooth";
+
+interface ToothArcProps {
+  teeth: number[];
+  selectedTeeth: number[];
+  toothSpecs: ToothSpec[];
+  toothColorMap: Record<number, TagColor>;
+  expandedTeeth: number[];
+  onToothClick: (num: number, e?: React.MouseEvent) => void;
+  label: string;
+}
+
+export function ToothArc({ teeth, selectedTeeth, toothSpecs, toothColorMap, expandedTeeth, onToothClick, label }: ToothArcProps) {
+  return (
+    <div>
+      <div
+        style={{
+          fontSize: "11px",
+          fontWeight: 500,
+          color: "#9CA3AF",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          fontFamily: "Inter, sans-serif",
+          marginBottom: "6px",
+        }}
+      >
+        {label}
+      </div>
+      <div style={{ display: "flex", gap: "3px" }}>
+        {teeth.map((num) => {
+          const spec = toothSpecs.find((s) => s.toothNumber === num);
+          return (
+            <Tooth
+              key={num}
+              number={num}
+              selected={selectedTeeth.includes(num)}
+              color={toothColorMap[num]}
+              procedure={spec?.procedure}
+              expanded={expandedTeeth.includes(num)}
+              onClick={(e) => onToothClick(num, e)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}

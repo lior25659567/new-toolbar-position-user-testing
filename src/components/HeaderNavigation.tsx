@@ -438,6 +438,7 @@ export default function HeaderNavigation({
   scanTabs,
 }: HeaderNavigationProps) {
   const isViewMode = currentStep === 'view';
+  const isInfoMode = currentStep === 'info';
 
   return (
     <div className="relative w-full">
@@ -453,19 +454,21 @@ export default function HeaderNavigation({
           <NavigatonIcons />
         </div>
       </div>
-      {/* Left panel: Jaw image in scan mode, Layers panel in view mode */}
-      <div className="absolute left-[16px]" style={{ top: `${93 + jawImageOffset}px` }}>
-        {isViewMode && scanTabs ? (
-          <ViewLayersPanel scanTabs={scanTabs} />
-        ) : (
-          <img 
-            src={jawNavigationImage} 
-            alt="Jaw Navigation" 
-            className="block"
-            style={{ width: '301px', height: '467px' }}
-          />
-        )}
-      </div>
+      {/* Left panel: Jaw image in scan mode, Layers panel in view mode, hidden in info mode */}
+      {!isInfoMode && (
+        <div className="absolute left-[16px]" style={{ top: `${93 + jawImageOffset}px` }}>
+          {isViewMode && scanTabs ? (
+            <ViewLayersPanel scanTabs={scanTabs} />
+          ) : (
+            <img
+              src={jawNavigationImage}
+              alt="Jaw Navigation"
+              className="block"
+              style={{ width: '301px', height: '467px' }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

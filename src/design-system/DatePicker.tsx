@@ -1,5 +1,5 @@
 import * as React from "react";
-import { color, font, radius, shadow, transition, space } from "./tokens";
+import { color, font, radius, transition, space } from "./tokens";
 
 export interface DatePickerProps {
   label?: string;
@@ -13,6 +13,8 @@ export interface DatePickerProps {
   min?: string;
   max?: string;
   fullWidth?: boolean;
+  placeholder?: string;
+  showIcon?: boolean;
 }
 
 const CalendarIcon = () => (
@@ -23,6 +25,14 @@ const CalendarIcon = () => (
     <line x1="10.5" y1="1.5" x2="10.5" y2="4.5" />
   </svg>
 );
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthIdx = parseInt(m, 10) - 1;
+  return `${months[monthIdx]} ${parseInt(d, 10)}, ${y}`;
+}
 
 export function DatePicker({
   label,
@@ -36,9 +46,13 @@ export function DatePicker({
   min,
   max,
   fullWidth,
+  placeholder = "Select date",
+  showIcon = true,
 }: DatePickerProps) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = React.useState(false);
   const hasError = Boolean(error);
+  const hasValue = Boolean(value || defaultValue);
 
   const wrapperStyle: React.CSSProperties = {
     display: "flex",
@@ -48,40 +62,62 @@ export function DatePicker({
     ...(fullWidth ? { width: "100%" } : {}),
   };
 
-  const fieldWrapperStyle: React.CSSProperties = {
-    position: "relative",
+  const triggerStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
-  };
-
-  const inputStyle: React.CSSProperties = {
+    justifyContent: "space-between",
+    gap: space[2],
+    width: fullWidth ? "100%" : undefined,
+    minWidth: 200,
+    padding: `${space[3]} ${space[4]}`,
     fontFamily: font.family,
     fontSize: font.size.base,
-    color: color.textDefault,
+    color: hasValue ? color.textDefault : color.textPlaceholder,
     backgroundColor: color.bgSurface,
     border: "1px solid",
     borderColor: hasError ? color.danger : isFocused ? color.primary : color.borderDefault,
     borderRadius: radius.sm,
-    padding: `${space[3]} ${space[4]}`,
-    paddingRight: "40px",
-    outline: "none",
-    width: fullWidth ? "100%" : undefined,
-    boxSizing: "border-box" as const,
-    transition: transition.input,
-    opacity: disabled ? 0.5 : 1,
     cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.5 : 1,
+    outline: "none",
+    transition: transition.input,
+    boxSizing: "border-box" as const,
+    position: "relative",
+  };
+
+  const handleClick = () => {
+    if (!disabled && inputRef.current) {
+      inputRef.current.showPicker?.();
+      inputRef.current.focus();
+    }
   };
 
   return (
     <div style={wrapperStyle}>
       {label && (
         <div style={{ display: "flex", alignItems: "center", gap: space[1] }}>
-          <label style={{ fontSize: font.size.xs, color: color.textLabel }}>{label}</label>
+          <label style={{ fontSize: font.size.xs, fontWeight: font.weight.regular, color: color.textLabel }}>
+            {label}
+          </label>
           {required && <span style={{ color: color.danger, fontSize: font.size.xs }}>*</span>}
         </div>
       )}
-      <div style={fieldWrapperStyle}>
+      <div style={{ position: "relative" }}>
+        <button
+          type="button"
+          disabled={disabled}
+          style={triggerStyle}
+          onClick={handleClick}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+        >
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {hasValue ? formatDate((value || defaultValue)!) : placeholder}
+          </span>
+          {showIcon && <CalendarIcon />}
+        </button>
         <input
+          ref={inputRef}
           type="date"
           value={value}
           defaultValue={defaultValue}
@@ -89,23 +125,20 @@ export function DatePicker({
           disabled={disabled}
           min={min}
           max={max}
-          style={inputStyle}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           aria-invalid={hasError}
-        />
-        <span
           style={{
             position: "absolute",
-            right: space[3],
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: disabled ? color.textPlaceholder : color.textSubtle,
-            pointerEvents: "none",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            opacity: 0,
+            cursor: disabled ? "not-allowed" : "pointer",
+            zIndex: 1,
           }}
-        >
-          <CalendarIcon />
-        </span>
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+        />
       </div>
       {hasError ? (
         <span style={{ fontSize: font.size.xs, color: color.danger }} role="alert">{error}</span>

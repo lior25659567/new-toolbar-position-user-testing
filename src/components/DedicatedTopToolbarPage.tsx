@@ -17,12 +17,12 @@ export default function DedicatedTopToolbarPage({
   onButtonClick: (index: number) => void;
   onViewButtonClick: (index: number) => void;
 }) {
-  const [currentPage, setCurrentPage] = useState<'scan' | 'view'>('scan');
+  const [currentPage, setCurrentPage] = useState<string>('info');
   const [scanTabs, setScanTabs] = useState<ScanTab[]>([
     { id: '1', label: 'Treatment Scan', layerType: 'treatment-scan' },
   ]);
 
-  const handlePageChange = (page: 'scan' | 'view') => {
+  const handlePageChange = (page: string) => {
     setCurrentPage(page);
     onPageChange(page);
   };
@@ -37,7 +37,7 @@ export default function DedicatedTopToolbarPage({
         layout="horizontal-top"
         activeButtons={activeButtons}
         viewActiveButtons={viewActiveButtons}
-        onPageChange={(page) => handlePageChange(page as 'scan' | 'view')}
+        onPageChange={handlePageChange}
         onButtonClick={onButtonClick}
         onViewButtonClick={onViewButtonClick}
         combinedPanelMode={false}

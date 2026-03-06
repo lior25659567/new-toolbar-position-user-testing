@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { PrimaryButton as DSPrimaryButton, SecondaryButton as DSSecondaryButton } from "../design-system";
 
 // Image URLs from Figma - Updated to latest design
 const imgIcon = "https://www.figma.com/api/mcp/asset/b496beac-7b33-48d3-824e-6ab16f9b6788";
@@ -136,60 +137,22 @@ function ListItem() {
   );
 }
 
-function PrimaryButton({ icon, label }: { icon: React.ReactNode; label: string }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
+function PanelDetectButton({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div 
-      className="relative rounded-[8px] shrink-0 w-full cursor-pointer transition-all duration-200" 
-      data-name="Button"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        backgroundColor: isHovered ? '#0088B8' : '#009ace',
-        transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-        boxShadow: isHovered ? '0 4px 12px rgba(0, 154, 206, 0.3)' : 'none'
-      }}
-    >
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-center p-[16px] relative w-full">
-        <div className="content-stretch flex gap-[15px] items-center relative shrink-0">
-          <div className="relative shrink-0 size-[24px] flex items-center justify-center" data-name="Icon">
-            {icon}
-          </div>
-          <p className="font-['Inter:Medium',sans-serif] font-medium leading-[28px] not-italic relative shrink-0 text-[18px] text-center text-white tracking-[-0.4395px]">
-            {label}
-          </p>
-        </div>
-      </div>
-    </div>
+    <DSPrimaryButton size={60} fullWidth>
+      {icon}
+      {label}
+    </DSPrimaryButton>
   );
 }
 
 function ActionButton({ icon, label }: { icon: string; label: string }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
   return (
-    <div 
-      className="border border-solid content-stretch flex flex-[1_0_0] flex-col gap-[8px] h-[80px] items-center justify-center min-h-px min-w-px p-px relative rounded-[8px] cursor-pointer transition-all duration-200" 
-      data-name="Button"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        backgroundColor: isHovered ? '#f0f9ff' : 'white',
-        borderColor: isHovered ? '#009ACE' : '#e5e7eb',
-        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: isHovered ? '0 4px 8px rgba(0, 0, 0, 0.08)' : 'none'
-      }}
-    >
-      <div className="relative shrink-0 size-[24px]" data-name="Icon">
-        <img alt="" className="block max-w-none size-full" src={icon} />
-      </div>
-      <p 
-        className="font-['Inter:Medium',sans-serif] font-medium leading-[20px] not-italic text-[14px] text-center tracking-[-0.1504px] transition-colors duration-200"
-        style={{ color: isHovered ? '#009ACE' : '#364153' }}
-      >
-        {label}
-      </p>
+    <div style={{ flex: '1 0 0', minWidth: 0 }}>
+      <DSSecondaryButton size={60} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
+        <img alt="" style={{ width: 24, height: 24, display: 'block' }} src={icon} />
+        <span style={{ fontSize: '14px' }}>{label}</span>
+      </DSSecondaryButton>
     </div>
   );
 }
@@ -199,7 +162,7 @@ function Frame() {
     <div className="flex-[1_0_0] min-h-px min-w-px relative w-full" data-name="Container" data-node-id="138:22021">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[8px] items-start relative size-full">
         {/* Detect Button */}
-        <PrimaryButton icon={<DetectIcon />} label="Detect" />
+        <PanelDetectButton icon={<DetectIcon />} label="Detect" />
         {/* Action Buttons Row */}
         <div className="flex-[1_0_0] min-h-px min-w-px relative w-full" data-name="Container" data-node-id="138:22076">
           <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[8px] items-center relative size-full">
@@ -285,8 +248,7 @@ export default function CombinedReviewMarginPanel() {
   return (
     <div 
       className="flex flex-col p-[16px] relative w-[432px] bg-[#f5f5f5] rounded-[4px] gap-[16px]"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }} 
-      style={{ height: 'calc(100vh - 109px)' }}
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', height: 'calc(100vh - 109px)' }}
       data-name="Combined Review Margin Panel"
     >
       

@@ -18,7 +18,7 @@ const baseStyle: React.CSSProperties = {
   fontWeight: font.weight.medium,
   borderWidth: "1px",
   borderStyle: "solid",
-  borderColor: "rgba(0, 0, 0, 0.2275)",
+  borderColor: color.borderDefault,
   cursor: "pointer",
   outline: "none",
   transition: transition.border,
@@ -57,14 +57,14 @@ export function SecondaryButton({
       ? { opacity: 0.5, cursor: "not-allowed" }
       : {
           ...(isHovered && {
-            borderColor: "rgba(0, 0, 0, 0.34)",
+            borderColor: "#9CA3AF",
           }),
           ...(isActive && {
             transform: "scale(0.98)",
-            borderColor: "rgba(0, 0, 0, 0.34)",
+            borderColor: "#9CA3AF",
           }),
           ...(isFocused && {
-            borderColor: "rgba(0, 0, 0, 0.34)",
+            borderColor: "#9CA3AF",
           }),
         }),
     ...style,

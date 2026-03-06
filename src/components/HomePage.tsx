@@ -149,8 +149,10 @@ function BottomLayoutIcon() {
 
 export default function HomePage({ 
   onSelectLayout,
+  onOpenDesignSystem,
 }: { 
   onSelectLayout: (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => void;
+  onOpenDesignSystem?: () => void;
   combinedPanelMode?: boolean;
   onCombinedPanelModeChange?: (enabled: boolean) => void;
 }) {
@@ -239,6 +241,24 @@ export default function HomePage({
         }}>
           Press <span style={{ fontWeight: 500, color: '#666666' }}>R</span> to return anytime
         </p>
+        {onOpenDesignSystem && (
+          <button
+            type="button"
+            onClick={onOpenDesignSystem}
+            style={{
+              marginTop: '12px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              color: '#009ACE',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+            }}
+          >
+            View design system
+          </button>
+        )}
       </div>
     </div>
   );
