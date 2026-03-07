@@ -138,19 +138,18 @@ export default function ScanTabs({
     <div 
       className="w-full"
       style={{ 
-        height: '64px', 
-        minHeight: '64px',
+        height: '44px',
+        minHeight: '44px',
         backgroundColor: '#FFFFFF',
         fontFamily: "'Roboto', system-ui, sans-serif",
         display: 'flex',
         alignItems: 'flex-end',
         paddingLeft: '14px',
         paddingRight: '14px',
-        paddingTop: '14px',
+        paddingTop: '8px',
         paddingBottom: 0,
         gap: '4px',
-        borderTop: '1px solid #D9D9D9',
-        borderBottom: '1px solid #D9D9D9',
+        borderBottom: '1px solid #E5E7EB',
       }}
     >
       {/* Tabs */}
@@ -166,18 +165,18 @@ export default function ScanTabs({
             onMouseLeave={() => setHoveredTabId(null)}
             className="relative cursor-pointer flex items-center"
             style={{
-              height: '48px',
-              paddingLeft: '16px',
-              paddingRight: '12px',
+              height: '36px',
+              paddingLeft: '12px',
+              paddingRight: '8px',
               borderRadius: '7px 7px 0 0',
               backgroundColor: isActive ? '#FFFFFF' : isHovered ? '#F0F0F0' : '#F5F5F5',
               transition: 'background-color 0.15s ease',
               minWidth: '130px',
               maxWidth: '250px',
               overflow: 'hidden',
-              borderTop: isActive ? '1px solid #D0D0D0' : '1px solid transparent',
-              borderLeft: isActive ? '1px solid #D0D0D0' : '1px solid transparent',
-              borderRight: isActive ? '1px solid #D0D0D0' : '1px solid transparent',
+              borderTop: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
+              borderLeft: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
+              borderRight: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
               borderBottom: 'none',
               marginBottom: isActive ? '-1px' : '0',
             }}
@@ -198,7 +197,7 @@ export default function ScanTabs({
             <span
               className="truncate select-none"
               style={{
-                fontSize: '14px',
+                fontSize: '13px',
                 lineHeight: '20px',
                 fontWeight: isActive ? 600 : 400,
                 color: isActive ? '#009ACE' : '#666666',
@@ -215,9 +214,9 @@ export default function ScanTabs({
               onClick={(e) => handleTabClose(e, tab.id)}
               className="flex items-center justify-center shrink-0"
               style={{
-                width: '22px',
-                height: '22px',
-                marginLeft: '12px',
+                width: '18px',
+                height: '18px',
+                marginLeft: '8px',
                 backgroundColor: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
@@ -227,7 +226,7 @@ export default function ScanTabs({
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.08)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; }}
             >
-              <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+              <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
                 <path d="M1 1L9 9M9 1L1 9" stroke={isActive ? '#009ACE' : '#999999'} strokeWidth="1.4" strokeLinecap="round" />
               </svg>
             </button>
@@ -241,7 +240,7 @@ export default function ScanTabs({
         style={{
           display: 'flex',
           alignItems: 'center',
-          height: '48px',
+          height: '36px',
           paddingLeft: '4px',
           paddingRight: '4px',
           paddingTop: '4px',
@@ -255,8 +254,8 @@ export default function ScanTabs({
           onMouseLeave={() => setPlusHovered(false)}
           className="flex items-center justify-center"
           style={{
-            width: '40px',
-            height: '40px',
+            width: '32px',
+            height: '32px',
             backgroundColor: plusHovered ? '#D6EDF5' : '#E8F4F8',
             border: 'none',
             cursor: 'pointer',
@@ -265,7 +264,7 @@ export default function ScanTabs({
             flexShrink: 0,
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M8 3V13M3 8H13" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>

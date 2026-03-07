@@ -14,6 +14,7 @@ const sectionCardStyle: React.CSSProperties = {
   borderRadius: "12px",
   padding: "24px",
   border: "1px solid #E5E7EB",
+  flexShrink: 0,
 };
 
 export function InfoPage({ onContinue }: InfoPageProps) {
@@ -27,41 +28,48 @@ export function InfoPage({ onContinue }: InfoPageProps) {
         backgroundColor: "#F8FAFC",
       }}
     >
-      {/* Left column - scrollable workflow */}
+      {/* Left column - scroll container */}
       <div
         style={{
           flex: 1,
-          padding: "32px",
+          minWidth: 0,
           overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
         }}
       >
-        <div style={sectionCardStyle}>
-          <PatientSection
-            patient={state.patient}
-            searchQuery={state.patientSearchQuery}
-            isCreating={state.isCreatingPatient}
-            dispatch={dispatch}
-          />
-        </div>
-        <div style={sectionCardStyle}>
-          <ProcedureSection
-            selectedProcedure={state.selectedProcedure}
-            hasPatient={!!state.patient}
-            dispatch={dispatch}
-          />
-        </div>
-        {state.selectedProcedure && (
+        {/* Inner content with padding */}
+        <div
+          style={{
+            padding: "32px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "24px",
+          }}
+        >
           <div style={sectionCardStyle}>
-            <ConfigSection
-              state={state}
-              toothColorMap={toothColorMap}
+            <PatientSection
+              patient={state.patient}
+              searchQuery={state.patientSearchQuery}
+              isCreating={state.isCreatingPatient}
               dispatch={dispatch}
             />
           </div>
-        )}
+          <div style={sectionCardStyle}>
+            <ProcedureSection
+              selectedProcedure={state.selectedProcedure}
+              hasPatient={!!state.patient}
+              dispatch={dispatch}
+            />
+          </div>
+          {state.selectedProcedure && (
+            <div style={sectionCardStyle}>
+              <ConfigSection
+                state={state}
+                toothColorMap={toothColorMap}
+                dispatch={dispatch}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right column - sticky summary */}

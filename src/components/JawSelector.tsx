@@ -72,14 +72,14 @@ export default function JawSelector({ onToothClick, selectedTeeth = [] }: JawSel
 
       {/* Navigation controls */}
       <div className="content-stretch flex flex-col isolate items-start relative shrink-0 w-full">
-        <div className="bg-white content-stretch flex gap-[8px] h-[64px] items-center overflow-clip px-[8px] py-[12px] relative rounded-[8px] shrink-0 w-full shadow-sm border border-gray-200">
+        <div className="bg-white content-stretch flex gap-[8px] h-[48px] items-center overflow-clip px-[8px] py-[12px] relative rounded-[8px] shrink-0 w-full shadow-sm border border-gray-200">
           {/* Left arrow button */}
           <button
             onClick={handlePrevious}
-            className="relative rounded-[2px] shrink-0 size-[60px] flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="relative rounded-[2px] shrink-0 size-[40px] flex items-center justify-center hover:bg-gray-100 transition-colors"
             aria-label="Previous jaw"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
                 d="M15 18L9 12L15 6"
                 stroke="#000000"
@@ -122,10 +122,10 @@ export default function JawSelector({ onToothClick, selectedTeeth = [] }: JawSel
           {/* Right arrow button */}
           <button
             onClick={handleNext}
-            className="relative rounded-[2px] shrink-0 size-[60px] flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="relative rounded-[2px] shrink-0 size-[40px] flex items-center justify-center hover:bg-gray-100 transition-colors"
             aria-label="Next jaw"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
                 d="M9 6L15 12L9 18"
                 stroke="#000000"

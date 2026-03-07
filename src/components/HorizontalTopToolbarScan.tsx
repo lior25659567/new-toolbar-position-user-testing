@@ -19,8 +19,8 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
   const strokeColor = isActive ? "#008EC2" : "#5E646E";
   
   return (
-    <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Mono chomr new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Mono chomr new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_monochrome_htopscan)">
           <path 
             fillRule="evenodd" 
@@ -61,7 +61,7 @@ function AohsButton({ isActive, onClick, buttonIndex }: { isActive: boolean; onC
   
   return (
     <motion.div 
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[40px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
         backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
       }}
@@ -94,7 +94,7 @@ function AohsButton({ isActive, onClick, buttonIndex }: { isActive: boolean; onC
           }}
         />
       )}
-      <div className="relative flex items-center justify-center size-[60px]">
+      <div className="relative flex items-center justify-center size-[40px]">
         <MonoChomrNew isActive={isActive || isHovered} />
       </div>
     </motion.div>
@@ -136,8 +136,8 @@ function FeedbackNew({ isActive = false }: { isActive?: boolean }) {
   const fillColor = isActive ? "#008EC2" : "#5E646E";
   
   return (
-    <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Feedback new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Feedback new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M32.861 53H24.5715V28.7183H29.7507V10.2847H24.5715V6H30.4588C31.9723 6 33.4232 6.51317 34.4994 7.4382L38.9773 11.2873C40.0535 12.2062 40.6505 13.4594 40.6505 14.7603V33.0654" 
           stroke={strokeColor} 
@@ -189,7 +189,7 @@ function AohsButton1({ isActive, onClick, buttonIndex }: { isActive: boolean; on
   
   return (
     <motion.div 
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[40px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
         backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
       }}
@@ -222,7 +222,7 @@ function AohsButton1({ isActive, onClick, buttonIndex }: { isActive: boolean; on
           }}
         />
       )}
-      <div className="relative flex items-center justify-center size-[60px]">
+      <div className="relative flex items-center justify-center size-[40px]">
         <FeedbackNew isActive={isActive || isHovered} />
       </div>
     </motion.div>
@@ -287,8 +287,8 @@ function PrepEditToTest({ isActive = false }: { isActive?: boolean }) {
   const strokeColor = isActive ? "#008EC2" : "#5E646E";
   
   return (
-    <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Prep edit to test">
-      <svg width="44" height="45" viewBox="0 0 60 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Prep edit to test">
+      <svg width="28" height="29" viewBox="0 0 60 61" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M25.5238 51C19.5289 50.971 14.1168 49.5938 6.70168 46.5318C6.28657 46.3603 6.03918 45.9312 6.09579 45.4857L10.6275 9.82312C10.9436 7.33696 13.0214 5.65522 15.2086 6.06017C25.126 7.89606 31.8458 8.06423 40.8708 6.22052C43.1241 5.76026 45.3022 7.48079 45.5983 10.0541L47 22.2335" 
           stroke={strokeColor} 
@@ -326,7 +326,7 @@ function AohsButton2({ isActive, onClick, buttonIndex }: { isActive: boolean; on
   
   return (
     <motion.div
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[40px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
         backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
       }}
@@ -359,7 +359,7 @@ function AohsButton2({ isActive, onClick, buttonIndex }: { isActive: boolean; on
           }}
         />
       )}
-      <div className="relative flex items-center justify-center size-[60px]">
+      <div className="relative flex items-center justify-center size-[40px]">
         <PrepEditToTest isActive={isActive || isHovered} />
       </div>
     </motion.div>
@@ -401,7 +401,7 @@ function ExpandedToolbar({
   stackVertical?: boolean;
 }) {
   return (
-    <div className="bg-white flex flex-1 gap-[12px] items-stretch p-[8px] relative rounded-[8px] font-['Roboto']">
+    <div className="bg-white flex flex-1 gap-[8px] items-stretch p-[4px] relative rounded-[8px] font-['Roboto']">
       
       {/* Monochrome */}
       <div className="flex flex-col flex-1 items-center justify-center gap-[2px] relative">
@@ -421,15 +421,17 @@ function ExpandedToolbar({
         <p className="font-['Roboto'] font-normal whitespace-nowrap text-center text-[12px] leading-[14px]" style={{ color: activeButtons.has(2) ? '#008EC2' : '#000000' }}>Prep edit</p>
       </div>
 
-      {/* Collapse Button */}
-      <CollapseButton onClick={() => onButtonClick(3)} />
+      {/* Collapse Button - same size as toolbar buttons (36px) */}
+      <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36 }} onClick={() => onButtonClick(3)}>
+        <ChevronIcon isExpanded={true} />
+      </SecondaryButton>
     </div>
   );
 }
 
 function Frame4({ activeButtons, onButtonClick }: { activeButtons: Set<number>; onButtonClick: (index: number) => void }) {
   return (
-    <div className="bg-white content-stretch flex gap-[12px] items-center p-[8px] relative self-stretch shrink-0 h-[76px]">
+    <div className="bg-white content-stretch flex gap-[8px] items-center p-[6px] relative self-stretch shrink-0 h-[48px]">
       <ToolbarTextLabel isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} buttonIndex={0} />
       <ToolbarTextLabel1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} buttonIndex={1} />
       <ToolbarTextLabel2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} buttonIndex={2} />
@@ -442,15 +444,15 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
   return (
     <motion.div
       className="relative shrink-0 flex items-center justify-center"
-      style={{ width: '32px', height: '32px' }}
+      style={{ width: '24px', height: '24px' }}
       initial={{ rotate: isExpanded ? 0 : 180 }}
       animate={{ rotate: isExpanded ? 180 : 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <svg
         className="block"
-        width="32"
-        height="32"
+        width="24"
+        height="24"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -469,8 +471,9 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
 function CollapseButton({ onClick }: { onClick: () => void }) {
   return (
     <SecondaryButton
-      size={60}
-      style={{ width: 60, padding: 0, minHeight: 60 }}
+      variant="toolbar"
+      size={40}
+      style={{ width: 40, padding: 0, minHeight: 40 }}
       onClick={onClick}
     >
       <ChevronIcon isExpanded={true} />
@@ -480,15 +483,14 @@ function CollapseButton({ onClick }: { onClick: () => void }) {
 
 function Frame3({ onButtonClick, isExpanded }: { onButtonClick: (index: number) => void; isExpanded: boolean }) {
   return (
-    <div className="bg-white flex h-[76px] w-[76px] items-center justify-center">
-      <SecondaryButton
-        size={60}
-        style={{ width: 60, padding: 0, minHeight: 60 }}
-        onClick={() => onButtonClick(3)}
-      >
-        <ChevronIcon isExpanded={isExpanded} />
-      </SecondaryButton>
-    </div>
+<SecondaryButton
+    variant="toolbar"
+    size={36}
+    style={{ width: 36, padding: 0, minHeight: 36 }}
+      onClick={() => onButtonClick(3)}
+    >
+      <ChevronIcon isExpanded={isExpanded} />
+    </SecondaryButton>
   );
 }
 
@@ -514,11 +516,9 @@ export function HorizontalTopToolbarScan({
   }
 
   return (
-    <div className="content-stretch flex items-start relative rounded-[8px] h-[76px] font-['Roboto'] overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}>
+    <div className="content-stretch flex items-center gap-[8px] p-[6px] relative rounded-[8px] h-[48px] font-['Roboto'] overflow-hidden bg-white" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', padding: '6px' }}>
       <Frame4 activeButtons={activeButtons} onButtonClick={onButtonClick} />
-      <div className="flex h-[76px] items-center justify-center relative shrink-0 w-[76px] bg-white" style={{ "--transform-inner-width": "60", "--transform-inner-height": "60" } as React.CSSProperties}>
-        <Frame3 onButtonClick={onButtonClick} isExpanded={isExpanded} />
-      </div>
+      <Frame3 onButtonClick={onButtonClick} isExpanded={isExpanded} />
     </div>
   );
 }

@@ -67,7 +67,7 @@ export default function ViewLayersPanel({ scanTabs }: ViewLayersPanelProps) {
   return (
     <div
       style={{
-        width: '301px',
+        width: '240px',
         backgroundColor: '#FFFFFF',
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)',
@@ -83,8 +83,8 @@ export default function ViewLayersPanel({ scanTabs }: ViewLayersPanelProps) {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '8px',
-          borderBottom: isExpanded ? '1px solid #EBEBEB' : 'none',
+          padding: '6px',
+          borderBottom: isExpanded ? '1px solid #E5E7EB' : 'none',
         }}
       >
         <JawButton
@@ -113,7 +113,7 @@ export default function ViewLayersPanel({ scanTabs }: ViewLayersPanelProps) {
             style={{
               maxHeight: '360px',
               overflowY: 'auto',
-              padding: '8px 0',
+              padding: '4px 0',
             }}
           >
             {scanTabs.length === 0 ? (
@@ -163,16 +163,16 @@ function PanelChevronIcon({ isExpanded }: { isExpanded: boolean }) {
     <div
       className="relative shrink-0 flex items-center justify-center"
       style={{
-        width: '32px',
-        height: '32px',
+        width: '24px',
+        height: '24px',
         transform: `rotate(${isExpanded ? 180 : 0}deg)`,
         transition: 'transform 0.3s ease-in-out',
       }}
     >
       <svg
         className="block"
-        width="32"
-        height="32"
+        width="24"
+        height="24"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -191,8 +191,8 @@ function PanelChevronIcon({ isExpanded }: { isExpanded: boolean }) {
 function ExpandCollapseButton({ isExpanded, onClick }: { isExpanded: boolean; onClick: () => void }) {
   return (
     <SecondaryButton
-      size={60}
-      style={{ width: 60, padding: 0, minHeight: 60 }}
+      size={36}
+      style={{ width: 36, padding: 0, minHeight: 36 }}
       onClick={onClick}
     >
       <PanelChevronIcon isExpanded={isExpanded} />
@@ -223,8 +223,8 @@ function JawButton({
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 15 } }}
       style={{
-        width: '60px',
-        height: '60px',
+        width: '40px',
+        height: '40px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -246,7 +246,7 @@ function JawIcon({ type, active }: { type: 'upper' | 'lower' | 'both'; active: b
   if (type === 'upper') {
     // Upper jaw: U-shape opening downward (arch with teeth bumps at top)
     return (
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
         {/* Arch shape */}
         <path
           d="M5 21C5 21 5 10 14 10C23 10 23 21 23 21"
@@ -269,7 +269,7 @@ function JawIcon({ type, active }: { type: 'upper' | 'lower' | 'both'; active: b
   if (type === 'lower') {
     // Lower jaw: inverted U-shape opening upward
     return (
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
         {/* Arch shape */}
         <path
           d="M5 7C5 7 5 18 14 18C23 18 23 7 23 7"
@@ -291,7 +291,7 @@ function JawIcon({ type, active }: { type: 'upper' | 'lower' | 'both'; active: b
   }
   // Both jaws: upper + lower with gap between
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
       {/* Upper arch */}
       <path
         d="M6 15C6 15 6 6 14 6C22 6 22 15 22 15"
@@ -358,17 +358,16 @@ function LayerRow({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{
-        padding: '0 8px',
+        padding: '0 6px',
         margin: '2px 0',
       }}
     >
       <div
         style={{
           borderRadius: '6px',
-          backgroundColor: state.selected ? '#F0F9FC' : isHovered ? '#F5F5F5' : 'transparent',
-          borderLeft: state.selected ? '3px solid #009ACE' : '3px solid transparent',
+          backgroundColor: state.selected ? '#F5F5F5' : isHovered ? '#FAFAFA' : 'transparent',
           transition: 'all 0.12s ease',
-          padding: '10px 12px 10px 10px',
+          padding: '8px 0px',
         }}
       >
         {/* Top row: name + eye icon */}
@@ -382,19 +381,8 @@ function LayerRow({
           }}
           onClick={onSelect}
         >
-          {/* Layer color dot + name */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: getLayerColor(tab.layerType),
-                flexShrink: 0,
-                opacity: isHidden ? 0.35 : 1,
-                transition: 'opacity 0.15s ease',
-              }}
-            />
+          {/* Layer name */}
+          <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
             <span
               style={{
                 fontSize: '13px',
@@ -421,8 +409,8 @@ function LayerRow({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '26px',
-              height: '26px',
+              width: '30px',
+              height: '30px',
               borderRadius: '4px',
               backgroundColor: 'transparent',
               border: 'none',
@@ -446,47 +434,38 @@ function LayerRow({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            marginTop: '6px',
-            paddingLeft: '16px',
+            gap: '16px',
+            marginTop: '8px',
             opacity: isHidden ? 0.4 : 1,
             transition: 'opacity 0.15s ease',
           }}
         >
-          <OpacityIcon />
-          <input
-            type="range"
-            min={0}
-            max={100}
+          <OpacitySlider
             value={state.opacity}
             disabled={isHidden}
-            onChange={(e) => onOpacityChange(Number(e.target.value))}
-            style={{
-              flex: 1,
-              height: '4px',
-              appearance: 'none',
-              WebkitAppearance: 'none',
-              background: isHidden
-                ? '#E0E0E0'
-                : `linear-gradient(to right, #009ACE ${state.opacity}%, #E0E0E0 ${state.opacity}%)`,
-              borderRadius: '2px',
-              outline: 'none',
-              cursor: isHidden ? 'default' : 'pointer',
-              accentColor: '#009ACE',
-            }}
+            onChange={(val) => onOpacityChange(val)}
           />
-          <span
+          <div
             style={{
-              fontSize: '11px',
+              minWidth: '44px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '6px',
+              border: '1px solid #E5E7EB',
+              backgroundColor: '#FFFFFF',
+              fontSize: '12px',
               fontWeight: 500,
-              color: isHidden ? '#CCCCCC' : '#666666',
-              minWidth: '30px',
-              textAlign: 'right',
+              color: isHidden ? '#CCCCCC' : '#333333',
               fontVariantNumeric: 'tabular-nums',
+              fontFamily: "'Roboto', system-ui, sans-serif",
+              flexShrink: 0,
+              padding: '4px 8px',
             }}
           >
             {state.opacity}%
-          </span>
+          </div>
         </div>
       </div>
     </div>
@@ -499,7 +478,7 @@ function LayerRow({
 
 function EyeOpenIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
       <path
         d="M8 4C4.5 4 2 8 2 8C2 8 4.5 12 8 12C11.5 12 14 8 14 8C14 8 11.5 4 8 4Z"
         stroke="#666666"
@@ -514,7 +493,7 @@ function EyeOpenIcon() {
 
 function EyeClosedIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
       <path
         d="M3 3L13 13"
         stroke="#BBBBBB"
@@ -543,21 +522,92 @@ function EyeClosedIcon() {
   );
 }
 
-function OpacityIcon() {
+// ============================================================================
+// Opacity Slider (custom track + thumb like reference)
+// ============================================================================
+
+function OpacitySlider({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: number;
+  disabled: boolean;
+  onChange: (value: number) => void;
+}) {
+  const trackRef = React.useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = React.useState(false);
+
+  const updateValue = (clientX: number) => {
+    if (!trackRef.current || disabled) return;
+    const rect = trackRef.current.getBoundingClientRect();
+    const pct = Math.round(Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)));
+    onChange(pct);
+  };
+
+  React.useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: MouseEvent) => updateValue(e.clientX);
+    const onUp = () => setDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [dragging]);
+
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <circle cx="6" cy="6" r="5" stroke="#999999" strokeWidth="1.2" />
-      <path
-        d="M6 1C6 1 6 6 6 11"
-        stroke="#999999"
-        strokeWidth="1"
-      />
-      <path
-        d="M6 1C3.24 1 1 3.24 1 6C1 8.76 3.24 11 6 11"
-        fill="#999999"
-        fillOpacity="0.3"
-      />
-    </svg>
+    <div
+      ref={trackRef}
+      onMouseDown={(e) => {
+        if (disabled) return;
+        setDragging(true);
+        updateValue(e.clientX);
+      }}
+      style={{
+        flex: 1,
+        height: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        cursor: disabled ? 'default' : 'pointer',
+        position: 'relative',
+      }}
+    >
+      {/* Track background */}
+      <div style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        height: '4px',
+        borderRadius: '2px',
+        backgroundColor: '#E5E7EB',
+      }} />
+      {/* Track fill */}
+      <div style={{
+        position: 'absolute',
+        left: 0,
+        width: `${value}%`,
+        height: '4px',
+        borderRadius: '2px',
+        backgroundColor: disabled ? '#CCCCCC' : '#009ACE',
+        transition: dragging ? 'none' : 'width 0.1s ease',
+      }} />
+      {/* Thumb */}
+      <div style={{
+        position: 'absolute',
+        left: `${value}%`,
+        transform: 'translateX(-50%)',
+        width: '16px',
+        height: '16px',
+        borderRadius: '50%',
+        backgroundColor: '#FFFFFF',
+        border: `2px solid ${disabled ? '#CCCCCC' : '#009ACE'}`,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+        transition: dragging ? 'none' : 'left 0.1s ease',
+        cursor: disabled ? 'default' : 'grab',
+      }} />
+    </div>
   );
 }
 
@@ -565,17 +615,3 @@ function OpacityIcon() {
 // Helpers
 // ============================================================================
 
-function getLayerColor(layerType: string): string {
-  switch (layerType) {
-    case 'treatment-scan':
-      return '#009ACE';
-    case 'pre-treatment':
-      return '#F59E0B';
-    case 'additional-scan':
-      return '#10B981';
-    case 'additional-bite':
-      return '#8B5CF6';
-    default:
-      return '#999999';
-  }
-}

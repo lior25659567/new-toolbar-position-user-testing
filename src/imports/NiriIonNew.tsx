@@ -7,7 +7,7 @@ export default function NiriIonNew({ isActive = false }: NiriIonNewProps) {
   
   return (
     <div className="relative size-full flex items-center justify-center" data-name="Niri+ Ion new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M53.2501 42.9376L42.0524 30.0524M15 18.5363C15 27.1123 22.2448 34.0724 31.1861 34.0724C40.1274 34.0724 47.372 27.1186 47.372 18.5363C47.372 9.95386 40.1274 3 31.1861 3C22.2448 3 15 9.95386 15 18.5363Z" 
           stroke={strokeColor} 

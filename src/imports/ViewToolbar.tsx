@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { SecondaryButton } from "../design-system";
 import svgPaths from "./svg-4m16l2fjs5";
 import NiriIonNew from "./NiriIonNew";
 import OcculsgramNew from "./OcculsgramNew";
@@ -13,8 +14,8 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
   const strokeColor = isActive ? "#008EC2" : "#5E646E";
   
   return (
-    <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Mono chomr new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Mono chomr new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_monochrome_view)">
           <path 
             fillRule="evenodd" 
@@ -41,7 +42,7 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
 
 function AohsButton({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]" data-name="AOHS button">
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
       <MonoChomrNew isActive={isActive} />
     </div>
@@ -64,7 +65,7 @@ function ToolbarTextLabel({ isActive, onClick, isExpanded, microAnimations = tru
 
   return (
     <motion.div 
-      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
+      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
         backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
         border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
@@ -106,7 +107,7 @@ function ToolbarTextLabel({ isActive, onClick, isExpanded, microAnimations = tru
 
 function AohsButton1({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]" data-name="AOHS button">
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
       <NiriIonNew isActive={isActive} />
     </div>
@@ -129,7 +130,7 @@ function ToolbarTextLabel1({ isActive, onClick, isExpanded, buttonIndex }: { isA
   
   return (
     <motion.div 
-      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
+      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
         backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
         border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
@@ -171,7 +172,7 @@ function ToolbarTextLabel1({ isActive, onClick, isExpanded, buttonIndex }: { isA
 
 function AohsButton2({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]" data-name="AOHS button">
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
       <OcculsgramNew isActive={isActive} />
     </div>
@@ -194,7 +195,7 @@ function ToolbarTextLabel2({ isActive, onClick, isExpanded, buttonIndex }: { isA
   
   return (
     <motion.div 
-      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
+      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
         backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
         border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
@@ -236,7 +237,7 @@ function ToolbarTextLabel2({ isActive, onClick, isExpanded, buttonIndex }: { isA
 
 function AohsButton3Margin({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]" data-name="AOHS button">
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
       <MarginLineNew isActive={isActive} />
     </div>
@@ -259,7 +260,7 @@ function ToolbarTextLabel3({ isActive, onClick, isExpanded, buttonIndex }: { isA
   
   return (
     <motion.div 
-      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
+      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
         backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
         border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
@@ -301,7 +302,7 @@ function ToolbarTextLabel3({ isActive, onClick, isExpanded, buttonIndex }: { isA
 
 function AohsButton4PrepQc({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]" data-name="AOHS button">
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
       <PrepQcNew isActive={isActive} />
     </div>
@@ -324,7 +325,7 @@ function ToolbarTextLabel4({ isActive, onClick, isExpanded, buttonIndex }: { isA
   
   return (
     <motion.div 
-      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
+      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
         backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
         border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
@@ -366,7 +367,7 @@ function ToolbarTextLabel4({ isActive, onClick, isExpanded, buttonIndex }: { isA
 
 function AohsButton5Trim({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[60px]" data-name="AOHS button">
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
       <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
       <TrimNew isActive={isActive} />
     </div>
@@ -389,7 +390,7 @@ function ToolbarTextLabel5({ isActive, onClick, isExpanded, buttonIndex }: { isA
   
   return (
     <motion.div 
-      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[60px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
+      className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
         backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
         border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
@@ -432,7 +433,7 @@ function ToolbarTextLabel5({ isActive, onClick, isExpanded, buttonIndex }: { isA
 function Frame5({ activeButtons, onButtonClick, microAnimations }: { activeButtons: Set<number>; onButtonClick: (index: number) => void; microAnimations?: boolean }) {
   const isExpanded = activeButtons.has(6);
   return (
-    <div className="box-border content-stretch flex flex-col gap-[8px] items-stretch p-[8px] relative shrink-0 w-full">
+    <div className="box-border content-stretch flex flex-col gap-[4px] items-stretch p-[4px] relative shrink-0 w-full">
       <ToolbarTextLabel isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} isExpanded={isExpanded} buttonIndex={0} microAnimations={microAnimations} />
       <ToolbarTextLabel1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} isExpanded={isExpanded} buttonIndex={1} />
       <ToolbarTextLabel2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} isExpanded={isExpanded} buttonIndex={2} />
@@ -465,35 +466,21 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
 }
 
 function Button({ isExpanded, onClick }: { isExpanded?: boolean; onClick: () => void }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
   return (
-    <motion.div 
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 cursor-pointer transition-all duration-200" 
-      data-name="Button"
-      style={{ 
-        border: `1px solid ${isHovered ? '#009ACE' : '#E5E7EB'}`,
-        backgroundColor: isHovered ? '#f0f9ff' : 'transparent',
-        width: '60px',
-        height: '60px',
-        minWidth: '60px',
-        minHeight: '60px'
-      }}
+    <SecondaryButton
+      size={36}
+      style={{ width: 40, height: 40, minHeight: 40, padding: 0 }}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileTap={{ scale: 0.95 }}
-      whileHover={{ scale: 1.02 }}
     >
       <ChevronIcon isExpanded={!!isExpanded} />
-    </motion.div>
+    </SecondaryButton>
   );
 }
 
 function Frame4({ onButtonClick, activeButtons }: { onButtonClick: (index: number) => void; activeButtons: Set<number> }) {
   const isExpanded = activeButtons.has(6);
   return (
-    <div className="box-border flex flex-col items-start px-[8px] pb-[8px] pt-0 gap-[8px] w-full relative shrink-0">
+    <div className="box-border flex flex-col items-start px-[4px] pb-[4px] pt-0 gap-[4px] w-full relative shrink-0">
       <Button isExpanded={isExpanded} onClick={() => onButtonClick(6)} />
     </div>
   );
@@ -501,7 +488,7 @@ function Frame4({ onButtonClick, activeButtons }: { onButtonClick: (index: numbe
 
 function Frame6({ activeButtons, onButtonClick, microAnimations = true }: { activeButtons: Set<number>; onButtonClick: (index: number) => void; microAnimations?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col gap-[8px] items-stretch relative shrink-0 w-full">
+    <div className="content-stretch flex flex-col gap-[4px] items-stretch relative shrink-0 w-full">
       <Frame5 activeButtons={activeButtons} onButtonClick={onButtonClick} microAnimations={microAnimations} />
       <Frame4 onButtonClick={onButtonClick} activeButtons={activeButtons} />
     </div>
@@ -511,7 +498,7 @@ function Frame6({ activeButtons, onButtonClick, microAnimations = true }: { acti
 export default function ViewToolbar({ activeButtons, onButtonClick, microAnimations = true }: { activeButtons: Set<number>; onButtonClick: (index: number) => void; microAnimations?: boolean }) {
   return (
     <div 
-      className="bg-white box-border content-stretch flex flex-col gap-[8px] items-center justify-center px-0 py-[8px] relative rounded-[12px] w-full" 
+      className="bg-white box-border content-stretch flex flex-col gap-[4px] items-center justify-center px-0 py-[4px] relative rounded-[12px] w-full" 
       data-name="Toolbar"
       style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}
     >

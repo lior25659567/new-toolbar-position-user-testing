@@ -92,8 +92,8 @@ function Frame({ patientName }: { patientName: string }) {
 
 function StepName({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative z-10 flex items-center justify-center shrink-0 flex-shrink-0 w-full" data-name="Name" style={{ width: '176px', minWidth: '176px', maxWidth: '176px', height: '64px', minHeight: '64px', flexShrink: 0 }}>
-      <p className="font-['Roboto:Medium',sans-serif] font-medium text-[18px] text-[rgba(0,0,0,0.93)] text-center leading-[24px] whitespace-nowrap w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
+    <div className="relative z-10 flex items-center justify-center shrink-0 flex-shrink-0 w-full" data-name="Name" style={{ width: '140px', minWidth: '140px', maxWidth: '140px', height: '48px', minHeight: '48px', flexShrink: 0 }}>
+      <p className="font-['Roboto:Medium',sans-serif] font-medium text-[14px] text-[rgba(0,0,0,0.93)] text-center leading-[20px] whitespace-nowrap w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
         {children}
       </p>
     </div>
@@ -102,8 +102,8 @@ function StepName({ children }: { children: React.ReactNode }) {
 
 function StepNameActive({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative z-10 flex items-center justify-center shrink-0 flex-shrink-0 w-full" data-name="Name" style={{ width: '176px', minWidth: '176px', maxWidth: '176px', height: '64px', minHeight: '64px', flexShrink: 0 }}>
-      <p className="font-['Roboto:Medium',sans-serif] font-medium text-[18px] text-white text-center leading-[24px] whitespace-nowrap w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
+    <div className="relative z-10 flex items-center justify-center shrink-0 flex-shrink-0 w-full" data-name="Name" style={{ width: '140px', minWidth: '140px', maxWidth: '140px', height: '48px', minHeight: '48px', flexShrink: 0 }}>
+      <p className="font-['Roboto:Medium',sans-serif] font-medium text-[14px] text-white text-center leading-[20px] whitespace-nowrap w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
         {children}
       </p>
     </div>
@@ -121,7 +121,7 @@ function CompleteStep({ label, onClick }: { label: string; onClick?: () => void 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{ 
-        width: '176px', minWidth: '176px', maxWidth: '176px', height: '64px', minHeight: '64px', flexShrink: 0,
+        width: '140px', minWidth: '140px', maxWidth: '140px', height: '48px', minHeight: '48px', flexShrink: 0,
         transform: isHovered ? 'scale(1.02)' : 'scale(1)',
         filter: isHovered ? 'brightness(0.97)' : 'brightness(1)'
       }}
@@ -147,7 +147,7 @@ function CurrentStep({ label, onClick }: { label: string; onClick?: () => void }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{ 
-        width: '176px', minWidth: '176px', maxWidth: '176px', height: '64px', minHeight: '64px', flexShrink: 0,
+        width: '140px', minWidth: '140px', maxWidth: '140px', height: '48px', minHeight: '48px', flexShrink: 0,
         transform: isHovered ? 'scale(1.02)' : 'scale(1)'
       }}
     >
@@ -172,13 +172,13 @@ function IncompleteStep({ label, onClick }: { label: string; onClick?: () => voi
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{ 
-        width: '176px', minWidth: '176px', maxWidth: '176px', height: '64px', minHeight: '64px', flexShrink: 0,
+        width: '140px', minWidth: '140px', maxWidth: '140px', height: '48px', minHeight: '48px', flexShrink: 0,
         transform: isHovered ? 'scale(1.02)' : 'scale(1)'
       }}
     >
       <div className="absolute inset-0" data-name="back">
         <svg className="block w-full h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 180 72">
-          <path d={svgPaths.p2106e100} fill={isHovered ? "#FAFAFA" : "white"} stroke={isHovered ? "#C0C0C0" : "#E0E0E0"} strokeWidth="2" style={{ transition: 'all 0.2s ease' }} />
+          <path d={svgPaths.p2106e100} fill={isHovered ? "#FAFAFA" : "white"} stroke={isHovered ? "#C0C0C0" : "#E5E7EB"} strokeWidth="1" style={{ transition: 'all 0.2s ease' }} />
         </svg>
       </div>
       <StepName>{label}</StepName>
@@ -197,7 +197,7 @@ function WizardTopbar({ currentStep, onStepChange }: { currentStep: WizardStep; 
   const currentOrder = steps.find(s => s.key === currentStep)?.order ?? 1;
 
   return (
-    <div className="flex items-center justify-center shrink-0 w-full" data-name="./Wizard topbar" style={{ height: '64px', minHeight: '64px' }}>
+    <div className="flex items-center justify-center shrink-0 w-full" data-name="./Wizard topbar" style={{ height: '48px', minHeight: '48px' }}>
       <div className="flex items-center justify-center shrink-0">
         {steps.map((step, index) => {
           const zIndex = 4 - index;
@@ -246,7 +246,7 @@ function WizardTopbarSwitcher({ currentStep, onStepChange }: { currentStep: Wiza
 
 function Locked() {
   return (
-    <svg className="block size-[32px]" fill="none" viewBox="0 0 32 32">
+    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
       <g id="Locked">
         <path d={svgPaths.p215dc800} fill="black" fillOpacity="0.63" id="Vector" />
       </g>
@@ -256,7 +256,7 @@ function Locked() {
 
 function Icon() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '60px', height: '60px', minWidth: '60px', minHeight: '60px', maxWidth: '60px', maxHeight: '60px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <Locked />
     </div>
   );
@@ -264,7 +264,7 @@ function Icon() {
 
 function BatteryFull() {
   return (
-    <svg className="block size-[32px]" fill="none" viewBox="0 0 32 32">
+    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
       <g id="Battery full">
         <g id="Vector">
           <path d={svgPaths.p117a6a00} fill="black" fillOpacity="0.63" />
@@ -277,7 +277,7 @@ function BatteryFull() {
 
 function Icon1() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '60px', height: '60px', minWidth: '60px', minHeight: '60px', maxWidth: '60px', maxHeight: '60px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <BatteryFull />
     </div>
   );
@@ -285,7 +285,7 @@ function Icon1() {
 
 function NotificationOutline() {
   return (
-    <svg className="block size-[32px]" fill="none" viewBox="0 0 32 32">
+    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
       <g id="Notification outline">
         <path d={svgPaths.p3ab1f880} fill="black" fillOpacity="0.63" id="Vector" />
       </g>
@@ -295,7 +295,7 @@ function NotificationOutline() {
 
 function Icon2() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '60px', height: '60px', minWidth: '60px', minHeight: '60px', maxWidth: '60px', maxHeight: '60px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <NotificationOutline />
     </div>
   );
@@ -303,7 +303,7 @@ function Icon2() {
 
 function Settings() {
   return (
-    <svg className="block size-[32px]" fill="none" viewBox="0 0 32 32">
+    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
       <g id="Settings">
         <g id="Vector">
           <path d={svgPaths.p289c8d00} fill="black" fillOpacity="0.63" />
@@ -316,7 +316,7 @@ function Settings() {
 
 function Icon3() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '60px', height: '60px', minWidth: '60px', minHeight: '60px', maxWidth: '60px', maxHeight: '60px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <Settings />
     </div>
   );
@@ -376,8 +376,8 @@ function Dropdown1({ patientName }: { patientName: string }) {
         {/* Patient Avatar - Initials */}
         <div
           style={{ 
-            width: '44px', 
-            height: '44px',
+            width: '36px',
+            height: '36px',
             borderRadius: '50%',
             flexShrink: 0,
             backgroundColor: '#E8F4F8',
@@ -402,7 +402,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
         {/* Patient Name */}
         <div className="flex flex-col">
           <span 
-            className="text-[15px] font-medium group-hover:text-[#008EC2] transition-colors"
+            className="text-[14px] font-medium group-hover:text-[#008EC2] transition-colors"
             style={{ 
               color: 'rgba(0, 0, 0, 0.88)',
               fontFamily: "'Roboto', sans-serif",
@@ -412,7 +412,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
             {displayName}
           </span>
           <span 
-            className="text-[13px]"
+            className="text-[12px]"
             style={{ 
               color: 'rgba(0, 0, 0, 0.45)',
               fontFamily: "'Roboto', sans-serif",
@@ -442,8 +442,7 @@ export default function HeaderNavigation({
 
   return (
     <div className="relative w-full">
-      <div className="bg-white flex items-center justify-between gap-[16px] px-[16px] py-[4px] relative w-full" data-name="Header Scan component" style={{ height: '72px', minHeight: '72px', maxHeight: '72px' }}>
-        <div aria-hidden="true" className="absolute border-b border-[rgba(0,0,0,0.23)] border-solid inset-0 pointer-events-none" />
+      <div className="bg-white flex items-center justify-between gap-[16px] px-[16px] py-[4px] relative w-full" data-name="Header Scan component" style={{ height: '56px', minHeight: '56px', maxHeight: '56px', borderBottom: '1px solid #E5E7EB' }}>
         <div className="flex items-center shrink-0">
           <Dropdown1 patientName={patientName} />
         </div>
@@ -456,7 +455,7 @@ export default function HeaderNavigation({
       </div>
       {/* Left panel: Jaw image in scan mode, Layers panel in view mode, hidden in info mode */}
       {!isInfoMode && (
-        <div className="absolute left-[16px]" style={{ top: `${93 + jawImageOffset}px` }}>
+        <div className="absolute left-[16px]" style={{ top: `${72 + jawImageOffset}px` }}>
           {isViewMode && scanTabs ? (
             <ViewLayersPanel scanTabs={scanTabs} />
           ) : (
@@ -464,7 +463,7 @@ export default function HeaderNavigation({
               src={jawNavigationImage}
               alt="Jaw Navigation"
               className="block"
-              style={{ width: '301px', height: '467px' }}
+              style={{ width: '240px', height: '373px' }}
             />
           )}
         </div>

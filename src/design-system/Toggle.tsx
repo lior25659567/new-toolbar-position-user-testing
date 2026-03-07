@@ -98,6 +98,7 @@ export function Toggle({
   };
 
   const wrapperStyle: React.CSSProperties = {
+    position: "relative",
     display: "inline-flex",
     alignItems: "center",
     gap: space[2],

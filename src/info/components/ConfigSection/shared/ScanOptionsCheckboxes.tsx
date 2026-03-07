@@ -1,7 +1,7 @@
 import React from "react";
 import type { ProcedureType, ScanOptions } from "../../../types";
 import type { InfoAction } from "../../../state/infoReducer";
-import { Checkbox } from "../../../../design-system";
+import { Toggle } from "../../../../design-system";
 import { PROCEDURE_SCAN_OPTIONS, SCAN_OPTION_LABELS } from "../../../constants";
 import type { ScanOptionKey } from "../../../constants";
 
@@ -28,9 +28,9 @@ export function ScanOptionsCheckboxes({ procedure, scanOptions, dispatch }: Scan
       >
         Scan options
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "16px" }}>
         {keys.map((key) => (
-          <Checkbox
+          <Toggle
             key={key}
             checked={scanOptions[key]}
             onChange={() => dispatch({ type: "TOGGLE_SCAN_OPTION", key })}

@@ -24,8 +24,8 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
   const strokeColor = isActive ? "#008EC2" : "#5E646E";
   
   return (
-    <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Mono chomr new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Mono chomr new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_monochrome_hbotview)">
           <path 
             fillRule="evenodd" 
@@ -104,7 +104,7 @@ function IconButton({
 
   return (
     <motion.div 
-      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[40px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
         backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
       }}
@@ -129,7 +129,7 @@ function IconButton({
           }}
         />
       )}
-      <div className="relative flex items-center justify-center size-[60px]">
+      <div className="relative flex items-center justify-center size-[40px]">
         <Icon isActive={isActive || isHovered} />
       </div>
     </motion.div>
@@ -187,7 +187,7 @@ function ExpandedToolbar({
   stackVertical?: boolean;
 }) {
   return (
-    <div className="bg-white flex flex-1 gap-[12px] items-stretch p-[8px] relative rounded-[8px]">
+    <div className="bg-white flex flex-1 gap-[8px] items-stretch p-[4px] relative rounded-[8px]">
       
       {viewButtons.map((btn, index) => (
         <React.Fragment key={btn.label}>
@@ -203,12 +203,8 @@ function ExpandedToolbar({
         </React.Fragment>
       ))}
 
-      {/* Collapse Button */}
-      <SecondaryButton
-        size={60}
-        style={{ width: 60, padding: 0, minHeight: 60 }}
-        onClick={() => onButtonClick(6)}
-      >
+      {/* Collapse Button - same size as toolbar buttons (36px) */}
+      <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36 }} onClick={() => onButtonClick(6)}>
         <ChevronIcon isExpanded={true} />
       </SecondaryButton>
     </div>
@@ -225,7 +221,7 @@ function Frame4({
   microAnimations?: boolean;
 }) {
   return (
-    <div className="bg-white content-stretch flex gap-[12px] items-center p-[8px] relative self-stretch shrink-0 h-[76px]">
+    <div className="bg-white content-stretch flex gap-[8px] items-center p-[6px] relative self-stretch shrink-0 h-[48px]">
       {viewButtons.map((btn, index) => (
         <React.Fragment key={btn.label}>
           <IconButton
@@ -246,15 +242,15 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
   return (
     <motion.div
       className="relative shrink-0 flex items-center justify-center"
-      style={{ width: '32px', height: '32px' }}
+      style={{ width: '24px', height: '24px' }}
       initial={{ rotate: isExpanded ? 0 : 180 }}
       animate={{ rotate: isExpanded ? 180 : 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <svg
         className="block"
-        width="32"
-        height="32"
+        width="24"
+        height="24"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -272,15 +268,14 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
 
 function Frame3({ onButtonClick, isExpanded }: { onButtonClick: (index: number) => void; isExpanded: boolean }) {
   return (
-    <div className="bg-white flex h-[76px] w-[76px] items-center justify-center">
-      <SecondaryButton
-        size={60}
-        style={{ width: 60, padding: 0, minHeight: 60 }}
-        onClick={() => onButtonClick(6)}
-      >
-        <ChevronIcon isExpanded={isExpanded} />
-      </SecondaryButton>
-    </div>
+    <SecondaryButton
+      variant="toolbar"
+      size={36}
+      style={{ width: 36, padding: 0, minHeight: 36 }}
+      onClick={() => onButtonClick(6)}
+    >
+      <ChevronIcon isExpanded={isExpanded} />
+    </SecondaryButton>
   );
 }
 
@@ -316,7 +311,8 @@ export function HorizontalBottomToolbarView({
 
   return (
     <motion.div 
-      className="content-stretch flex items-start relative rounded-[8px] h-[76px] font-['Roboto'] overflow-hidden"
+      className="content-stretch flex items-center gap-[8px] p-[6px] relative rounded-[8px] h-[48px] font-['Roboto'] overflow-hidden bg-white"
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', padding: '6px' }}
       initial={{ width: 'auto', opacity: 0 }}
       animate={{ width: 'auto', opacity: 1 }}
       exit={{ width: 'auto', opacity: 0 }}
@@ -326,9 +322,7 @@ export function HorizontalBottomToolbarView({
       }}
     >
       <Frame4 activeButtons={activeButtons} onButtonClick={onButtonClick} microAnimations={microAnimations} />
-      <div className="flex h-[76px] items-center justify-center relative shrink-0 w-[76px] bg-white" style={{ "--transform-inner-width": "60", "--transform-inner-height": "60" } as React.CSSProperties}>
-        <Frame3 onButtonClick={onButtonClick} isExpanded={isExpanded} />
-      </div>
+      <Frame3 onButtonClick={onButtonClick} isExpanded={isExpanded} />
     </motion.div>
   );
 }

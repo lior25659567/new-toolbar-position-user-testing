@@ -12,7 +12,7 @@ const imgIcon6 = "https://www.figma.com/api/mcp/asset/2feb583a-ccbc-42eb-8664-2d
 // Magic wand / Select icon for Detect button
 function DetectIcon() {
   return (
-    <svg width="24" height="24" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="18" height="18" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path fillRule="evenodd" clipRule="evenodd" d="M18.7462 19.2287C18.3494 19.6658 17.6622 19.6658 17.2654 19.2287L11.4031 12.771C11.057 12.3898 11.057 11.808 11.4031 11.4267L12.0926 10.6672C12.4895 10.23 13.1766 10.23 13.5735 10.6672L19.4357 17.1249C19.7818 17.5061 19.7818 18.0879 19.4357 18.4691L18.7462 19.2287Z" fill="white"/>
       <path fillRule="evenodd" clipRule="evenodd" d="M9.79109 10.0996C9.23978 10.6195 8.37873 10.6195 7.82743 10.0996L6.78553 9.11695C6.18661 8.55211 6.18661 7.59964 6.78553 7.0348L7.64855 6.22088C8.19986 5.70095 9.06091 5.70095 9.61222 6.22088L10.6541 7.20349C11.253 7.76833 11.253 8.7208 10.6541 9.28564L9.79109 10.0996Z" fill="white"/>
       <path d="M7.65918 11.5928C7.99395 11.6539 8.21842 11.9607 8.16016 12.2773L7.56152 15.5215C7.50271 15.8378 7.18417 16.0445 6.84961 15.9834C6.51502 15.9222 6.29155 15.6163 6.34961 15.2998L6.94727 12.0566C7.00567 11.7401 7.32449 11.5319 7.65918 11.5928ZM4.26855 8.65137C4.6039 8.59585 4.91728 8.80887 4.96875 9.12695C5.01971 9.44487 4.78931 9.74794 4.4541 9.80371L0.707031 10.4268C0.371786 10.4823 0.0584469 10.2691 0.00683594 9.95117C-0.0444096 9.63316 0.185272 9.33032 0.520508 9.27441L4.26855 8.65137ZM15.5811 3.99805C15.8806 3.84699 16.2417 3.96218 16.3877 4.25488C16.5334 4.54753 16.4088 4.9065 16.1094 5.05762L12.9072 6.67383C12.6077 6.8249 12.2457 6.7105 12.0996 6.41797C11.9538 6.12527 12.0794 5.76538 12.3789 5.61426L15.5811 3.99805ZM2.04102 2.0127C2.27552 1.7788 2.65558 1.77927 2.88965 2.01367L5.66504 4.79297C5.89881 5.02734 5.89904 5.4075 5.66504 5.6416C5.43073 5.87557 5.0506 5.87556 4.81641 5.6416L2.04004 2.86133C1.80608 2.62683 1.8066 2.24678 2.04102 2.0127ZM10.96 0.0253906C11.287 0.118937 11.4774 0.44518 11.3848 0.753906L10.3838 4.08887C10.2911 4.39748 9.94999 4.57184 9.62305 4.47852C9.29631 4.38479 9.1066 4.05857 9.19922 3.75L10.2002 0.415039C10.2929 0.106329 10.6329 -0.068118 10.96 0.0253906Z" fill="white"/>
@@ -23,8 +23,8 @@ function DetectIcon() {
 // --- Margin Line Panel Components (Updated to match Figma design) ---
 function Container() {
   return (
-    <div className="border-[#f3f4f6] border-b border-solid h-[73px] relative shrink-0 w-full" data-name="Container" data-node-id="138:21992">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-between pb-px pt-0 px-[24px] relative size-full">
+    <div className="border-[#f3f4f6] border-b border-solid h-[56px] relative shrink-0 w-full" data-name="Container" data-node-id="138:21992">
+      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-between pb-px pt-0 px-[16px] relative size-full">
         <div className="h-[30px] relative shrink-0 w-[123.633px]" data-name="Container" data-node-id="138:21993">
           <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[12px] items-center relative size-full">
             {/* Drag Handle */}
@@ -47,7 +47,7 @@ function Container() {
             {/* Title */}
             <div className="flex-[1_0_0] h-[30px] min-h-px min-w-px relative" data-name="Heading 2" data-node-id="138:22001">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[30px] left-0 not-italic text-[#1e2939] text-[20px] top-0 tracking-[-0.4492px]" data-node-id="138:22002">
+                <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[30px] left-0 not-italic text-[#1e2939] text-[16px] top-0 tracking-[-0.4492px]" data-node-id="138:22002">
                   Margin line
                 </p>
               </div>
@@ -79,7 +79,7 @@ function ArrowButton({ direction, imgSrc }: { direction: 'left' | 'right'; imgSr
   
   return (
     <div 
-      className="border border-solid relative rounded-[8px] shrink-0 size-[48px] cursor-pointer transition-all duration-200" 
+      className="border border-solid relative rounded-[8px] shrink-0 size-[36px] cursor-pointer transition-all duration-200"
       data-name="Button"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -90,7 +90,7 @@ function ArrowButton({ direction, imgSrc }: { direction: 'left' | 'right'; imgSr
       }}
     >
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-center p-px relative size-full">
-        <div className="relative shrink-0 size-[24px]" data-name="Icon">
+        <div className="relative shrink-0 size-[20px]" data-name="Icon">
           <img alt="" className="block max-w-none size-full" src={imgSrc} />
         </div>
       </div>
@@ -109,21 +109,21 @@ function ListItem() {
           <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[4px] items-center relative size-full">
             <div className="h-[16px] relative shrink-0 w-[43.961px]" data-name="Paragraph" data-node-id="138:22012">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Medium',sans-serif] font-medium leading-[16px] left-0 not-italic text-[#6a7282] text-[12px] top-px tracking-[0.3px] uppercase" data-node-id="138:22013">
+                <p className="absolute font-['Inter:Medium',sans-serif] font-medium leading-[16px] left-0 not-italic text-[#6a7282] text-[11px] top-px tracking-[0.3px] uppercase" data-node-id="138:22013">
                   TOOTH
                 </p>
               </div>
             </div>
             <div className="flex-[1_0_0] min-h-px min-w-px relative w-[35.297px]" data-name="Paragraph" data-node-id="138:22014">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Bold',sans-serif] font-bold leading-[40px] left-0 not-italic text-[#101828] text-[36px] top-[0.5px] tracking-[0.3691px]" data-node-id="138:22015">
+                <p className="absolute font-['Inter:Bold',sans-serif] font-bold leading-[32px] left-0 not-italic text-[#101828] text-[28px] top-[0.5px] tracking-[0.3691px]" data-node-id="138:22015">
                   11
                 </p>
               </div>
             </div>
             <div className="h-[20px] relative shrink-0 w-[69.086px]" data-name="Paragraph" data-node-id="138:22016">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[20px] left-0 not-italic text-[#6a7282] text-[14px] top-[0.5px] tracking-[-0.1504px]" data-node-id="138:22017">
+                <p className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[20px] left-0 not-italic text-[#6a7282] text-[12px] top-[0.5px] tracking-[-0.1504px]" data-node-id="138:22017">
                   Upper Jaw
                 </p>
               </div>
@@ -139,7 +139,7 @@ function ListItem() {
 
 function PanelDetectButton({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <DSPrimaryButton size={60} fullWidth>
+    <DSPrimaryButton size={36} fullWidth>
       {icon}
       {label}
     </DSPrimaryButton>
@@ -149,9 +149,9 @@ function PanelDetectButton({ icon, label }: { icon: React.ReactNode; label: stri
 function ActionButton({ icon, label }: { icon: string; label: string }) {
   return (
     <div style={{ flex: '1 0 0', minWidth: 0 }}>
-      <DSSecondaryButton size={60} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
-        <img alt="" style={{ width: 24, height: 24, display: 'block' }} src={icon} />
-        <span style={{ fontSize: '14px' }}>{label}</span>
+      <DSSecondaryButton size={36} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '6px 4px' }}>
+        <img alt="" style={{ width: 16, height: 16, display: 'block' }} src={icon} />
+        <span style={{ fontSize: '12px' }}>{label}</span>
       </DSSecondaryButton>
     </div>
   );
@@ -248,7 +248,7 @@ export default function CombinedReviewMarginPanel() {
   return (
     <div 
       className="flex flex-col p-[16px] relative w-[432px] bg-[#f5f5f5] rounded-[4px] gap-[16px]"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', height: 'calc(100vh - 109px)' }}
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', height: 'calc(100vh - 88px)' }}
       data-name="Combined Review Margin Panel"
     >
       
@@ -256,7 +256,7 @@ export default function CombinedReviewMarginPanel() {
       <div className="bg-white content-stretch flex flex-col items-start relative rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] size-full shrink-0 w-[240px]" data-name="MarginLinePanel" data-node-id="138:21991" style={{ width: '240px', minWidth: '240px', maxWidth: '240px' }}>
         <Container />
         <div className="flex-[1_0_0] min-h-px min-w-px relative w-full" data-name="Container" data-node-id="138:22006">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[32px] items-start px-[24px] py-[32px] relative size-full">
+          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[16px] items-start px-[16px] py-[16px] relative size-full">
             <ListItem />
             <Frame />
           </div>

@@ -7,7 +7,7 @@ export default function OcculsgramNew({ isActive = false }: OcculsgramNewProps) 
   
   return (
     <div className="relative size-full flex items-center justify-center" data-name="Occulsgram new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_occlusalgram)">
           <path 
             d="M52.8721 17.0208C46.5211 18.7014 37.818 20.269 27.4625 19.9879C19.3151 19.7679 12.335 18.4662 6.87207 17.0208" 

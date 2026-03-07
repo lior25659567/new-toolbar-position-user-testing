@@ -38,7 +38,7 @@ export function MonochromeIcon({ isActive = false }: { isActive?: boolean }) {
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Monochrome Icon">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_monochrome)">
           <path 
             fillRule="evenodd" 

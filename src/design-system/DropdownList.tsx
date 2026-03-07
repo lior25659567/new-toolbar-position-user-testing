@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { color, font, radius, transition, space, shadow } from "./tokens";
 
 export interface DropdownItem {
@@ -61,15 +62,38 @@ export function DropdownList({
   const [hoveredIndex, setHoveredIndex] = React.useState(-1);
   const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue ?? "");
   const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLUListElement>(null);
+  const [menuPos, setMenuPos] = React.useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
 
   const isControlled = controlledValue !== undefined;
   const selected = isControlled ? controlledValue : uncontrolledValue;
   const selectedOption = options.find((o) => o.value === selected);
   const hasError = Boolean(error);
 
+  // Update menu position when opening
+  React.useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  }, [isOpen]);
+
+  // Close menu on scroll to prevent position mismatch
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleScroll = () => setIsOpen(false);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => window.removeEventListener("scroll", handleScroll, true);
+  }, [isOpen]);
+
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        wrapperRef.current && !wrapperRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -110,11 +134,11 @@ export function DropdownList({
   };
 
   const menuStyle: React.CSSProperties = {
-    position: "absolute",
-    top: "calc(100% + 4px)",
-    left: 0,
-    right: 0,
-    zIndex: 50,
+    position: "fixed",
+    top: menuPos.top,
+    left: menuPos.left,
+    width: menuPos.width,
+    zIndex: 9999,
     backgroundColor: color.bgSurface,
     border: `1px solid ${color.borderDefault}`,
     borderRadius: radius.md,
@@ -146,6 +170,7 @@ export function DropdownList({
       )}
       <div style={{ position: "relative" }}>
         <button
+          ref={triggerRef}
           type="button"
           disabled={disabled}
           style={triggerStyle}
@@ -168,42 +193,43 @@ export function DropdownList({
           <ChevronIcon open={isOpen} />
         </button>
 
-        {isOpen && (
-          <ul role="listbox" style={menuStyle}>
-            {options.map((opt, i) => {
-              const isSelected = opt.value === selected;
-              const isHovered = hoveredIndex === i;
-              return (
-                <li
-                  key={opt.value}
-                  role="option"
-                  aria-selected={isSelected}
-                  aria-disabled={opt.disabled}
-                  onMouseEnter={() => !opt.disabled && setHoveredIndex(i)}
-                  onMouseLeave={() => setHoveredIndex(-1)}
-                  onClick={() => !opt.disabled && handleSelect(opt.value)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: `${space[2]} ${space[4]}`,
-                    fontSize: font.size.base,
-                    fontFamily: font.family,
-                    color: opt.disabled ? color.textPlaceholder : isSelected ? color.primary : color.textDefault,
-                    fontWeight: isSelected ? font.weight.medium : font.weight.regular,
-                    backgroundColor: isHovered && !opt.disabled ? color.bgHover : "transparent",
-                    cursor: opt.disabled ? "not-allowed" : "pointer",
-                    opacity: opt.disabled ? 0.5 : 1,
-                    listStyle: "none",
-                    transition: transition.fast,
-                  }}
-                >
-                  {opt.label}
-                </li>
-              );
-            })}
-          </ul>
-        )}
       </div>
+      {isOpen && createPortal(
+        <ul ref={menuRef} role="listbox" style={menuStyle} onMouseDown={(e) => e.preventDefault()}>
+          {options.map((opt, i) => {
+            const isSelected = opt.value === selected;
+            const isHovered = hoveredIndex === i;
+            return (
+              <li
+                key={opt.value}
+                role="option"
+                aria-selected={isSelected}
+                aria-disabled={opt.disabled}
+                onMouseEnter={() => !opt.disabled && setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(-1)}
+                onClick={() => !opt.disabled && handleSelect(opt.value)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: `${space[2]} ${space[4]}`,
+                  fontSize: font.size.base,
+                  fontFamily: font.family,
+                  color: opt.disabled ? color.textPlaceholder : isSelected ? color.primary : color.textDefault,
+                  fontWeight: isSelected ? font.weight.medium : font.weight.regular,
+                  backgroundColor: isHovered && !opt.disabled ? color.bgHover : "transparent",
+                  cursor: opt.disabled ? "not-allowed" : "pointer",
+                  opacity: opt.disabled ? 0.5 : 1,
+                  listStyle: "none",
+                  transition: transition.fast,
+                }}
+              >
+                {opt.label}
+              </li>
+            );
+          })}
+        </ul>,
+        document.body
+      )}
       {hasError ? (
         <span style={{ fontSize: font.size.xs, color: color.danger }} role="alert">{error}</span>
       ) : helper ? (

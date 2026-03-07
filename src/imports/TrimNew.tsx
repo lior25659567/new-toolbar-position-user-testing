@@ -7,7 +7,7 @@ export default function TrimNew({ isActive = false }: TrimNewProps) {
   
   return (
     <div className="relative size-full flex items-center justify-center" data-name="Trim new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M15.7798 23.5597C20.6288 23.5597 24.5597 19.6288 24.5597 14.7798C24.5597 9.93087 20.6288 6 15.7798 6C10.9309 6 7 9.93087 7 14.7798C7 19.6288 10.9309 23.5597 15.7798 23.5597Z" 
           stroke={strokeColor} 

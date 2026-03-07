@@ -8,7 +8,7 @@ export default function FeedbackIcon({ isActive = false }: FeedbackIconProps) {
   
   return (
     <div className="relative size-full flex items-center justify-center" data-name="Feedback icon">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M32.861 53H24.5715V28.7183H29.7507V10.2847H24.5715V6H30.4588C31.9723 6 33.4232 6.51317 34.4994 7.4382L38.9773 11.2873C40.0535 12.2062 40.6505 13.4594 40.6505 14.7603V33.0654" 
           stroke={strokeColor} 

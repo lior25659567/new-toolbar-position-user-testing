@@ -14,8 +14,8 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
   const strokeColor = isActive ? "#008EC2" : "#5E646E";
   
   return (
-    <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Mono chomr new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Mono chomr new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_monochrome_hview)">
           <path 
             fillRule="evenodd" 
@@ -95,10 +95,10 @@ function CollapsedToolbar({
 
   return (
     <div className="bg-white rounded-[4px] size-full flex items-center font-['Roboto']">
-      <div className="flex items-center gap-[8px] px-[16px] py-[16px] flex-1">
+      <div className="flex items-center gap-[4px] px-[4px] py-[4px] flex-1">
         {/* Button 0: Monochrome */}
         <motion.div 
-          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(0) ? '#E0F2FE' : hoveredButton === 0 ? '#f5f5f5' : 'transparent'
           }}
@@ -130,7 +130,7 @@ function CollapsedToolbar({
 
         {/* Button 1: Review Tool */}
         <motion.div 
-          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(1) ? '#E0F2FE' : hoveredButton === 1 ? '#f5f5f5' : 'transparent'
           }}
@@ -162,7 +162,7 @@ function CollapsedToolbar({
 
         {/* Button 2: Occlusalgram */}
         <motion.div 
-          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(2) ? '#E0F2FE' : hoveredButton === 2 ? '#f5f5f5' : 'transparent'
           }}
@@ -194,7 +194,7 @@ function CollapsedToolbar({
 
         {/* Button 3: Margin Line */}
         <motion.div 
-          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(3) ? '#E0F2FE' : hoveredButton === 3 ? '#f5f5f5' : 'transparent'
           }}
@@ -226,7 +226,7 @@ function CollapsedToolbar({
 
         {/* Button 4: Prep QC */}
         <motion.div 
-          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(4) ? '#E0F2FE' : hoveredButton === 4 ? '#f5f5f5' : 'transparent'
           }}
@@ -258,7 +258,7 @@ function CollapsedToolbar({
 
         {/* Button 5: Trim */}
         <motion.div 
-          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] cursor-pointer flex items-center justify-center size-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(5) ? '#E0F2FE' : hoveredButton === 5 ? '#f5f5f5' : 'transparent'
           }}
@@ -292,8 +292,8 @@ function CollapsedToolbar({
       {/* Expand button */}
       <div className="h-full flex items-center justify-center px-[8px]">
         <SecondaryButton
-          size={60}
-          style={{ width: 60, padding: 0, minHeight: 60 }}
+          size={40}
+          style={{ width: 40, padding: 0, minHeight: 40 }}
           onClick={() => onButtonClick(6)}
         >
           <ExpandIcon />
@@ -349,11 +349,11 @@ function ExpandedToolbar({
   };
 
   return (
-    <div className="bg-white rounded-[4px] size-full flex items-center font-['Roboto'] p-[12px]">
-      <div className="flex items-center gap-[8px] flex-1">
+    <div className="bg-white rounded-[4px] size-full flex items-center font-['Roboto'] p-[4px]">
+      <div className="flex items-center gap-[4px] flex-1">
         {/* Button 0: Monochrome */}
         <motion.div 
-          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(0) ? '#E0F2FE' : hoveredButton === 0 ? '#f5f5f5' : 'transparent'
           }}
@@ -388,7 +388,7 @@ function ExpandedToolbar({
 
         {/* Button 1: Review Tool */}
         <motion.div 
-          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(1) ? '#E0F2FE' : hoveredButton === 1 ? '#f5f5f5' : 'transparent'
           }}
@@ -423,7 +423,7 @@ function ExpandedToolbar({
 
         {/* Button 2: Occlusalgram */}
         <motion.div 
-          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(2) ? '#E0F2FE' : hoveredButton === 2 ? '#f5f5f5' : 'transparent'
           }}
@@ -458,7 +458,7 @@ function ExpandedToolbar({
 
         {/* Button 3: Margin Line */}
         <motion.div 
-          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(3) ? '#E0F2FE' : hoveredButton === 3 ? '#f5f5f5' : 'transparent'
           }}
@@ -493,7 +493,7 @@ function ExpandedToolbar({
 
         {/* Button 4: Prep QC */}
         <motion.div 
-          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(4) ? '#E0F2FE' : hoveredButton === 4 ? '#f5f5f5' : 'transparent'
           }}
@@ -528,7 +528,7 @@ function ExpandedToolbar({
 
         {/* Button 5: Trim */}
         <motion.div 
-          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[60px] relative overflow-hidden transition-colors duration-200`}
+          className={`rounded-[8px] px-[6px] cursor-pointer flex items-center gap-[6px] h-[40px] relative overflow-hidden transition-colors duration-200`}
           style={{
             backgroundColor: activeButtons.has(5) ? '#E0F2FE' : hoveredButton === 5 ? '#f5f5f5' : 'transparent'
           }}
@@ -565,8 +565,8 @@ function ExpandedToolbar({
       {/* Expand button */}
       <div className="h-full flex items-center justify-center px-[8px]">
         <SecondaryButton
-          size={60}
-          style={{ width: 60, padding: 0, minHeight: 60 }}
+          size={40}
+          style={{ width: 40, padding: 0, minHeight: 40 }}
           onClick={() => onButtonClick(6)}
         >
           <ExpandIcon />

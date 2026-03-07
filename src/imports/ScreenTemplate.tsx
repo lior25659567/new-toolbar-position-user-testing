@@ -634,8 +634,8 @@ function View() {
 
 function HeaderTopBarITero({ currentPage, onPageChange, onBackToHome }: { currentPage: string; onPageChange: (page: string) => void; onBackToHome?: () => void }) {
   return (
-    <div className="absolute h-[76.001px] left-0 right-0 top-0" data-name="Header - Top bar - iTero">
-      <div className="absolute inset-[-2.63%_-0.21%_-7.89%_-0.21%]">
+    <div className="absolute h-[56px] left-0 right-0 top-0" data-name="Header - Top bar - iTero" style={{ backgroundColor: "white", borderBottom: "1px solid #E5E7EB", zIndex: 10 }}>
+      <div className="absolute inset-[-2.63%_-0.21%_-7.89%_-0.21%]" style={{ display: "none" }}>
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1928 84">
           <g filter="url(#filter0_d_1_7025)" id="back">
             <path d="M1924 2H4V78H1924V2Z" fill="var(--fill-0, white)" />
@@ -669,7 +669,7 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Mono chomr new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clipPath="url(#clip0_monochrome_screen)">
           <path 
             fillRule="evenodd" 
@@ -902,7 +902,7 @@ function Frame7({ activeButtons, onButtonClick }: { activeButtons: Set<number>; 
 
 function OldToolbarUnused({ activeButtons, onButtonClick }: { activeButtons: Set<number>; onButtonClick: (index: number) => void }) {
   return (
-    <div className="absolute bg-white box-border content-stretch flex flex-col gap-[8px] items-center justify-center px-0 py-[8px] right-[14px] rounded-[4px] top-[93px]" data-name="Toolbar">
+    <div className="absolute bg-white box-border content-stretch flex flex-col gap-[8px] items-center justify-center px-0 py-[8px] right-[14px] rounded-[4px] top-[72px]" data-name="Toolbar">
       <Frame7 activeButtons={activeButtons} onButtonClick={onButtonClick} />
     </div>
   );
@@ -2462,7 +2462,7 @@ export default function ScreenTemplate({
   const viewActiveButtons = externalViewActiveButtons !== undefined ? externalViewActiveButtons : localViewActiveButtons;
 
   // Offset for scan tabs (64px when tabs are shown on scan page)
-  const tabsOffset = showScanTabs && currentPage === 'scan' ? 64 : 0;
+  const tabsOffset = showScanTabs && currentPage === 'scan' ? 44 : 0;
 
   const handleButtonClick = externalOnButtonClick || ((index: number) => {
     setLocalActiveButtons(prev => {
@@ -2528,7 +2528,7 @@ export default function ScreenTemplate({
     <div className="relative size-full" data-name="Screen template" style={{ backgroundColor: '#F4F4F4' }}>
       {/* Info page - full layout without 3D model */}
       {currentPage === 'info' && (
-        <div style={{ position: 'absolute', top: '72px', left: 0, right: 0, bottom: 0, zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, bottom: 0, zIndex: 10 }}>
           <InfoPage onContinue={() => handlePageChange('scan')} />
         </div>
       )}
@@ -2567,7 +2567,7 @@ export default function ScreenTemplate({
 
       {/* Scan Tabs - only shown when showScanTabs is true (DedicatedTopToolbarPage) */}
       {showScanTabs && currentPage === 'scan' && (
-        <div className="absolute top-[72px] left-0 right-0 z-40" style={{ width: '100%' }}>
+        <div className="absolute top-[56px] left-0 right-0 z-40" style={{ width: '100%' }}>
           <ScanTabs
             tabs={externalScanTabs}
             onTabsChange={externalOnScanTabsChange}
@@ -2579,13 +2579,13 @@ export default function ScreenTemplate({
         <>
           {activeButtons.has(3) ? (
             <>
-              <div className="absolute top-[93px] right-[17px] w-[195px]">
+              <div className="absolute top-[72px] right-[17px] w-[195px]">
                 <ExpandedToolbar activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
               </div>
             </>
           ) : (
             <>
-              <div className="absolute top-[93px] right-[17px] w-[76px]">
+              <div className="absolute top-[72px] right-[17px] w-[76px]">
                 <Toolbar activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
               </div>
             </>
@@ -2628,17 +2628,17 @@ export default function ScreenTemplate({
         <>
           {viewActiveButtons.has(6) ? (
             <>
-              <div className="absolute right-[17px] top-[93px] w-[195px]">
+              <div className="absolute right-[17px] top-[72px] w-[195px]">
                 <ViewToolbar activeButtons={viewActiveButtons} onButtonClick={handleViewButtonClick} microAnimations={microAnimations} />
               </div>
               {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
-                <div className="absolute right-[228px] top-[93px]">
+                <div className="absolute right-[228px] top-[72px]">
                   <CombinedReviewMarginPanel />
                 </div>
               ) : (
                 <>
                   {viewActiveButtons.has(1) && (
-                    <div className="absolute right-[228px] top-[93px] w-[432px] h-[846px]">
+                    <div className="absolute right-[228px] top-[72px] w-[432px] h-[846px]">
                       <CameraNiri />
                     </div>
                   )}
@@ -2657,17 +2657,17 @@ export default function ScreenTemplate({
             </>
           ) : (
             <>
-              <div className="absolute right-[17px] top-[93px] w-[76px]">
+              <div className="absolute right-[17px] top-[72px] w-[76px]">
                 <ViewToolbar activeButtons={viewActiveButtons} onButtonClick={handleViewButtonClick} microAnimations={microAnimations} />
               </div>
               {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
-                <div className="absolute right-[106px] top-[93px]">
+                <div className="absolute right-[106px] top-[72px]">
                   <CombinedReviewMarginPanel />
                 </div>
               ) : (
                 <>
                   {viewActiveButtons.has(1) && (
-                    <div className="absolute right-[106px] top-[93px] w-[432px] h-[846px]">
+                    <div className="absolute right-[106px] top-[72px] w-[432px] h-[846px]">
                       <CameraNiri />
                     </div>
                   )}
@@ -2700,13 +2700,13 @@ export default function ScreenTemplate({
             />
           </div>
           {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
-            <div className="absolute top-[93px] right-[17px]">
+            <div className="absolute top-[72px] right-[17px]">
               <CombinedReviewMarginPanel />
             </div>
           ) : (
             <>
               {viewActiveButtons.has(1) && (
-                <div className="absolute top-[93px] right-[17px] w-[432px] h-[846px]">
+                <div className="absolute top-[72px] right-[17px] w-[432px] h-[846px]">
                   <CameraNiri />
                 </div>
               )}
@@ -2726,24 +2726,24 @@ export default function ScreenTemplate({
       )}
       {currentPage === 'scan' && layout === 'horizontal-top' && (
         <>
-          <div className="absolute right-[17px]" style={{ top: `${93 + tabsOffset}px` }}>
+          <div className="absolute right-[17px]" style={{ top: `${72 + tabsOffset}px` }}>
             <HorizontalTopToolbarScan activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
           </div>
         </>
       )}
       {currentPage === 'view' && layout === 'horizontal-top' && (
         <>
-          <div className="absolute right-[17px]" style={{ top: `${93 + tabsOffset}px` }}>
+          <div className="absolute right-[17px]" style={{ top: `${72 + tabsOffset}px` }}>
             <HorizontalTopToolbarView activeButtons={viewActiveButtons} onButtonClick={handleViewButtonClick} microAnimations={microAnimations} />
           </div>
           {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
-            <div className="absolute top-[185px] right-[17px]">
+            <div className="absolute top-[164px] right-[17px]">
               <CombinedReviewMarginPanel />
             </div>
           ) : (
             <>
               {viewActiveButtons.has(1) && (
-                <div className="absolute top-[185px] right-[17px] w-[432px] h-[846px]">
+                <div className="absolute top-[164px] right-[17px] w-[432px] h-[846px]">
                   <CameraNiri />
                 </div>
               )}
@@ -2771,13 +2771,13 @@ export default function ScreenTemplate({
             />
           </div>
           {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
-            <div className="absolute top-[93px] right-[17px]">
+            <div className="absolute top-[72px] right-[17px]">
               <CombinedReviewMarginPanel />
             </div>
           ) : (
             <>
               {viewActiveButtons.has(1) && (
-                <div className="absolute top-[93px] right-[17px] w-[432px] h-[846px]">
+                <div className="absolute top-[72px] right-[17px] w-[432px] h-[846px]">
                   <CameraNiri />
                 </div>
               )}
@@ -2808,7 +2808,7 @@ export default function ScreenTemplate({
       
       {/* Layout switcher for scan and view pages - positioned below HeaderNavigation/tabs/jaw image with 16px gap */}
       {!hideLayoutSwitcher && (currentPage === 'scan' || currentPage === 'view') && (onBackToHome || onNavigateToLayout) && (
-        <div className="absolute z-50" style={{ top: `calc(${96 + tabsOffset}px + 467px + 16px)`, left: '14px' }}>
+        <div className="absolute z-50" style={{ top: `calc(${72 + tabsOffset}px + 373px + 16px)`, left: '14px' }}>
           <LayoutSwitcher
             currentLayout={
               layout === 'vertical' ? 'vertical' 

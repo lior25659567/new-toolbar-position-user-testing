@@ -83,7 +83,7 @@ function FeedbackNew({ isActive = false }: { isActive?: boolean }) {
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Feedback new">
-      <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M32.861 53H24.5715V28.7183H29.7507V10.2847H24.5715V6H30.4588C31.9723 6 33.4232 6.51317 34.4994 7.4382L38.9773 11.2873C40.0535 12.2062 40.6505 13.4594 40.6505 14.7603V33.0654" 
           stroke={strokeColor} 
@@ -185,7 +185,7 @@ function PrepEditToTest({ isActive = false }: { isActive?: boolean }) {
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Prep edit to test">
-      <svg width="44" height="45" viewBox="0 0 60 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="28" height="29" viewBox="0 0 60 61" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M25.5238 51C19.5289 50.971 14.1168 49.5938 6.70168 46.5318C6.28657 46.3603 6.03918 45.9312 6.09579 45.4857L10.6275 9.82312C10.9436 7.33696 13.0214 5.65522 15.2086 6.06017C25.126 7.89606 31.8458 8.06423 40.8708 6.22052C43.1241 5.76026 45.3022 7.48079 45.5983 10.0541L47 22.2335" 
           stroke={strokeColor} 
