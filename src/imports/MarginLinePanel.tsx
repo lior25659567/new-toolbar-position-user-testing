@@ -57,7 +57,7 @@ function DetectIcon() {
 
 function DrawIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, minWidth: '16px', minHeight: '16px' }}>
       <path d="M12 19L19 12L22 15L15 22L12 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M18 13L16.5 5.5L2 2L5.5 16.5L13 18L18 13Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M2 2L9.586 9.586" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -68,7 +68,7 @@ function DrawIcon() {
 
 function UndoIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, minWidth: '16px', minHeight: '16px' }}>
       <path d="M3 7V13H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M21 17C21 14.6131 20.0518 12.3239 18.364 10.636C16.6761 8.94821 14.3869 8 12 8C9.61305 8 7.32387 8.94821 5.63604 10.636L3 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
@@ -77,7 +77,7 @@ function UndoIcon() {
 
 function ClearIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, minWidth: '16px', minHeight: '16px' }}>
       <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
@@ -120,7 +120,7 @@ export default function MarginLinePanel() {
         style={{ padding: '16px 16px 0 16px' }}
       >
         {/* Left Arrow */}
-        <SecondaryButton size={36} style={{ width: '36px', height: '36px', padding: 0 }}>
+        <SecondaryButton size={44} style={{ width: '44px', height: '44px', padding: 0 }}>
           <ChevronLeftIcon />
         </SecondaryButton>
 
@@ -138,7 +138,7 @@ export default function MarginLinePanel() {
         </div>
 
         {/* Right Arrow */}
-        <SecondaryButton size={36} style={{ width: '36px', height: '36px', padding: 0 }}>
+        <SecondaryButton size={44} style={{ width: '44px', height: '44px', padding: 0 }}>
           <ChevronRightIcon />
         </SecondaryButton>
       </div>
@@ -149,7 +149,7 @@ export default function MarginLinePanel() {
         style={{ padding: '16px 16px 16px 16px' }}
       >
         {/* Detect Button */}
-        <PrimaryButton size={36} fullWidth>
+        <PrimaryButton size={44} fullWidth>
           <DetectIcon />
           Detect
         </PrimaryButton>
@@ -157,21 +157,21 @@ export default function MarginLinePanel() {
         {/* Draw / Undo / Clear Buttons */}
         <div className="flex gap-2">
           <div style={{ flex: '1 0 0', minWidth: 0 }}>
-            <SecondaryButton size={36} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '6px 4px' }}>
+            <SecondaryButton size={44} fullWidth>
               <DrawIcon />
-              <span style={{ fontSize: '12px' }}>Draw</span>
+              Draw
             </SecondaryButton>
           </div>
           <div style={{ flex: '1 0 0', minWidth: 0 }}>
-            <SecondaryButton size={36} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '6px 4px' }}>
+            <SecondaryButton size={44} fullWidth>
               <UndoIcon />
-              <span style={{ fontSize: '12px' }}>Undo</span>
+              Undo
             </SecondaryButton>
           </div>
           <div style={{ flex: '1 0 0', minWidth: 0 }}>
-            <SecondaryButton size={36} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '6px 4px' }}>
+            <SecondaryButton size={44} fullWidth>
               <ClearIcon />
-              <span style={{ fontSize: '12px' }}>Clear</span>
+              Clear
             </SecondaryButton>
           </div>
         </div>

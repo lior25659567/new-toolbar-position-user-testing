@@ -2462,7 +2462,7 @@ export default function ScreenTemplate({
   const viewActiveButtons = externalViewActiveButtons !== undefined ? externalViewActiveButtons : localViewActiveButtons;
 
   // Offset for scan tabs (64px when tabs are shown on scan page)
-  const tabsOffset = showScanTabs && currentPage === 'scan' ? 44 : 0;
+  const tabsOffset = showScanTabs && currentPage === 'scan' ? 60 : 0;
 
   const handleButtonClick = externalOnButtonClick || ((index: number) => {
     setLocalActiveButtons(prev => {
@@ -2567,7 +2567,7 @@ export default function ScreenTemplate({
 
       {/* Scan Tabs - only shown when showScanTabs is true (DedicatedTopToolbarPage) */}
       {showScanTabs && currentPage === 'scan' && (
-        <div className="absolute top-[56px] left-0 right-0 z-40" style={{ width: '100%' }}>
+        <div className="absolute top-[56px] left-0 right-0 z-40" style={{ width: '100%', height: 'fit-content' }}>
           <ScanTabs
             tabs={externalScanTabs}
             onTabsChange={externalOnScanTabsChange}
@@ -2638,7 +2638,7 @@ export default function ScreenTemplate({
               ) : (
                 <>
                   {viewActiveButtons.has(1) && (
-                    <div className="absolute right-[228px] top-[72px] w-[432px] h-[846px]">
+                    <div className="absolute right-[228px] top-[136px] bottom-[16px]">
                       <CameraNiri />
                     </div>
                   )}
@@ -2667,7 +2667,7 @@ export default function ScreenTemplate({
               ) : (
                 <>
                   {viewActiveButtons.has(1) && (
-                    <div className="absolute right-[106px] top-[72px] w-[432px] h-[846px]">
+                    <div className="absolute right-[106px] top-[136px] bottom-[16px]">
                       <CameraNiri />
                     </div>
                   )}
@@ -2706,7 +2706,7 @@ export default function ScreenTemplate({
           ) : (
             <>
               {viewActiveButtons.has(1) && (
-                <div className="absolute top-[72px] right-[17px] w-[432px] h-[846px]">
+                <div className="absolute top-[136px] bottom-[16px] right-[17px]">
                   <CameraNiri />
                 </div>
               )}
@@ -2726,29 +2726,35 @@ export default function ScreenTemplate({
       )}
       {currentPage === 'scan' && layout === 'horizontal-top' && (
         <>
-          <div className="absolute right-[17px]" style={{ top: `${72 + tabsOffset}px` }}>
+          <div className="absolute right-[17px] bottom-[16px]" style={{ top: `${72 + tabsOffset}px` }}>
             <HorizontalTopToolbarScan activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
           </div>
         </>
       )}
       {currentPage === 'view' && layout === 'horizontal-top' && (
         <>
-          <div className="absolute right-[17px]" style={{ top: `${72 + tabsOffset}px` }}>
-            <HorizontalTopToolbarView activeButtons={viewActiveButtons} onButtonClick={handleViewButtonClick} microAnimations={microAnimations} />
-          </div>
-          {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
-            <div className="absolute top-[164px] right-[17px]">
-              <CombinedReviewMarginPanel />
-            </div>
-          ) : (
-            <>
-              {viewActiveButtons.has(1) && (
-                <div className="absolute top-[164px] right-[17px] w-[432px] h-[846px]">
-                  <CameraNiri />
+          <div className="absolute right-[17px] bottom-[16px] left-auto flex flex-col items-end justify-start gap-[16px]" style={{ top: `${72 + tabsOffset}px`, bottom: '16px', width: 'max-content' }}>
+            <div className="flex flex-col flex-1 min-h-0 w-max min-w-0 items-end gap-[16px]">
+              <div className="shrink-0">
+                <HorizontalTopToolbarView activeButtons={viewActiveButtons} onButtonClick={handleViewButtonClick} microAnimations={microAnimations} />
+              </div>
+              {viewActiveButtons.has(1) && viewActiveButtons.has(3) && combinedPanelMode ? (
+                <div className="shrink-0">
+                  <CombinedReviewMarginPanel />
                 </div>
+              ) : (
+                <>
+                  {viewActiveButtons.has(1) && (
+                    <div className="flex flex-col flex-1 min-h-0 w-[320px] max-w-[320px] shrink-0 self-end ml-auto" style={{ alignSelf: 'flex-end', marginLeft: 'auto' }}>
+                      <CameraNiri />
+                    </div>
+                  )}
+                  {/* Spacer to keep Review panel 140px above bottom */}
+                  {viewActiveButtons.has(1) && <div className="h-[140px] shrink-0" aria-hidden />}
+                </>
               )}
-            </>
-          )}
+            </div>
+          </div>
           {viewActiveButtons.has(2) && (
             <div className="absolute bottom-[14px] left-1/2 translate-x-[-50%] flex justify-center h-[68px]">
               <Scale />
@@ -2777,7 +2783,7 @@ export default function ScreenTemplate({
           ) : (
             <>
               {viewActiveButtons.has(1) && (
-                <div className="absolute top-[72px] right-[17px] w-[432px] h-[846px]">
+                <div className="absolute top-[136px] bottom-[16px] right-[17px]">
                   <CameraNiri />
                 </div>
               )}

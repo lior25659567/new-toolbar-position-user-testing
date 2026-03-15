@@ -271,32 +271,50 @@ export default function HorizontalScreenTemplate({
         </div>
       </div>
 
-      {/* Horizontal Top Toolbar - Independent state from bottom toolbar */}
+      {/* Horizontal Top Toolbar + panels below */}
       {currentPage === 'scan' && (
-        <div className="absolute right-[17px] top-[72px]">
-          <HorizontalTopToolbarScan 
-            activeButtons={topActiveButtons} 
-            onButtonClick={handleTopButtonClick} 
-            microAnimations={microAnimations} 
-          />
+        <div className="absolute left-0 right-[17px] top-[72px] bottom-[16px] flex flex-col items-end gap-[16px] pointer-events-none">
+          <div className="shrink-0 pointer-events-auto">
+            <HorizontalTopToolbarScan
+              activeButtons={topActiveButtons}
+              onButtonClick={handleTopButtonClick}
+              microAnimations={microAnimations}
+            />
+          </div>
+          {activeButtons.has(2) && (
+            <div className="shrink-0 pointer-events-auto">
+              <Frame1618872975 />
+            </div>
+          )}
+          {activeButtons.has(1) && (
+            <div className="flex-1 min-h-0 w-[260px] pointer-events-auto">
+              <CameraNiri />
+            </div>
+          )}
         </div>
       )}
-
       {currentPage === 'view' && (
-        <div className="absolute right-[17px] top-[72px]">
-          <HorizontalTopToolbarView 
-            activeButtons={topViewActiveButtons} 
-            onButtonClick={handleTopViewButtonClick} 
-            microAnimations={microAnimations} 
-          />
+        <div className="absolute left-0 right-[17px] top-[72px] bottom-[16px] flex flex-col items-end gap-[16px] pointer-events-none">
+          <div className="shrink-0 pointer-events-auto">
+            <HorizontalTopToolbarView
+              activeButtons={topViewActiveButtons}
+              onButtonClick={handleTopViewButtonClick}
+              microAnimations={microAnimations}
+            />
+          </div>
+          {viewActiveButtons.has(1) && (
+            <div className="flex-1 min-h-0 w-[260px] pointer-events-auto">
+              <CameraNiri />
+            </div>
+          )}
         </div>
       )}
 
       {/* Horizontal Bottom Toolbar */}
       {currentPage === 'scan' && (
         <div className="absolute bottom-[14px] left-1/2 translate-x-[-50%]">
-          <HorizontalBottomToolbarScan 
-            activeButtons={activeButtons} 
+          <HorizontalBottomToolbarScan
+            activeButtons={activeButtons}
             onButtonClick={handleButtonClick}
             microAnimations={microAnimations}
           />
@@ -306,36 +324,17 @@ export default function HorizontalScreenTemplate({
       {/* View page bottom toolbar */}
       {currentPage === 'view' && (
         <div className="absolute bottom-[14px] left-1/2 translate-x-[-50%]">
-          <HorizontalBottomToolbarView 
-            activeButtons={viewActiveButtons} 
+          <HorizontalBottomToolbarView
+            activeButtons={viewActiveButtons}
             onButtonClick={handleViewButtonClick}
             microAnimations={microAnimations}
           />
         </div>
       )}
 
-      {/* Panels for scan page - Horizontal Top Toolbar Layout */}
-      {currentPage === 'scan' && activeButtons.has(2) && (
-        <div className="absolute top-[164px] right-[17px]">
-          <Frame1618872975 />
-        </div>
-      )}
-
-      {/* Review Tool camera panel */}
-      {currentPage === 'scan' && activeButtons.has(1) && (
-        <div className="absolute top-[72px] right-[17px]">
-          <CameraNiri />
-        </div>
-      )}
-
       {/* Scale components for view page */}
       {currentPage === 'view' && (
         <>
-          {viewActiveButtons.has(1) && (
-            <div className="absolute top-[164px] right-[17px] w-[432px] h-[846px]">
-              <CameraNiri />
-            </div>
-          )}
           {viewActiveButtons.has(1) && (viewActiveButtons.has(3) || viewActiveButtons.has(5)) && (
             <div className="absolute bottom-[14px] left-[14px]">
               {viewActiveButtons.has(3) && <Panel />}

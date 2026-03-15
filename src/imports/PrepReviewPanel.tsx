@@ -84,13 +84,13 @@ export default function PrepReviewPanel() {
         style={{ padding: '16px 16px 16px 16px' }}
       >
         {/* Select Button */}
-        <PrimaryButton size={36} fullWidth>
+        <PrimaryButton size={44} fullWidth>
           <SelectIcon />
           Select
         </PrimaryButton>
 
         {/* Erase & Rescan Button */}
-        <SecondaryButton size={36} fullWidth>
+        <SecondaryButton size={44} fullWidth>
           <UndoIcon />
           Erase &amp; Rescan
         </SecondaryButton>

@@ -6,12 +6,14 @@ import { ToothArc } from "./ToothArc";
 import { ToothSpecCard } from "./ToothSpecCard";
 import { ToothBatchActions } from "./ToothBatchActions";
 import { ToothTable } from "./ToothTable";
+import { GhostButton } from "../../../design-system";
 
 
 interface ToothChartProps {
   state: InfoState;
   toothColorMap: Record<number, TagColor>;
   dispatch: React.Dispatch<InfoAction>;
+  title?: string;
 }
 
 function ChartIcon({ active }: { active: boolean }) {
@@ -45,7 +47,7 @@ function groupSpecsByGroupId(specs: ToothSpec[]): ToothSpec[][] {
   return Array.from(map.values());
 }
 
-export function ToothChart({ state, toothColorMap, dispatch }: ToothChartProps) {
+export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChartProps) {
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart");
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const lastClickedRef = useRef<number | null>(null);
@@ -101,34 +103,13 @@ export function ToothChart({ state, toothColorMap, dispatch }: ToothChartProps) 
 
   return (
     <div>
-      {/* Toolbar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginRight: "auto", fontSize: "12px", color: "#6a7282", fontFamily: "Inter, sans-serif" }}>
-          {state.selectedTeeth.length > 0 && (
-            <>
-              <span style={{ fontWeight: 500 }}>
-                {state.selectedTeeth.length} selected
-              </span>
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "CLEAR_SELECTION" })}
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  color: "#009ACE",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  fontFamily: "Inter, sans-serif",
-                  outline: "none",
-                }}
-              >
-                Clear
-              </button>
-            </>
-          )}
-        </div>
+      {/* Row 1: Title + chart/table toggle */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: state.selectedTeeth.length > 0 ? "8px" : "16px" }}>
+        {title && (
+          <span style={{ fontSize: "14px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif" }}>
+            {title}
+          </span>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           <button
             type="button"
@@ -136,7 +117,7 @@ export function ToothChart({ state, toothColorMap, dispatch }: ToothChartProps) 
             style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               width: "32px", height: "32px", borderRadius: "6px", border: "none",
-              backgroundColor: viewMode === "chart" ? "#E0F2FE" : "transparent",
+              backgroundColor: viewMode === "chart" ? "#f3f4f6" : "transparent",
               cursor: "pointer", transition: "background-color 0.15s",
             }}
             title="Chart view"
@@ -149,7 +130,7 @@ export function ToothChart({ state, toothColorMap, dispatch }: ToothChartProps) 
             style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               width: "32px", height: "32px", borderRadius: "6px", border: "none",
-              backgroundColor: viewMode === "table" ? "#E0F2FE" : "transparent",
+              backgroundColor: viewMode === "table" ? "#f3f4f6" : "transparent",
               cursor: "pointer", transition: "background-color 0.15s",
             }}
             title="Table view"
@@ -158,6 +139,32 @@ export function ToothChart({ state, toothColorMap, dispatch }: ToothChartProps) 
           </button>
         </div>
       </div>
+
+      {/* Row 2: Selected count + Clear (under title) */}
+      {state.selectedTeeth.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+          <span
+            style={{
+              fontSize: "12px",
+              fontWeight: 500,
+              color: "#009ACE",
+              backgroundColor: "#E0F2FE",
+              padding: "3px 10px",
+              borderRadius: "9999px",
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            {state.selectedTeeth.length} selected
+          </span>
+          <GhostButton
+            size={36}
+            onClick={() => dispatch({ type: "CLEAR_SELECTION" })}
+            style={{ minHeight: "26px", padding: "0 8px", fontSize: "12px" }}
+          >
+            Clear
+          </GhostButton>
+        </div>
+      )}
 
       {viewMode === "chart" ? (
         <>

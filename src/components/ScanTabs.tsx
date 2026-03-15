@@ -134,21 +134,24 @@ export default function ScanTabs({
     onTabsChange?.(newTabs);
   };
 
+  const tabHeight = 44;
+  const addButtonSize = 32;
+
   return (
     <div 
       className="w-full"
       style={{ 
-        height: '44px',
-        minHeight: '44px',
+        minHeight: '60px',
+        height: '100%',
         backgroundColor: '#FFFFFF',
         fontFamily: "'Roboto', system-ui, sans-serif",
         display: 'flex',
         alignItems: 'flex-end',
         paddingLeft: '14px',
         paddingRight: '14px',
-        paddingTop: '8px',
+        paddingTop: '16px',
         paddingBottom: 0,
-        gap: '4px',
+        gap: '6px',
         borderBottom: '1px solid #E5E7EB',
       }}
     >
@@ -165,14 +168,14 @@ export default function ScanTabs({
             onMouseLeave={() => setHoveredTabId(null)}
             className="relative cursor-pointer flex items-center"
             style={{
-              height: '36px',
-              paddingLeft: '12px',
-              paddingRight: '8px',
-              borderRadius: '7px 7px 0 0',
+              height: `${tabHeight}px`,
+              paddingLeft: '14px',
+              paddingRight: '10px',
+              borderRadius: '8px 8px 0 0',
               backgroundColor: isActive ? '#FFFFFF' : isHovered ? '#F0F0F0' : '#F5F5F5',
               transition: 'background-color 0.15s ease',
-              minWidth: '130px',
-              maxWidth: '250px',
+              minWidth: '140px',
+              maxWidth: '260px',
               overflow: 'hidden',
               borderTop: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
               borderLeft: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
@@ -197,8 +200,8 @@ export default function ScanTabs({
             <span
               className="truncate select-none"
               style={{
-                fontSize: '13px',
-                lineHeight: '20px',
+                fontSize: '14px',
+                lineHeight: '22px',
                 fontWeight: isActive ? 600 : 400,
                 color: isActive ? '#009ACE' : '#666666',
                 transition: 'color 0.15s ease',
@@ -209,27 +212,29 @@ export default function ScanTabs({
               {tab.label}
             </span>
 
-            {/* Close X */}
-            <button
-              onClick={(e) => handleTabClose(e, tab.id)}
-              className="flex items-center justify-center shrink-0"
-              style={{
-                width: '18px',
-                height: '18px',
-                marginLeft: '8px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.12s ease',
-                borderRadius: '4px',
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.08)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; }}
-            >
-              <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-                <path d="M1 1L9 9M9 1L1 9" stroke={isActive ? '#009ACE' : '#999999'} strokeWidth="1.4" strokeLinecap="round" />
-              </svg>
-            </button>
+            {/* Close X - only on selected tab */}
+            {isActive && (
+              <button
+                onClick={(e) => handleTabClose(e, tab.id)}
+                className="flex items-center justify-center shrink-0"
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  marginLeft: '10px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.12s ease',
+                  borderRadius: '4px',
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.08)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; }}
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1 1L9 9M9 1L1 9" stroke="#009ACE" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
           </div>
         );
       })}
@@ -240,11 +245,11 @@ export default function ScanTabs({
         style={{
           display: 'flex',
           alignItems: 'center',
-          height: '36px',
-          paddingLeft: '4px',
-          paddingRight: '4px',
-          paddingTop: '4px',
-          paddingBottom: '4px',
+          height: `${tabHeight}px`,
+          paddingLeft: '6px',
+          paddingRight: '6px',
+          paddingTop: '6px',
+          paddingBottom: '6px',
         }}
         ref={dropdownRef}
       >
@@ -254,18 +259,18 @@ export default function ScanTabs({
           onMouseLeave={() => setPlusHovered(false)}
           className="flex items-center justify-center"
           style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: plusHovered ? '#D6EDF5' : '#E8F4F8',
-            border: 'none',
+            width: `${addButtonSize}px`,
+            height: `${addButtonSize}px`,
+            backgroundColor: plusHovered ? '#f3f4f6' : '#FFFFFF',
+            border: '1px solid #E5E7EB',
             cursor: 'pointer',
             borderRadius: '8px',
             transition: 'background-color 0.15s ease',
             flexShrink: 0,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M8 3V13M3 8H13" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" />
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3V13M3 8H13" stroke="#64748b" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
         </button>
 

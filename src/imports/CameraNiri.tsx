@@ -1,139 +1,190 @@
-import svgPaths from "./svg-wi5n7xzoah";
-import imgScreenshot20221115At16261 from "figma:asset/1447eb3fe8363533ebdc60265425e3f1dac685e7.png";
-import imgScreenshot20221109At13092 from "figma:asset/22c8274398284723cf97f1470cd780174dd5439c.png";
-import imgScreenShot20220727At2350 from "figma:asset/85992d98a85ebda774e1363fea1b11c53b299457.png";
-import imgScreenshot20240318At1457BackgroundRemoved from "figma:asset/a1dfc57a055d32f098369f51df6fd0791a341b87.png";
+import React from "react";
+import { IconButton } from "../design-system";
 
-function NiriIocImages() {
+const PLACEHOLDER_IMAGE_COLOR = "https://placehold.co/320x160/e2e8f0/64748b?text=Color";
+const PLACEHOLDER_IMAGE_NIRI = "https://placehold.co/320x160/e2e8f0/64748b?text=NIRI";
+
+function DragHandle() {
   return (
-    <div className="absolute h-[416px] left-[32px] top-[8px] w-[392px]" data-name="NIRI + IOC Images">
-      <div className="absolute inset-0 rounded-[4px]" data-name="Screenshot 2022-11-15 at 16.26 1">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[4px]">
-          <img alt="" className="absolute h-[230.34%] left-[-0.57%] max-w-none top-[-14.11%] w-[100.84%]" src={imgScreenshot20221115At16261} />
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+      <div style={{ display: 'flex', gap: '3px' }}>
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '3px' }}>
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '3px' }}>
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
       </div>
     </div>
   );
 }
 
-function Group4() {
+function CloseIcon() {
   return (
-    <div className="absolute bottom-0 contents left-0 right-0 top-[0.29%]">
-      <div className="absolute bottom-0 left-0 right-0 rounded-[4px] top-[0.54%]" data-name="Screenshot 2022-11-09 at 13.09 2">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[4px]">
-          <img alt="" className="absolute h-[261.15%] left-0 max-w-none top-[-146%] w-[101.88%]" src={imgScreenshot20221109At13092} />
-        </div>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 5L5 15M5 5L15 15" stroke="#6B7280" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ExpandIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <path d="M15 3H21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9 21H3V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M21 3L14 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3 21L10 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function ImageCard({ src, label, badge }: { src: string; label: string; badge: string }) {
+  return (
+    <div
+      style={{
+        flex: '1 1 0',
+        minHeight: '120px',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: '#1a1a2e',
+      }}
+    >
+      <img
+        alt={label}
+        src={src}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}
+      />
+      {/* Badge */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '6px',
+          padding: '4px 10px',
+          fontSize: '11px',
+          fontWeight: 600,
+          color: '#374151',
+          fontFamily: 'Inter, sans-serif',
+          letterSpacing: '0.3px',
+          textTransform: 'uppercase' as const,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        }}
+      >
+        {badge}
       </div>
-      <div className="absolute bottom-[0.25%] left-[0.26%] right-0 rounded-[4px] top-[0.29%]" data-name="Screenshot 2022-11-15 at 16.26 1">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[4px]">
-          <img alt="" className="absolute h-[235.9%] left-[-0.57%] max-w-none top-[-135.9%] w-[100.86%]" src={imgScreenshot20221115At16261} />
-        </div>
+      {/* Expand button */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          width: '28px',
+          height: '28px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(4px)',
+          borderRadius: '6px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          color: '#374151',
+        }}
+      >
+        <ExpandIcon />
       </div>
-    </div>
-  );
-}
-
-function NiriIocImages1() {
-  return (
-    <div className="absolute inset-[50.23%_1.85%_0.94%_7.41%]" data-name="NIRI + IOC Images">
-      <div className="absolute bottom-[0.5%] left-0 right-0 rounded-[4px] top-0" data-name="Screen Shot 2022-07-27 at 23.50">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[4px] size-full" src={imgScreenshot20240318At1457BackgroundRemoved} />
-      </div>
-      <Group4 />
-    </div>
-  );
-}
-
-function Group() {
-  return (
-    <div className="absolute inset-[2.55%_5.04%_94.1%_88.37%]">
-      <div className="absolute inset-[-0.18%_-7.02%_-7.02%_-0.19%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31 31">
-          <g id="Group 2778">
-            <g id="Ellipse 205">
-              <path d={svgPaths.p1eb1d100} fill="var(--fill-0, #F2FBFF)" id="Vector" />
-              <path d={svgPaths.p2dac0600} id="Vector_2" stroke="var(--stroke-0, #0067AC)" strokeMiterlimit="10" />
-            </g>
-            <path d={svgPaths.p3c5d2700} fill="var(--fill-0, #00ADEF)" id="Rectangle 866" />
-            <path d={svgPaths.pe8e8cf0} fill="var(--fill-0, #00ADEF)" id="Rectangle 867" />
-            <path d={svgPaths.p260bff00} id="Line 105" stroke="var(--stroke-0, #0067AC)" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="4" />
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function Group2() {
-  return (
-    <div className="absolute contents inset-[0.94%_1.85%_92.49%_85.19%]">
-      <div className="absolute bg-[rgba(255,255,255,0.54)] inset-[0.94%_1.85%_92.49%_85.19%] rounded-[4px]" />
-      <Group />
-    </div>
-  );
-}
-
-function Group1() {
-  return (
-    <div className="absolute inset-[51.97%_5.04%_44.69%_88.37%]">
-      <div className="absolute inset-[-0.18%_-7.02%_-7.02%_-0.19%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31 31">
-          <g id="Group 2778">
-            <g id="Ellipse 205">
-              <path d={svgPaths.p33a16700} fill="var(--fill-0, #F2FBFF)" id="Vector" />
-              <path d={svgPaths.p2dac0600} id="Vector_2" stroke="var(--stroke-0, #0067AC)" strokeMiterlimit="10" />
-            </g>
-            <path d={svgPaths.p3c5d2700} fill="var(--fill-0, #00ADEF)" id="Rectangle 866" />
-            <path d={svgPaths.p309974f0} fill="var(--fill-0, #00ADEF)" id="Rectangle 867" />
-            <path d={svgPaths.p260bff00} id="Line 105" stroke="var(--stroke-0, #0067AC)" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="4" />
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function Group3() {
-  return (
-    <div className="absolute contents inset-[50.35%_1.85%_43.08%_85.19%]">
-      <div className="absolute bg-[rgba(255,255,255,0.54)] inset-[50.35%_1.85%_43.08%_85.19%] rounded-[4px]" />
-      <Group1 />
-    </div>
-  );
-}
-
-function ArrowsRightArrow() {
-  return (
-    <div className="relative size-full" data-name="Arrows / right arrow">
     </div>
   );
 }
 
 export default function CameraNiri() {
   return (
-    <div className="relative size-full" data-name="camera NIRI" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', borderRadius: '4px' }}>
-      <div className="absolute inset-[-0.47%_-0.93%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 440 860">
-          <g filter="url(#filter0_f_83_2708)" id="Rectangle 932">
-            <path d={svgPaths.pc40baa0} fill="var(--fill-0, #F0F9FF)" fillOpacity="0.5" />
-          </g>
-          <defs>
-            <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="860" id="filter0_f_83_2708" width="440" x="0" y="0">
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend in="SourceGraphic" in2="BackgroundImageFix" mode="normal" result="shape" />
-              <feGaussianBlur result="effect1_foregroundBlur_83_2708" stdDeviation="2" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
-      <NiriIocImages />
-      <NiriIocImages1 />
-      <Group2 />
-      <Group3 />
-      <div className="absolute flex inset-[47.71%_92.82%_48.2%_1.16%] items-center justify-center">
-        <div className="flex-none h-[34.901px] rotate-[180deg] w-[26px]">
-          <ArrowsRightArrow />
+    <div
+      data-name="ReviewToolPanel"
+      style={{
+        width: '320px',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#ffffff',
+        borderRadius: '8px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
+        overflow: 'hidden',
+        height: '100%',
+        paddingTop: 0,
+        marginTop: 0,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          height: '56px',
+          minHeight: '56px',
+          padding: '0 16px',
+          borderBottom: '1px solid #f3f4f6',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <DragHandle />
+          <h2
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 600,
+              fontSize: '16px',
+              color: '#1e2939',
+              letterSpacing: '-0.45px',
+              margin: 0,
+            }}
+          >
+            Review tool
+          </h2>
         </div>
+        <IconButton aria-label="Close panel">
+          <CloseIcon />
+        </IconButton>
+      </div>
+
+      {/* Images - two stacked vertically, filling remaining space */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          justifyContent: 'flex-start',
+        }}
+      >
+        <ImageCard
+          src={PLACEHOLDER_IMAGE_COLOR}
+          label="Upper arch color scan"
+          badge="Color"
+        />
+        <ImageCard
+          src={PLACEHOLDER_IMAGE_NIRI}
+          label="Lower arch NIRI scan"
+          badge="NIRI"
+        />
       </div>
     </div>
   );

@@ -147,12 +147,37 @@ function BottomLayoutIcon() {
   );
 }
 
-export default function HomePage({ 
+function PatientReportIcon() {
+  return (
+    <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Page background */}
+      <rect x="30" y="8" width="60" height="84" rx="4" fill="white" stroke="#D4D4D4" strokeWidth="1"/>
+      {/* Header bar */}
+      <rect x="36" y="14" width="48" height="6" rx="2" fill="#0099d6"/>
+      {/* Patient info line */}
+      <rect x="36" y="24" width="32" height="3" rx="1.5" fill="#E0E0E0"/>
+      <rect x="36" y="30" width="24" height="3" rx="1.5" fill="#E0E0E0"/>
+      {/* Image placeholder */}
+      <rect x="36" y="38" width="48" height="28" rx="3" fill="#FAFAFA" stroke="#E0E0E0" strokeWidth="0.5"/>
+      {/* Image icon inside placeholder */}
+      <circle cx="50" cy="48" r="4" fill="#D4D4D4"/>
+      <path d="M42 60 L50 52 L58 60 L66 46 L78 60" stroke="#D4D4D4" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Notes lines */}
+      <rect x="36" y="72" width="48" height="2.5" rx="1" fill="#E0E0E0"/>
+      <rect x="36" y="78" width="36" height="2.5" rx="1" fill="#E0E0E0"/>
+      <rect x="36" y="84" width="42" height="2.5" rx="1" fill="#E0E0E0"/>
+    </svg>
+  );
+}
+
+export default function HomePage({
   onSelectLayout,
   onOpenDesignSystem,
-}: { 
+  onOpenPatientReport,
+}: {
   onSelectLayout: (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => void;
   onOpenDesignSystem?: () => void;
+  onOpenPatientReport?: () => void;
   combinedPanelMode?: boolean;
   onCombinedPanelModeChange?: (enabled: boolean) => void;
 }) {
@@ -163,10 +188,11 @@ export default function HomePage({
       if (e.key === '2') onSelectLayout('horizontal-top');
       if (e.key === '3') onSelectLayout('horizontal-bottom');
       if (e.key === '4') onSelectLayout('dedicated-top');
+      if ((e.key === 'p' || e.key === 'P') && onOpenPatientReport) onOpenPatientReport();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onSelectLayout]);
+  }, [onSelectLayout, onOpenPatientReport]);
 
   return (
     <div 
@@ -232,6 +258,36 @@ export default function HomePage({
         />
       </div>
       
+      {/* Tools section */}
+      {onOpenPatientReport && (
+        <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: '#1a1a1a',
+            margin: '0 0 6px 0',
+            letterSpacing: '-0.02em',
+          }}>
+            Tools
+          </h2>
+          <p style={{
+            fontSize: '13px',
+            color: '#888888',
+            margin: '0 0 20px 0',
+          }}>
+            Clinical utilities and report generation
+          </p>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <LayoutCard
+              title="Patient Report"
+              icon={<PatientReportIcon />}
+              onClick={() => onOpenPatientReport()}
+              shortcut="P"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <div style={{ marginTop: '40px', textAlign: 'center' }}>
         <p style={{

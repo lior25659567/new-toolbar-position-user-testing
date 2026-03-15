@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-34vouhfnvt";
 import { SecondaryButton } from "../design-system";
+import { color } from "../design-system/tokens";
 
 function InfoIcon() {
   return (
@@ -204,7 +205,7 @@ function ExpandedToolbar({
       ))}
 
       {/* Collapse Button - same size as toolbar buttons (36px) */}
-      <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36 }} onClick={() => onButtonClick(6)}>
+      <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36, borderWidth: 1, borderStyle: 'solid', borderColor: color.borderDefault }} onClick={() => onButtonClick(6)}>
         <ChevronIcon isExpanded={true} />
       </SecondaryButton>
     </div>
@@ -271,7 +272,7 @@ function Frame3({ onButtonClick, isExpanded }: { onButtonClick: (index: number) 
     <SecondaryButton
       variant="toolbar"
       size={36}
-      style={{ width: 36, padding: 0, minHeight: 36 }}
+      style={{ width: 36, padding: 0, minHeight: 36, borderWidth: 1, borderStyle: 'solid', borderColor: color.borderDefault }}
       onClick={() => onButtonClick(6)}
     >
       <ChevronIcon isExpanded={isExpanded} />
@@ -295,7 +296,8 @@ export function HorizontalBottomToolbarView({
   if (isExpanded) {
     return (
       <motion.div 
-        className="content-stretch flex items-stretch relative rounded-[8px] font-['Roboto'] overflow-hidden"
+        className="content-stretch flex items-stretch relative rounded-[8px] font-['Roboto'] overflow-hidden bg-white"
+        style={{ backgroundColor: color.bgSurface, boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', padding: '6px' }}
         initial={{ width: 'auto', opacity: 0 }}
         animate={{ width: 'auto', opacity: 1 }}
         exit={{ width: 'auto', opacity: 0 }}

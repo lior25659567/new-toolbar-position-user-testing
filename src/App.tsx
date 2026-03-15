@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import ScreenTemplate from "./imports/ScreenTemplate";
 import HomePage from "./components/HomePage";
 import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
+import PatientReportPage from "./components/PatientReportPage";
 import { DesignSystemPage } from "./design-system";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report'>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => {
+  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report') => {
     setCurrentView(layout);
   };
   
@@ -104,9 +105,10 @@ export default function App() {
   return (
     <div className="w-full h-full overflow-hidden relative">
       {currentView === 'home' && (
-        <HomePage 
+        <HomePage
           onSelectLayout={handleSelectLayout}
           onOpenDesignSystem={() => setCurrentView('design-system')}
+          onOpenPatientReport={() => setCurrentView('patient-report')}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
         />
@@ -192,6 +194,12 @@ export default function App() {
           onPageChange={handlePageChange}
           onButtonClick={handleButtonClick}
           onViewButtonClick={handleViewButtonClick}
+        />
+      )}
+
+      {currentView === 'patient-report' && (
+        <PatientReportPage
+          onBackToHome={handleBackToHome}
         />
       )}
 

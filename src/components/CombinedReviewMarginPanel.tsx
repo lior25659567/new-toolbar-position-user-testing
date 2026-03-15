@@ -79,7 +79,7 @@ function ArrowButton({ direction, imgSrc }: { direction: 'left' | 'right'; imgSr
   
   return (
     <div 
-      className="border border-solid relative rounded-[8px] shrink-0 size-[36px] cursor-pointer transition-all duration-200"
+      className="border border-solid relative rounded-[8px] shrink-0 size-[44px] cursor-pointer transition-all duration-200"
       data-name="Button"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -139,7 +139,7 @@ function ListItem() {
 
 function PanelDetectButton({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <DSPrimaryButton size={36} fullWidth>
+    <DSPrimaryButton size={44} fullWidth>
       {icon}
       {label}
     </DSPrimaryButton>
@@ -149,9 +149,9 @@ function PanelDetectButton({ icon, label }: { icon: React.ReactNode; label: stri
 function ActionButton({ icon, label }: { icon: string; label: string }) {
   return (
     <div style={{ flex: '1 0 0', minWidth: 0 }}>
-      <DSSecondaryButton size={36} fullWidth style={{ flexDirection: 'column', gap: '4px', padding: '6px 4px' }}>
+      <DSSecondaryButton size={44} fullWidth>
         <img alt="" style={{ width: 16, height: 16, display: 'block' }} src={icon} />
-        <span style={{ fontSize: '12px' }}>{label}</span>
+        {label}
       </DSSecondaryButton>
     </div>
   );

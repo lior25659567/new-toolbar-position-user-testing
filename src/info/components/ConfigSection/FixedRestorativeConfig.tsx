@@ -38,8 +38,7 @@ export function FixedRestorativeConfig({ state, toothColorMap, dispatch }: Props
 
       {/* Card 2: Tooth chart */}
       <div style={cardStyle}>
-        <div style={cardTitleStyle}>Select teeth and assign procedures</div>
-        <ToothChart state={state} toothColorMap={toothColorMap} dispatch={dispatch} />
+        <ToothChart state={state} toothColorMap={toothColorMap} dispatch={dispatch} title="Select teeth and assign procedures" />
       </div>
 
       {/* Card 3: Notes + Attachments side by side */}

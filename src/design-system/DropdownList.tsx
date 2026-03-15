@@ -20,6 +20,8 @@ export interface DropdownListProps {
   helper?: string;
   required?: boolean;
   fullWidth?: boolean;
+  /** When "top", the menu opens upward above the trigger. Default: "bottom". */
+  menuPlacement?: "bottom" | "top";
 }
 
 const ChevronIcon = ({ open }: { open: boolean }) => (
@@ -56,6 +58,7 @@ export function DropdownList({
   helper,
   required,
   fullWidth,
+  menuPlacement = "bottom",
 }: DropdownListProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
@@ -64,7 +67,7 @@ export function DropdownList({
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const menuRef = React.useRef<HTMLUListElement>(null);
-  const [menuPos, setMenuPos] = React.useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+  const [menuPos, setMenuPos] = React.useState<{ top?: number; bottom?: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
 
   const isControlled = controlledValue !== undefined;
   const selected = isControlled ? controlledValue : uncontrolledValue;
@@ -75,9 +78,13 @@ export function DropdownList({
   React.useEffect(() => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+      if (menuPlacement === "top") {
+        setMenuPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left, width: rect.width });
+      } else {
+        setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, menuPlacement]);
 
   // Close menu on scroll to prevent position mismatch
   React.useEffect(() => {
@@ -135,7 +142,7 @@ export function DropdownList({
 
   const menuStyle: React.CSSProperties = {
     position: "fixed",
-    top: menuPos.top,
+    ...(menuPlacement === "top" ? { bottom: menuPos.bottom } : { top: menuPos.top }),
     left: menuPos.left,
     width: menuPos.width,
     zIndex: 9999,

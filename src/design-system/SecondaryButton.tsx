@@ -32,7 +32,7 @@ const baseStyle: React.CSSProperties = {
   gap: space[2],
   color: "rgba(0, 0, 0, 0.93)",
   backgroundColor: color.bgSurface,
-  borderRadius: radius.sm,
+  borderRadius: radius.md,
 };
 
 const toolbarBaseStyle: React.CSSProperties = {
@@ -55,7 +55,7 @@ const toolbarBaseStyle: React.CSSProperties = {
 const sizeStyles: Record<60 | 44 | 36, React.CSSProperties> = {
   60: { minHeight: "60px", padding: `0 ${space[6]}`, fontSize: "16px", lineHeight: "22px", letterSpacing: "-0.2px" },
   44: { minHeight: "44px", padding: `0 ${space[4]}`, fontSize: font.size.base, lineHeight: "20px", letterSpacing: "-0.15px" },
-  36: { minHeight: "36px", padding: `0 ${space[3]}`, fontSize: font.size.sm, lineHeight: "18px", letterSpacing: "-0.1px" },
+  36: { minHeight: "34px", padding: `0 ${space[4]}`, fontSize: font.size.xs, lineHeight: "18px", letterSpacing: "-0.1px" },
 };
 
 export function SecondaryButton({
