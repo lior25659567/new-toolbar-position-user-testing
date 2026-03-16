@@ -170,29 +170,56 @@ function PatientReportIcon() {
   );
 }
 
+function ScanGuidanceIcon() {
+  return (
+    <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Scanning boundary arc */}
+      <path d="M30 50 A30 30 0 0 1 90 50" stroke="#0099d6" strokeWidth="2" fill="none" strokeDasharray="4 3"/>
+      <path d="M90 50 A30 30 0 0 1 30 50" stroke="#D4D4D4" strokeWidth="1" fill="none" strokeDasharray="4 3"/>
+      {/* Tooth arch shape */}
+      <path d="M38 48 Q42 30 60 28 Q78 30 82 48" stroke="#888" strokeWidth="2" fill="#FAFAFA"/>
+      {/* Revealed (scanned) section - filled */}
+      <path d="M42 46 Q48 32 60 30 Q66 31 70 36" stroke="none" fill="#0099d6" opacity="0.2"/>
+      {/* Scan cursor */}
+      <circle cx="58" cy="38" r="8" stroke="#0099d6" strokeWidth="1.5" fill="#0099d6" opacity="0.15"/>
+      <circle cx="58" cy="38" r="2" fill="#0099d6"/>
+      {/* Progress bar */}
+      <rect x="30" y="72" width="60" height="4" rx="2" fill="#E0E0E0"/>
+      <rect x="30" y="72" width="28" height="4" rx="2" fill="#0099d6"/>
+      {/* Arrow guidance */}
+      <line x1="74" y1="40" x2="86" y2="40" stroke="#0099d6" strokeWidth="1.5" strokeLinecap="round"/>
+      <polyline points="82,36 86,40 82,44" stroke="#0099d6" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 export default function HomePage({
   onSelectLayout,
   onOpenDesignSystem,
   onOpenPatientReport,
+  onOpenScanGuidance,
 }: {
   onSelectLayout: (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => void;
   onOpenDesignSystem?: () => void;
   onOpenPatientReport?: () => void;
+  onOpenScanGuidance?: () => void;
   combinedPanelMode?: boolean;
   onCombinedPanelModeChange?: (enabled: boolean) => void;
 }) {
   // Keyboard shortcuts
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === '1') onSelectLayout('vertical');
       if (e.key === '2') onSelectLayout('horizontal-top');
       if (e.key === '3') onSelectLayout('horizontal-bottom');
       if (e.key === '4') onSelectLayout('dedicated-top');
       if ((e.key === 'p' || e.key === 'P') && onOpenPatientReport) onOpenPatientReport();
+      if ((e.key === 'g' || e.key === 'G') && onOpenScanGuidance) onOpenScanGuidance();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onSelectLayout, onOpenPatientReport]);
+  }, [onSelectLayout, onOpenPatientReport, onOpenScanGuidance]);
 
   return (
     <div 
@@ -283,6 +310,36 @@ export default function HomePage({
               icon={<PatientReportIcon />}
               onClick={() => onOpenPatientReport()}
               shortcut="P"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Prototypes section */}
+      {onOpenScanGuidance && (
+        <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: '#1a1a1a',
+            margin: '0 0 6px 0',
+            letterSpacing: '-0.02em',
+          }}>
+            Prototypes
+          </h2>
+          <p style={{
+            fontSize: '13px',
+            color: '#888888',
+            margin: '0 0 20px 0',
+          }}>
+            Experimental features and concepts
+          </p>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <LayoutCard
+              title="Smart Scan Guidance"
+              icon={<ScanGuidanceIcon />}
+              onClick={() => onOpenScanGuidance()}
+              shortcut="G"
             />
           </div>
         </div>

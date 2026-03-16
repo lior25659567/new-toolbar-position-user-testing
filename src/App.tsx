@@ -3,10 +3,11 @@ import ScreenTemplate from "./imports/ScreenTemplate";
 import HomePage from "./components/HomePage";
 import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
 import PatientReportPage from "./components/PatientReportPage";
+import ScanGuidancePage from "./components/scan-guidance/ScanGuidancePage";
 import { DesignSystemPage } from "./design-system";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance'>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report') => {
+  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance') => {
     setCurrentView(layout);
   };
   
@@ -109,6 +110,7 @@ export default function App() {
           onSelectLayout={handleSelectLayout}
           onOpenDesignSystem={() => setCurrentView('design-system')}
           onOpenPatientReport={() => setCurrentView('patient-report')}
+          onOpenScanGuidance={() => setCurrentView('scan-guidance')}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
         />
@@ -199,6 +201,12 @@ export default function App() {
 
       {currentView === 'patient-report' && (
         <PatientReportPage
+          onBackToHome={handleBackToHome}
+        />
+      )}
+
+      {currentView === 'scan-guidance' && (
+        <ScanGuidancePage
           onBackToHome={handleBackToHome}
         />
       )}
