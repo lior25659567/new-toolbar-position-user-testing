@@ -14,15 +14,16 @@ const ARROW_RED = '#E74C3C';
 
 // ─── Target rect + sweeping arrow (positioned beside the scanning frame) ──────
 
-function TargetIndicator({ direction, modelRotation }: {
+function TargetIndicator({ direction, modelRotation, pointerNDC }: {
   direction: GuidanceDirection;
   modelRotation: { x: number; y: number };
+  pointerNDC: { x: number; y: number };
 }) {
   const side: 'left' | 'right' = (direction === 'right' || direction === 'rotate-right') ? 'right' : 'left';
 
-  // Use actual model rotation data (radians → degrees) for accurate perspective
-  const rotY = modelRotation.y * (180 / Math.PI) * 1.8;  // amplify for visible CSS effect
-  const rotX = modelRotation.x * (180 / Math.PI) * 1.5;
+  // Model rotation (accurate base) + pointer movement (responsive to cursor direction)
+  const rotY = modelRotation.y * (180 / Math.PI) * 1.8 + pointerNDC.x * 18;
+  const rotX = modelRotation.x * (180 / Math.PI) * 1.5 + pointerNDC.y * -10;
 
   return (
     <div style={{
@@ -95,8 +96,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction, m
       boxShadow: glowShadow,
       transition: 'transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease',
     }}>
-      {/* Target rect — sits beside the scanning frame, perspective from model rotation */}
-      {direction && <TargetIndicator direction={direction} modelRotation={modelRotation} />}
+      {/* Target rect — perspective from model rotation + mouse movement */}
+      {direction && <TargetIndicator direction={direction} modelRotation={modelRotation} pointerNDC={pointerNDC} />}
     </div>
   );
 }
