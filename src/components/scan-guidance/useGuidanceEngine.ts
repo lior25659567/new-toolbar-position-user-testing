@@ -4,7 +4,7 @@ import type { ScanPhase, ScanStage, FrameEdge, ScanRegion, GuidanceState, Guidan
 const BUCCAL_THRESHOLD   = 0.40;
 const LINGUAL_THRESHOLD  = 0.70;
 const COMPLETE_THRESHOLD = 0.95;
-const IMBALANCE_THRESHOLD = 0.03;
+const IMBALANCE_THRESHOLD = 0.015; // more sensitive — reacts faster to uneven coverage
 
 const GRID_SIZE = 4;
 
@@ -45,7 +45,7 @@ function analyzeDirection(regions: ScanRegion[]): {
 } {
   // Need some scanning before giving guidance
   const avgCov = regions.reduce((s, r) => s + r.coverage, 0) / regions.length;
-  if (avgCov < 0.02) return { edge: null, direction: null, weakestRegion: null };
+  if (avgCov < 0.01) return { edge: null, direction: null, weakestRegion: null };
 
   // Build set of "on-model" cell indices:
   // A cell is on the model if it or any of its 8 neighbors has coverage > 0.
@@ -66,11 +66,15 @@ function analyzeDirection(regions: ScanRegion[]): {
     }
   }
 
-  // Find the weakest and strongest among on-model cells only
+  // Once meaningful scanning has started (>5% avg), consider ALL cells so the
+  // engine can detect entirely-unscanned halves that the on-model mask would miss.
+  const considerAll = avgCov > 0.05;
+
+  // Find the weakest and strongest among candidate cells
   let weakest: ScanRegion | null = null;
   let maxCov = 0;
   for (let i = 0; i < regions.length; i++) {
-    if (!onModel.has(i)) continue;
+    if (!considerAll && !onModel.has(i)) continue;
     if (!weakest || regions[i].coverage < weakest.coverage) {
       weakest = regions[i];
     }
