@@ -27,6 +27,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { camera, pointer } = useThree();
   const raycaster = useRef(new THREE.Raycaster());
+  const samplePt  = useRef(new THREE.Vector2());
 
   const [phase, setPhase]         = useState<ScanPhase>('idle');
   const [isHovering, setIsHovering] = useState(false);
@@ -104,6 +105,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     group.rotation.y += (targetY - group.rotation.y) * 0.06;
     group.rotation.z  = BASE_ROT_Z;
 
+    // ── Center ray for hover detection ──
     raycaster.current.setFromCamera(pointer, camera);
     const hits = raycaster.current.intersectObject(mesh, false);
     const hitting = hits.length > 0;
@@ -119,9 +121,30 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       if (startTime === null) setStartTime(Date.now());
       currentPhase = 'scanning';
 
-      const local = mesh.worldToLocal(hits[0].point.clone());
-      paintAt(local.x, local.z, bounds, false);
+      // ── Paint across the entire scanning frame rectangle ──
+      // Frame CSS: width clamp(160,14vw,200) × height clamp(250,22vw,300)
+      // Convert to NDC half-extents (approx for a ~1400×900 viewport)
+      const FRAME_HALF_W = 0.14;
+      const FRAME_HALF_H = 0.33;
+      const GRID_X = 3;
+      const GRID_Y = 5;
 
+      for (let gx = 0; gx < GRID_X; gx++) {
+        for (let gy = 0; gy < GRID_Y; gy++) {
+          samplePt.current.x = pointer.x + ((gx / (GRID_X - 1)) - 0.5) * 2 * FRAME_HALF_W;
+          samplePt.current.y = pointer.y + ((gy / (GRID_Y - 1)) - 0.5) * 2 * FRAME_HALF_H;
+
+          raycaster.current.setFromCamera(samplePt.current, camera);
+          const gridHits = raycaster.current.intersectObject(mesh, false);
+          if (gridHits.length > 0) {
+            const local = mesh.worldToLocal(gridHits[0].point.clone());
+            paintAt(local.x, local.z, bounds, false);
+          }
+        }
+      }
+
+      // Track current region from center hit
+      const local = mesh.worldToLocal(hits[0].point.clone());
       const nx = (local.x - bounds.minX) / (bounds.maxX - bounds.minX);
       const nz = (local.z - bounds.minZ) / (bounds.maxZ - bounds.minZ);
       if      (nx < 0.5 && nz < 0.5) currentRegionRef.current = 'upper-left';
