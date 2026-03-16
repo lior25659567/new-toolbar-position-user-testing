@@ -2,13 +2,22 @@ import React, { useState, useCallback } from 'react';
 import { color, font, space, radius, transition } from '../../design-system/tokens';
 import { SecondaryButton } from '../../design-system/SecondaryButton';
 import ScanGuidanceViewer from './ScanGuidanceViewer';
+import type { GuidanceMode } from './types';
 
 interface ScanGuidancePageProps {
   onBackToHome: () => void;
 }
 
+const MODES: { id: GuidanceMode; label: string; sub: string }[] = [
+  { id: 'classic', label: 'Classic',    sub: 'Frame + arrow'  },
+  { id: 'edge',    label: 'Edge Guide', sub: 'Edge glow'      },
+  { id: 'dot',     label: 'Smart Dot',  sub: 'Floating dot'   },
+  { id: 'glow',    label: 'Glow Frame', sub: 'Border lights'  },
+];
+
 export default function ScanGuidancePage({ onBackToHome }: ScanGuidancePageProps) {
   const [resetCounter, setResetCounter] = useState(0);
+  const [guidanceMode, setGuidanceMode] = useState<GuidanceMode>('classic');
 
   const handleReset = useCallback(() => {
     setResetCounter((c) => c + 1);
@@ -76,6 +85,40 @@ export default function ScanGuidancePage({ onBackToHome }: ScanGuidancePageProps
           </div>
         </div>
 
+        {/* Center: mode switcher */}
+        <div style={{
+          display: 'flex',
+          border: `1px solid ${color.borderDefault}`,
+          borderRadius: radius.full,
+          overflow: 'hidden',
+          flexShrink: 0,
+        }}>
+          {MODES.map((m, i) => {
+            const active = guidanceMode === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => setGuidanceMode(m.id)}
+                title={m.sub}
+                style={{
+                  padding: `${space[1]} ${space[4]}`,
+                  backgroundColor: active ? color.primary : 'transparent',
+                  color: active ? '#fff' : color.textSubtle,
+                  border: 'none',
+                  borderLeft: i > 0 ? `1px solid ${color.borderDefault}` : 'none',
+                  cursor: 'pointer',
+                  fontSize: font.size.xs,
+                  fontWeight: active ? font.weight.semibold : font.weight.medium,
+                  transition: `background-color ${transition.fast}, color ${transition.fast}`,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Right: Reset */}
         <SecondaryButton size={36} onClick={handleReset}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
@@ -88,7 +131,7 @@ export default function ScanGuidancePage({ onBackToHome }: ScanGuidancePageProps
 
       {/* Canvas area */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        <ScanGuidanceViewer resetTrigger={resetCounter} />
+        <ScanGuidanceViewer resetTrigger={resetCounter} guidanceMode={guidanceMode} />
       </div>
     </div>
   );

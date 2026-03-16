@@ -2,6 +2,8 @@
 
 export type ScanPhase = 'idle' | 'scanning' | 'paused' | 'complete';
 
+export type GuidanceMode = 'classic' | 'edge' | 'dot' | 'glow';
+
 export type ScanStage = 'occlusal' | 'buccal' | 'lingual';
 
 export type FrameEdge = 'top' | 'right' | 'bottom' | 'left' | null;

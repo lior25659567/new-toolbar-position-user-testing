@@ -12,7 +12,7 @@ import ScanningBoundary from './ScanningBoundary';
 import { useScanProgress } from './useScanProgress';
 import { useGuidanceEngine } from './useGuidanceEngine';
 import GuidanceOverlay from './GuidanceOverlay';
-import type { ScanPhase, GuidanceState, ModelBounds } from './types';
+import type { ScanPhase, GuidanceState, ModelBounds, GuidanceMode } from './types';
 
 // ─── Inner scene ──────────────────────────────────────────────────────────────
 
@@ -281,9 +281,10 @@ function LoadingSpinner() {
 
 interface ScanGuidanceViewerProps {
   resetTrigger: number;
+  guidanceMode?: GuidanceMode;
 }
 
-export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerProps) {
+export default function ScanGuidanceViewer({ resetTrigger, guidanceMode = 'classic' }: ScanGuidanceViewerProps) {
   const [guidance, setGuidance] = useState<GuidanceState>({
     phase: 'idle', direction: null, hint: '', coveragePercent: 0,
     activeRegion: null, regions: [],
@@ -380,6 +381,7 @@ export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerP
         pointerNDC={pointerNDC}
         flashActive={flashActive}
         containerSize={containerSize}
+        mode={guidanceMode}
       />
     </div>
   );
