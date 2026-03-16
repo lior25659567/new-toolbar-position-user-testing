@@ -11,45 +11,32 @@ import RevealMaterial from './RevealMaterial';
 import ScanningBoundary from './ScanningBoundary';
 import { useScanProgress } from './useScanProgress';
 import { useGuidanceEngine } from './useGuidanceEngine';
-import { useDemoMode } from './useDemoMode';
 import GuidanceOverlay from './GuidanceOverlay';
-import type { ScanPhase, ScanStage, GuidanceState, ModelBounds } from './types';
+import type { ScanPhase, GuidanceState, ModelBounds } from './types';
 
-// ─── Group rotation targets per stage ────────────────────────────────────────
-// The model's Y axis is the jaw's vertical; rotating it shows different surfaces.
-const STAGE_ROT_Y: Record<ScanStage, number> = {
-  occlusal:  0,     // top-down bite surface view
-  buccal:   -0.95,  // tilted to show cheek (outer) surface
-  lingual:   0.95,  // tilted to show tongue (inner) surface
-};
-
-// ─── Inner scene (must be inside Canvas) ─────────────────────────────────────
+// ─── Inner scene ──────────────────────────────────────────────────────────────
 
 interface SceneProps {
   onGuidanceUpdate: (g: GuidanceState) => void;
   onReset?: boolean;
-  /** Ref to current demo NDC position. When non-null, auto-paints the model. */
-  demoScanNDCRef: React.RefObject<{ x: number; y: number } | null>;
-  /** Ref to current demo stage for model auto-rotation. */
-  demoStageRef: React.RefObject<ScanStage | null>;
 }
 
-function Scene({ onGuidanceUpdate, onReset, demoScanNDCRef, demoStageRef }: SceneProps) {
+function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
   const geometry = useLoader(PLYLoader, upperJawModel);
   const meshRef  = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const { camera, pointer, gl } = useThree();
+  const { camera, pointer } = useThree();
   const raycaster = useRef(new THREE.Raycaster());
 
-  const [phase, setPhase]       = useState<ScanPhase>('idle');
-  const [mouseDown, setMouseDown] = useState(false);
+  const [phase, setPhase]         = useState<ScanPhase>('idle');
+  const [isHovering, setIsHovering] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const currentRegionRef = useRef<string | undefined>(undefined);
 
   const { coverageTexture, paintAt, getCoverage, getRegionCoverage, reset } = useScanProgress();
   const { evaluate, resetEngine } = useGuidanceEngine();
 
-  // ── Geometry setup ────────────────────────────────────────────────────────
+  // ── Geometry ──────────────────────────────────────────────────────────────
   const { bounds, enhancedGeo } = useMemo(() => {
     const geo = geometry.clone();
     geo.center();
@@ -85,96 +72,51 @@ function Scene({ onGuidanceUpdate, onReset, demoScanNDCRef, demoStageRef }: Scen
     return { bounds: { minX, maxX, minZ, maxZ } as ModelBounds, enhancedGeo: geo };
   }, [geometry]);
 
-  // Set initial group rotation imperatively (avoids JSX prop re-render conflicts)
+  // Set initial group rotation imperatively
   useLayoutEffect(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.set(Math.PI * 0.6, 0, Math.PI);
-    }
+    if (groupRef.current) groupRef.current.rotation.set(Math.PI * 0.6, 0, Math.PI);
   }, []);
 
   // ── Reset ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (onReset) {
       reset(); resetEngine();
-      setPhase('idle'); setStartTime(null);
+      setPhase('idle'); setStartTime(null); setIsHovering(false);
       currentRegionRef.current = undefined;
     }
   }, [onReset, reset, resetEngine]);
 
-  // ── Mouse events ──────────────────────────────────────────────────────────
-  useEffect(() => {
-    const canvas = gl.domElement;
-    const dn = (e: MouseEvent) => { if (e.button === 0) setMouseDown(true); };
-    const up = (e: MouseEvent) => { if (e.button === 0) setMouseDown(false); };
-    canvas.addEventListener('mousedown', dn);
-    canvas.addEventListener('mouseup',   up);
-    window.addEventListener('mouseup',   up);
-    return () => {
-      canvas.removeEventListener('mousedown', dn);
-      canvas.removeEventListener('mouseup',   up);
-      window.removeEventListener('mouseup',   up);
-    };
-  }, [gl.domElement]);
-
-  // ── Frame loop ────────────────────────────────────────────────────────────
+  // ── Frame loop — hover to scan, no click needed ───────────────────────────
   useFrame(() => {
-    const mesh  = meshRef.current;
-    const group = groupRef.current;
-
-    // ── Model rotation — lerp toward stage target (demo) or back to 0 (real)
-    if (group) {
-      const stage = demoStageRef.current;
-      const targetY = stage ? STAGE_ROT_Y[stage] : 0;
-      // Keep X and Z at their base values; only animate Y
-      group.rotation.x = Math.PI * 0.6;
-      group.rotation.z = Math.PI;
-      group.rotation.y += (targetY - group.rotation.y) * 0.04;
-    }
-
+    const mesh = meshRef.current;
     if (!mesh) return;
 
-    // ── Demo auto-paint: use a large (scanner-sized) brush at the NDC position
-    const demoNDC = demoScanNDCRef.current;
-    if (demoNDC) {
-      // Map NDC → model local space (approximate UV-based mapping)
-      const u = (demoNDC.x + 1) / 2;
-      const v = (1 - demoNDC.y) / 2;
-      const lx = bounds.minX + Math.min(1, Math.max(0, u)) * (bounds.maxX - bounds.minX);
-      const lz = bounds.minZ + Math.min(1, Math.max(0, v)) * (bounds.maxZ - bounds.minZ);
+    raycaster.current.setFromCamera(pointer, camera);
+    const hits = raycaster.current.intersectObject(mesh, false);
+    const hitting = hits.length > 0;
 
-      // Paint the center point with large brush (represents scanner viewport)
-      paintAt(lx, lz, bounds, true);
+    if (hitting !== isHovering) setIsHovering(hitting);
 
-      // Also paint two neighboring strip positions to better fill the frame's width
-      const stripW = (bounds.maxX - bounds.minX) * 0.08;
-      paintAt(lx - stripW, lz, bounds, true);
-      paintAt(lx + stripW, lz, bounds, true);
-
-      return; // skip user-scan logic while demo is running
-    }
-
-    // ── Normal user scanning ──────────────────────────────────────────────
     const coverage = getCoverage();
     let currentPhase: ScanPhase = phase;
 
     if (coverage >= 0.95) {
       currentPhase = 'complete';
-    } else if (mouseDown) {
-      if (phase === 'idle' && startTime === null) setStartTime(Date.now());
+    } else if (hitting) {
+      // Scanning: just move the cursor over the model
+      if (startTime === null) setStartTime(Date.now());
       currentPhase = 'scanning';
 
-      raycaster.current.setFromCamera(pointer, camera);
-      const hits = raycaster.current.intersectObject(mesh, false);
-      if (hits.length > 0) {
-        const local = mesh.worldToLocal(hits[0].point.clone());
-        paintAt(local.x, local.z, bounds, false);
-        const nx = (local.x - bounds.minX) / (bounds.maxX - bounds.minX);
-        const nz = (local.z - bounds.minZ) / (bounds.maxZ - bounds.minZ);
-        if      (nx < 0.5 && nz < 0.5) currentRegionRef.current = 'upper-left';
-        else if (nx >= 0.5 && nz < 0.5) currentRegionRef.current = 'upper-right';
-        else if (nx < 0.5)              currentRegionRef.current = 'lower-left';
-        else                            currentRegionRef.current = 'lower-right';
-      }
+      const local = mesh.worldToLocal(hits[0].point.clone());
+      paintAt(local.x, local.z, bounds, false);
+
+      // Track current region
+      const nx = (local.x - bounds.minX) / (bounds.maxX - bounds.minX);
+      const nz = (local.z - bounds.minZ) / (bounds.maxZ - bounds.minZ);
+      if      (nx < 0.5 && nz < 0.5) currentRegionRef.current = 'upper-left';
+      else if (nx >= 0.5 && nz < 0.5) currentRegionRef.current = 'upper-right';
+      else if (nx < 0.5)              currentRegionRef.current = 'lower-left';
+      else                            currentRegionRef.current = 'lower-right';
     } else if (startTime !== null) {
       currentPhase = 'paused';
     }
@@ -197,7 +139,6 @@ function Scene({ onGuidanceUpdate, onReset, demoScanNDCRef, demoStageRef }: Scen
       <Environment preset="apartment" background={false} />
 
       <Center>
-        {/* group rotation is set imperatively in useFrame */}
         <group ref={groupRef}>
           <mesh ref={meshRef} geometry={enhancedGeo} scale={0.035}>
             <RevealMaterial coverageTexture={coverageTexture} bounds={bounds} />
@@ -205,16 +146,28 @@ function Scene({ onGuidanceUpdate, onReset, demoScanNDCRef, demoStageRef }: Scen
         </group>
       </Center>
 
-      <ScanningBoundary meshRef={meshRef} isScanning={mouseDown} />
+      <ScanningBoundary meshRef={meshRef} isScanning={isHovering} />
 
+      {/* Right-click to rotate, scroll to zoom */}
       <OrbitControls
-        enablePan={true} enableZoom={true} enableRotate={true}
-        mouseButtons={{ LEFT: undefined as any, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE }}
-        rotateSpeed={1.5} zoomSpeed={1.2} panSpeed={1.2}
-        enableDamping={true} dampingFactor={0.08}
-        minDistance={0.5} maxDistance={10}
-        minPolarAngle={0.1} maxPolarAngle={Math.PI - 0.1}
-        screenSpacePanning={true} target={[0, 0, 0]} makeDefault
+        enablePan={false}
+        enableZoom={true}
+        enableRotate={true}
+        mouseButtons={{
+          LEFT: undefined as any,
+          MIDDLE: THREE.MOUSE.DOLLY,
+          RIGHT: THREE.MOUSE.ROTATE,
+        }}
+        rotateSpeed={1.5}
+        zoomSpeed={1.2}
+        enableDamping={true}
+        dampingFactor={0.08}
+        minDistance={0.5}
+        maxDistance={10}
+        minPolarAngle={0.1}
+        maxPolarAngle={Math.PI - 0.1}
+        target={[0, 0, 0]}
+        makeDefault
       />
     </>
   );
@@ -233,90 +186,59 @@ function LoadingSpinner() {
 
 interface ScanGuidanceViewerProps {
   resetTrigger: number;
-  demoTrigger: number;
 }
 
-export default function ScanGuidanceViewer({ resetTrigger, demoTrigger }: ScanGuidanceViewerProps) {
+export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerProps) {
   const [guidance, setGuidance] = useState<GuidanceState>({
     phase: 'idle', direction: null, hint: '', coveragePercent: 0,
     activeRegion: null, regions: [],
     stage: 'occlusal', activeEdge: null, stageAdvanced: false,
   });
-  const [elapsed, setElapsed] = useState(0);
-  const [pointerNDC, setPointerNDC]     = useState({ x: 0, y: 0 });
-  const [flashActive, setFlashActive]   = useState(false);
+  const [elapsed, setElapsed]     = useState(0);
+  const [pointerNDC, setPointerNDC] = useState({ x: 0, y: 0 });
+  const [flashActive, setFlashActive] = useState(false);
 
   const containerRef    = useRef<HTMLDivElement>(null);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Demo mode ─────────────────────────────────────────────────────────────
-  const { isPlaying, play, demoGuidance, demoPointerNDC, demoFlashActive } = useDemoMode();
-
-  // Ref read by Scene.useFrame — drives both painting AND model rotation
-  const demoScanNDCRef = useRef<{ x: number; y: number } | null>(null);
-  const demoStageRef   = useRef<ScanStage | null>(null);
-
-  // Keep refs in sync with demo state (read by Scene at 60fps without re-renders)
-  useEffect(() => {
-    const scanning = isPlaying && demoGuidance?.phase === 'scanning';
-    demoScanNDCRef.current = scanning ? (demoPointerNDC ?? null) : null;
-    demoStageRef.current   = isPlaying ? (demoGuidance?.stage ?? null) : null;
-  });
-
-  // Start demo after reset has propagated
-  useEffect(() => {
-    if (demoTrigger <= 0) return;
-    const t = setTimeout(() => play(), 200);
-    return () => clearTimeout(t);
-  }, [demoTrigger, play]);
-
-  // ── Real user guidance ────────────────────────────────────────────────────
   const handleGuidance = useCallback((g: GuidanceState) => {
-    if (isPlaying) return;
     setGuidance(g);
     if (g.stageAdvanced) {
       setFlashActive(true);
       if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
       flashTimeoutRef.current = setTimeout(() => setFlashActive(false), 600);
     }
-  }, [isPlaying]);
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (isPlaying) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     setPointerNDC({
       x:  (e.clientX - rect.left) / rect.width  * 2 - 1,
       y: -(((e.clientY - rect.top) / rect.height) * 2 - 1),
     });
-  }, [isPlaying]);
+  }, []);
 
-  // ── Elapsed timer (real mode) ─────────────────────────────────────────────
+  // Elapsed timer
   const startTimeRef = useRef<number | null>(null);
   useEffect(() => {
-    if (isPlaying) return;
     if (guidance.phase === 'scanning' && !startTimeRef.current) startTimeRef.current = Date.now();
     if (guidance.phase === 'idle') { startTimeRef.current = null; setElapsed(0); }
-  }, [guidance.phase, isPlaying]);
+  }, [guidance.phase]);
 
   useEffect(() => {
-    if (isPlaying || !startTimeRef.current || guidance.phase === 'complete') return;
+    if (!startTimeRef.current || guidance.phase === 'complete') return;
     const id = setInterval(() => {
       if (startTimeRef.current) setElapsed((Date.now() - startTimeRef.current) / 1000);
     }, 200);
     return () => clearInterval(id);
-  }, [guidance.phase, isPlaying]);
+  }, [guidance.phase]);
 
   useEffect(() => {
     startTimeRef.current = null;
     setElapsed(0); setFlashActive(false);
     if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
   }, [resetTrigger]);
-
-  // ── Merge real / demo for overlay ─────────────────────────────────────────
-  const displayGuidance  = (isPlaying && demoGuidance)  ? demoGuidance  : guidance;
-  const displayPointer   = (isPlaying && demoPointerNDC) ? demoPointerNDC : pointerNDC;
-  const displayFlash     = isPlaying ? demoFlashActive : flashActive;
 
   return (
     <div
@@ -337,17 +259,15 @@ export default function ScanGuidanceViewer({ resetTrigger, demoTrigger }: ScanGu
           <Scene
             onGuidanceUpdate={handleGuidance}
             onReset={resetTrigger > 0 ? true : undefined}
-            demoScanNDCRef={demoScanNDCRef}
-            demoStageRef={demoStageRef}
           />
         </Suspense>
       </Canvas>
 
       <GuidanceOverlay
-        guidance={displayGuidance}
+        guidance={guidance}
         elapsedSeconds={elapsed}
-        pointerNDC={displayPointer}
-        flashActive={displayFlash}
+        pointerNDC={pointerNDC}
+        flashActive={flashActive}
       />
     </div>
   );
