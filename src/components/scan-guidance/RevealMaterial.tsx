@@ -72,13 +72,12 @@ export default function RevealMaterial({ coverageTexture, bounds }: RevealMateri
         // Smooth step for nice edge transition
         float reveal = smoothstep(0.1, 0.5, coverage);
 
-        // Uncovered: desaturated, translucent gray
+        // Uncovered: faint translucent ghost so users can see the model shape
         float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
-        vec3 ghostColor = vec3(gray * 0.7 + 0.15);
+        vec3 ghostColor = vec3(gray * 0.55 + 0.3);
 
         gl_FragColor.rgb = mix(ghostColor, gl_FragColor.rgb, reveal);
-        // Start fully invisible — model builds from nothing as scanning progresses
-        gl_FragColor.a = mix(0.0, 1.0, reveal);
+        gl_FragColor.a = mix(0.18, 1.0, reveal);
         `
       );
     };

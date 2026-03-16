@@ -9,7 +9,56 @@ interface GuidanceOverlayProps {
   flashActive: boolean;
 }
 
-// ─── Roll Arrow (large, beside the frame) ────────────────────────────────────
+// ─── Big Curved Scan-Direction Arrow ──────────────────────────────────────────
+// Shows a large arc arrow above/around the frame telling the user to rotate
+// around the arch. Fades out as coverage increases.
+
+function ScanDirectionArrow({ coverage, phase }: { coverage: number; phase: string }) {
+  // Visible when idle or early scanning (< 55%)
+  const show = phase === 'idle' || (coverage < 0.55 && phase !== 'complete');
+  const opacity = show ? Math.max(0, 1 - coverage * 2.2) : 0;
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: 'calc(50% - 200px)',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      pointerEvents: 'none',
+      opacity,
+      transition: 'opacity 0.5s ease',
+      animation: show ? 'arrow-breathe 2.5s ease-in-out infinite' : undefined,
+    }}>
+      <svg width="360" height="120" viewBox="0 0 360 120" fill="none">
+        {/* Big sweeping arc from right to left */}
+        <path
+          d="M 330 100 C 310 20, 50 20, 30 100"
+          stroke={color.primary}
+          strokeWidth="6"
+          strokeLinecap="round"
+          fill="none"
+        />
+        {/* Arrowhead at left end pointing down-left */}
+        <polygon
+          points="30,100 18,78 42,82"
+          fill={color.primary}
+        />
+        {/* Trail fade: thin ghost of the path going further */}
+        <path
+          d="M 330 100 C 335 80, 338 55, 330 35"
+          stroke={color.primary}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="6 6"
+          opacity="0.35"
+          fill="none"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// ─── Roll Arrow (large, beside the frame — buccal/lingual) ───────────────────
 
 function RollArrow({ side, visible }: { side: 'left' | 'right'; visible: boolean }) {
   const isLeft = side === 'left';
@@ -269,6 +318,12 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
 
         <StagePill stage={guidance.stage} phase={guidance.phase} />
       </div>
+
+      {/* ── Big curved scan-direction arrow (fades as coverage grows) ── */}
+      <ScanDirectionArrow
+        coverage={guidance.coveragePercent}
+        phase={guidance.phase}
+      />
 
       {/* ── Scanning frame with edge glows + roll arrows ── */}
       <ScanFrame
