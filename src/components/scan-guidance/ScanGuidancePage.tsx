@@ -71,7 +71,7 @@ export default function ScanGuidancePage({ onBackToHome }: ScanGuidancePageProps
               Smart Scan Guidance
             </div>
             <div style={{ fontSize: font.size.xs, color: color.textPlaceholder, marginTop: '1px' }}>
-              Move the cursor over the model to scan
+              Hover to scan · Drag to rotate · Right-drag to pan · Scroll to zoom
             </div>
           </div>
         </div>

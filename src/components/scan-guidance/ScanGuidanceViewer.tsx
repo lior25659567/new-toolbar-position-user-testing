@@ -148,18 +148,19 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
 
       <ScanningBoundary meshRef={meshRef} isScanning={isHovering} />
 
-      {/* Right-click to rotate, scroll to zoom */}
+      {/* Left-drag: rotate | Right-drag: pan | Scroll: zoom */}
       <OrbitControls
-        enablePan={false}
+        enablePan={true}
         enableZoom={true}
         enableRotate={true}
         mouseButtons={{
-          LEFT: undefined as any,
+          LEFT: THREE.MOUSE.ROTATE,
           MIDDLE: THREE.MOUSE.DOLLY,
-          RIGHT: THREE.MOUSE.ROTATE,
+          RIGHT: THREE.MOUSE.PAN,
         }}
         rotateSpeed={1.5}
         zoomSpeed={1.2}
+        panSpeed={0.8}
         enableDamping={true}
         dampingFactor={0.08}
         minDistance={0.5}
