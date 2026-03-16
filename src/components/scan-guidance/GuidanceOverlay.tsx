@@ -14,12 +14,12 @@ const ARROW_RED = '#E74C3C';
 // ─── Target offsets in 3D space (translateX, translateY, translateZ) ──────────
 
 const TARGET_3D: Record<string, { tx: number; ty: number; tz: number }> = {
-  left:           { tx: -280, ty: 0, tz: -60 },
-  right:          { tx: 280,  ty: 0, tz: -60 },
-  up:             { tx: 0,    ty: -280, tz: -60 },
-  down:           { tx: 0,    ty: 280,  tz: -60 },
-  'rotate-left':  { tx: -280, ty: 0, tz: -60 },
-  'rotate-right': { tx: 280,  ty: 0, tz: -60 },
+  left:           { tx: -300, ty: 0, tz: -150 },
+  right:          { tx: 300,  ty: 0, tz: -150 },
+  up:             { tx: 0,    ty: -300, tz: -150 },
+  down:           { tx: 0,    ty: 300,  tz: -150 },
+  'rotate-left':  { tx: -300, ty: 0, tz: -150 },
+  'rotate-right': { tx: 300,  ty: 0, tz: -150 },
 };
 
 // ─── Arrow SVG configs ────────────────────────────────────────────────────────
@@ -97,9 +97,9 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
 
-  // 3D rotation matching the model's tilt from mouse
-  const rotY = pointerNDC.x * 22;   // degrees — matches model's Y rotation
-  const rotX = pointerNDC.y * -10;   // degrees — matches model's X tilt
+  // 3D rotation matching the model's tilt — aggressive perspective
+  const rotY = pointerNDC.x * 35;   // degrees — strong Y rotation with cursor
+  const rotX = pointerNDC.y * -18;   // degrees — noticeable X tilt
 
   const borderCol = flashActive
     ? '#16A34A'
@@ -123,8 +123,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
       position: 'absolute',
       top: '50%',
       left: '50%',
-      // Perspective container — gives 3D depth to both frames
-      perspective: '800px',
+      // Perspective container — strong 3D depth
+      perspective: '500px',
       perspectiveOrigin: '50% 50%',
       transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
       pointerEvents: 'none',

@@ -4,7 +4,7 @@ import type { ScanPhase, ScanStage, FrameEdge, ScanRegion, GuidanceState, Guidan
 const BUCCAL_THRESHOLD   = 0.40;
 const LINGUAL_THRESHOLD  = 0.70;
 const COMPLETE_THRESHOLD = 0.95;
-const IMBALANCE_THRESHOLD = 0.10; // min coverage difference to trigger directional guidance
+const IMBALANCE_THRESHOLD = 0.05; // min coverage difference to trigger directional guidance
 
 /** Default 2x2 quadrant regions */
 function createDefaultRegions(): Omit<ScanRegion, 'coverage'>[] {
@@ -23,47 +23,44 @@ function getStage(coverage: number): ScanStage {
 }
 
 /**
- * Analyze region coverage and determine which direction needs attention.
- * Works at ALL stages — always points toward the least-scanned area.
+ * Find the lowest-coverage area and point toward it.
+ * Compares all 4 quadrants individually — picks the one that needs the most work
+ * and returns a direction pointing from the highest-coverage side toward it.
  */
 function analyzeDirection(regions: ScanRegion[]): {
   edge: FrameEdge;
   direction: GuidanceDirection | null;
 } {
+  // Need some scanning done before we can give guidance
+  const avgCov = regions.reduce((s, r) => s + r.coverage, 0) / regions.length;
+  if (avgCov < 0.03) return { edge: null, direction: null };
+
   // regions: [0]=upper-left, [1]=upper-right, [2]=lower-left, [3]=lower-right
   const leftCov  = (regions[0].coverage + regions[2].coverage) / 2;
   const rightCov = (regions[1].coverage + regions[3].coverage) / 2;
   const topCov   = (regions[0].coverage + regions[1].coverage) / 2;
   const botCov   = (regions[2].coverage + regions[3].coverage) / 2;
 
-  const hDiff = rightCov - leftCov;  // positive = right more covered
-  const vDiff = botCov - topCov;     // positive = bottom more covered
-  const absH = Math.abs(hDiff);
-  const absV = Math.abs(vDiff);
+  // Find the side with lowest coverage
+  const sides = [
+    { cov: leftCov,  edge: 'left'   as FrameEdge, dir: 'left'  as GuidanceDirection },
+    { cov: rightCov, edge: 'right'  as FrameEdge, dir: 'right' as GuidanceDirection },
+    { cov: topCov,   edge: 'top'    as FrameEdge, dir: 'up'    as GuidanceDirection },
+    { cov: botCov,   edge: 'bottom' as FrameEdge, dir: 'down'  as GuidanceDirection },
+  ];
 
-  // No imbalance — everything's even
-  if (absH < IMBALANCE_THRESHOLD && absV < IMBALANCE_THRESHOLD) {
+  // Sort by coverage ascending — [0] is the least scanned
+  sides.sort((a, b) => a.cov - b.cov);
+  const weakest = sides[0];
+  const strongest = sides[sides.length - 1];
+
+  // Only show guidance if there's a meaningful difference between best and worst
+  if (strongest.cov - weakest.cov < IMBALANCE_THRESHOLD) {
     return { edge: null, direction: null };
   }
 
-  // Pick the axis with biggest imbalance
-  if (absH >= absV) {
-    if (hDiff > 0) {
-      // Right is more covered → guide LEFT
-      return { edge: 'left', direction: 'left' };
-    } else {
-      // Left is more covered → guide RIGHT
-      return { edge: 'right', direction: 'right' };
-    }
-  } else {
-    if (vDiff > 0) {
-      // Bottom more covered → guide UP
-      return { edge: 'top', direction: 'up' };
-    } else {
-      // Top more covered → guide DOWN
-      return { edge: 'bottom', direction: 'down' };
-    }
-  }
+  // Point toward the weakest side
+  return { edge: weakest.edge, direction: weakest.dir };
 }
 
 export function useGuidanceEngine() {
