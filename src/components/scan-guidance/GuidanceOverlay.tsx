@@ -15,42 +15,30 @@ const ARROW_RED = '#E74C3C';
 // ─── Target rect + sweeping arrow (positioned beside the scanning frame) ──────
 
 function TargetIndicator({ direction }: { direction: GuidanceDirection }) {
-  const isLeft  = direction === 'left' || direction === 'rotate-left';
-  const isRight = direction === 'right' || direction === 'rotate-right';
-  const isUp    = direction === 'up';
-  const isDown  = direction === 'down';
-  const isHoriz = isLeft || isRight;
+  // Only show on horizontal directions (left/right)
+  const isLeft  = direction === 'left' || direction === 'rotate-left' || direction === 'up' || direction === 'down';
+  // Map up/down to left/right — the target rect is always horizontal beside the frame
+  // up/down default to left side
+  const side: 'left' | 'right' = (direction === 'right' || direction === 'rotate-right') ? 'right' : 'left';
 
-  // Target rect: positioned right beside the scanning frame
-  const rectStyle: React.CSSProperties = isHoriz ? {
-    position: 'absolute',
-    top: '0',
-    [isLeft ? 'right' : 'left']: 'calc(100% + 12px)',
-    width: '55%',
-    height: '100%',
-    border: `3px solid ${ARROW_RED}`,
-    borderRadius: '12px',
-    opacity: 0.75,
-    animation: 'target-pulse 2s ease-in-out infinite',
-    pointerEvents: 'none',
-  } : {
-    position: 'absolute',
-    left: '0',
-    [isUp ? 'bottom' : 'top']: 'calc(100% + 12px)',
-    width: '100%',
-    height: '45%',
-    border: `3px solid ${ARROW_RED}`,
-    borderRadius: '12px',
-    opacity: 0.75,
-    animation: 'target-pulse 2s ease-in-out infinite',
-    pointerEvents: 'none',
-  };
+  return (
+    <>
+      {/* Target rect — always horizontal, beside the scanning frame */}
+      <div style={{
+        position: 'absolute',
+        top: '0',
+        [side === 'left' ? 'right' : 'left']: 'calc(100% + 12px)',
+        width: '55%',
+        height: '100%',
+        border: `3px solid ${ARROW_RED}`,
+        borderRadius: '12px',
+        opacity: 0.75,
+        animation: 'target-pulse 2s ease-in-out infinite',
+        pointerEvents: 'none',
+      }} />
 
-  // Big sweeping curved arrow from scanning frame toward target rect
-  const arrowEl = (() => {
-    if (isLeft) {
-      // Arrow sweeps from upper-right of frame, arcs left-downward to target
-      return (
+      {/* Big sweeping curved arrow */}
+      {side === 'left' ? (
         <div style={{
           position: 'absolute',
           top: '-80px',
@@ -69,11 +57,7 @@ function TargetIndicator({ direction }: { direction: GuidanceDirection }) {
             <polygon points="20,200 8,170 36,178" fill={ARROW_RED} />
           </svg>
         </div>
-      );
-    }
-    if (isRight) {
-      // Mirror: sweeps from upper-left, arcs right-downward
-      return (
+      ) : (
         <div style={{
           position: 'absolute',
           top: '-80px',
@@ -92,59 +76,7 @@ function TargetIndicator({ direction }: { direction: GuidanceDirection }) {
             <polygon points="300,200 312,170 284,178" fill={ARROW_RED} />
           </svg>
         </div>
-      );
-    }
-    if (isUp) {
-      return (
-        <div style={{
-          position: 'absolute',
-          bottom: 'calc(100% + 10px)',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          pointerEvents: 'none',
-          animation: 'arrow-breathe 2s ease-in-out infinite',
-        }}>
-          <svg width="200" height="180" viewBox="0 0 200 180" fill="none">
-            <path
-              d="M 170 170 C 180 60, 20 60, 30 170"
-              stroke={ARROW_RED}
-              strokeWidth="10"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <polygon points="30,170 18,142 46,148" fill={ARROW_RED} />
-          </svg>
-        </div>
-      );
-    }
-    // down
-    return (
-      <div style={{
-        position: 'absolute',
-        top: 'calc(100% + 10px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        pointerEvents: 'none',
-        animation: 'arrow-breathe 2s ease-in-out infinite',
-      }}>
-        <svg width="200" height="180" viewBox="0 0 200 180" fill="none">
-          <path
-            d="M 170 10 C 180 120, 20 120, 30 10"
-            stroke={ARROW_RED}
-            strokeWidth="10"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <polygon points="30,10 18,38 46,32" fill={ARROW_RED} />
-        </svg>
-      </div>
-    );
-  })();
-
-  return (
-    <>
-      <div style={rectStyle} />
-      {arrowEl}
+      )}
     </>
   );
 }
