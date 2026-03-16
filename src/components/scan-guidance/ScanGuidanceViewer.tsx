@@ -72,9 +72,13 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     return { bounds: { minX, maxX, minZ, maxZ } as ModelBounds, enhancedGeo: geo };
   }, [geometry]);
 
+  // Base rotation constants — model starts looking down at occlusal surface
+  const BASE_ROT_X = Math.PI * 0.6;
+  const BASE_ROT_Z = Math.PI;
+
   // Set initial group rotation imperatively
   useLayoutEffect(() => {
-    if (groupRef.current) groupRef.current.rotation.set(Math.PI * 0.6, 0, Math.PI);
+    if (groupRef.current) groupRef.current.rotation.set(BASE_ROT_X, 0, BASE_ROT_Z);
   }, []);
 
   // ── Reset ─────────────────────────────────────────────────────────────────
@@ -83,13 +87,22 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       reset(); resetEngine();
       setPhase('idle'); setStartTime(null); setIsHovering(false);
       currentRegionRef.current = undefined;
+      if (groupRef.current) groupRef.current.rotation.set(BASE_ROT_X, 0, BASE_ROT_Z);
     }
   }, [onReset, reset, resetEngine]);
 
-  // ── Frame loop — hover to scan, no click needed ───────────────────────────
+  // ── Frame loop — hover to scan + model follows mouse ─────────────────────
   useFrame(() => {
     const mesh = meshRef.current;
-    if (!mesh) return;
+    const group = groupRef.current;
+    if (!mesh || !group) return;
+
+    // Model tilts with mouse: feels like holding/angling the scanner
+    const targetX = BASE_ROT_X + pointer.y * -0.28;
+    const targetY = pointer.x * 0.55;
+    group.rotation.x += (targetX - group.rotation.x) * 0.06;
+    group.rotation.y += (targetY - group.rotation.y) * 0.06;
+    group.rotation.z  = BASE_ROT_Z;
 
     raycaster.current.setFromCamera(pointer, camera);
     const hits = raycaster.current.intersectObject(mesh, false);
@@ -103,14 +116,12 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     if (coverage >= 0.95) {
       currentPhase = 'complete';
     } else if (hitting) {
-      // Scanning: just move the cursor over the model
       if (startTime === null) setStartTime(Date.now());
       currentPhase = 'scanning';
 
       const local = mesh.worldToLocal(hits[0].point.clone());
       paintAt(local.x, local.z, bounds, false);
 
-      // Track current region
       const nx = (local.x - bounds.minX) / (bounds.maxX - bounds.minX);
       const nz = (local.z - bounds.minZ) / (bounds.maxZ - bounds.minZ);
       if      (nx < 0.5 && nz < 0.5) currentRegionRef.current = 'upper-left';
