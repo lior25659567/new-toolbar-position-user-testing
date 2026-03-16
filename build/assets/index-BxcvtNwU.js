@@ -3592,17 +3592,17 @@ No matching component was found for:
         uniform sampler2D uCoverage;
         uniform vec2 uBBoxMin;
         uniform vec2 uBBoxMax;
-        varying vec3 vWorldPos;
+        varying vec3 vLocalPos;
       `+s.fragmentShader,s.vertexShader=`
-        varying vec3 vWorldPos;
+        varying vec3 vLocalPos;
       `+s.vertexShader,s.vertexShader=s.vertexShader.replace("#include <worldpos_vertex>",`
         #include <worldpos_vertex>
-        vWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+        vLocalPos = transformed;
         `),s.fragmentShader=s.fragmentShader.replace("#include <dithering_fragment>",`
         #include <dithering_fragment>
 
-        // Map world XZ to 0-1 UV in the coverage texture
-        vec2 coverageUV = (vWorldPos.xz - uBBoxMin) / (uBBoxMax - uBBoxMin);
+        // Map local XZ to 0-1 UV — stays stable regardless of group rotation
+        vec2 coverageUV = (vLocalPos.xz - uBBoxMin) / (uBBoxMax - uBBoxMin);
         coverageUV = clamp(coverageUV, 0.0, 1.0);
 
         float coverage = texture2D(uCoverage, coverageUV).r;

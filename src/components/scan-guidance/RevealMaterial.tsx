@@ -40,20 +40,20 @@ export default function RevealMaterial({ coverageTexture, bounds }: RevealMateri
         uniform sampler2D uCoverage;
         uniform vec2 uBBoxMin;
         uniform vec2 uBBoxMax;
-        varying vec3 vWorldPos;
+        varying vec3 vLocalPos;
       ` + shader.fragmentShader;
 
-      // Inject world position varying into vertex shader
+      // Inject local-space position varying into vertex shader
       shader.vertexShader = `
-        varying vec3 vWorldPos;
+        varying vec3 vLocalPos;
       ` + shader.vertexShader;
 
-      // Compute world position in vertex shader
+      // Pass local-space position (geometry coords, unaffected by group rotation)
       shader.vertexShader = shader.vertexShader.replace(
         '#include <worldpos_vertex>',
         `
         #include <worldpos_vertex>
-        vWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+        vLocalPos = transformed;
         `
       );
 
@@ -63,8 +63,8 @@ export default function RevealMaterial({ coverageTexture, bounds }: RevealMateri
         `
         #include <dithering_fragment>
 
-        // Map world XZ to 0-1 UV in the coverage texture
-        vec2 coverageUV = (vWorldPos.xz - uBBoxMin) / (uBBoxMax - uBBoxMin);
+        // Map local XZ to 0-1 UV — stays stable regardless of group rotation
+        vec2 coverageUV = (vLocalPos.xz - uBBoxMin) / (uBBoxMax - uBBoxMin);
         coverageUV = clamp(coverageUV, 0.0, 1.0);
 
         float coverage = texture2D(uCoverage, coverageUV).r;
