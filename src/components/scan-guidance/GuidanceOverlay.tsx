@@ -23,8 +23,9 @@ function TargetIndicator({ modelRotation, pointerNDC }: {
   // Cursor on left → target on right.
   const side: 'left' | 'right' = pointerNDC.x > 0 ? 'left' : 'right';
 
-  // Model rotation (accurate base) + pointer movement (responsive to cursor direction)
-  const rotY = modelRotation.y * (180 / Math.PI) * 1.8 + pointerNDC.x * 18;
+  // Flip perspective based on side — mirror the rotation so it recedes in the correct direction
+  const flip = side === 'right' ? -1 : 1;
+  const rotY = (modelRotation.y * (180 / Math.PI) * 1.8 + pointerNDC.x * 18) * flip;
   const rotX = modelRotation.x * (180 / Math.PI) * 1.5 + pointerNDC.y * -10;
 
   return (
