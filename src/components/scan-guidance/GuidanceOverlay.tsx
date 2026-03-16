@@ -14,12 +14,14 @@ const ARROW_RED = '#E74C3C';
 
 // ─── Target rect + sweeping arrow (positioned beside the scanning frame) ──────
 
-function TargetIndicator({ direction, modelRotation, pointerNDC }: {
-  direction: GuidanceDirection;
+function TargetIndicator({ modelRotation, pointerNDC }: {
   modelRotation: { x: number; y: number };
   pointerNDC: { x: number; y: number };
 }) {
-  const side: 'left' | 'right' = (direction === 'right' || direction === 'rotate-right') ? 'right' : 'left';
+  // Target rect appears on the OPPOSITE side of where the cursor is.
+  // Cursor on right → target on left (you need to scan there next).
+  // Cursor on left → target on right.
+  const side: 'left' | 'right' = pointerNDC.x > 0 ? 'left' : 'right';
 
   // Model rotation (accurate base) + pointer movement (responsive to cursor direction)
   const rotY = modelRotation.y * (180 / Math.PI) * 1.8 + pointerNDC.x * 18;
@@ -96,8 +98,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction, m
       boxShadow: glowShadow,
       transition: 'transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease',
     }}>
-      {/* Target rect — perspective from model rotation + mouse movement */}
-      {direction && <TargetIndicator direction={direction} modelRotation={modelRotation} pointerNDC={pointerNDC} />}
+      {/* Target rect — flips sides based on cursor position, perspective from model */}
+      {direction && <TargetIndicator modelRotation={modelRotation} pointerNDC={pointerNDC} />}
     </div>
   );
 }
