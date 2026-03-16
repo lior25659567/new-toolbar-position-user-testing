@@ -48,4 +48,6 @@ export interface ModelBounds {
   maxX: number;
   minZ: number;
   maxZ: number;
+  /** Y midpoint of the model surface — used for accurate 3D→screen projection */
+  surfaceY: number;
 }

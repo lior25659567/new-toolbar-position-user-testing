@@ -57,10 +57,12 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
 
     const pos = geo.attributes.position;
     let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
     let minZ = Infinity, maxZ = -Infinity;
     for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i), z = pos.getZ(i);
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
       minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
       minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
     }
 
@@ -82,7 +84,8 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       col[i * 3 + 2] = Math.min(1, Math.max(0, b));
     }
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    return { bounds: { minX, maxX, minZ, maxZ } as ModelBounds, enhancedGeo: geo };
+    const surfaceY = (minY + maxY) / 2;
+    return { bounds: { minX, maxX, minZ, maxZ, surfaceY } as ModelBounds, enhancedGeo: geo };
   }, [geometry]);
 
   useLayoutEffect(() => {
@@ -186,12 +189,12 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     // ── Project weakest region center from 3D → screen space ──
     const wr = guidance.weakestRegion;
     if (wr && guidance.direction) {
-      // Compute center of weakest region in model-local XZ
+      // Compute center of weakest region in model-local space
       const wrCenterX = bounds.minX + ((wr.xMin + wr.xMax) / 2) * (bounds.maxX - bounds.minX);
       const wrCenterZ = bounds.minZ + ((wr.zMin + wr.zMax) / 2) * (bounds.maxZ - bounds.minZ);
 
-      // Project to screen via mesh world matrix + camera
-      _projVec.set(wrCenterX, 0, wrCenterZ);
+      // Use the model's surface Y for accurate projection onto the visible surface
+      _projVec.set(wrCenterX, bounds.surfaceY, wrCenterZ);
       mesh.localToWorld(_projVec);
       _projVec.project(camera);
 
