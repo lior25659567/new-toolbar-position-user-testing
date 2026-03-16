@@ -3,8 +3,8 @@ import * as THREE from 'three';
 import type { ModelBounds } from './types';
 
 const TEX_SIZE = 256;
-const BRUSH_RADIUS = 8;       // default brush for real user scanning
-const BRUSH_RADIUS_DEMO = 18; // larger brush for demo — covers scanner frame footprint
+const BRUSH_RADIUS = 24;      // covers scanner frame footprint per ray
+const BRUSH_RADIUS_DEMO = 24; // same size for demo
 
 export function useScanProgress() {
   const dataRef = useRef<Uint8Array>(new Uint8Array(TEX_SIZE * TEX_SIZE).fill(0));
@@ -81,11 +81,41 @@ export function useScanProgress() {
     return total === 0 ? 0 : covered / total;
   }, []);
 
+  /** Capture a rectangular region at once — like a camera snapshot, fills the full rect instantly. */
+  const captureRect = useCallback((
+    worldXMin: number, worldXMax: number,
+    worldZMin: number, worldZMax: number,
+    bounds: ModelBounds,
+  ) => {
+    const data = dataRef.current;
+    const rangeX = bounds.maxX - bounds.minX;
+    const rangeZ = bounds.maxZ - bounds.minZ;
+    if (rangeX === 0 || rangeZ === 0) return;
+
+    const u0 = Math.floor(((worldXMin - bounds.minX) / rangeX) * TEX_SIZE);
+    const u1 = Math.floor(((worldXMax - bounds.minX) / rangeX) * TEX_SIZE);
+    const v0 = Math.floor(((worldZMin - bounds.minZ) / rangeZ) * TEX_SIZE);
+    const v1 = Math.floor(((worldZMax - bounds.minZ) / rangeZ) * TEX_SIZE);
+
+    const x0 = Math.max(0, Math.min(u0, u1));
+    const x1 = Math.min(TEX_SIZE - 1, Math.max(u0, u1));
+    const y0 = Math.max(0, Math.min(v0, v1));
+    const y1 = Math.min(TEX_SIZE - 1, Math.max(v0, v1));
+
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        data[y * TEX_SIZE + x] = 255;
+      }
+    }
+
+    coverageTexture.needsUpdate = true;
+  }, [coverageTexture]);
+
   /** Reset all coverage */
   const reset = useCallback(() => {
     dataRef.current.fill(0);
     coverageTexture.needsUpdate = true;
   }, [coverageTexture]);
 
-  return { coverageTexture, paintAt, getCoverage, getRegionCoverage, reset };
+  return { coverageTexture, paintAt, captureRect, getCoverage, getRegionCoverage, reset };
 }

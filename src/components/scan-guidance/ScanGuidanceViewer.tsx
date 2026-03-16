@@ -16,6 +16,13 @@ import type { ScanPhase, GuidanceState, ModelBounds } from './types';
 
 // ─── Inner scene ──────────────────────────────────────────────────────────────
 
+const BASE_ROT_X = Math.PI * 0.6;
+const BASE_ROT_Z = Math.PI;
+
+// Frame NDC half-extents (matches CSS clamp sizes on ~1400×900 viewport)
+const FRAME_HALF_W = 0.18;
+const FRAME_HALF_H = 0.38;
+
 interface SceneProps {
   onGuidanceUpdate: (g: GuidanceState) => void;
   onReset?: boolean;
@@ -34,7 +41,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
   const [startTime, setStartTime] = useState<number | null>(null);
   const currentRegionRef = useRef<string | undefined>(undefined);
 
-  const { coverageTexture, paintAt, getCoverage, getRegionCoverage, reset } = useScanProgress();
+  const { coverageTexture, captureRect, getCoverage, getRegionCoverage, reset } = useScanProgress();
   const { evaluate, resetEngine } = useGuidanceEngine();
 
   // ── Geometry ──────────────────────────────────────────────────────────────
@@ -73,11 +80,6 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     return { bounds: { minX, maxX, minZ, maxZ } as ModelBounds, enhancedGeo: geo };
   }, [geometry]);
 
-  // Base rotation constants — model starts looking down at occlusal surface
-  const BASE_ROT_X = Math.PI * 0.6;
-  const BASE_ROT_Z = Math.PI;
-
-  // Set initial group rotation imperatively
   useLayoutEffect(() => {
     if (groupRef.current) groupRef.current.rotation.set(BASE_ROT_X, 0, BASE_ROT_Z);
   }, []);
@@ -92,20 +94,20 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     }
   }, [onReset, reset, resetEngine]);
 
-  // ── Frame loop — hover to scan + model follows mouse ─────────────────────
+  // ── Frame loop ────────────────────────────────────────────────────────────
   useFrame(() => {
     const mesh = meshRef.current;
     const group = groupRef.current;
     if (!mesh || !group) return;
 
-    // Model tilts with mouse: feels like holding/angling the scanner
+    // Model tilts with mouse
     const targetX = BASE_ROT_X + pointer.y * -0.28;
     const targetY = pointer.x * 0.55;
     group.rotation.x += (targetX - group.rotation.x) * 0.06;
     group.rotation.y += (targetY - group.rotation.y) * 0.06;
     group.rotation.z  = BASE_ROT_Z;
 
-    // ── Center ray for hover detection ──
+    // Center ray for hover detection
     raycaster.current.setFromCamera(pointer, camera);
     const hits = raycaster.current.intersectObject(mesh, false);
     const hitting = hits.length > 0;
@@ -121,30 +123,40 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       if (startTime === null) setStartTime(Date.now());
       currentPhase = 'scanning';
 
-      // ── Paint across the entire scanning frame rectangle ──
-      // Frame CSS: width clamp(160,14vw,200) × height clamp(250,22vw,300)
-      // Convert to NDC half-extents (approx for a ~1400×900 viewport)
-      const FRAME_HALF_W = 0.14;
-      const FRAME_HALF_H = 0.33;
-      const GRID_X = 3;
-      const GRID_Y = 5;
+      // ── Camera-style capture: raycast 4 corners of the frame, fill the rect ──
+      let xMin = Infinity, xMax = -Infinity, zMin = Infinity, zMax = -Infinity;
+      const corners = [
+        [pointer.x - FRAME_HALF_W, pointer.y - FRAME_HALF_H],
+        [pointer.x + FRAME_HALF_W, pointer.y - FRAME_HALF_H],
+        [pointer.x - FRAME_HALF_W, pointer.y + FRAME_HALF_H],
+        [pointer.x + FRAME_HALF_W, pointer.y + FRAME_HALF_H],
+      ];
 
-      for (let gx = 0; gx < GRID_X; gx++) {
-        for (let gy = 0; gy < GRID_Y; gy++) {
-          samplePt.current.x = pointer.x + ((gx / (GRID_X - 1)) - 0.5) * 2 * FRAME_HALF_W;
-          samplePt.current.y = pointer.y + ((gy / (GRID_Y - 1)) - 0.5) * 2 * FRAME_HALF_H;
+      // Include center hit
+      const centerLocal = mesh.worldToLocal(hits[0].point.clone());
+      xMin = Math.min(xMin, centerLocal.x);
+      xMax = Math.max(xMax, centerLocal.x);
+      zMin = Math.min(zMin, centerLocal.z);
+      zMax = Math.max(zMax, centerLocal.z);
 
-          raycaster.current.setFromCamera(samplePt.current, camera);
-          const gridHits = raycaster.current.intersectObject(mesh, false);
-          if (gridHits.length > 0) {
-            const local = mesh.worldToLocal(gridHits[0].point.clone());
-            paintAt(local.x, local.z, bounds, false);
-          }
+      for (const [cx, cy] of corners) {
+        samplePt.current.set(cx, cy);
+        raycaster.current.setFromCamera(samplePt.current, camera);
+        const cornerHits = raycaster.current.intersectObject(mesh, false);
+        if (cornerHits.length > 0) {
+          const loc = mesh.worldToLocal(cornerHits[0].point.clone());
+          xMin = Math.min(xMin, loc.x);
+          xMax = Math.max(xMax, loc.x);
+          zMin = Math.min(zMin, loc.z);
+          zMax = Math.max(zMax, loc.z);
         }
       }
 
+      // Fill the entire rectangle in one shot
+      captureRect(xMin, xMax, zMin, zMax, bounds);
+
       // Track current region from center hit
-      const local = mesh.worldToLocal(hits[0].point.clone());
+      const local = centerLocal;
       const nx = (local.x - bounds.minX) / (bounds.maxX - bounds.minX);
       const nz = (local.z - bounds.minZ) / (bounds.maxZ - bounds.minZ);
       if      (nx < 0.5 && nz < 0.5) currentRegionRef.current = 'upper-left';
@@ -174,7 +186,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
 
       <Center>
         <group ref={groupRef}>
-          <mesh ref={meshRef} geometry={enhancedGeo} scale={0.035}>
+          <mesh ref={meshRef} geometry={enhancedGeo} scale={0.055}>
             <RevealMaterial coverageTexture={coverageTexture} bounds={bounds} />
           </mesh>
         </group>
@@ -182,7 +194,6 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
 
       <ScanningBoundary meshRef={meshRef} isScanning={isHovering} />
 
-      {/* Left-drag: rotate | Right-drag: pan | Scroll: zoom */}
       <OrbitControls
         enablePan={true}
         enableZoom={true}
@@ -282,7 +293,7 @@ export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerP
       style={{ position: 'relative', width: '100%', height: '100%' }}
     >
       <Canvas
-        camera={{ position: [0, -2, 4.5], fov: 40, near: 0.01, far: 1000, up: [0, 1, 0] }}
+        camera={{ position: [0, -1.5, 3.5], fov: 40, near: 0.01, far: 1000, up: [0, 1, 0] }}
         gl={{
           antialias: true, alpha: true, preserveDrawingBuffer: true,
           toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.7,

@@ -110,7 +110,7 @@ export default function RevealMaterial({ coverageTexture, bounds }: RevealMateri
       sheenRoughness={0.4}
       sheenColor={new THREE.Color(0xe8e8e0)}
       transparent={true}
-      depthWrite={false}
+      depthWrite={true}
     />
   );
 }
