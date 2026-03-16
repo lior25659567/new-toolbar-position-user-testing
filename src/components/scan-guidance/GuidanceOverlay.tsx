@@ -11,20 +11,22 @@ interface GuidanceOverlayProps {
 
 const ARROW_RED = '#E74C3C';
 
-// ─── Target offsets in 3D space (translateX, translateY, translateZ) ──────────
+// ─── Target frame positions (fixed on the model, not relative to cursor) ──────
+// These represent the actual viewport positions where unscanned areas live.
 
-const TARGET_3D: Record<string, { tx: number; ty: number; tz: number }> = {
-  left:           { tx: -300, ty: 0, tz: -150 },
-  right:          { tx: 300,  ty: 0, tz: -150 },
-  up:             { tx: 0,    ty: -300, tz: -150 },
-  down:           { tx: 0,    ty: 300,  tz: -150 },
-  'rotate-left':  { tx: -300, ty: 0, tz: -150 },
-  'rotate-right': { tx: 300,  ty: 0, tz: -150 },
+const TARGET_VIEWPORT: Record<string, { left: string; top: string }> = {
+  left:           { left: '28%', top: '50%' },
+  right:          { left: '72%', top: '50%' },
+  up:             { left: '50%', top: '30%' },
+  down:           { left: '50%', top: '70%' },
+  'rotate-left':  { left: '28%', top: '50%' },
+  'rotate-right': { left: '72%', top: '50%' },
 };
 
-// ─── Arrow SVG configs ────────────────────────────────────────────────────────
+// ─── Arrow SVG (attached to target frame, points back toward center) ──────────
 
-function GuidanceArrowSvg({ direction }: { direction: GuidanceDirection }) {
+function TargetArrow({ direction }: { direction: GuidanceDirection }) {
+  // Arrow curves from center-ish toward the target frame
   const configs: Record<string, {
     style: React.CSSProperties;
     viewBox: string;
@@ -32,41 +34,41 @@ function GuidanceArrowSvg({ direction }: { direction: GuidanceDirection }) {
     path: string;
     head: string;
   }> = {
-    left: {
-      style: { position: 'absolute', right: '100%', top: '-50px', marginRight: '10px' },
-      viewBox: '0 0 240 180', w: 240, h: 180,
-      path: 'M 230 140 C 210 20, 30 20, 10 140',
-      head: '10,140 0,110 28,118',
-    },
-    'rotate-left': {
-      style: { position: 'absolute', right: '100%', top: '-50px', marginRight: '10px' },
-      viewBox: '0 0 240 180', w: 240, h: 180,
-      path: 'M 230 140 C 210 20, 30 20, 10 140',
-      head: '10,140 0,110 28,118',
-    },
     right: {
-      style: { position: 'absolute', left: '100%', top: '-50px', marginLeft: '10px' },
-      viewBox: '0 0 240 180', w: 240, h: 180,
-      path: 'M 10 140 C 30 20, 210 20, 230 140',
-      head: '230,140 240,110 212,118',
+      style: { position: 'absolute', right: '100%', top: '-40px', marginRight: '8px' },
+      viewBox: '0 0 200 160', w: 200, h: 160,
+      path: 'M 10 130 C 30 20, 170 20, 190 130',
+      head: '190,130 198,100 172,108',
     },
     'rotate-right': {
-      style: { position: 'absolute', left: '100%', top: '-50px', marginLeft: '10px' },
-      viewBox: '0 0 240 180', w: 240, h: 180,
-      path: 'M 10 140 C 30 20, 210 20, 230 140',
-      head: '230,140 240,110 212,118',
+      style: { position: 'absolute', right: '100%', top: '-40px', marginRight: '8px' },
+      viewBox: '0 0 200 160', w: 200, h: 160,
+      path: 'M 10 130 C 30 20, 170 20, 190 130',
+      head: '190,130 198,100 172,108',
+    },
+    left: {
+      style: { position: 'absolute', left: '100%', top: '-40px', marginLeft: '8px' },
+      viewBox: '0 0 200 160', w: 200, h: 160,
+      path: 'M 190 130 C 170 20, 30 20, 10 130',
+      head: '10,130 2,100 28,108',
+    },
+    'rotate-left': {
+      style: { position: 'absolute', left: '100%', top: '-40px', marginLeft: '8px' },
+      viewBox: '0 0 200 160', w: 200, h: 160,
+      path: 'M 190 130 C 170 20, 30 20, 10 130',
+      head: '10,130 2,100 28,108',
     },
     up: {
-      style: { position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '10px' },
-      viewBox: '0 0 200 180', w: 200, h: 180,
-      path: 'M 160 170 C 20 150, 20 30, 160 10',
-      head: '160,10 130,0 138,28',
+      style: { position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '8px' },
+      viewBox: '0 0 160 160', w: 160, h: 160,
+      path: 'M 130 150 C 20 130, 20 30, 130 10',
+      head: '130,10 100,2 108,28',
     },
     down: {
-      style: { position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '10px' },
-      viewBox: '0 0 200 180', w: 200, h: 180,
-      path: 'M 160 10 C 20 30, 20 150, 160 170',
-      head: '160,170 130,180 138,152',
+      style: { position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '8px' },
+      viewBox: '0 0 160 160', w: 160, h: 160,
+      path: 'M 130 10 C 20 30, 20 130, 130 150',
+      head: '130,150 100,158 108,132',
     },
   };
 
@@ -83,23 +85,18 @@ function GuidanceArrowSvg({ direction }: { direction: GuidanceDirection }) {
   );
 }
 
-// ─── 3D Perspective Frame Container ───────────────────────────────────────────
+// ─── Scanning Frame (blue, follows cursor) ────────────────────────────────────
 
-interface ScanFrameProps {
+function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: {
   pointerNDC: { x: number; y: number };
   glowEdge: FrameEdge;
   isScanning: boolean;
   flashActive: boolean;
-  direction: GuidanceDirection | null;
-}
-
-function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }: ScanFrameProps) {
+}) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
-
-  // 3D rotation matching the model's tilt — aggressive perspective
-  const rotY = pointerNDC.x * 35;   // degrees — strong Y rotation with cursor
-  const rotX = pointerNDC.y * -18;   // degrees — noticeable X tilt
+  const rotY = pointerNDC.x * 35;
+  const rotX = pointerNDC.y * -18;
 
   const borderCol = flashActive
     ? '#16A34A'
@@ -116,26 +113,20 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
   const bw = (edge: 'top' | 'right' | 'bottom' | 'left') =>
     glowEdge === edge ? '5px' : '3px';
 
-  const target = direction ? TARGET_3D[direction] : null;
-
   return (
     <div style={{
       position: 'absolute',
       top: '50%',
       left: '50%',
-      // Perspective container — strong 3D depth
       perspective: '500px',
-      perspectiveOrigin: '50% 50%',
       transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
       pointerEvents: 'none',
     }}>
-      {/* 3D-rotated inner: both frames and arrow rotate together matching the model */}
       <div style={{
         transformStyle: 'preserve-3d',
         transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`,
         transition: 'transform 0.12s ease',
       }}>
-        {/* ── Scanning frame (blue) — current scanner position ── */}
         <div style={{
           width: 'clamp(220px, 20vw, 300px)',
           height: 'clamp(340px, 32vw, 450px)',
@@ -148,29 +139,48 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
           borderRadius: '14px',
           boxShadow: glowShadow,
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-          position: 'relative',
-          transformStyle: 'preserve-3d',
-        }}>
-          {/* ── Target frame (red) — where to scan next — in 3D perspective ── */}
-          {target && (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              border: `4px solid ${ARROW_RED}`,
-              borderRadius: '14px',
-              transform: `translate3d(${target.tx}px, ${target.ty}px, ${target.tz}px)`,
-              opacity: 0.85,
-              animation: 'target-pulse 2s ease-in-out infinite',
-              pointerEvents: 'none',
-              backfaceVisibility: 'hidden',
-            }} />
-          )}
+        }} />
+      </div>
+    </div>
+  );
+}
 
-          {/* ── Arrow connecting frames ── */}
-          {direction && <GuidanceArrowSvg direction={direction} />}
+// ─── Target Frame (red, fixed at the unscanned area on the model) ─────────────
+
+function TargetFrame({ direction, pointerNDC }: {
+  direction: GuidanceDirection;
+  pointerNDC: { x: number; y: number };
+}) {
+  const pos = TARGET_VIEWPORT[direction];
+  if (!pos) return null;
+
+  const rotY = pointerNDC.x * 35;
+  const rotX = pointerNDC.y * -18;
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: pos.top,
+      left: pos.left,
+      perspective: '500px',
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none',
+    }}>
+      <div style={{
+        transformStyle: 'preserve-3d',
+        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`,
+        transition: 'transform 0.15s ease',
+      }}>
+        <div style={{
+          width: 'clamp(220px, 20vw, 300px)',
+          height: 'clamp(340px, 32vw, 450px)',
+          border: `4px solid ${ARROW_RED}`,
+          borderRadius: '14px',
+          animation: 'target-pulse 2s ease-in-out infinite',
+          position: 'relative',
+        }}>
+          {/* Arrow on the target frame pointing from center toward it */}
+          <TargetArrow direction={direction} />
         </div>
       </div>
     </div>
@@ -219,6 +229,7 @@ function StagePill({ stage, phase }: { stage: ScanStage; phase: string }) {
 
 export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: GuidanceOverlayProps) {
   const pct = Math.round(guidance.coveragePercent * 100);
+  const dir = guidance.phase !== 'complete' ? guidance.direction : null;
 
   return (
     <div style={{
@@ -240,12 +251,12 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
           50% { opacity: 0.45; }
         }
         @keyframes target-pulse {
-          0%, 100% { opacity: 0.85; }
+          0%, 100% { opacity: 0.9; }
           50% { opacity: 0.5; }
         }
       `}</style>
 
-      {/* ── Top bar: progress + stage pill ── */}
+      {/* ── Top bar ── */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -255,8 +266,7 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: space[3], flex: 1, maxWidth: '320px' }}>
           <div style={{
-            flex: 1,
-            height: '5px',
+            flex: 1, height: '5px',
             backgroundColor: color.neutral200,
             borderRadius: radius.full,
             overflow: 'hidden',
@@ -276,18 +286,19 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
             minWidth: '30px',
           }}>{pct}%</span>
         </div>
-
         <StagePill stage={guidance.stage} phase={guidance.phase} />
       </div>
 
-      {/* ── 3D perspective frames + arrow ── */}
+      {/* ── Scanning frame (blue, follows cursor) ── */}
       <ScanFrame
         pointerNDC={pointerNDC}
         glowEdge={guidance.activeEdge}
         isScanning={guidance.phase === 'scanning'}
         flashActive={flashActive}
-        direction={guidance.phase !== 'complete' ? guidance.direction : null}
       />
+
+      {/* ── Target frame (red, fixed at unscanned area) + arrow ── */}
+      {dir && <TargetFrame direction={dir} pointerNDC={pointerNDC} />}
     </div>
   );
 }
