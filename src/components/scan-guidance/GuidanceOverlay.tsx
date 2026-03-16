@@ -14,70 +14,34 @@ const ARROW_RED = '#E74C3C';
 
 // ─── Target rect + sweeping arrow (positioned beside the scanning frame) ──────
 
-function TargetIndicator({ direction }: { direction: GuidanceDirection }) {
-  // Only show on horizontal directions (left/right)
-  const isLeft  = direction === 'left' || direction === 'rotate-left' || direction === 'up' || direction === 'down';
-  // Map up/down to left/right — the target rect is always horizontal beside the frame
-  // up/down default to left side
+function TargetIndicator({ direction, pointerNDC }: { direction: GuidanceDirection; pointerNDC: { x: number; y: number } }) {
   const side: 'left' | 'right' = (direction === 'right' || direction === 'rotate-right') ? 'right' : 'left';
 
+  // Perspective rotation matching the model tilt — same height, but in 3D
+  const rotY = pointerNDC.x * 40;
+  const rotX = pointerNDC.y * -18;
+
   return (
-    <>
-      {/* Target rect — always horizontal, beside the scanning frame */}
+    <div style={{
+      position: 'absolute',
+      top: '0',
+      [side === 'left' ? 'right' : 'left']: 'calc(100% + 12px)',
+      width: '55%',
+      height: '100%',
+      perspective: '350px',
+      pointerEvents: 'none',
+    }}>
       <div style={{
-        position: 'absolute',
-        top: '0',
-        [side === 'left' ? 'right' : 'left']: 'calc(100% + 12px)',
-        width: '55%',
+        width: '100%',
         height: '100%',
         border: `3px solid ${ARROW_RED}`,
         borderRadius: '12px',
         opacity: 0.75,
         animation: 'target-pulse 2s ease-in-out infinite',
-        pointerEvents: 'none',
+        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`,
+        transition: 'transform 0.12s ease',
       }} />
-
-      {/* Big sweeping curved arrow */}
-      {side === 'left' ? (
-        <div style={{
-          position: 'absolute',
-          top: '-80px',
-          right: '20%',
-          pointerEvents: 'none',
-          animation: 'arrow-breathe 2s ease-in-out infinite',
-        }}>
-          <svg width="320" height="260" viewBox="0 0 320 260" fill="none">
-            <path
-              d="M 300 40 C 260 10, 60 10, 20 200"
-              stroke={ARROW_RED}
-              strokeWidth="10"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <polygon points="20,200 8,170 36,178" fill={ARROW_RED} />
-          </svg>
-        </div>
-      ) : (
-        <div style={{
-          position: 'absolute',
-          top: '-80px',
-          left: '20%',
-          pointerEvents: 'none',
-          animation: 'arrow-breathe 2s ease-in-out infinite',
-        }}>
-          <svg width="320" height="260" viewBox="0 0 320 260" fill="none">
-            <path
-              d="M 20 40 C 60 10, 260 10, 300 200"
-              stroke={ARROW_RED}
-              strokeWidth="10"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <polygon points="300,200 312,170 284,178" fill={ARROW_RED} />
-          </svg>
-        </div>
-      )}
-    </>
+    </div>
   );
 }
 
@@ -89,7 +53,7 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
   isScanning: boolean;
   flashActive: boolean;
   direction: GuidanceDirection | null;
-}) {
+ }) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
 
@@ -127,8 +91,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
       boxShadow: glowShadow,
       transition: 'transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease',
     }}>
-      {/* Target rect + arrow — sits beside the scanning frame */}
-      {direction && <TargetIndicator direction={direction} />}
+      {/* Target rect — sits beside the scanning frame, with perspective */}
+      {direction && <TargetIndicator direction={direction} pointerNDC={pointerNDC} />}
     </div>
   );
 }
