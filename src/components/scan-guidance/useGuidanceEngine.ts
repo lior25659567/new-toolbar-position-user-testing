@@ -84,7 +84,9 @@ function analyzeDirection(regions: ScanRegion[]): {
     return { edge: null, direction: null, weakestRegion: null };
   }
 
-  // Direction from grid center (0.5, 0.5) toward the weakest cell's center
+  // Direction from grid center toward weakest cell.
+  // X is INVERTED because the model is rotated 180° around Z (BASE_ROT_Z = PI),
+  // so texture-space left = screen-space right and vice versa.
   const cx = (weakest.xMin + weakest.xMax) / 2 - 0.5;
   const cz = (weakest.zMin + weakest.zMax) / 2 - 0.5;
 
@@ -92,8 +94,9 @@ function analyzeDirection(regions: ScanRegion[]): {
   let edge: FrameEdge;
 
   if (Math.abs(cx) > Math.abs(cz)) {
-    direction = cx < 0 ? 'left' : 'right';
-    edge = cx < 0 ? 'left' : 'right';
+    // Flipped: texture cx < 0 means screen RIGHT, cx > 0 means screen LEFT
+    direction = cx < 0 ? 'right' : 'left';
+    edge = cx < 0 ? 'right' : 'left';
   } else {
     direction = cz < 0 ? 'up' : 'down';
     edge = cz < 0 ? 'top' : 'bottom';
