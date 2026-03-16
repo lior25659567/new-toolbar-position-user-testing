@@ -9,19 +9,18 @@ interface GuidanceOverlayProps {
   flashActive: boolean;
 }
 
+const ARROW_COLOR = '#E74C3C';
+
 // ─── Big Curved Scan-Direction Arrow ──────────────────────────────────────────
-// Shows a large arc arrow above/around the frame telling the user to rotate
-// around the arch. Fades out as coverage increases.
 
 function ScanDirectionArrow({ coverage, phase }: { coverage: number; phase: string }) {
-  // Visible when idle or early scanning (< 55%)
-  const show = phase === 'idle' || (coverage < 0.55 && phase !== 'complete');
-  const opacity = show ? Math.max(0, 1 - coverage * 2.2) : 0;
+  const show = phase === 'idle' || (coverage < 0.50 && phase !== 'complete');
+  const opacity = show ? Math.max(0, 1 - coverage * 2.5) : 0;
 
   return (
     <div style={{
       position: 'absolute',
-      top: 'calc(50% - 200px)',
+      top: 'calc(50% - 280px)',
       left: '50%',
       transform: 'translateX(-50%)',
       pointerEvents: 'none',
@@ -29,28 +28,22 @@ function ScanDirectionArrow({ coverage, phase }: { coverage: number; phase: stri
       transition: 'opacity 0.5s ease',
       animation: show ? 'arrow-breathe 2.5s ease-in-out infinite' : undefined,
     }}>
-      <svg width="360" height="120" viewBox="0 0 360 120" fill="none">
-        {/* Big sweeping arc from right to left */}
+      <svg width="440" height="140" viewBox="0 0 440 140" fill="none">
         <path
-          d="M 330 100 C 310 20, 50 20, 30 100"
-          stroke={color.primary}
-          strokeWidth="6"
+          d="M 400 115 C 380 15, 60 15, 40 115"
+          stroke={ARROW_COLOR}
+          strokeWidth="10"
           strokeLinecap="round"
           fill="none"
         />
-        {/* Arrowhead at left end pointing down-left */}
-        <polygon
-          points="30,100 18,78 42,82"
-          fill={color.primary}
-        />
-        {/* Trail fade: thin ghost of the path going further */}
+        <polygon points="40,115 16,85 52,92" fill={ARROW_COLOR} />
         <path
-          d="M 330 100 C 335 80, 338 55, 330 35"
-          stroke={color.primary}
-          strokeWidth="3"
+          d="M 400 115 C 408 85, 412 55, 400 30"
+          stroke={ARROW_COLOR}
+          strokeWidth="4"
           strokeLinecap="round"
-          strokeDasharray="6 6"
-          opacity="0.35"
+          strokeDasharray="8 8"
+          opacity="0.4"
           fill="none"
         />
       </svg>
@@ -58,51 +51,87 @@ function ScanDirectionArrow({ coverage, phase }: { coverage: number; phase: stri
   );
 }
 
-// ─── Roll Arrow (large, beside the frame — buccal/lingual) ───────────────────
+// ─── Direction Arrow (points toward low-coverage area) ────────────────────────
+// Positioned beside/above/below the frame depending on direction.
 
-function RollArrow({ side, visible }: { side: 'left' | 'right'; visible: boolean }) {
-  const isLeft = side === 'left';
+function DirectionArrow({ direction, visible }: {
+  direction: 'left' | 'right' | 'up' | 'down';
+  visible: boolean;
+}) {
+  const isHorizontal = direction === 'left' || direction === 'right';
+
+  // Arrow positioning relative to the frame
+  const positionStyle: React.CSSProperties = (() => {
+    switch (direction) {
+      case 'left':
+        return { right: 'calc(100% + 16px)', top: '50%', transform: 'translateY(-50%)' };
+      case 'right':
+        return { left: 'calc(100% + 16px)', top: '50%', transform: 'translateY(-50%)' };
+      case 'up':
+        return { bottom: 'calc(100% + 16px)', left: '50%', transform: 'translateX(-50%)' };
+      case 'down':
+        return { top: 'calc(100% + 16px)', left: '50%', transform: 'translateX(-50%)' };
+    }
+  })();
+
+  // SVG arrow pointing in the right direction
+  const arrowSvg = (() => {
+    if (isHorizontal) {
+      const flip = direction === 'right';
+      return (
+        <svg
+          width="60" height="120" viewBox="0 0 60 120" fill="none"
+          style={{ transform: flip ? 'scaleX(-1)' : undefined }}
+        >
+          {/* Curved path sweeping downward */}
+          <path
+            d="M 50 10 C 40 10, 10 40, 12 100"
+            stroke={ARROW_COLOR}
+            strokeWidth="6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Arrowhead */}
+          <polygon points="12,100 2,78 24,84" fill={ARROW_COLOR} />
+        </svg>
+      );
+    } else {
+      const flip = direction === 'down';
+      return (
+        <svg
+          width="120" height="50" viewBox="0 0 120 50" fill="none"
+          style={{ transform: flip ? 'scaleY(-1)' : undefined }}
+        >
+          {/* Curved path sweeping sideways */}
+          <path
+            d="M 10 40 C 10 30, 40 8, 100 12"
+            stroke={ARROW_COLOR}
+            strokeWidth="6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Arrowhead */}
+          <polygon points="100,12 78,2 84,24" fill={ARROW_COLOR} />
+        </svg>
+      );
+    }
+  })();
 
   return (
     <div style={{
       position: 'absolute',
-      [isLeft ? 'right' : 'left']: 'calc(100% + 8px)',
-      top: '8%',
+      ...positionStyle,
       opacity: visible ? 1 : 0,
-      transition: `opacity 0.3s ease`,
+      transition: 'opacity 0.3s ease',
       animation: visible ? 'arrow-breathe 2s ease-in-out infinite' : undefined,
       pointerEvents: 'none',
     }}>
-      <svg width="80" height="210" viewBox="0 0 80 210" fill="none">
-        {isLeft ? (
-          <>
-            <path
-              d="M 68 10 C 55 10, 6 80, 8 190"
-              stroke={color.primary}
-              strokeWidth="5"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <polygon points="8,190 0,165 22,172" fill={color.primary} />
-          </>
-        ) : (
-          <>
-            <path
-              d="M 12 10 C 25 10, 74 80, 72 190"
-              stroke={color.primary}
-              strokeWidth="5"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <polygon points="72,190 80,165 58,172" fill={color.primary} />
-          </>
-        )}
-      </svg>
+      {arrowSvg}
     </div>
   );
 }
 
-// ─── Scanning Frame ───────────────────────────────────────────────────────────
+// ─── Scanning Frame ──────────────────────────────────────────────────────────
 
 interface ScanFrameProps {
   pointerNDC: { x: number; y: number };
@@ -116,102 +145,52 @@ interface ScanFrameProps {
 function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction, phase }: ScanFrameProps) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
-  const tiltDeg = pointerNDC.x * 3;
 
-  const activeColor = flashActive ? '#16A34A' : color.primary;
-  const cornerColor = isScanning ? activeColor : 'rgba(0,154,206,0.55)';
-  const cornerGlow  = flashActive
-    ? '0 0 10px 3px rgba(22,163,74,0.65)'
+  const borderCol = flashActive
+    ? '#16A34A'
     : isScanning
-    ? '0 0 8px 3px rgba(0,154,206,0.55)'
+    ? color.primary
+    : 'rgba(0,154,206,0.5)';
+
+  const glowShadow = flashActive
+    ? '0 0 24px 8px rgba(22,163,74,0.4), inset 0 0 12px 2px rgba(22,163,74,0.15)'
+    : isScanning
+    ? '0 0 20px 6px rgba(0,154,206,0.35), inset 0 0 10px 2px rgba(0,154,206,0.1)'
     : 'none';
 
-  const cornerStyle = (pos: 'tl' | 'tr' | 'bl' | 'br'): React.CSSProperties => {
-    const positions: Record<typeof pos, React.CSSProperties> = {
-      tl: { top: 0,    left: 0,    borderWidth: '3px 0 0 3px' },
-      tr: { top: 0,    right: 0,   borderWidth: '3px 3px 0 0' },
-      bl: { bottom: 0, left: 0,    borderWidth: '0 0 3px 3px' },
-      br: { bottom: 0, right: 0,   borderWidth: '0 3px 3px 0' },
-    };
-    return {
-      position: 'absolute',
-      width: '22px',
-      height: '22px',
-      borderStyle: 'solid',
-      borderColor: cornerColor,
-      boxShadow: cornerGlow,
-      transition: `border-color ${transition.base}, box-shadow ${transition.base}`,
-      ...positions[pos],
-    };
-  };
+  const bw = (edge: 'top' | 'right' | 'bottom' | 'left') =>
+    glowEdge === edge ? '5px' : '3px';
 
-  const edgeStyle = (edge: 'top' | 'right' | 'bottom' | 'left'): React.CSSProperties => {
-    const isActive = glowEdge === edge;
-    const isHoriz  = edge === 'top' || edge === 'bottom';
-
-    const fullPositions: Record<typeof edge, React.CSSProperties> = {
-      top:    { top: 0,    left: 0,    right: 0,   height: isActive ? '4px' : '2px' },
-      bottom: { bottom: 0, left: 0,    right: 0,   height: isActive ? '4px' : '2px' },
-      left:   { left: 0,  top: 0,     bottom: 0,  width:  isActive ? '4px' : '2px' },
-      right:  { right: 0, top: 0,     bottom: 0,  width:  isActive ? '4px' : '2px' },
-    };
-
-    const bgColor = flashActive
-      ? '#16A34A'
-      : isActive
-      ? color.primary
-      : isScanning
-      ? 'rgba(0,154,206,0.35)'
-      : 'rgba(0,154,206,0.18)';
-
-    const edgeGlow = flashActive
-      ? '0 0 18px 8px rgba(22,163,74,0.6)'
-      : isActive
-      ? isHoriz
-        ? `0 ${edge === 'top' ? '-' : ''}10px 18px 5px rgba(0,154,206,0.65)`
-        : `${edge === 'left' ? '-' : ''}10px 0 18px 5px rgba(0,154,206,0.65)`
-      : 'none';
-
-    return {
-      position: 'absolute',
-      backgroundColor: bgColor,
-      boxShadow: edgeGlow,
-      opacity: isActive || flashActive ? 1 : isScanning ? 0.7 : 0.4,
-      transition: `opacity ${transition.base}, background-color ${transition.base}, box-shadow ${transition.base}, width ${transition.fast}, height ${transition.fast}`,
-      zIndex: isActive ? 2 : 1,
-      ...fullPositions[edge],
-    };
-  };
-
-  const arrowSide: 'left' | 'right' | null =
-    direction === 'rotate-left'  ? 'left'  :
-    direction === 'rotate-right' ? 'right' :
+  // Map direction to arrow props
+  const arrowDir: 'left' | 'right' | 'up' | 'down' | null =
+    direction === 'left' || direction === 'rotate-left'   ? 'left'  :
+    direction === 'right' || direction === 'rotate-right'  ? 'right' :
+    direction === 'up'    ? 'up'    :
+    direction === 'down'  ? 'down'  :
     null;
-  const arrowVisible = arrowSide !== null && phase !== 'scanning';
+
+  const arrowVisible = arrowDir !== null;
 
   return (
     <div style={{
       position: 'absolute',
       top: '50%',
       left: '50%',
-      width: 'clamp(160px, 14vw, 200px)',
-      height: 'clamp(250px, 22vw, 300px)',
-      transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) rotateZ(${tiltDeg}deg)`,
-      transition: `transform 0.12s ease`,
+      width: 'clamp(220px, 20vw, 300px)',
+      height: 'clamp(340px, 32vw, 450px)',
+      transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
+      transition: 'transform 0.12s ease, border-color 0.2s ease, box-shadow 0.2s ease',
       pointerEvents: 'none',
+      borderStyle: 'solid',
+      borderColor: borderCol,
+      borderTopWidth: bw('top'),
+      borderRightWidth: bw('right'),
+      borderBottomWidth: bw('bottom'),
+      borderLeftWidth: bw('left'),
+      borderRadius: '14px',
+      boxShadow: glowShadow,
     }}>
-      {arrowSide === 'left'  && <RollArrow side="left"  visible={arrowVisible} />}
-      {arrowSide === 'right' && <RollArrow side="right" visible={arrowVisible} />}
-
-      <div style={cornerStyle('tl')} />
-      <div style={cornerStyle('tr')} />
-      <div style={cornerStyle('bl')} />
-      <div style={cornerStyle('br')} />
-
-      <div style={edgeStyle('top')} />
-      <div style={edgeStyle('bottom')} />
-      <div style={edgeStyle('left')} />
-      <div style={edgeStyle('right')} />
+      {arrowDir && <DirectionArrow direction={arrowDir} visible={arrowVisible} />}
     </div>
   );
 }
@@ -219,10 +198,10 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction, p
 // ─── Stage Pill ───────────────────────────────────────────────────────────────
 
 const STAGE_META: Record<ScanStage | 'complete', { label: string; bg: string; textColor: string; dot: string }> = {
-  occlusal: { label: 'Occlusal', bg: color.neutral100,              textColor: color.textSubtle, dot: color.neutral400 },
-  buccal:   { label: 'Buccal',   bg: 'rgba(0,154,206,0.12)',        textColor: color.primary,    dot: color.primary    },
-  lingual:  { label: 'Lingual',  bg: 'rgba(0,154,206,0.12)',        textColor: color.primary,    dot: color.primary    },
-  complete: { label: 'Complete', bg: 'rgba(22,163,74,0.1)',         textColor: '#16A34A',         dot: '#16A34A'        },
+  occlusal: { label: 'Occlusal', bg: color.neutral100,        textColor: color.textSubtle, dot: color.neutral400 },
+  buccal:   { label: 'Buccal',   bg: 'rgba(0,154,206,0.12)',  textColor: color.primary,    dot: color.primary    },
+  lingual:  { label: 'Lingual',  bg: 'rgba(0,154,206,0.12)',  textColor: color.primary,    dot: color.primary    },
+  complete: { label: 'Complete', bg: 'rgba(22,163,74,0.1)',   textColor: '#16A34A',        dot: '#16A34A'        },
 };
 
 function StagePill({ stage, phase }: { stage: ScanStage; phase: string }) {
@@ -259,10 +238,7 @@ function StagePill({ stage, phase }: { stage: ScanStage; phase: string }) {
 export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: GuidanceOverlayProps) {
   const pct = Math.round(guidance.coveragePercent * 100);
 
-  const glowEdge: FrameEdge =
-    guidance.direction === 'rotate-left'  ? 'left'  :
-    guidance.direction === 'rotate-right' ? 'right' :
-    guidance.activeEdge;
+  const glowEdge: FrameEdge = guidance.activeEdge;
 
   return (
     <div style={{
@@ -305,7 +281,7 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
               width: `${pct}%`,
               backgroundColor: guidance.phase === 'complete' ? '#16A34A' : color.primary,
               borderRadius: radius.full,
-              transition: `width 0.3s ease`,
+              transition: 'width 0.3s ease',
             }} />
           </div>
           <span style={{
@@ -319,13 +295,13 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
         <StagePill stage={guidance.stage} phase={guidance.phase} />
       </div>
 
-      {/* ── Big curved scan-direction arrow (fades as coverage grows) ── */}
+      {/* ── Scan direction arrow (fades as coverage grows) ── */}
       <ScanDirectionArrow
         coverage={guidance.coveragePercent}
         phase={guidance.phase}
       />
 
-      {/* ── Scanning frame with edge glows + roll arrows ── */}
+      {/* ── Scanning frame + directional arrows ── */}
       <ScanFrame
         pointerNDC={pointerNDC}
         glowEdge={glowEdge}

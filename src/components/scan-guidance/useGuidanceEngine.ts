@@ -4,7 +4,7 @@ import type { ScanPhase, ScanStage, FrameEdge, ScanRegion, GuidanceState, Guidan
 const BUCCAL_THRESHOLD   = 0.40;
 const LINGUAL_THRESHOLD  = 0.70;
 const COMPLETE_THRESHOLD = 0.95;
-const EDGE_SENSITIVITY   = 0.12;
+const IMBALANCE_THRESHOLD = 0.10; // min coverage difference to trigger directional guidance
 
 /** Default 2x2 quadrant regions */
 function createDefaultRegions(): Omit<ScanRegion, 'coverage'>[] {
@@ -22,25 +22,47 @@ function getStage(coverage: number): ScanStage {
   return 'occlusal';
 }
 
-function getActiveEdge(stage: ScanStage, regions: ScanRegion[]): FrameEdge {
-  if (stage !== 'occlusal') return null;
-  // regions[0]=upper-left, [1]=upper-right, [2]=lower-left, [3]=lower-right
+/**
+ * Analyze region coverage and determine which direction needs attention.
+ * Works at ALL stages — always points toward the least-scanned area.
+ */
+function analyzeDirection(regions: ScanRegion[]): {
+  edge: FrameEdge;
+  direction: GuidanceDirection | null;
+} {
+  // regions: [0]=upper-left, [1]=upper-right, [2]=lower-left, [3]=lower-right
   const leftCov  = (regions[0].coverage + regions[2].coverage) / 2;
   const rightCov = (regions[1].coverage + regions[3].coverage) / 2;
   const topCov   = (regions[0].coverage + regions[1].coverage) / 2;
   const botCov   = (regions[2].coverage + regions[3].coverage) / 2;
 
-  const absH = Math.abs(rightCov - leftCov);
-  const absV = Math.abs(botCov - topCov);
+  const hDiff = rightCov - leftCov;  // positive = right more covered
+  const vDiff = botCov - topCov;     // positive = bottom more covered
+  const absH = Math.abs(hDiff);
+  const absV = Math.abs(vDiff);
 
-  if (absH < EDGE_SENSITIVITY && absV < EDGE_SENSITIVITY) return null;
+  // No imbalance — everything's even
+  if (absH < IMBALANCE_THRESHOLD && absV < IMBALANCE_THRESHOLD) {
+    return { edge: null, direction: null };
+  }
 
+  // Pick the axis with biggest imbalance
   if (absH >= absV) {
-    // right is more covered → guide toward left (left edge glows)
-    return rightCov > leftCov ? 'left' : 'right';
+    if (hDiff > 0) {
+      // Right is more covered → guide LEFT
+      return { edge: 'left', direction: 'left' };
+    } else {
+      // Left is more covered → guide RIGHT
+      return { edge: 'right', direction: 'right' };
+    }
   } else {
-    // bottom is more covered → guide toward top (top edge glows)
-    return botCov > topCov ? 'top' : 'bottom';
+    if (vDiff > 0) {
+      // Bottom more covered → guide UP
+      return { edge: 'top', direction: 'up' };
+    } else {
+      // Top more covered → guide DOWN
+      return { edge: 'bottom', direction: 'down' };
+    }
   }
 }
 
@@ -78,24 +100,30 @@ export function useGuidanceEngine() {
     const stageAdvanced = stage !== prevStageRef.current;
     if (stageAdvanced) prevStageRef.current = stage;
 
-    const activeEdge = getActiveEdge(stage, regions);
+    // Always analyze where coverage is low and point there
+    const { edge, direction } = analyzeDirection(regions);
 
-    // buccal = roll left (left edge / left arrow first, matching clinical convention)
-    // lingual = roll right
-    const direction: GuidanceDirection | null =
-      stage === 'buccal'  ? 'rotate-left'  :
-      stage === 'lingual' ? 'rotate-right' :
-      null;
+    // For buccal/lingual stages, override with rotate direction if no strong imbalance
+    let finalDirection: GuidanceDirection | null = direction;
+    let finalEdge: FrameEdge = edge;
+
+    if (stage === 'buccal' && !direction) {
+      finalDirection = 'rotate-left';
+      finalEdge = 'left';
+    } else if (stage === 'lingual' && !direction) {
+      finalDirection = 'rotate-right';
+      finalEdge = 'right';
+    }
 
     return {
       phase,
-      direction,
+      direction: finalDirection,
       hint: '',
       coveragePercent,
       activeRegion: null,
       regions,
       stage,
-      activeEdge,
+      activeEdge: finalEdge,
       stageAdvanced,
     };
   }, [regionDefs]);
