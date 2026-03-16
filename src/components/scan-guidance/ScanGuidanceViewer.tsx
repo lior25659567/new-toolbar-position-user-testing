@@ -213,6 +213,12 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       weakestCenterRef.current = null;
     }
 
+    // Pass actual model rotation delta to the overlay
+    guidance.modelRotation = {
+      x: group.rotation.x - BASE_ROT_X,
+      y: group.rotation.y,
+    };
+
     onGuidanceUpdate({ ...guidance, coveragePercent: coverage });
   });
 
@@ -282,7 +288,7 @@ export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerP
     phase: 'idle', direction: null, hint: '', coveragePercent: 0,
     activeRegion: null, regions: [],
     stage: 'occlusal', activeEdge: null, stageAdvanced: false,
-    targetScreenPos: null, weakestRegion: null,
+    targetScreenPos: null, weakestRegion: null, modelRotation: { x: 0, y: 0 },
   });
   const [elapsed, setElapsed]     = useState(0);
   const [pointerNDC, setPointerNDC] = useState({ x: 0, y: 0 });

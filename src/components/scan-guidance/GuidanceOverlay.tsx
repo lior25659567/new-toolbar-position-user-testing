@@ -14,12 +14,15 @@ const ARROW_RED = '#E74C3C';
 
 // ─── Target rect + sweeping arrow (positioned beside the scanning frame) ──────
 
-function TargetIndicator({ direction, pointerNDC }: { direction: GuidanceDirection; pointerNDC: { x: number; y: number } }) {
+function TargetIndicator({ direction, modelRotation }: {
+  direction: GuidanceDirection;
+  modelRotation: { x: number; y: number };
+}) {
   const side: 'left' | 'right' = (direction === 'right' || direction === 'rotate-right') ? 'right' : 'left';
 
-  // Perspective rotation matching the model tilt — same height, but in 3D
-  const rotY = pointerNDC.x * 40;
-  const rotX = pointerNDC.y * -18;
+  // Use actual model rotation data (radians → degrees) for accurate perspective
+  const rotY = modelRotation.y * (180 / Math.PI) * 1.8;  // amplify for visible CSS effect
+  const rotX = modelRotation.x * (180 / Math.PI) * 1.5;
 
   return (
     <div style={{
@@ -47,12 +50,13 @@ function TargetIndicator({ direction, pointerNDC }: { direction: GuidanceDirecti
 
 // ─── Scanning Frame (blue, flat, follows cursor) ─────────────────────────────
 
-function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }: {
+function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction, modelRotation }: {
   pointerNDC: { x: number; y: number };
   glowEdge: FrameEdge;
   isScanning: boolean;
   flashActive: boolean;
   direction: GuidanceDirection | null;
+  modelRotation: { x: number; y: number };
  }) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
@@ -91,8 +95,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }:
       boxShadow: glowShadow,
       transition: 'transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease',
     }}>
-      {/* Target rect — sits beside the scanning frame, with perspective */}
-      {direction && <TargetIndicator direction={direction} pointerNDC={pointerNDC} />}
+      {/* Target rect — sits beside the scanning frame, perspective from model rotation */}
+      {direction && <TargetIndicator direction={direction} modelRotation={modelRotation} />}
     </div>
   );
 }
@@ -206,6 +210,7 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
         isScanning={guidance.phase === 'scanning'}
         flashActive={flashActive}
         direction={dir}
+        modelRotation={guidance.modelRotation}
       />
     </div>
   );

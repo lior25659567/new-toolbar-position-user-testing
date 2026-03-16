@@ -134,6 +134,7 @@ export function useGuidanceEngine() {
         stageAdvanced: false,
         targetScreenPos: null,
         weakestRegion: null,
+        modelRotation: { x: 0, y: 0 },
       };
     }
 

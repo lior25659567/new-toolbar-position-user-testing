@@ -38,6 +38,8 @@ export interface GuidanceState {
   stageAdvanced: boolean;
   /** Screen-space 0-1 coords of the weakest region center (projected from 3D) */
   targetScreenPos: { x: number; y: number } | null;
+  /** Model rotation delta from base (radians) — drives target rect perspective */
+  modelRotation: { x: number; y: number };
   /** The single region with the lowest coverage that needs scanning */
   weakestRegion: ScanRegion | null;
 }
