@@ -12,7 +12,8 @@ import ScanningBoundary from './ScanningBoundary';
 import { useScanProgress } from './useScanProgress';
 import { useGuidanceEngine } from './useGuidanceEngine';
 import GuidanceOverlay from './GuidanceOverlay';
-import type { ScanPhase, GuidanceState, ModelBounds } from './types';
+import GuidanceArrow3D from './GuidanceArrow3D';
+import type { ScanPhase, GuidanceState, GuidanceDirection, ModelBounds } from './types';
 
 // ─── Inner scene ──────────────────────────────────────────────────────────────
 
@@ -39,6 +40,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
   const [phase, setPhase]         = useState<ScanPhase>('idle');
   const [isHovering, setIsHovering] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [arrowDir, setArrowDir]   = useState<GuidanceDirection | null>(null);
   const currentRegionRef = useRef<string | undefined>(undefined);
 
   const { coverageTexture, captureRect, getCoverage, getRegionCoverage, reset } = useScanProgress();
@@ -170,6 +172,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     if (currentPhase !== phase) setPhase(currentPhase);
 
     const guidance = evaluate(currentPhase, coverage, getRegionCoverage, currentRegionRef.current);
+    if (guidance.direction !== arrowDir) setArrowDir(guidance.direction);
     onGuidanceUpdate({ ...guidance, coveragePercent: coverage });
   });
 
@@ -193,6 +196,12 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       </Center>
 
       <ScanningBoundary meshRef={meshRef} isScanning={isHovering} />
+
+      {/* 3D directional arrow — points toward unscanned area */}
+      <GuidanceArrow3D
+        direction={arrowDir}
+        visible={arrowDir !== null && phase !== 'complete'}
+      />
 
       <OrbitControls
         enablePan={true}
