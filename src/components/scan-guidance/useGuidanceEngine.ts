@@ -4,16 +4,27 @@ import type { ScanPhase, ScanStage, FrameEdge, ScanRegion, GuidanceState, Guidan
 const BUCCAL_THRESHOLD   = 0.40;
 const LINGUAL_THRESHOLD  = 0.70;
 const COMPLETE_THRESHOLD = 0.95;
-const IMBALANCE_THRESHOLD = 0.05; // min coverage difference to trigger directional guidance
+const IMBALANCE_THRESHOLD = 0.05;
 
-/** Default 2x2 quadrant regions */
+const GRID_SIZE = 4;
+
+/** 4×4 grid of regions for fine-grained coverage analysis */
 function createDefaultRegions(): Omit<ScanRegion, 'coverage'>[] {
-  return [
-    { id: 'upper-left',  label: 'Upper Left',  xMin: 0,   xMax: 0.5, zMin: 0,   zMax: 0.5 },
-    { id: 'upper-right', label: 'Upper Right', xMin: 0.5, xMax: 1,   zMin: 0,   zMax: 0.5 },
-    { id: 'lower-left',  label: 'Lower Left',  xMin: 0,   xMax: 0.5, zMin: 0.5, zMax: 1 },
-    { id: 'lower-right', label: 'Lower Right', xMin: 0.5, xMax: 1,   zMin: 0.5, zMax: 1 },
-  ];
+  const regions: Omit<ScanRegion, 'coverage'>[] = [];
+  const step = 1 / GRID_SIZE;
+  for (let row = 0; row < GRID_SIZE; row++) {
+    for (let col = 0; col < GRID_SIZE; col++) {
+      regions.push({
+        id: `r${row}-c${col}`,
+        label: `R${row}C${col}`,
+        xMin: col * step,
+        xMax: (col + 1) * step,
+        zMin: row * step,
+        zMax: (row + 1) * step,
+      });
+    }
+  }
+  return regions;
 }
 
 function getStage(coverage: number): ScanStage {
@@ -23,44 +34,47 @@ function getStage(coverage: number): ScanStage {
 }
 
 /**
- * Find the lowest-coverage area and point toward it.
- * Compares all 4 quadrants individually — picks the one that needs the most work
- * and returns a direction pointing from the highest-coverage side toward it.
+ * Find the single weakest region and compute direction toward it.
+ * Uses a 4×4 grid for precise spatial guidance.
  */
 function analyzeDirection(regions: ScanRegion[]): {
   edge: FrameEdge;
   direction: GuidanceDirection | null;
+  weakestRegion: ScanRegion | null;
 } {
-  // Need some scanning done before we can give guidance
+  // Need some scanning before giving guidance
   const avgCov = regions.reduce((s, r) => s + r.coverage, 0) / regions.length;
-  if (avgCov < 0.03) return { edge: null, direction: null };
+  if (avgCov < 0.03) return { edge: null, direction: null, weakestRegion: null };
 
-  // regions: [0]=upper-left, [1]=upper-right, [2]=lower-left, [3]=lower-right
-  const leftCov  = (regions[0].coverage + regions[2].coverage) / 2;
-  const rightCov = (regions[1].coverage + regions[3].coverage) / 2;
-  const topCov   = (regions[0].coverage + regions[1].coverage) / 2;
-  const botCov   = (regions[2].coverage + regions[3].coverage) / 2;
-
-  // Find the side with lowest coverage
-  const sides = [
-    { cov: leftCov,  edge: 'left'   as FrameEdge, dir: 'left'  as GuidanceDirection },
-    { cov: rightCov, edge: 'right'  as FrameEdge, dir: 'right' as GuidanceDirection },
-    { cov: topCov,   edge: 'top'    as FrameEdge, dir: 'up'    as GuidanceDirection },
-    { cov: botCov,   edge: 'bottom' as FrameEdge, dir: 'down'  as GuidanceDirection },
-  ];
-
-  // Sort by coverage ascending — [0] is the least scanned
-  sides.sort((a, b) => a.cov - b.cov);
-  const weakest = sides[0];
-  const strongest = sides[sides.length - 1];
-
-  // Only show guidance if there's a meaningful difference between best and worst
-  if (strongest.cov - weakest.cov < IMBALANCE_THRESHOLD) {
-    return { edge: null, direction: null };
+  // Find the weakest and strongest regions
+  let weakest = regions[0];
+  let maxCov = 0;
+  for (const r of regions) {
+    if (r.coverage < weakest.coverage) weakest = r;
+    if (r.coverage > maxCov) maxCov = r.coverage;
   }
 
-  // Point toward the weakest side
-  return { edge: weakest.edge, direction: weakest.dir };
+  // If the gap between best and worst is small, no guidance needed
+  if (maxCov - weakest.coverage < IMBALANCE_THRESHOLD) {
+    return { edge: null, direction: null, weakestRegion: null };
+  }
+
+  // Direction from grid center (0.5, 0.5) toward the weakest cell's center
+  const cx = (weakest.xMin + weakest.xMax) / 2 - 0.5;
+  const cz = (weakest.zMin + weakest.zMax) / 2 - 0.5;
+
+  let direction: GuidanceDirection;
+  let edge: FrameEdge;
+
+  if (Math.abs(cx) > Math.abs(cz)) {
+    direction = cx < 0 ? 'left' : 'right';
+    edge = cx < 0 ? 'left' : 'right';
+  } else {
+    direction = cz < 0 ? 'up' : 'down';
+    edge = cz < 0 ? 'top' : 'bottom';
+  }
+
+  return { edge, direction, weakestRegion: weakest };
 }
 
 export function useGuidanceEngine() {
@@ -90,6 +104,8 @@ export function useGuidanceEngine() {
         stage: 'lingual',
         activeEdge: null,
         stageAdvanced: false,
+        targetScreenPos: null,
+        weakestRegion: null,
       };
     }
 
@@ -97,10 +113,10 @@ export function useGuidanceEngine() {
     const stageAdvanced = stage !== prevStageRef.current;
     if (stageAdvanced) prevStageRef.current = stage;
 
-    // Always analyze where coverage is low and point there
-    const { edge, direction } = analyzeDirection(regions);
+    // Find the weakest region and compute direction
+    const { edge, direction, weakestRegion } = analyzeDirection(regions);
 
-    // For buccal/lingual stages, override with rotate direction if no strong imbalance
+    // For buccal/lingual stages, fall back to rotate hints if coverage is balanced
     let finalDirection: GuidanceDirection | null = direction;
     let finalEdge: FrameEdge = edge;
 
@@ -122,6 +138,8 @@ export function useGuidanceEngine() {
       stage,
       activeEdge: finalEdge,
       stageAdvanced,
+      targetScreenPos: null, // filled by Scene's 3D projection
+      weakestRegion: weakestRegion ?? null,
     };
   }, [regionDefs]);
 

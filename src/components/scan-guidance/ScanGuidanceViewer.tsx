@@ -12,7 +12,7 @@ import ScanningBoundary from './ScanningBoundary';
 import { useScanProgress } from './useScanProgress';
 import { useGuidanceEngine } from './useGuidanceEngine';
 import GuidanceOverlay from './GuidanceOverlay';
-import type { ScanPhase, GuidanceState, GuidanceDirection, ModelBounds } from './types';
+import type { ScanPhase, GuidanceState, ModelBounds } from './types';
 
 // ─── Inner scene ──────────────────────────────────────────────────────────────
 
@@ -22,6 +22,9 @@ const BASE_ROT_Z = Math.PI;
 // Frame NDC half-extents (matches CSS clamp sizes on ~1400×900 viewport)
 const FRAME_HALF_W = 0.18;
 const FRAME_HALF_H = 0.38;
+
+// Reusable vector for projection (avoids GC)
+const _projVec = new THREE.Vector3();
 
 interface SceneProps {
   onGuidanceUpdate: (g: GuidanceState) => void;
@@ -39,8 +42,9 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
   const [phase, setPhase]         = useState<ScanPhase>('idle');
   const [isHovering, setIsHovering] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [arrowDir, setArrowDir]   = useState<GuidanceDirection | null>(null);
   const currentRegionRef = useRef<string | undefined>(undefined);
+  // Store weakest region center for rotation bias (updated per frame, read without re-render)
+  const weakestCenterRef = useRef<{ x: number; z: number } | null>(null);
 
   const { coverageTexture, captureRect, getCoverage, getRegionCoverage, reset } = useScanProgress();
   const { evaluate, resetEngine } = useGuidanceEngine();
@@ -91,6 +95,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       reset(); resetEngine();
       setPhase('idle'); setStartTime(null); setIsHovering(false);
       currentRegionRef.current = undefined;
+      weakestCenterRef.current = null;
       if (groupRef.current) groupRef.current.rotation.set(BASE_ROT_X, 0, BASE_ROT_Z);
     }
   }, [onReset, reset, resetEngine]);
@@ -101,9 +106,16 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     const group = groupRef.current;
     if (!mesh || !group) return;
 
-    // Model tilts with mouse
-    const targetX = BASE_ROT_X + pointer.y * -0.28;
-    const targetY = pointer.x * 0.55;
+    // ── Model rotation: mouse follow + bias toward unscanned area ──
+    let targetX = BASE_ROT_X + pointer.y * -0.20;
+    let targetY = pointer.x * 0.40;
+
+    const wc = weakestCenterRef.current;
+    if (wc) {
+      targetX += (wc.z - 0.5) * -0.15;
+      targetY += (wc.x - 0.5) * 0.25;
+    }
+
     group.rotation.x += (targetX - group.rotation.x) * 0.06;
     group.rotation.y += (targetY - group.rotation.y) * 0.06;
     group.rotation.z  = BASE_ROT_Z;
@@ -124,7 +136,7 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       if (startTime === null) setStartTime(Date.now());
       currentPhase = 'scanning';
 
-      // ── Camera-style capture: raycast 4 corners of the frame, fill the rect ──
+      // Camera-style capture: raycast 4 corners of the frame, fill the rect
       let xMin = Infinity, xMax = -Infinity, zMin = Infinity, zMax = -Infinity;
       const corners = [
         [pointer.x - FRAME_HALF_W, pointer.y - FRAME_HALF_H],
@@ -133,7 +145,6 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
         [pointer.x + FRAME_HALF_W, pointer.y + FRAME_HALF_H],
       ];
 
-      // Include center hit
       const centerLocal = mesh.worldToLocal(hits[0].point.clone());
       xMin = Math.min(xMin, centerLocal.x);
       xMax = Math.max(xMax, centerLocal.x);
@@ -153,10 +164,9 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
         }
       }
 
-      // Fill the entire rectangle in one shot
       captureRect(xMin, xMax, zMin, zMax, bounds);
 
-      // Track current region from center hit
+      // Track current region
       const local = centerLocal;
       const nx = (local.x - bounds.minX) / (bounds.maxX - bounds.minX);
       const nz = (local.z - bounds.minZ) / (bounds.maxZ - bounds.minZ);
@@ -170,8 +180,36 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
 
     if (currentPhase !== phase) setPhase(currentPhase);
 
+    // ── Evaluate guidance ──
     const guidance = evaluate(currentPhase, coverage, getRegionCoverage, currentRegionRef.current);
-    if (guidance.direction !== arrowDir) setArrowDir(guidance.direction);
+
+    // ── Project weakest region center from 3D → screen space ──
+    const wr = guidance.weakestRegion;
+    if (wr && guidance.direction) {
+      // Compute center of weakest region in model-local XZ
+      const wrCenterX = bounds.minX + ((wr.xMin + wr.xMax) / 2) * (bounds.maxX - bounds.minX);
+      const wrCenterZ = bounds.minZ + ((wr.zMin + wr.zMax) / 2) * (bounds.maxZ - bounds.minZ);
+
+      // Project to screen via mesh world matrix + camera
+      _projVec.set(wrCenterX, 0, wrCenterZ);
+      mesh.localToWorld(_projVec);
+      _projVec.project(camera);
+
+      guidance.targetScreenPos = {
+        x: Math.min(0.9, Math.max(0.1, (_projVec.x + 1) / 2)),
+        y: Math.min(0.9, Math.max(0.1, (1 - _projVec.y) / 2)),
+      };
+
+      // Store for rotation bias (normalized 0-1)
+      weakestCenterRef.current = {
+        x: (wr.xMin + wr.xMax) / 2,
+        z: (wr.zMin + wr.zMax) / 2,
+      };
+    } else {
+      guidance.targetScreenPos = null;
+      weakestCenterRef.current = null;
+    }
+
     onGuidanceUpdate({ ...guidance, coveragePercent: coverage });
   });
 
@@ -241,10 +279,12 @@ export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerP
     phase: 'idle', direction: null, hint: '', coveragePercent: 0,
     activeRegion: null, regions: [],
     stage: 'occlusal', activeEdge: null, stageAdvanced: false,
+    targetScreenPos: null, weakestRegion: null,
   });
   const [elapsed, setElapsed]     = useState(0);
   const [pointerNDC, setPointerNDC] = useState({ x: 0, y: 0 });
   const [flashActive, setFlashActive] = useState(false);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   const containerRef    = useRef<HTMLDivElement>(null);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -265,6 +305,20 @@ export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerP
       x:  (e.clientX - rect.left) / rect.width  * 2 - 1,
       y: -(((e.clientY - rect.top) / rect.height) * 2 - 1),
     });
+  }, []);
+
+  // Track container size for arrow pixel calculations
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      setContainerSize({ width: r.width, height: r.height });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // Elapsed timer
@@ -316,6 +370,7 @@ export default function ScanGuidanceViewer({ resetTrigger }: ScanGuidanceViewerP
         elapsedSeconds={elapsed}
         pointerNDC={pointerNDC}
         flashActive={flashActive}
+        containerSize={containerSize}
       />
     </div>
   );

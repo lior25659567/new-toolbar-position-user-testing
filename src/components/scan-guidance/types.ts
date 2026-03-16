@@ -36,6 +36,10 @@ export interface GuidanceState {
   stage: ScanStage;
   activeEdge: FrameEdge;
   stageAdvanced: boolean;
+  /** Screen-space 0-1 coords of the weakest region center (projected from 3D) */
+  targetScreenPos: { x: number; y: number } | null;
+  /** The single region with the lowest coverage that needs scanning */
+  weakestRegion: ScanRegion | null;
 }
 
 /** Bounding box in world XZ for the loaded model */

@@ -1,87 +1,76 @@
 import React from 'react';
 import { color, font, space, radius, transition } from '../../design-system/tokens';
-import type { GuidanceState, ScanStage, FrameEdge, GuidanceDirection } from './types';
+import type { GuidanceState, ScanStage, FrameEdge } from './types';
 
 interface GuidanceOverlayProps {
   guidance: GuidanceState;
   elapsedSeconds: number;
   pointerNDC: { x: number; y: number };
   flashActive: boolean;
+  containerSize: { width: number; height: number };
 }
 
 const ARROW_RED = '#E74C3C';
 
-// ─── Target frame positions (fixed on the model, not relative to cursor) ──────
-// These represent the actual viewport positions where unscanned areas live.
+// ─── Full-Viewport Guidance Arrow ─────────────────────────────────────────────
+// Draws a thick curved bezier from scanning frame center → target frame center.
 
-const TARGET_VIEWPORT: Record<string, { left: string; top: string }> = {
-  left:           { left: '28%', top: '50%' },
-  right:          { left: '72%', top: '50%' },
-  up:             { left: '50%', top: '30%' },
-  down:           { left: '50%', top: '70%' },
-  'rotate-left':  { left: '28%', top: '50%' },
-  'rotate-right': { left: '72%', top: '50%' },
-};
+function GuidancePathArrow({ scanCenter, targetCenter }: {
+  scanCenter: { x: number; y: number };
+  targetCenter: { x: number; y: number };
+}) {
+  const dx = targetCenter.x - scanCenter.x;
+  const dy = targetCenter.y - scanCenter.y;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 40) return null; // too close, skip
 
-// ─── Arrow SVG (attached to target frame, points back toward center) ──────────
+  // Control point: perpendicular offset at midpoint for a nice arc
+  const mx = (scanCenter.x + targetCenter.x) / 2;
+  const my = (scanCenter.y + targetCenter.y) / 2;
+  const perpX = (-dy / len) * len * 0.3;
+  const perpY = (dx / len) * len * 0.3;
+  const cpx = mx + perpX;
+  const cpy = my + perpY;
 
-function TargetArrow({ direction }: { direction: GuidanceDirection }) {
-  // Arrow curves from center-ish toward the target frame
-  const configs: Record<string, {
-    style: React.CSSProperties;
-    viewBox: string;
-    w: number; h: number;
-    path: string;
-    head: string;
-  }> = {
-    right: {
-      style: { position: 'absolute', right: '100%', top: '-40px', marginRight: '8px' },
-      viewBox: '0 0 200 160', w: 200, h: 160,
-      path: 'M 10 130 C 30 20, 170 20, 190 130',
-      head: '190,130 198,100 172,108',
-    },
-    'rotate-right': {
-      style: { position: 'absolute', right: '100%', top: '-40px', marginRight: '8px' },
-      viewBox: '0 0 200 160', w: 200, h: 160,
-      path: 'M 10 130 C 30 20, 170 20, 190 130',
-      head: '190,130 198,100 172,108',
-    },
-    left: {
-      style: { position: 'absolute', left: '100%', top: '-40px', marginLeft: '8px' },
-      viewBox: '0 0 200 160', w: 200, h: 160,
-      path: 'M 190 130 C 170 20, 30 20, 10 130',
-      head: '10,130 2,100 28,108',
-    },
-    'rotate-left': {
-      style: { position: 'absolute', left: '100%', top: '-40px', marginLeft: '8px' },
-      viewBox: '0 0 200 160', w: 200, h: 160,
-      path: 'M 190 130 C 170 20, 30 20, 10 130',
-      head: '10,130 2,100 28,108',
-    },
-    up: {
-      style: { position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '8px' },
-      viewBox: '0 0 160 160', w: 160, h: 160,
-      path: 'M 130 150 C 20 130, 20 30, 130 10',
-      head: '130,10 100,2 108,28',
-    },
-    down: {
-      style: { position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '8px' },
-      viewBox: '0 0 160 160', w: 160, h: 160,
-      path: 'M 130 10 C 20 30, 20 130, 130 150',
-      head: '130,150 100,158 108,132',
-    },
-  };
-
-  const cfg = configs[direction];
-  if (!cfg) return null;
+  // Arrowhead: tangent at end of curve
+  const t = 0.95;
+  const tx = 2 * (1 - t) * (cpx - scanCenter.x) + 2 * t * (targetCenter.x - cpx);
+  const ty = 2 * (1 - t) * (cpy - scanCenter.y) + 2 * t * (targetCenter.y - cpy);
+  const angle = Math.atan2(ty, tx);
+  const hl = 18; // head length
+  const ha = Math.PI / 5; // head angle
 
   return (
-    <div style={{ ...cfg.style, pointerEvents: 'none', animation: 'arrow-breathe 2s ease-in-out infinite' }}>
-      <svg width={cfg.w} height={cfg.h} viewBox={cfg.viewBox} fill="none">
-        <path d={cfg.path} stroke={ARROW_RED} strokeWidth="8" strokeLinecap="round" fill="none" />
-        <polygon points={cfg.head} fill={ARROW_RED} />
-      </svg>
-    </div>
+    <svg style={{
+      position: 'absolute', inset: 0,
+      width: '100%', height: '100%',
+      pointerEvents: 'none',
+      overflow: 'visible',
+    }}>
+      {/* Curved path */}
+      <path
+        d={`M ${scanCenter.x} ${scanCenter.y} Q ${cpx} ${cpy} ${targetCenter.x} ${targetCenter.y}`}
+        stroke={ARROW_RED}
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeDasharray="14 8"
+        fill="none"
+        opacity="0.8"
+      >
+        <animate attributeName="stroke-dashoffset" from="44" to="0" dur="1.5s" repeatCount="indefinite" />
+      </path>
+
+      {/* Arrowhead */}
+      <polygon
+        points={`
+          ${targetCenter.x},${targetCenter.y}
+          ${targetCenter.x - hl * Math.cos(angle - ha)},${targetCenter.y - hl * Math.sin(angle - ha)}
+          ${targetCenter.x - hl * Math.cos(angle + ha)},${targetCenter.y - hl * Math.sin(angle + ha)}
+        `}
+        fill={ARROW_RED}
+        opacity="0.85"
+      />
+    </svg>
   );
 }
 
@@ -95,8 +84,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: {
 }) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
-  const rotY = pointerNDC.x * 35;
-  const rotX = pointerNDC.y * -18;
+  const rotY = pointerNDC.x * 40;
+  const rotX = pointerNDC.y * -20;
 
   const borderCol = flashActive
     ? '#16A34A'
@@ -118,13 +107,13 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      perspective: '500px',
+      perspective: '400px',
       transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
       pointerEvents: 'none',
     }}>
       <div style={{
         transformStyle: 'preserve-3d',
-        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`,
+        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(0px)`,
         transition: 'transform 0.12s ease',
       }}>
         <div style={{
@@ -145,30 +134,27 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: {
   );
 }
 
-// ─── Target Frame (red, fixed at the unscanned area on the model) ─────────────
+// ─── Target Frame (red, projected at unscanned area) ──────────────────────────
 
-function TargetFrame({ direction, pointerNDC }: {
-  direction: GuidanceDirection;
+function TargetFrame({ screenPos, pointerNDC }: {
+  screenPos: { x: number; y: number };
   pointerNDC: { x: number; y: number };
 }) {
-  const pos = TARGET_VIEWPORT[direction];
-  if (!pos) return null;
-
-  const rotY = pointerNDC.x * 35;
-  const rotX = pointerNDC.y * -18;
+  const rotY = pointerNDC.x * 40;
+  const rotX = pointerNDC.y * -20;
 
   return (
     <div style={{
       position: 'absolute',
-      top: pos.top,
-      left: pos.left,
-      perspective: '500px',
+      top: `${screenPos.y * 100}%`,
+      left: `${screenPos.x * 100}%`,
+      perspective: '400px',
       transform: 'translate(-50%, -50%)',
       pointerEvents: 'none',
     }}>
       <div style={{
         transformStyle: 'preserve-3d',
-        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`,
+        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(-200px)`,
         transition: 'transform 0.15s ease',
       }}>
         <div style={{
@@ -177,11 +163,7 @@ function TargetFrame({ direction, pointerNDC }: {
           border: `4px solid ${ARROW_RED}`,
           borderRadius: '14px',
           animation: 'target-pulse 2s ease-in-out infinite',
-          position: 'relative',
-        }}>
-          {/* Arrow on the target frame pointing from center toward it */}
-          <TargetArrow direction={direction} />
-        </div>
+        }} />
       </div>
     </div>
   );
@@ -227,9 +209,21 @@ function StagePill({ stage, phase }: { stage: ScanStage; phase: string }) {
 
 // ─── Main Overlay ─────────────────────────────────────────────────────────────
 
-export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: GuidanceOverlayProps) {
+export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, containerSize }: GuidanceOverlayProps) {
   const pct = Math.round(guidance.coveragePercent * 100);
   const dir = guidance.phase !== 'complete' ? guidance.direction : null;
+  const targetPos = guidance.targetScreenPos;
+
+  // Compute pixel centers for the arrow SVG
+  const scanCenterPx = containerSize.width > 0 ? {
+    x: containerSize.width / 2 + pointerNDC.x * 8,
+    y: containerSize.height / 2 + pointerNDC.y * -6,
+  } : null;
+
+  const targetCenterPx = targetPos && containerSize.width > 0 ? {
+    x: targetPos.x * containerSize.width,
+    y: targetPos.y * containerSize.height,
+  } : null;
 
   return (
     <div style={{
@@ -245,10 +239,6 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
-        }
-        @keyframes arrow-breathe {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.45; }
         }
         @keyframes target-pulse {
           0%, 100% { opacity: 0.9; }
@@ -289,7 +279,7 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
         <StagePill stage={guidance.stage} phase={guidance.phase} />
       </div>
 
-      {/* ── Scanning frame (blue, follows cursor) ── */}
+      {/* ── Scanning frame (blue) ── */}
       <ScanFrame
         pointerNDC={pointerNDC}
         glowEdge={guidance.activeEdge}
@@ -297,8 +287,15 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
         flashActive={flashActive}
       />
 
-      {/* ── Target frame (red, fixed at unscanned area) + arrow ── */}
-      {dir && <TargetFrame direction={dir} pointerNDC={pointerNDC} />}
+      {/* ── Target frame (red, at projected 3D position) ── */}
+      {dir && targetPos && (
+        <TargetFrame screenPos={targetPos} pointerNDC={pointerNDC} />
+      )}
+
+      {/* ── Full-viewport curved arrow connecting the two frames ── */}
+      {dir && scanCenterPx && targetCenterPx && (
+        <GuidancePathArrow scanCenter={scanCenterPx} targetCenter={targetCenterPx} />
+      )}
     </div>
   );
 }
