@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import type { ModelBounds } from './types';
 
 const TEX_SIZE = 256;
-const BRUSH_RADIUS = 8; // pixels in the coverage texture
+const BRUSH_RADIUS = 8;       // default brush for real user scanning
+const BRUSH_RADIUS_DEMO = 18; // larger brush for demo — covers scanner frame footprint
 
 export function useScanProgress() {
   const dataRef = useRef<Uint8Array>(new Uint8Array(TEX_SIZE * TEX_SIZE).fill(0));
@@ -19,32 +20,28 @@ export function useScanProgress() {
     return tex;
   }, []);
 
-  /** Paint a circle at the given world XZ position */
-  const paintAt = useCallback((worldX: number, worldZ: number, bounds: ModelBounds) => {
+  /** Paint a circle at the given world XZ position. Pass isDemo=true for a larger scanner-sized brush. */
+  const paintAt = useCallback((worldX: number, worldZ: number, bounds: ModelBounds, isDemo = false) => {
     const data = dataRef.current;
     const rangeX = bounds.maxX - bounds.minX;
     const rangeZ = bounds.maxZ - bounds.minZ;
     if (rangeX === 0 || rangeZ === 0) return;
 
-    // Normalize world XZ → 0-1
     const u = (worldX - bounds.minX) / rangeX;
     const v = (worldZ - bounds.minZ) / rangeZ;
-
-    // Convert to texel coords
     const cx = Math.floor(u * TEX_SIZE);
     const cy = Math.floor(v * TEX_SIZE);
+    const r  = isDemo ? BRUSH_RADIUS_DEMO : BRUSH_RADIUS;
 
-    // Paint a circle
-    for (let dy = -BRUSH_RADIUS; dy <= BRUSH_RADIUS; dy++) {
-      for (let dx = -BRUSH_RADIUS; dx <= BRUSH_RADIUS; dx++) {
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > BRUSH_RADIUS) continue;
+        if (dist > r) continue;
         const px = cx + dx;
         const py = cy + dy;
         if (px < 0 || px >= TEX_SIZE || py < 0 || py >= TEX_SIZE) continue;
         const idx = py * TEX_SIZE + px;
-        // Soft falloff
-        const intensity = Math.max(0, 1 - dist / BRUSH_RADIUS);
+        const intensity = Math.max(0, 1 - dist / r);
         const value = Math.floor(intensity * 255);
         data[idx] = Math.max(data[idx], value);
       }

@@ -77,7 +77,8 @@ export default function RevealMaterial({ coverageTexture, bounds }: RevealMateri
         vec3 ghostColor = vec3(gray * 0.7 + 0.15);
 
         gl_FragColor.rgb = mix(ghostColor, gl_FragColor.rgb, reveal);
-        gl_FragColor.a = mix(0.35, 1.0, reveal);
+        // Start fully invisible — model builds from nothing as scanning progresses
+        gl_FragColor.a = mix(0.0, 1.0, reveal);
         `
       );
     };
@@ -110,6 +111,7 @@ export default function RevealMaterial({ coverageTexture, bounds }: RevealMateri
       sheenRoughness={0.4}
       sheenColor={new THREE.Color(0xe8e8e0)}
       transparent={true}
+      depthWrite={false}
     />
   );
 }
