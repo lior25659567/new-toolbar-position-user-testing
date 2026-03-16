@@ -4,7 +4,7 @@ import type { ScanPhase, ScanStage, FrameEdge, ScanRegion, GuidanceState, Guidan
 const BUCCAL_THRESHOLD   = 0.40;
 const LINGUAL_THRESHOLD  = 0.70;
 const COMPLETE_THRESHOLD = 0.95;
-const IMBALANCE_THRESHOLD = 0.05;
+const IMBALANCE_THRESHOLD = 0.03;
 
 const GRID_SIZE = 4;
 
@@ -44,7 +44,7 @@ function analyzeDirection(regions: ScanRegion[]): {
 } {
   // Need some scanning before giving guidance
   const avgCov = regions.reduce((s, r) => s + r.coverage, 0) / regions.length;
-  if (avgCov < 0.03) return { edge: null, direction: null, weakestRegion: null };
+  if (avgCov < 0.02) return { edge: null, direction: null, weakestRegion: null };
 
   // Find the weakest and strongest regions
   let weakest = regions[0];

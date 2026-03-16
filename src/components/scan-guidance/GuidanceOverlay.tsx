@@ -84,8 +84,6 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: {
 }) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
-  const rotY = pointerNDC.x * 40;
-  const rotX = pointerNDC.y * -20;
 
   const borderCol = flashActive
     ? '#16A34A'
@@ -107,30 +105,20 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      perspective: '400px',
+      width: 'clamp(220px, 20vw, 300px)',
+      height: 'clamp(340px, 32vw, 450px)',
       transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
       pointerEvents: 'none',
-    }}>
-      <div style={{
-        transformStyle: 'preserve-3d',
-        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(0px)`,
-        transition: 'transform 0.12s ease',
-      }}>
-        <div style={{
-          width: 'clamp(220px, 20vw, 300px)',
-          height: 'clamp(340px, 32vw, 450px)',
-          borderStyle: 'solid',
-          borderColor: borderCol,
-          borderTopWidth: bw('top'),
-          borderRightWidth: bw('right'),
-          borderBottomWidth: bw('bottom'),
-          borderLeftWidth: bw('left'),
-          borderRadius: '14px',
-          boxShadow: glowShadow,
-          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-        }} />
-      </div>
-    </div>
+      borderStyle: 'solid',
+      borderColor: borderCol,
+      borderTopWidth: bw('top'),
+      borderRightWidth: bw('right'),
+      borderBottomWidth: bw('bottom'),
+      borderLeftWidth: bw('left'),
+      borderRadius: '14px',
+      boxShadow: glowShadow,
+      transition: 'transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+    }} />
   );
 }
 
@@ -140,26 +128,28 @@ function TargetFrame({ screenPos, pointerNDC }: {
   screenPos: { x: number; y: number };
   pointerNDC: { x: number; y: number };
 }) {
-  const rotY = pointerNDC.x * 40;
-  const rotX = pointerNDC.y * -20;
+  // Strong perspective rotation matching the model's tilt
+  const rotY = pointerNDC.x * 45;
+  const rotX = pointerNDC.y * -22;
 
   return (
     <div style={{
       position: 'absolute',
       top: `${screenPos.y * 100}%`,
       left: `${screenPos.x * 100}%`,
-      perspective: '400px',
+      perspective: '300px',
       transform: 'translate(-50%, -50%)',
       pointerEvents: 'none',
+      transition: 'top 0.25s ease, left 0.25s ease',
     }}>
       <div style={{
         transformStyle: 'preserve-3d',
-        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(-200px)`,
+        transform: `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(-180px)`,
         transition: 'transform 0.15s ease',
       }}>
         <div style={{
-          width: 'clamp(220px, 20vw, 300px)',
-          height: 'clamp(340px, 32vw, 450px)',
+          width: 'clamp(200px, 18vw, 270px)',
+          height: 'clamp(310px, 28vw, 410px)',
           border: `4px solid ${ARROW_RED}`,
           borderRadius: '14px',
           animation: 'target-pulse 2s ease-in-out infinite',

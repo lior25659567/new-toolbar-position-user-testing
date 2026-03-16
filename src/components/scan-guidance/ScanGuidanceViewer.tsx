@@ -196,8 +196,8 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       _projVec.project(camera);
 
       guidance.targetScreenPos = {
-        x: Math.min(0.9, Math.max(0.1, (_projVec.x + 1) / 2)),
-        y: Math.min(0.9, Math.max(0.1, (1 - _projVec.y) / 2)),
+        x: Math.min(0.95, Math.max(0.05, (_projVec.x + 1) / 2)),
+        y: Math.min(0.95, Math.max(0.05, (1 - _projVec.y) / 2)),
       };
 
       // Store for rotation bias (normalized 0-1)
