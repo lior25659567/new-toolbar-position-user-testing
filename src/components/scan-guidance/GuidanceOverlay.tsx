@@ -1,6 +1,6 @@
 import React from 'react';
 import { color, font, space, radius, transition } from '../../design-system/tokens';
-import type { GuidanceState, ScanStage, FrameEdge } from './types';
+import type { GuidanceState, ScanStage, FrameEdge, GuidanceDirection } from './types';
 
 interface GuidanceOverlayProps {
   guidance: GuidanceState;
@@ -9,16 +9,116 @@ interface GuidanceOverlayProps {
   flashActive: boolean;
 }
 
-// ─── Scanning Frame (solid rounded rectangle) ─────────────────────────────────
+const ARROW_RED = '#E74C3C';
+
+// ─── Target frame offsets (px from scanning frame origin) ─────────────────────
+
+const TARGET_OFFSETS: Record<string, { left: string; top: string }> = {
+  left:           { left: '-290px', top: '0px' },
+  right:          { left: 'calc(100% + 50px)', top: '0px' },
+  up:             { left: '0px', top: '-310px' },
+  down:           { left: '0px', top: 'calc(100% + 50px)' },
+  'rotate-left':  { left: '-290px', top: '0px' },
+  'rotate-right': { left: 'calc(100% + 50px)', top: '0px' },
+};
+
+// ─── Arrow SVG between frames ─────────────────────────────────────────────────
+// Each direction has a positioned SVG with a curved path + arrowhead
+
+function GuidanceArrowSvg({ direction }: { direction: GuidanceDirection }) {
+  // Arrow configs: SVG position relative to scanning frame, and path within it
+  const configs: Record<string, {
+    style: React.CSSProperties;
+    viewBox: string;
+    width: number;
+    height: number;
+    path: string;
+    head: string; // polygon points for arrowhead
+  }> = {
+    left: {
+      style: { position: 'absolute', right: '100%', top: '-60px', marginRight: '10px' },
+      viewBox: '0 0 240 200',
+      width: 240,
+      height: 200,
+      path: 'M 230 160 C 210 30, 30 30, 10 160',
+      head: '10,160 0,130 28,138',
+    },
+    'rotate-left': {
+      style: { position: 'absolute', right: '100%', top: '-60px', marginRight: '10px' },
+      viewBox: '0 0 240 200',
+      width: 240,
+      height: 200,
+      path: 'M 230 160 C 210 30, 30 30, 10 160',
+      head: '10,160 0,130 28,138',
+    },
+    right: {
+      style: { position: 'absolute', left: '100%', top: '-60px', marginLeft: '10px' },
+      viewBox: '0 0 240 200',
+      width: 240,
+      height: 200,
+      path: 'M 10 160 C 30 30, 210 30, 230 160',
+      head: '230,160 240,130 212,138',
+    },
+    'rotate-right': {
+      style: { position: 'absolute', left: '100%', top: '-60px', marginLeft: '10px' },
+      viewBox: '0 0 240 200',
+      width: 240,
+      height: 200,
+      path: 'M 10 160 C 30 30, 210 30, 230 160',
+      head: '230,160 240,130 212,138',
+    },
+    up: {
+      style: { position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '10px' },
+      viewBox: '0 0 200 200',
+      width: 200,
+      height: 200,
+      path: 'M 160 190 C 30 170, 30 30, 160 10',
+      head: '160,10 130,0 138,28',
+    },
+    down: {
+      style: { position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '10px' },
+      viewBox: '0 0 200 200',
+      width: 200,
+      height: 200,
+      path: 'M 160 10 C 30 30, 30 170, 160 190',
+      head: '160,190 130,200 138,172',
+    },
+  };
+
+  const cfg = configs[direction];
+  if (!cfg) return null;
+
+  return (
+    <div style={{
+      ...cfg.style,
+      pointerEvents: 'none',
+      animation: 'arrow-breathe 2s ease-in-out infinite',
+    }}>
+      <svg width={cfg.width} height={cfg.height} viewBox={cfg.viewBox} fill="none">
+        <path
+          d={cfg.path}
+          stroke={ARROW_RED}
+          strokeWidth="8"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <polygon points={cfg.head} fill={ARROW_RED} />
+      </svg>
+    </div>
+  );
+}
+
+// ─── Scanning Frame + Target Frame + Arrow ────────────────────────────────────
 
 interface ScanFrameProps {
   pointerNDC: { x: number; y: number };
   glowEdge: FrameEdge;
   isScanning: boolean;
   flashActive: boolean;
+  direction: GuidanceDirection | null;
 }
 
-function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: ScanFrameProps) {
+function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direction }: ScanFrameProps) {
   const offsetX = pointerNDC.x * 8;
   const offsetY = pointerNDC.y * -6;
 
@@ -36,6 +136,8 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: ScanFrameP
 
   const bw = (edge: 'top' | 'right' | 'bottom' | 'left') =>
     glowEdge === edge ? '5px' : '3px';
+
+  const targetPos = direction ? TARGET_OFFSETS[direction] : null;
 
   return (
     <div style={{
@@ -55,7 +157,26 @@ function ScanFrame({ pointerNDC, glowEdge, isScanning, flashActive }: ScanFrameP
       borderLeftWidth: bw('left'),
       borderRadius: '14px',
       boxShadow: glowShadow,
-    }} />
+    }}>
+      {/* Target frame — "move your scanner here next" */}
+      {targetPos && (
+        <div style={{
+          position: 'absolute',
+          left: targetPos.left,
+          top: targetPos.top,
+          width: '100%',
+          height: '100%',
+          border: `4px solid ${ARROW_RED}`,
+          borderRadius: '14px',
+          opacity: 0.85,
+          animation: 'target-pulse 2s ease-in-out infinite',
+          pointerEvents: 'none',
+        }} />
+      )}
+
+      {/* Arrow from scanning frame → target frame */}
+      {direction && <GuidanceArrowSvg direction={direction} />}
+    </div>
   );
 }
 
@@ -110,11 +231,20 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
       display: 'flex',
       flexDirection: 'column',
       fontFamily: font.family,
+      overflow: 'hidden',
     }}>
       <style>{`
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
+        }
+        @keyframes arrow-breathe {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.45; }
+        }
+        @keyframes target-pulse {
+          0%, 100% { opacity: 0.85; transform: scale(1); }
+          50% { opacity: 0.55; transform: scale(0.98); }
         }
       `}</style>
 
@@ -153,12 +283,13 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive }: G
         <StagePill stage={guidance.stage} phase={guidance.phase} />
       </div>
 
-      {/* ── Scanning frame (2D overlay — border + edge glow only) ── */}
+      {/* ── Scanning frame + target frame + arrow ── */}
       <ScanFrame
         pointerNDC={pointerNDC}
         glowEdge={guidance.activeEdge}
         isScanning={guidance.phase === 'scanning'}
         flashActive={flashActive}
+        direction={guidance.phase !== 'complete' ? guidance.direction : null}
       />
     </div>
   );

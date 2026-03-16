@@ -12,7 +12,6 @@ import ScanningBoundary from './ScanningBoundary';
 import { useScanProgress } from './useScanProgress';
 import { useGuidanceEngine } from './useGuidanceEngine';
 import GuidanceOverlay from './GuidanceOverlay';
-import GuidanceArrow3D from './GuidanceArrow3D';
 import type { ScanPhase, GuidanceState, GuidanceDirection, ModelBounds } from './types';
 
 // ─── Inner scene ──────────────────────────────────────────────────────────────
@@ -196,12 +195,6 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
       </Center>
 
       <ScanningBoundary meshRef={meshRef} isScanning={isHovering} />
-
-      {/* 3D directional arrow — points toward unscanned area */}
-      <GuidanceArrow3D
-        direction={arrowDir}
-        visible={arrowDir !== null && phase !== 'complete'}
-      />
 
       <OrbitControls
         enablePan={true}
