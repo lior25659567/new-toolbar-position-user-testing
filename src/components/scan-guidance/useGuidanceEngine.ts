@@ -34,8 +34,9 @@ function getStage(coverage: number): ScanStage {
 }
 
 /**
- * Find the single weakest region and compute direction toward it.
- * Uses a 4×4 grid for precise spatial guidance.
+ * Find the weakest region that's actually on the model surface.
+ * Cells outside the jaw's footprint (corners, edges with no geometry)
+ * are filtered out by checking if they or their neighbors have any coverage.
  */
 function analyzeDirection(regions: ScanRegion[]): {
   edge: FrameEdge;
@@ -46,15 +47,39 @@ function analyzeDirection(regions: ScanRegion[]): {
   const avgCov = regions.reduce((s, r) => s + r.coverage, 0) / regions.length;
   if (avgCov < 0.02) return { edge: null, direction: null, weakestRegion: null };
 
-  // Find the weakest and strongest regions
-  let weakest = regions[0];
-  let maxCov = 0;
-  for (const r of regions) {
-    if (r.coverage < weakest.coverage) weakest = r;
-    if (r.coverage > maxCov) maxCov = r.coverage;
+  // Build set of "on-model" cell indices:
+  // A cell is on the model if it or any of its 8 neighbors has coverage > 0.
+  // This filters out grid cells in corners/edges where no jaw geometry exists.
+  const onModel = new Set<number>();
+  for (let i = 0; i < regions.length; i++) {
+    if (regions[i].coverage > 0) {
+      const row = Math.floor(i / GRID_SIZE);
+      const col = i % GRID_SIZE;
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = row + dr, nc = col + dc;
+          if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+            onModel.add(nr * GRID_SIZE + nc);
+          }
+        }
+      }
+    }
   }
 
-  // If the gap between best and worst is small, no guidance needed
+  // Find the weakest and strongest among on-model cells only
+  let weakest: ScanRegion | null = null;
+  let maxCov = 0;
+  for (let i = 0; i < regions.length; i++) {
+    if (!onModel.has(i)) continue;
+    if (!weakest || regions[i].coverage < weakest.coverage) {
+      weakest = regions[i];
+    }
+    if (regions[i].coverage > maxCov) maxCov = regions[i].coverage;
+  }
+
+  if (!weakest) return { edge: null, direction: null, weakestRegion: null };
+
+  // If the gap between best and worst on-model cells is small, no guidance needed
   if (maxCov - weakest.coverage < IMBALANCE_THRESHOLD) {
     return { edge: null, direction: null, weakestRegion: null };
   }
