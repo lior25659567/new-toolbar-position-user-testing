@@ -124,7 +124,7 @@ function TargetIndicator({ modelRotation, pointerNDC, regions, direction }: {
   const cov    = sideCoverage(regions, side);
   const isDone = cov >= SIDE_DONE_THRESHOLD;
   const accent = isDone ? ARROW_GREEN : ARROW_RED;
-  const glow   = isDone ? 'rgba(22,163,74,0.25)' : 'rgba(231,76,60,0.18)';
+  const glow   = isDone ? 'rgba(22,163,74,0.25)' : 'rgba(0,154,206,0.18)';
   const aAnim  = isDone ? 'arrow-breathe-fast 0.8s ease-in-out infinite' : 'arrow-breathe 2s ease-in-out infinite';
   const rAnim  = isDone ? 'target-pulse-fast 0.7s ease-in-out infinite'  : 'target-pulse 2s ease-in-out infinite';
 
@@ -425,8 +425,8 @@ function SmartDotOverlay({ guidance, pointerNDC, containerSize, flashActive }: {
           <div style={{
             position: 'absolute', inset: 8, borderRadius: '50%',
             border: `2px solid ${accent}`,
-            backgroundColor: isDone ? 'rgba(22,163,74,0.1)' : 'rgba(231,76,60,0.07)',
-            boxShadow: `0 0 12px 2px ${isDone ? 'rgba(22,163,74,0.2)' : 'rgba(231,76,60,0.15)'}`,
+            backgroundColor: isDone ? 'rgba(22,163,74,0.1)' : 'rgba(0,154,206,0.07)',
+            boxShadow: `0 0 12px 2px ${isDone ? 'rgba(22,163,74,0.2)' : 'rgba(0,154,206,0.15)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'border-color 0.3s ease, background-color 0.3s ease',
           }}>
@@ -620,25 +620,25 @@ function BlueDefs() {
   return (
     <defs>
       <linearGradient id="gb-h" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#93C5FD"/><stop offset="50%" stopColor="#3B82F6"/><stop offset="100%" stopColor="#1D4ED8"/>
+        <stop offset="0%" stopColor="#80D4F0"/><stop offset="50%" stopColor="#009ACE"/><stop offset="100%" stopColor="#007A9E"/>
       </linearGradient>
       <linearGradient id="gb-v" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="#93C5FD"/><stop offset="50%" stopColor="#3B82F6"/><stop offset="100%" stopColor="#1D4ED8"/>
+        <stop offset="0%" stopColor="#80D4F0"/><stop offset="50%" stopColor="#009ACE"/><stop offset="100%" stopColor="#007A9E"/>
       </linearGradient>
       <linearGradient id="gb-d" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#93C5FD"/><stop offset="100%" stopColor="#1E40AF"/>
+        <stop offset="0%" stopColor="#80D4F0"/><stop offset="100%" stopColor="#006080"/>
       </linearGradient>
       <linearGradient id="gb-hl" x1="0%" y1="0%" x2="0%" y2="100%">
         <stop offset="0%" stopColor="rgba(255,255,255,0.4)"/><stop offset="100%" stopColor="rgba(255,255,255,0)"/>
       </linearGradient>
       <radialGradient id="gb-r" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#60A5FA"/><stop offset="100%" stopColor="#1E40AF"/>
+        <stop offset="0%" stopColor="#40B8DB"/><stop offset="100%" stopColor="#006080"/>
       </radialGradient>
     </defs>
   );
 }
 
-const BF = 'drop-shadow(0 2px 6px rgba(30,64,175,0.3))';
+const BF = 'drop-shadow(0 2px 6px rgba(0,120,160,0.3))';
 
 // ─── 3D SVG Arrows ───────────────────────────────────────────────────────────
 
@@ -707,7 +707,7 @@ function SvgRing({ variant }: { variant: 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw' }) 
       position: 'absolute', top: '50%', left: '50%', width: 260, height: 260,
       animation: anim, pointerEvents: 'none',
     }}>
-      <svg width="260" height="260" viewBox="0 0 260 260" fill="none" style={{ filter: 'drop-shadow(0 2px 8px rgba(99,102,241,0.3))' }}>
+      <svg width="260" height="260" viewBox="0 0 260 260" fill="none" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,154,206,0.3))' }}>
         <BlueDefs/>
         <ellipse cx="130" cy="130"
           rx={variant === 'fb' ? 100 : 120}
@@ -737,7 +737,7 @@ const MODE_LABEL: Record<string, string> = {
   'dof-gizmo':'6DoF Overview',
 };
 
-function ModeLabel({ mode, c = '#3B82F6' }: { mode: string; c?: string }) {
+function ModeLabel({ mode, c = '#009ACE' }: { mode: string; c?: string }) {
   return (
     <div style={{
       position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
@@ -756,7 +756,7 @@ function ModeLabel({ mode, c = '#3B82F6' }: { mode: string; c?: string }) {
 function DofFrame({ mode, flashActive, children, anim }: {
   mode: string; flashActive: boolean; children?: React.ReactNode; anim?: string;
 }) {
-  const bc = flashActive ? '#16A34A' : 'rgba(59,130,246,0.45)';
+  const bc = flashActive ? '#16A34A' : 'rgba(0,154,206,0.45)';
   const glow = flashActive ? '0 0 24px 8px rgba(22,163,74,0.4)' : 'none';
   return (
     <div style={{
@@ -797,7 +797,7 @@ function DofLR({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean })
       <W mode={m} flashActive={f}>
         <div style={{ position:'absolute',left:-64,top:'50%',transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="left"/></div>
         <div style={{ position:'absolute',right:-64,top:'50%',transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="right"/></div>
-        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#60A5FA,#1D4ED8)',boxShadow:'0 1px 4px rgba(30,64,175,0.4)',animation:'dof-slide-lr 2.5s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'dof-slide-lr 2.5s ease-in-out infinite' }}/>
       </W>
     </div>
   );
@@ -813,7 +813,7 @@ function DofUD({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean })
       <W mode={m} flashActive={f}>
         <div style={{ position:'absolute',top:-64,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="up"/></div>
         <div style={{ position:'absolute',bottom:-64,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="down"/></div>
-        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#60A5FA,#1D4ED8)',boxShadow:'0 1px 4px rgba(30,64,175,0.4)',animation:'dof-slide-ud 2.5s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'dof-slide-ud 2.5s ease-in-out infinite' }}/>
       </W>
     </div>
   );
@@ -829,7 +829,7 @@ function DofFB({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean })
         position:'absolute',top:'50%',left:'50%',
         width:'clamp(220px,20vw,300px)',height:'clamp(340px,32vw,450px)',
         pointerEvents:'none',
-        border: bare ? 'none' : `3px solid ${f ? '#16A34A' : 'rgba(59,130,246,0.45)'}`,
+        border: bare ? 'none' : `3px solid ${f ? '#16A34A' : 'rgba(0,154,206,0.45)'}`,
         borderRadius:'14px', boxShadow: !bare && f ? '0 0 24px 8px rgba(22,163,74,0.4)' : 'none',
         animation:'dof-scale-fb 3s ease-in-out infinite',
       }}>
@@ -907,10 +907,10 @@ function RingOverlay({ mode, g }: { mode: string; g: GuidanceState }) {
       <SvgRing variant={variant}/>
       <div style={{
         position:'absolute',bottom:36,left:'50%',transform:'translateX(-50%)',
-        fontSize:'12px',fontWeight:600,color:'#6366F1',
+        fontSize:'12px',fontWeight:600,color:'#009ACE',
         backgroundColor:'rgba(255,255,255,0.9)',padding:'4px 14px',
         borderRadius:'12px',whiteSpace:'nowrap',
-        border:'1px solid rgba(99,102,241,0.2)',boxShadow:'0 2px 8px rgba(99,102,241,0.1)',
+        border:'1px solid rgba(0,154,206,0.2)',boxShadow:'0 2px 8px rgba(0,154,206,0.1)',
       }}>
         {MODE_LABEL[mode] ?? mode}
       </div>
@@ -920,8 +920,8 @@ function RingOverlay({ mode, g }: { mode: string; g: GuidanceState }) {
 
 // ─── Pulse overlays ──────────────────────────────────────────────────────────
 
-const PT = '#0D9488';
-const PTG = 'rgba(13,148,136,0.35)';
+const PT = '#009ACE';
+const PTG = 'rgba(0,154,206,0.35)';
 
 function PulseOverlay({ mode, g, f, anim, lead }: {
   mode: string; g: GuidanceState; f: boolean; anim: string;
@@ -930,7 +930,7 @@ function PulseOverlay({ mode, g, f, anim, lead }: {
   const pct = Math.round(g.coveragePercent * 100);
   const bc = f ? '#16A34A' : PT;
   const ew = (e: string) => (lead === 'all' ? 3 : e === lead ? 4 : 2);
-  const ec = (e: string) => (f ? '#16A34A' : lead === 'all' ? PT : e === lead ? PT : 'rgba(13,148,136,0.3)');
+  const ec = (e: string) => (f ? '#16A34A' : lead === 'all' ? PT : e === lead ? PT : 'rgba(0,154,206,0.3)');
   const glows: string[] = [];
   if (f) glows.push('0 0 20px 6px rgba(22,163,74,0.35)');
   else if (lead && lead !== 'all') {
@@ -968,13 +968,13 @@ function GizmoOverlay({ g }: { g: GuidanceState }) {
     <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
       <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
       <div style={{ position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:320,height:320,pointerEvents:'none' }}>
-        <svg width="320" height="320" viewBox="0 0 320 320" fill="none" style={{ filter:'drop-shadow(0 3px 8px rgba(30,64,175,0.18))' }}>
+        <svg width="320" height="320" viewBox="0 0 320 320" fill="none" style={{ filter:'drop-shadow(0 3px 8px rgba(0,120,160,0.18))' }}>
           <BlueDefs/>
           {/* X — L/R */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite' }}>
             <rect x="40" y="155" width="240" height="10" rx="5" fill="url(#gb-h)"/><rect x="40" y="155" width="240" height="5" rx="5" fill="url(#gb-hl)"/>
             <path d="M40 145L20 160L40 175Z" fill="url(#gb-h)"/><path d="M280 145L300 160L280 175Z" fill="url(#gb-h)"/>
-            <text x="305" y="164" fill="#1D4ED8" fontSize="11" fontWeight="700" fontFamily="system-ui">X</text>
+            <text x="305" y="164" fill="#007A9E" fontSize="11" fontWeight="700" fontFamily="system-ui">X</text>
           </g>
           {/* Y — U/D */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'0.5s' }}>
@@ -986,31 +986,613 @@ function GizmoOverlay({ g }: { g: GuidanceState }) {
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'1s' }}>
             <line x1="90" y1="230" x2="230" y2="90" stroke="url(#gb-d)" strokeWidth="8" strokeLinecap="round"/>
             <path d="M90 230L78 212L102 218Z" fill="url(#gb-d)"/><path d="M230 90L218 78L242 84Z" fill="url(#gb-d)"/>
-            <text x="240" y="78" fill="#DC2626" fontSize="11" fontWeight="700" fontFamily="system-ui">Z</text>
+            <text x="240" y="78" fill="#007A9E" fontSize="11" fontWeight="700" fontFamily="system-ui">Z</text>
           </g>
           {/* Roll arc */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'1.5s' }}>
             <path d="M110 70A100 100 0 0 1 210 70" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
             <path d="M210 70L200 60L203 75Z" fill="url(#gb-d)"/>
-            <text x="160" y="56" fill="#2563EB" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Roll</text>
+            <text x="160" y="56" fill="#009ACE" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Roll</text>
           </g>
           {/* Pitch arc */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'2s' }}>
             <path d="M252 110A100 100 0 0 1 252 210" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
             <path d="M252 210L242 200L257 203Z" fill="url(#gb-d)"/>
-            <text x="268" y="164" fill="#2563EB" fontSize="9" fontWeight="600" fontFamily="system-ui">Pitch</text>
+            <text x="268" y="164" fill="#009ACE" fontSize="9" fontWeight="600" fontFamily="system-ui">Pitch</text>
           </g>
           {/* Yaw arc */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'2.5s' }}>
             <path d="M110 252A100 100 0 0 1 210 252" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
             <path d="M210 252L200 243L203 257Z" fill="url(#gb-d)"/>
-            <text x="160" y="272" fill="#2563EB" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Yaw</text>
+            <text x="160" y="272" fill="#009ACE" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Yaw</text>
           </g>
           <circle cx="160" cy="160" r="8" fill="url(#gb-r)"/><circle cx="158" cy="158" r="3" fill="rgba(255,255,255,0.4)"/>
         </svg>
-        <div style={{ position:'absolute',bottom:-36,left:'50%',transform:'translateX(-50%)',fontSize:'12px',fontWeight:700,color:'#D97706',backgroundColor:'rgba(255,255,255,0.92)',padding:'4px 16px',borderRadius:'12px',whiteSpace:'nowrap',border:`1px solid ${color.borderDefault}`,boxShadow:'0 1px 4px rgba(0,0,0,0.08)' }}>
+        <div style={{ position:'absolute',bottom:-36,left:'50%',transform:'translateX(-50%)',fontSize:'12px',fontWeight:700,color:'#009ACE',backgroundColor:'rgba(255,255,255,0.92)',padding:'4px 16px',borderRadius:'12px',whiteSpace:'nowrap',border:`1px solid ${color.borderDefault}`,boxShadow:'0 1px 4px rgba(0,0,0,0.08)' }}>
           6 Degrees of Freedom
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// GHOST WAND GUIDANCE — real frame + ghost frame per 6DoF axis
+// ════════════════════════════════════════════════════════════════════════════
+
+const GHOST_KF = `
+  @keyframes ghost-float-lr  { 0%{transform:translate(calc(-50% + 30px),-50%)} 50%{transform:translate(calc(-50% - 30px),-50%)} 100%{transform:translate(calc(-50% + 30px),-50%)} }
+  @keyframes ghost-float-ud  { 0%{transform:translate(-50%,calc(-50% + 24px))} 50%{transform:translate(-50%,calc(-50% - 24px))} 100%{transform:translate(-50%,calc(-50% + 24px))} }
+  @keyframes ghost-float-fb  { 0%{transform:translate(-50%,-50%) scale(0.88)} 50%{transform:translate(-50%,-50%) scale(1.12)} 100%{transform:translate(-50%,-50%) scale(0.88)} }
+  @keyframes ghost-float-roll { 0%{transform:translate(-50%,-50%) rotate(-8deg)} 50%{transform:translate(-50%,-50%) rotate(8deg)} 100%{transform:translate(-50%,-50%) rotate(-8deg)} }
+  @keyframes ghost-float-pitch { 0%{transform:translate(-50%,-50%) perspective(400px) rotateX(-12deg)} 50%{transform:translate(-50%,-50%) perspective(400px) rotateX(12deg)} 100%{transform:translate(-50%,-50%) perspective(400px) rotateX(-12deg)} }
+  @keyframes ghost-float-yaw { 0%{transform:translate(-50%,-50%) perspective(400px) rotateY(-14deg)} 50%{transform:translate(-50%,-50%) perspective(400px) rotateY(14deg)} 100%{transform:translate(-50%,-50%) perspective(400px) rotateY(-14deg)} }
+  @keyframes ghost-confirm  { 0%{box-shadow:0 0 0 0 rgba(22,163,74,0.5)} 70%{box-shadow:0 0 0 18px rgba(22,163,74,0)} 100%{box-shadow:0 0 0 0 rgba(22,163,74,0)} }
+`;
+
+const GHOST_ANIM: Record<string, string> = {
+  'ghost-lr':    'ghost-float-lr 2.8s ease-in-out infinite',
+  'ghost-ud':    'ghost-float-ud 2.8s ease-in-out infinite',
+  'ghost-fb':    'ghost-float-fb 3.2s ease-in-out infinite',
+  'ghost-roll':  'ghost-float-roll 3s ease-in-out infinite',
+  'ghost-pitch': 'ghost-float-pitch 3s ease-in-out infinite',
+  'ghost-yaw':   'ghost-float-yaw 3s ease-in-out infinite',
+};
+
+const GHOST_LABEL: Record<string, string> = {
+  'ghost-lr': 'Left / Right', 'ghost-ud': 'Up / Down', 'ghost-fb': 'Forward / Back',
+  'ghost-roll': 'Roll', 'ghost-pitch': 'Pitch', 'ghost-yaw': 'Yaw',
+};
+
+const GW = '#009ACE';
+
+function GhostOverlay({ mode, g, f }: { mode: string; g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const isScanning = g.phase === 'scanning';
+
+  // Real frame colors
+  const realBorder = f ? '#16A34A' : isScanning ? GW : 'rgba(0,154,206,0.5)';
+  const realGlow = f
+    ? '0 0 24px 8px rgba(22,163,74,0.4), inset 0 0 12px 2px rgba(22,163,74,0.15)'
+    : isScanning
+    ? '0 0 20px 6px rgba(0,154,206,0.3), inset 0 0 10px 2px rgba(0,154,206,0.08)'
+    : 'none';
+
+  // Ghost frame
+  const ghostAnim = GHOST_ANIM[mode] ?? 'none';
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
+      <style>{KF + DOF_KF + GHOST_KF}</style>
+      <TopBar guidance={g} pct={pct} />
+
+      {/* Ghost frame — animates along the axis */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: 'clamp(220px, 20vw, 300px)', height: 'clamp(340px, 32vw, 450px)',
+        pointerEvents: 'none',
+        animation: ghostAnim,
+      }}>
+        <div style={{
+          width: '100%', height: '100%',
+          border: '2.5px dashed rgba(0,154,206,0.25)',
+          borderRadius: '14px',
+          boxShadow: '0 0 14px 3px rgba(0,154,206,0.1)',
+          transition: 'border-color 0.3s ease',
+        }}>
+          {/* "target" label */}
+          <div style={{
+            position: 'absolute', bottom: -24, left: '50%', transform: 'translateX(-50%)',
+            fontSize: '10px', fontWeight: 600, color: GW, opacity: 0.7,
+            backgroundColor: 'rgba(255,255,255,0.88)', padding: '2px 10px',
+            borderRadius: '8px', whiteSpace: 'nowrap',
+            border: '1px solid rgba(0,154,206,0.12)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            scan here
+          </div>
+        </div>
+      </div>
+
+      {/* Real frame — stationary in the center */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: 'clamp(220px, 20vw, 300px)', height: 'clamp(340px, 32vw, 450px)',
+        transform: 'translate(-50%,-50%)',
+        pointerEvents: 'none',
+        border: `3px solid ${realBorder}`,
+        borderRadius: '14px',
+        boxShadow: realGlow,
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+      }}>
+        {/* Mode label */}
+        <div style={{
+          position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
+          fontSize: '11px', fontWeight: 600, color: GW,
+          backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
+          borderRadius: '10px', whiteSpace: 'nowrap',
+          border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        }}>
+          {GHOST_LABEL[mode] ?? mode}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SURFACE GUIDANCE — model-driven minimal highlights
+// ════════════════════════════════════════════════════════════════════════════
+
+const SURFACE_KF = `
+  @keyframes surface-pulse  { 0%,100%{opacity:0.45} 50%{opacity:0.85} }
+  @keyframes surface-reveal { from{clip-path:inset(100% 0 0 0)} to{clip-path:inset(0)} }
+  @keyframes surface-hint-slide { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+  @keyframes surface-region-glow { 0%,100%{box-shadow:0 0 12px 2px var(--sg)} 50%{box-shadow:0 0 24px 6px var(--sg)} }
+`;
+
+/** Maps stage to a human-readable instruction */
+function surfaceHint(stage: ScanStage, direction: GuidanceDirection | null, coverage: number): string {
+  if (coverage < 0.02) return 'Hover over the model to begin scanning';
+  if (stage === 'occlusal') {
+    if (!direction) return 'Scanning occlusal surface...';
+    if (direction === 'left' || direction === 'rotate-left') return 'Move toward the left side';
+    if (direction === 'right' || direction === 'rotate-right') return 'Move toward the right side';
+    if (direction === 'up') return 'Scan the upper area';
+    if (direction === 'down') return 'Scan the lower area';
+  }
+  if (stage === 'buccal') {
+    if (!direction || direction === 'rotate-left') return 'Rotate to scan buccal surface';
+    return 'Continue scanning buccal area';
+  }
+  if (stage === 'lingual') {
+    if (!direction || direction === 'rotate-right') return 'Rotate to reach lingual surface';
+    return 'Continue scanning lingual area';
+  }
+  return 'Continue scanning';
+}
+
+function SurfaceGuideOverlay({ guidance, containerSize }: {
+  guidance: GuidanceState;
+  containerSize: { width: number; height: number };
+}) {
+  const pct = Math.round(guidance.coveragePercent * 100);
+  const dir = guidance.phase !== 'complete' ? guidance.direction : null;
+  const isScanning = guidance.phase === 'scanning';
+  const isComplete = guidance.phase === 'complete';
+  const { width: cw, height: ch } = containerSize;
+
+  // Find the weakest regions (up to 3) to highlight
+  const sortedRegions = [...guidance.regions]
+    .filter(r => r.coverage < 0.6)
+    .sort((a, b) => a.coverage - b.coverage)
+    .slice(0, 3);
+
+  const hint = isComplete
+    ? 'Scan complete'
+    : surfaceHint(guidance.stage, dir, guidance.coveragePercent);
+
+  // Subtle rotation cue arrow (only shows when stage suggests rotation)
+  const showRotateCue = !isComplete && (dir === 'rotate-left' || dir === 'rotate-right');
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
+      <style>{KF + SURFACE_KF}</style>
+      <TopBar guidance={guidance} pct={pct} />
+
+      {/* Region highlight markers — positioned over the 3D model area */}
+      {cw > 0 && sortedRegions.map((region, i) => {
+        // Map region's normalized coords to screen space
+        // The model occupies roughly the center 60% of the viewport
+        const modelLeft = cw * 0.2;
+        const modelTop = ch * 0.15;
+        const modelW = cw * 0.6;
+        const modelH = ch * 0.7;
+
+        const rx = modelLeft + ((region.xMin + region.xMax) / 2) * modelW;
+        const ry = modelTop + ((region.zMin + region.zMax) / 2) * modelH;
+        const rw = ((region.xMax - region.xMin) * modelW) * 0.85;
+        const rh = ((region.zMax - region.zMin) * modelH) * 0.85;
+
+        const intensity = 1 - region.coverage; // 0=fully scanned, 1=not scanned
+        const glowColor = `rgba(0,154,206,${(intensity * 0.35).toFixed(2)})`;
+
+        return (
+          <div key={region.id} style={{
+            position: 'absolute',
+            left: rx - rw / 2, top: ry - rh / 2,
+            width: rw, height: rh,
+            borderRadius: '12px',
+            border: `1.5px solid rgba(0,154,206,${(intensity * 0.5).toFixed(2)})`,
+            backgroundColor: `rgba(0,154,206,${(intensity * 0.08).toFixed(2)})`,
+            animation: `surface-pulse ${2 + i * 0.4}s ease-in-out infinite`,
+            ['--sg' as string]: glowColor,
+            transition: 'opacity 0.5s ease, border-color 0.5s ease',
+          }}>
+            {/* Inner pulse dot */}
+            {i === 0 && intensity > 0.4 && (
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                width: 8, height: 8, borderRadius: '50%',
+                backgroundColor: 'rgba(0,154,206,0.6)',
+                transform: 'translate(-50%, -50%)',
+                animation: 'surface-pulse 1.4s ease-in-out infinite',
+              }} />
+            )}
+          </div>
+        );
+      })}
+
+      {/* Subtle rotation cue — minimal curved hint */}
+      {showRotateCue && cw > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          [dir === 'rotate-left' ? 'left' : 'right']: '8%',
+          transform: `translateY(-50%) ${dir === 'rotate-right' ? 'scaleX(-1)' : ''}`,
+          opacity: 0.45,
+          animation: 'surface-pulse 2s ease-in-out infinite',
+        }}>
+          <svg width="36" height="60" viewBox="0 0 36 60" fill="none">
+            <path d="M28 8C12 12 8 28 12 48" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" fill="none" />
+            <path d="M12 48L6 40M12 48L20 42" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </div>
+      )}
+
+      {/* Direction hint — subtle arrow for non-rotation directions */}
+      {dir && !showRotateCue && !isComplete && cw > 0 && (
+        <div style={{
+          position: 'absolute',
+          ...(dir === 'left'  ? { top: '50%', left: '12%', transform: 'translateY(-50%)' } :
+              dir === 'right' ? { top: '50%', right: '12%', transform: 'translateY(-50%)' } :
+              dir === 'up'    ? { top: '15%', left: '50%', transform: 'translateX(-50%)' } :
+              dir === 'down'  ? { bottom: '15%', left: '50%', transform: 'translateX(-50%)' } : {}),
+          opacity: 0.4,
+          animation: 'surface-hint-slide 2.5s ease-in-out infinite',
+        }}>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d={
+              dir === 'left'  ? 'M22,14 L6,14 M12,8 L6,14 L12,20' :
+              dir === 'right' ? 'M6,14 L22,14 M16,8 L22,14 L16,20' :
+              dir === 'up'    ? 'M14,22 L14,6 M8,12 L14,6 L20,12' :
+                                'M14,6 L14,22 M8,16 L14,22 L20,16'
+            } stroke="#009ACE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      )}
+
+      {/* Instruction hint bar — bottom center */}
+      <div style={{
+        position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', alignItems: 'center', gap: '8px',
+        fontSize: '12px', fontWeight: 500,
+        color: isComplete ? '#16A34A' : '#009ACE',
+        backgroundColor: isComplete ? 'rgba(22,163,74,0.06)' : 'rgba(0,154,206,0.06)',
+        padding: '6px 18px', borderRadius: '14px', whiteSpace: 'nowrap',
+        border: `1px solid ${isComplete ? 'rgba(22,163,74,0.15)' : 'rgba(0,154,206,0.12)'}`,
+        boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+        animation: 'surface-hint-slide 3s ease-in-out infinite',
+        transition: 'color 0.3s, background-color 0.3s, border-color 0.3s',
+      }}>
+        {/* Pulsing dot indicator */}
+        <div style={{
+          width: 6, height: 6, borderRadius: '50%',
+          backgroundColor: isComplete ? '#16A34A' : isScanning ? '#009ACE' : 'rgba(0,154,206,0.4)',
+          animation: isScanning ? 'surface-pulse 1.2s ease-in-out infinite' : undefined,
+        }} />
+        {hint}
+      </div>
+
+      {/* Scan complete overlay */}
+      {isComplete && (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>
+          <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="#16A34A" strokeWidth="2" />
+            <polyline points="24,44 37,57 64,31" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SCAN INDICATOR — standalone mode showing where the user needs to move
+// ════════════════════════════════════════════════════════════════════════════
+
+const INDICATOR_KF = `
+  @keyframes ind-ping  { 0%{transform:translate(-50%,-50%) scale(1);opacity:0.7} 100%{transform:translate(-50%,-50%) scale(2.8);opacity:0} }
+  @keyframes ind-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.15)} }
+  @keyframes ind-arrow-bounce {
+    0%,100%{transform:var(--ind-base)} 50%{transform:var(--ind-bounce)}
+  }
+  @keyframes ind-stage-enter { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+  @keyframes ind-rotate-hint { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(12deg)} 75%{transform:rotate(-12deg)} }
+`;
+
+function stageInstruction(stage: ScanStage, dir: GuidanceDirection | null, cov: number): { text: string; sub: string; isRotate: boolean } {
+  if (cov < 0.03) return { text: 'Begin scanning', sub: 'Hover over the model to start', isRotate: false };
+
+  if (stage === 'occlusal') {
+    if (!dir) return { text: 'Scanning occlusal', sub: 'Scan the top surface evenly', isRotate: false };
+    if (dir === 'left' || dir === 'rotate-left') return { text: 'Scan left side', sub: 'Move scanner toward the left', isRotate: false };
+    if (dir === 'right' || dir === 'rotate-right') return { text: 'Scan right side', sub: 'Move scanner toward the right', isRotate: false };
+    if (dir === 'up') return { text: 'Scan upper area', sub: 'Move scanner upward', isRotate: false };
+    if (dir === 'down') return { text: 'Scan lower area', sub: 'Move scanner downward', isRotate: false };
+    return { text: 'Continue scanning', sub: 'Cover the remaining occlusal area', isRotate: false };
+  }
+
+  if (stage === 'buccal') {
+    if (!dir || dir === 'rotate-left') return { text: 'Now scan buccal', sub: 'Rotate the scanner to see the outer side', isRotate: true };
+    return { text: 'Scanning buccal', sub: 'Continue scanning the outer surface', isRotate: false };
+  }
+
+  if (stage === 'lingual') {
+    if (!dir || dir === 'rotate-right') return { text: 'Now scan lingual', sub: 'Rotate to the inner side of the arch', isRotate: true };
+    return { text: 'Scanning lingual', sub: 'Continue scanning the inner surface', isRotate: false };
+  }
+
+  return { text: 'Continue scanning', sub: '', isRotate: false };
+}
+
+function dirArrowPath(dir: GuidanceDirection): string {
+  switch (dir) {
+    case 'left':  case 'rotate-left':  return 'M20,12 L6,12 M11,7 L6,12 L11,17';
+    case 'right': case 'rotate-right': return 'M4,12 L18,12 M13,7 L18,12 L13,17';
+    case 'up':    return 'M12,20 L12,6 M7,11 L12,6 L17,11';
+    case 'down':  return 'M12,4 L12,18 M7,13 L12,18 L17,13';
+  }
+}
+
+function dirArrowPlacement(dir: GuidanceDirection): React.CSSProperties & Record<string, string> {
+  const base: React.CSSProperties = { position: 'absolute', animation: 'ind-arrow-bounce 1.2s ease-in-out infinite' };
+  switch (dir) {
+    case 'left': case 'rotate-left':
+      return { ...base, right: '100%', top: '50%', marginRight: 8, marginTop: -12,
+        ['--ind-base' as string]: 'translateX(0)', ['--ind-bounce' as string]: 'translateX(-8px)' };
+    case 'right': case 'rotate-right':
+      return { ...base, left: '100%', top: '50%', marginLeft: 8, marginTop: -12,
+        ['--ind-base' as string]: 'translateX(0)', ['--ind-bounce' as string]: 'translateX(8px)' };
+    case 'up':
+      return { ...base, left: '50%', bottom: '100%', marginBottom: 8, marginLeft: -12,
+        ['--ind-base' as string]: 'translateY(0)', ['--ind-bounce' as string]: 'translateY(-8px)' };
+    case 'down':
+      return { ...base, left: '50%', top: '100%', marginTop: 8, marginLeft: -12,
+        ['--ind-base' as string]: 'translateY(0)', ['--ind-bounce' as string]: 'translateY(8px)' };
+  }
+}
+
+function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive }: {
+  guidance: GuidanceState;
+  containerSize: { width: number; height: number };
+  pointerNDC: { x: number; y: number };
+  flashActive: boolean;
+}) {
+  const pct = Math.round(guidance.coveragePercent * 100);
+  const { width: cw, height: ch } = containerSize;
+  const dir = guidance.direction;
+  const tp = guidance.targetScreenPos;
+  const wr = guidance.weakestRegion;
+  const isComplete = guidance.phase === 'complete';
+  const isScanning = guidance.phase === 'scanning';
+  const stage = guidance.stage;
+
+  // Scan frame position (follows cursor)
+  const ox = pointerNDC.x * 8;
+  const oy = pointerNDC.y * -6;
+  const frameBorder = flashActive ? '#16A34A' : isScanning ? 'rgba(0,154,206,0.6)' : 'rgba(0,154,206,0.3)';
+  const frameGlow = flashActive
+    ? '0 0 24px 8px rgba(22,163,74,0.4), inset 0 0 12px 2px rgba(22,163,74,0.15)'
+    : isScanning
+    ? '0 0 16px 4px rgba(0,154,206,0.15), inset 0 0 8px 2px rgba(0,154,206,0.05)'
+    : 'none';
+
+  const hasTarget = !!dir && !!tp && !!wr && !isComplete && cw > 0 && guidance.coveragePercent >= 0.03;
+
+  // Clamp target position to stay within the model's visible area (center 70% of viewport)
+  const padX = cw * 0.15;
+  const padY = ch * 0.12;
+  const tx = tp ? Math.max(padX, Math.min(cw - padX, tp.x * cw)) : cw / 2;
+  const ty = tp ? Math.max(padY + 40, Math.min(ch - padY - 60, tp.y * ch)) : ch / 2;
+  const regionCov = wr ? Math.round(wr.coverage * 100) : 0;
+
+  const { text: stageText, sub: stageSub, isRotate } = stageInstruction(stage, dir, guidance.coveragePercent);
+
+  // Label goes below marker but clamp so it doesn't go offscreen
+  const labelTop = Math.min(ty + 32, ch - 60);
+  const labelLeft = Math.max(60, Math.min(cw - 60, tx));
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
+      <style>{KF + INDICATOR_KF}</style>
+      <TopBar guidance={guidance} pct={pct} />
+
+      {/* Scan frame — always visible, follows cursor */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: 'clamp(220px, 20vw, 300px)', height: 'clamp(340px, 32vw, 450px)',
+        transform: `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`,
+        pointerEvents: 'none',
+        border: `3px solid ${frameBorder}`,
+        borderRadius: '14px',
+        boxShadow: frameGlow,
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease',
+      }} />
+
+      {/* Idle — pre-scan hint centered on model */}
+      {guidance.coveragePercent < 0.03 && !isComplete && (
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
+        }}>
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" opacity="0.45">
+            <circle cx="26" cy="26" r="22" stroke="#009ACE" strokeWidth="1.5" strokeDasharray="6 4" />
+            <path d="M26 14v12" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="26" cy="32" r="1.5" fill="#009ACE" />
+          </svg>
+          <div style={{
+            fontSize: '13px', fontWeight: 500, color: '#94A3B8',
+            backgroundColor: 'rgba(255,255,255,0.92)', padding: '6px 18px',
+            borderRadius: '12px', border: `1px solid ${color.borderDefault}`,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+          }}>
+            Hover over the model to start scanning
+          </div>
+        </div>
+      )}
+
+      {/* Target marker — positioned on the model's weak area */}
+      {hasTarget && dir && (
+        <>
+          {/* Outer soft glow halo */}
+          <div style={{
+            position: 'absolute', left: tx, top: ty,
+            width: 48, height: 48, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(0,154,206,0.12) 0%, transparent 70%)',
+            transform: 'translate(-50%,-50%)',
+            animation: 'ind-pulse 2s ease-in-out infinite',
+          }} />
+
+          {/* Main target ring */}
+          <div style={{
+            position: 'absolute', left: tx, top: ty,
+            width: 32, height: 32, borderRadius: '50%',
+            border: '2px solid rgba(0,154,206,0.55)',
+            backgroundColor: 'rgba(0,154,206,0.06)',
+            transform: 'translate(-50%,-50%)',
+            animation: 'ind-pulse 1.8s ease-in-out infinite',
+          }}>
+            {/* Center dot */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              width: 8, height: 8, borderRadius: '50%',
+              backgroundColor: 'rgba(0,154,206,0.55)',
+              transform: 'translate(-50%,-50%)',
+            }} />
+
+            {/* Expanding ping */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              width: 32, height: 32, borderRadius: '50%',
+              border: '1.5px solid rgba(0,154,206,0.35)',
+              animation: 'ind-ping 2.2s ease-out infinite',
+            }} />
+
+            {/* Directional arrow */}
+            <div style={dirArrowPlacement(dir) as React.CSSProperties}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d={dirArrowPath(dir)} stroke="rgba(0,154,206,0.65)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Coverage chip near marker */}
+          <div style={{
+            position: 'absolute',
+            left: labelLeft, top: labelTop,
+            transform: 'translateX(-50%)',
+            fontSize: '10px', fontWeight: 600,
+            color: '#009ACE', opacity: 0.8,
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            whiteSpace: 'nowrap',
+            border: '1px solid rgba(0,154,206,0.12)',
+          }}>
+            {regionCov}% covered
+          </div>
+        </>
+      )}
+
+      {/* Stage instruction bar — bottom center, shows current phase + what to do */}
+      {!isComplete && guidance.coveragePercent >= 0.03 && (
+        <div style={{
+          position: 'absolute', bottom: 56, left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: '10px',
+          backgroundColor: 'rgba(255,255,255,0.94)',
+          padding: '8px 20px',
+          borderRadius: '14px',
+          border: `1px solid ${hasTarget ? 'rgba(0,154,206,0.12)' : 'rgba(22,163,74,0.15)'}`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          animation: 'ind-stage-enter 0.3s ease-out',
+          whiteSpace: 'nowrap',
+        }}>
+          {/* Rotate hint icon */}
+          {isRotate && (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+              style={{ animation: 'ind-rotate-hint 2s ease-in-out infinite', flexShrink: 0 }}>
+              <path d="M14 4C8 2 3 6 3 10" stroke="#009ACE" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M3 10L1 7M3 10L6 8" stroke="#009ACE" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          )}
+
+          {/* Status dot */}
+          {!isRotate && (
+            <div style={{
+              width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+              backgroundColor: hasTarget ? '#009ACE' : '#16A34A',
+              animation: isScanning ? 'pulse-dot 1.2s infinite' : undefined,
+            }} />
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            <span style={{
+              fontSize: '12px', fontWeight: 600,
+              color: hasTarget ? '#009ACE' : '#16A34A',
+            }}>
+              {hasTarget ? stageText : 'Coverage balanced'}
+            </span>
+            {stageSub && hasTarget && (
+              <span style={{ fontSize: '10px', fontWeight: 400, color: '#94A3B8' }}>
+                {stageSub}
+              </span>
+            )}
+          </div>
+
+          {/* Stage badge */}
+          <div style={{
+            fontSize: '9px', fontWeight: 700, textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: stage === 'occlusal' ? '#64748B' : stage === 'buccal' ? color.primary : '#009ACE',
+            backgroundColor: stage === 'occlusal' ? color.neutral100 : stage === 'buccal' ? 'rgba(0,154,206,0.08)' : 'rgba(0,154,206,0.08)',
+            padding: '2px 8px', borderRadius: '6px',
+          }}>
+            {stage}
+          </div>
+        </div>
+      )}
+
+      {/* Scan complete */}
+      {isComplete && (
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+        }}>
+          <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="#16A34A" strokeWidth="2" />
+            <polyline points="24,44 37,57 64,31" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div style={{
+            fontSize: '13px', fontWeight: 600, color: '#16A34A',
+            backgroundColor: 'rgba(255,255,255,0.92)', padding: '5px 16px',
+            borderRadius: '12px', border: '1px solid rgba(22,163,74,0.15)',
+          }}>
+            Scan complete
+          </div>
+        </div>
+      )}
+
+      {/* Mode label */}
+      <div style={{
+        position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+        fontSize: '11px', fontWeight: 600, color: '#009ACE',
+        backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 14px',
+        borderRadius: '10px', whiteSpace: 'nowrap',
+        border: '1px solid rgba(0,154,206,0.1)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      }}>
+        Scan Indicator
       </div>
     </div>
   );
@@ -1053,6 +1635,15 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, con
 
   // Gizmo
   if (mode === 'dof-gizmo') return <GizmoOverlay g={guidance}/>;
+
+  // Ghost Wand (6DoF)
+  if (mode.startsWith('ghost-')) return <GhostOverlay mode={mode} g={guidance} f={flashActive}/>;
+
+  // Scan Indicator
+  if (mode === 'scan-indicator') return <ScanIndicatorOverlay guidance={guidance} containerSize={containerSize} pointerNDC={pointerNDC} flashActive={flashActive}/>;
+
+  // Surface Guide
+  if (mode === 'surface-guide') return <SurfaceGuideOverlay guidance={guidance} containerSize={containerSize}/>;
 
   return <ClassicOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive}/>;
 }

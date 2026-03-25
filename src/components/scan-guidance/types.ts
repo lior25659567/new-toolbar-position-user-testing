@@ -7,7 +7,10 @@ export type GuidanceMode = 'classic' | 'edge' | 'dot' | 'glow'
   | 'bare-lr' | 'bare-ud' | 'bare-fb' | 'bare-roll' | 'bare-pitch' | 'bare-yaw'
   | 'ring-lr' | 'ring-ud' | 'ring-fb' | 'ring-roll' | 'ring-pitch' | 'ring-yaw'
   | 'pulse-lr' | 'pulse-ud' | 'pulse-fb' | 'pulse-roll' | 'pulse-pitch' | 'pulse-yaw'
-  | 'dof-gizmo';
+  | 'dof-gizmo'
+  | 'ghost-lr' | 'ghost-ud' | 'ghost-fb' | 'ghost-roll' | 'ghost-pitch' | 'ghost-yaw'
+  | 'scan-indicator'
+  | 'surface-guide';
 
 export type ScanStage = 'occlusal' | 'buccal' | 'lingual';
 

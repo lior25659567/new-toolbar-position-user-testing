@@ -33,12 +33,12 @@ interface SceneProps {
 }
 
 const DOF_AXIS: Record<string, 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw'> = {
-  'dof-lr':'lr','bare-lr':'lr','ring-lr':'lr','pulse-lr':'lr',
-  'dof-ud':'ud','bare-ud':'ud','ring-ud':'ud','pulse-ud':'ud',
-  'dof-fb':'fb','bare-fb':'fb','ring-fb':'fb','pulse-fb':'fb',
-  'dof-roll':'roll','bare-roll':'roll','ring-roll':'roll','pulse-roll':'roll',
-  'dof-pitch':'pitch','bare-pitch':'pitch','ring-pitch':'pitch','pulse-pitch':'pitch',
-  'dof-yaw':'yaw','bare-yaw':'yaw','ring-yaw':'yaw','pulse-yaw':'yaw',
+  'dof-lr':'lr','bare-lr':'lr','ring-lr':'lr','pulse-lr':'lr','ghost-lr':'lr',
+  'dof-ud':'ud','bare-ud':'ud','ring-ud':'ud','pulse-ud':'ud','ghost-ud':'ud',
+  'dof-fb':'fb','bare-fb':'fb','ring-fb':'fb','pulse-fb':'fb','ghost-fb':'fb',
+  'dof-roll':'roll','bare-roll':'roll','ring-roll':'roll','pulse-roll':'roll','ghost-roll':'roll',
+  'dof-pitch':'pitch','bare-pitch':'pitch','ring-pitch':'pitch','pulse-pitch':'pitch','ghost-pitch':'pitch',
+  'dof-yaw':'yaw','bare-yaw':'yaw','ring-yaw':'yaw','pulse-yaw':'yaw','ghost-yaw':'yaw',
 };
 
 function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
@@ -120,17 +120,25 @@ function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
     if (!mesh || !group) return;
 
     // ── Model rotation: mouse follow + bias toward unscanned area ──
+    const isSurfaceGuide = guidanceMode === 'surface-guide';
     let targetX = BASE_ROT_X + pointer.y * -0.20;
     let targetY = pointer.x * 0.40;
 
     const wc = weakestCenterRef.current;
     if (wc) {
-      targetX += (wc.z - 0.5) * -0.15;
-      targetY += (wc.x - 0.5) * 0.25;
+      if (isSurfaceGuide) {
+        // Auto-rotate aggressively toward weakest region
+        targetX += (wc.z - 0.5) * -0.55;
+        targetY += (wc.x - 0.5) * 0.80;
+      } else {
+        targetX += (wc.z - 0.5) * -0.15;
+        targetY += (wc.x - 0.5) * 0.25;
+      }
     }
 
-    group.rotation.x += (targetX - group.rotation.x) * 0.06;
-    group.rotation.y += (targetY - group.rotation.y) * 0.06;
+    const lerpSpeed = isSurfaceGuide ? 0.025 : 0.06;
+    group.rotation.x += (targetX - group.rotation.x) * lerpSpeed;
+    group.rotation.y += (targetY - group.rotation.y) * lerpSpeed;
     group.rotation.z  = BASE_ROT_Z;
 
     // ── 6DoF model animation ──
