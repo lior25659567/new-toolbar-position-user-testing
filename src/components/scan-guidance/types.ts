@@ -2,7 +2,12 @@
 
 export type ScanPhase = 'idle' | 'scanning' | 'paused' | 'complete';
 
-export type GuidanceMode = 'classic' | 'edge' | 'dot' | 'glow';
+export type GuidanceMode = 'classic' | 'edge' | 'dot' | 'glow'
+  | 'dof-lr' | 'dof-ud' | 'dof-fb' | 'dof-roll' | 'dof-pitch' | 'dof-yaw'
+  | 'bare-lr' | 'bare-ud' | 'bare-fb' | 'bare-roll' | 'bare-pitch' | 'bare-yaw'
+  | 'ring-lr' | 'ring-ud' | 'ring-fb' | 'ring-roll' | 'ring-pitch' | 'ring-yaw'
+  | 'pulse-lr' | 'pulse-ud' | 'pulse-fb' | 'pulse-roll' | 'pulse-pitch' | 'pulse-yaw'
+  | 'dof-gizmo';
 
 export type ScanStage = 'occlusal' | 'buccal' | 'lingual';
 

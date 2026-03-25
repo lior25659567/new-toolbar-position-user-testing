@@ -592,17 +592,467 @@ function GlowFrameOverlay({ guidance, pointerNDC, flashActive }: {
   );
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// 6DoF GUIDANCE MODES — Blue gradient, all SVG
+// ════════════════════════════════════════════════════════════════════════════
+
+const DOF_KF = `
+  @keyframes dof-breathe     { 0%,100%{opacity:0.85} 50%{opacity:0.3} }
+  @keyframes dof-slide-lr    { 0%{transform:translate(-50%,-50%) translateX(-20px)} 50%{transform:translate(-50%,-50%) translateX(20px)} 100%{transform:translate(-50%,-50%) translateX(-20px)} }
+  @keyframes dof-slide-ud    { 0%{transform:translate(-50%,-50%) translateY(-16px)} 50%{transform:translate(-50%,-50%) translateY(16px)} 100%{transform:translate(-50%,-50%) translateY(-16px)} }
+  @keyframes dof-scale-fb    { 0%{transform:translate(-50%,-50%) scale(0.88)} 50%{transform:translate(-50%,-50%) scale(1.12)} 100%{transform:translate(-50%,-50%) scale(0.88)} }
+  @keyframes dof-roll        { 0%{transform:translate(-50%,-50%) rotate(0deg)} 100%{transform:translate(-50%,-50%) rotate(360deg)} }
+  @keyframes dof-pitch       { 0%{transform:translate(-50%,-50%) perspective(400px) rotateX(-14deg)} 50%{transform:translate(-50%,-50%) perspective(400px) rotateX(14deg)} 100%{transform:translate(-50%,-50%) perspective(400px) rotateX(-14deg)} }
+  @keyframes dof-yaw         { 0%{transform:translate(-50%,-50%) perspective(400px) rotateY(-16deg)} 50%{transform:translate(-50%,-50%) perspective(400px) rotateY(16deg)} 100%{transform:translate(-50%,-50%) perspective(400px) rotateY(-16deg)} }
+  @keyframes dof-gizmo-pulse { 0%,100%{opacity:0.55} 50%{opacity:1} }
+  @keyframes pulse-drift-lr  { 0%{transform:translate(calc(-50% - 18px),-50%)} 50%{transform:translate(calc(-50% + 18px),-50%)} 100%{transform:translate(calc(-50% - 18px),-50%)} }
+  @keyframes pulse-drift-ud  { 0%{transform:translate(-50%,calc(-50% - 14px))} 50%{transform:translate(-50%,calc(-50% + 14px))} 100%{transform:translate(-50%,calc(-50% - 14px))} }
+  @keyframes pulse-breathe   { 0%{transform:translate(-50%,-50%) scale(0.88)} 50%{transform:translate(-50%,-50%) scale(1.12)} 100%{transform:translate(-50%,-50%) scale(0.88)} }
+  @keyframes pulse-roll-f    { 0%{transform:translate(-50%,-50%) rotate(-6deg)} 50%{transform:translate(-50%,-50%) rotate(6deg)} 100%{transform:translate(-50%,-50%) rotate(-6deg)} }
+  @keyframes pulse-pitch-f   { 0%{transform:translate(-50%,-50%) perspective(500px) rotateX(-10deg)} 50%{transform:translate(-50%,-50%) perspective(500px) rotateX(10deg)} 100%{transform:translate(-50%,-50%) perspective(500px) rotateX(-10deg)} }
+  @keyframes pulse-yaw-f     { 0%{transform:translate(-50%,-50%) perspective(500px) rotateY(-12deg)} 50%{transform:translate(-50%,-50%) perspective(500px) rotateY(12deg)} 100%{transform:translate(-50%,-50%) perspective(500px) rotateY(-12deg)} }
+  @keyframes ring-spin       { 0%{transform:translate(-50%,-50%) rotate(0deg)} 100%{transform:translate(-50%,-50%) rotate(360deg)} }
+  @keyframes ring-osc        { 0%,100%{stroke-dashoffset:0} 50%{stroke-dashoffset:40} }
+`;
+
+// Blue gradient SVG defs
+function BlueDefs() {
+  return (
+    <defs>
+      <linearGradient id="gb-h" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#93C5FD"/><stop offset="50%" stopColor="#3B82F6"/><stop offset="100%" stopColor="#1D4ED8"/>
+      </linearGradient>
+      <linearGradient id="gb-v" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#93C5FD"/><stop offset="50%" stopColor="#3B82F6"/><stop offset="100%" stopColor="#1D4ED8"/>
+      </linearGradient>
+      <linearGradient id="gb-d" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#93C5FD"/><stop offset="100%" stopColor="#1E40AF"/>
+      </linearGradient>
+      <linearGradient id="gb-hl" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.4)"/><stop offset="100%" stopColor="rgba(255,255,255,0)"/>
+      </linearGradient>
+      <radialGradient id="gb-r" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#60A5FA"/><stop offset="100%" stopColor="#1E40AF"/>
+      </radialGradient>
+    </defs>
+  );
+}
+
+const BF = 'drop-shadow(0 2px 6px rgba(30,64,175,0.3))';
+
+// ─── 3D SVG Arrows ───────────────────────────────────────────────────────────
+
+function ArrowH({ dir, s = 56 }: { dir: 'left'|'right'; s?: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 56 56" fill="none" style={{ transform: dir === 'left' ? 'scaleX(-1)' : undefined, filter: BF }}>
+      <BlueDefs/>
+      <rect x="8" y="22" width="28" height="12" rx="6" fill="url(#gb-h)"/>
+      <rect x="8" y="22" width="28" height="6" rx="6" fill="url(#gb-hl)"/>
+      <path d="M34 12 L52 28 L34 44Z" fill="url(#gb-h)"/>
+      <path d="M34 12 L52 28 L34 28Z" fill="url(#gb-hl)" opacity="0.5"/>
+    </svg>
+  );
+}
+
+function ArrowV({ dir, s = 56 }: { dir: 'up'|'down'; s?: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 56 56" fill="none" style={{ transform: dir === 'down' ? 'scaleY(-1)' : undefined, filter: BF }}>
+      <BlueDefs/>
+      <rect x="22" y="18" width="12" height="28" rx="6" fill="url(#gb-v)"/>
+      <rect x="22" y="18" width="6" height="28" rx="6" fill="url(#gb-hl)"/>
+      <path d="M12 20 L28 2 L44 20Z" fill="url(#gb-v)"/>
+      <path d="M12 20 L28 2 L28 20Z" fill="url(#gb-hl)" opacity="0.5"/>
+    </svg>
+  );
+}
+
+function ArrowCurve({ s = 110 }: { s?: number }) {
+  const h = Math.round(s * 0.55);
+  return (
+    <svg width={s} height={h} viewBox="0 0 110 60" fill="none" style={{ filter: BF }}>
+      <BlueDefs/>
+      <path d="M14 50 A 48 40 0 0 1 96 50" stroke="url(#gb-d)" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      <path d="M16 48 A 46 38 0 0 1 94 48" stroke="url(#gb-hl)" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.5"/>
+      <path d="M92 50 L102 42 L96 58Z" fill="url(#gb-d)"/>
+      <path d="M92 50 L102 42 L97 50Z" fill="url(#gb-hl)" opacity="0.5"/>
+      <path d="M96 50 A 48 40 0 0 1 14 50" stroke="url(#gb-d)" strokeWidth="1.5" strokeDasharray="5 6" fill="none" opacity="0.15"/>
+    </svg>
+  );
+}
+
+function ArrowDepth({ s = 68 }: { s?: number }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 68 68" fill="none" style={{ filter: BF }}>
+      <BlueDefs/>
+      <circle cx="34" cy="34" r="28" stroke="url(#gb-d)" strokeWidth="2" fill="none" opacity="0.2"/>
+      <circle cx="34" cy="34" r="17" stroke="url(#gb-d)" strokeWidth="2" fill="none" opacity="0.4"/>
+      <circle cx="34" cy="34" r="5" fill="url(#gb-r)"/>
+      <circle cx="33" cy="33" r="2" fill="rgba(255,255,255,0.35)"/>
+      {[0,90,180,270].map(d=><g key={d} transform={`rotate(${d} 34 34)`}><path d="M34 3L30 9M34 3L38 9" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round"/></g>)}
+    </svg>
+  );
+}
+
+// SVG Ring for Ring mode
+function SvgRing({ variant }: { variant: 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw' }) {
+  const isRot = variant === 'roll' || variant === 'pitch' || variant === 'yaw';
+  const anim = variant === 'roll' ? 'ring-spin 5s linear infinite' :
+               variant === 'pitch' ? 'pulse-pitch-f 3s ease-in-out infinite' :
+               variant === 'yaw' ? 'pulse-yaw-f 3s ease-in-out infinite' :
+               variant === 'lr' ? 'pulse-drift-lr 2.8s ease-in-out infinite' :
+               variant === 'ud' ? 'pulse-drift-ud 2.8s ease-in-out infinite' :
+               'pulse-breathe 3.2s ease-in-out infinite';
+  return (
+    <div style={{
+      position: 'absolute', top: '50%', left: '50%', width: 260, height: 260,
+      animation: anim, pointerEvents: 'none',
+    }}>
+      <svg width="260" height="260" viewBox="0 0 260 260" fill="none" style={{ filter: 'drop-shadow(0 2px 8px rgba(99,102,241,0.3))' }}>
+        <BlueDefs/>
+        <ellipse cx="130" cy="130"
+          rx={variant === 'fb' ? 100 : 120}
+          ry={variant === 'fb' ? 60 : variant === 'lr' ? 60 : 120}
+          stroke="url(#gb-d)" strokeWidth="3" fill="none" opacity="0.7"
+          strokeDasharray={isRot ? 'none' : '12 6'}
+        />
+        <ellipse cx="130" cy="130"
+          rx={variant === 'fb' ? 98 : 118}
+          ry={variant === 'fb' ? 58 : variant === 'lr' ? 58 : 118}
+          stroke="url(#gb-hl)" strokeWidth="1.5" fill="none" opacity="0.4"
+        />
+        {/* Arrowhead on ring */}
+        <circle cx={variant === 'lr' ? 250 : variant === 'ud' ? 130 : 230} cy={variant === 'ud' ? 10 : variant === 'lr' ? 130 : 60} r="4" fill="url(#gb-r)"/>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Labels ──────────────────────────────────────────────────────────────────
+
+const MODE_LABEL: Record<string, string> = {
+  'dof-lr':'Left / Right','dof-ud':'Up / Down','dof-fb':'Forward / Back','dof-roll':'Roll','dof-pitch':'Pitch','dof-yaw':'Yaw',
+  'bare-lr':'Left / Right','bare-ud':'Up / Down','bare-fb':'Forward / Back','bare-roll':'Roll','bare-pitch':'Pitch','bare-yaw':'Yaw',
+  'ring-lr':'Left / Right','ring-ud':'Up / Down','ring-fb':'Forward / Back','ring-roll':'Roll','ring-pitch':'Pitch','ring-yaw':'Yaw',
+  'pulse-lr':'Left / Right','pulse-ud':'Up / Down','pulse-fb':'Forward / Back','pulse-roll':'Roll','pulse-pitch':'Pitch','pulse-yaw':'Yaw',
+  'dof-gizmo':'6DoF Overview',
+};
+
+function ModeLabel({ mode, c = '#3B82F6' }: { mode: string; c?: string }) {
+  return (
+    <div style={{
+      position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
+      fontSize: '11px', fontWeight: 600, color: c,
+      backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
+      borderRadius: '10px', whiteSpace: 'nowrap',
+      border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    }}>
+      {MODE_LABEL[mode] ?? mode}
+    </div>
+  );
+}
+
+// ─── Frame wrapper ───────────────────────────────────────────────────────────
+
+function DofFrame({ mode, flashActive, children, anim }: {
+  mode: string; flashActive: boolean; children?: React.ReactNode; anim?: string;
+}) {
+  const bc = flashActive ? '#16A34A' : 'rgba(59,130,246,0.45)';
+  const glow = flashActive ? '0 0 24px 8px rgba(22,163,74,0.4)' : 'none';
+  return (
+    <div style={{
+      position: 'absolute', top: '50%', left: '50%',
+      width: 'clamp(220px, 20vw, 300px)', height: 'clamp(340px, 32vw, 450px)',
+      transform: 'translate(-50%,-50%)', pointerEvents: 'none',
+      border: `3px solid ${bc}`, borderRadius: '14px',
+      boxShadow: glow, transition: 'border-color 0.2s, box-shadow 0.2s', animation: anim,
+    }}>
+      <ModeLabel mode={mode}/>
+      {children}
+    </div>
+  );
+}
+
+function BareWrap({ mode, children }: { mode: string; children?: React.ReactNode }) {
+  return (
+    <div style={{
+      position: 'absolute', top: '50%', left: '50%',
+      width: 'clamp(220px, 20vw, 300px)', height: 'clamp(340px, 32vw, 450px)',
+      transform: 'translate(-50%,-50%)', pointerEvents: 'none',
+    }}>
+      <ModeLabel mode={mode}/>
+      {children}
+    </div>
+  );
+}
+
+// ─── 6DoF overlays (shared between frame & bare via `bare` prop) ─────────────
+
+function DofLR({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const W = bare ? BareWrap : DofFrame;
+  const m = bare ? 'bare-lr' : 'dof-lr';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <W mode={m} flashActive={f}>
+        <div style={{ position:'absolute',left:-64,top:'50%',transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="left"/></div>
+        <div style={{ position:'absolute',right:-64,top:'50%',transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="right"/></div>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#60A5FA,#1D4ED8)',boxShadow:'0 1px 4px rgba(30,64,175,0.4)',animation:'dof-slide-lr 2.5s ease-in-out infinite' }}/>
+      </W>
+    </div>
+  );
+}
+
+function DofUD({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const W = bare ? BareWrap : DofFrame;
+  const m = bare ? 'bare-ud' : 'dof-ud';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <W mode={m} flashActive={f}>
+        <div style={{ position:'absolute',top:-64,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="up"/></div>
+        <div style={{ position:'absolute',bottom:-64,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="down"/></div>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#60A5FA,#1D4ED8)',boxShadow:'0 1px 4px rgba(30,64,175,0.4)',animation:'dof-slide-ud 2.5s ease-in-out infinite' }}/>
+      </W>
+    </div>
+  );
+}
+
+function DofFB({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const m = bare ? 'bare-fb' : 'dof-fb';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <div style={{
+        position:'absolute',top:'50%',left:'50%',
+        width:'clamp(220px,20vw,300px)',height:'clamp(340px,32vw,450px)',
+        pointerEvents:'none',
+        border: bare ? 'none' : `3px solid ${f ? '#16A34A' : 'rgba(59,130,246,0.45)'}`,
+        borderRadius:'14px', boxShadow: !bare && f ? '0 0 24px 8px rgba(22,163,74,0.4)' : 'none',
+        animation:'dof-scale-fb 3s ease-in-out infinite',
+      }}>
+        <div style={{ position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowDepth s={bare ? 80 : 68}/></div>
+        <ModeLabel mode={m}/>
+      </div>
+    </div>
+  );
+}
+
+function DofRoll({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const W = bare ? BareWrap : DofFrame;
+  const m = bare ? 'bare-roll' : 'dof-roll';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <W mode={m} flashActive={f}>
+        <div style={{ position:'absolute',top:-68,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={110}/></div>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:70,height:70,animation:'dof-roll 4s linear infinite' }}>
+          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style={{ filter:BF }}>
+            <BlueDefs/><circle cx="35" cy="35" r="28" stroke="url(#gb-d)" strokeWidth="2" opacity="0.25" fill="none"/>
+            <line x1="35" y1="7" x2="35" y2="20" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="35" y1="50" x2="35" y2="63" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="7" y1="35" x2="20" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="50" y1="35" x2="63" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+            <circle cx="35" cy="35" r="3" fill="url(#gb-r)"/>
+          </svg>
+        </div>
+      </W>
+    </div>
+  );
+}
+
+function DofPitch({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const W = bare ? BareWrap : DofFrame;
+  const m = bare ? 'bare-pitch' : 'dof-pitch';
+  const anim = bare ? undefined : 'dof-pitch 3s ease-in-out infinite';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <W mode={m} flashActive={f} anim={anim}>
+        <div style={{ position:'absolute',right:-68,top:'50%',transform:'translateY(-50%) rotate(90deg)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={100}/></div>
+        <div style={{ position:'absolute',left:-68,top:'50%',transform:'translateY(-50%) rotate(-90deg) scaleX(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={80}/></div>
+      </W>
+    </div>
+  );
+}
+
+function DofYaw({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const W = bare ? BareWrap : DofFrame;
+  const m = bare ? 'bare-yaw' : 'dof-yaw';
+  const anim = bare ? undefined : 'dof-yaw 3s ease-in-out infinite';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <W mode={m} flashActive={f} anim={anim}>
+        <div style={{ position:'absolute',top:-68,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={120}/></div>
+        <div style={{ position:'absolute',bottom:-68,left:'50%',transform:'translateX(-50%) scaleY(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={100}/></div>
+      </W>
+    </div>
+  );
+}
+
+// ─── Ring overlays ───────────────────────────────────────────────────────────
+
+function RingOverlay({ mode, g }: { mode: string; g: GuidanceState }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const variant = mode.replace('ring-','') as 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw';
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <SvgRing variant={variant}/>
+      <div style={{
+        position:'absolute',bottom:36,left:'50%',transform:'translateX(-50%)',
+        fontSize:'12px',fontWeight:600,color:'#6366F1',
+        backgroundColor:'rgba(255,255,255,0.9)',padding:'4px 14px',
+        borderRadius:'12px',whiteSpace:'nowrap',
+        border:'1px solid rgba(99,102,241,0.2)',boxShadow:'0 2px 8px rgba(99,102,241,0.1)',
+      }}>
+        {MODE_LABEL[mode] ?? mode}
+      </div>
+    </div>
+  );
+}
+
+// ─── Pulse overlays ──────────────────────────────────────────────────────────
+
+const PT = '#0D9488';
+const PTG = 'rgba(13,148,136,0.35)';
+
+function PulseOverlay({ mode, g, f, anim, lead }: {
+  mode: string; g: GuidanceState; f: boolean; anim: string;
+  lead?: 'top'|'right'|'bottom'|'left'|'all'|null;
+}) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const bc = f ? '#16A34A' : PT;
+  const ew = (e: string) => (lead === 'all' ? 3 : e === lead ? 4 : 2);
+  const ec = (e: string) => (f ? '#16A34A' : lead === 'all' ? PT : e === lead ? PT : 'rgba(13,148,136,0.3)');
+  const glows: string[] = [];
+  if (f) glows.push('0 0 20px 6px rgba(22,163,74,0.35)');
+  else if (lead && lead !== 'all') {
+    const m: Record<string,string> = { left:`inset 14px 0 24px -6px ${PTG}`, right:`inset -14px 0 24px -6px ${PTG}`, top:`inset 0 14px 24px -6px ${PTG}`, bottom:`inset 0 -14px 24px -6px ${PTG}` };
+    glows.push(m[lead]);
+  } else if (lead === 'all') glows.push(`0 0 18px 4px ${PTG}`);
+
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <div style={{
+        position:'absolute',top:'50%',left:'50%',
+        width:'clamp(220px,20vw,300px)',height:'clamp(340px,32vw,450px)',
+        pointerEvents:'none',borderStyle:'solid',borderRadius:'14px',
+        borderTopWidth:ew('top'),borderTopColor:ec('top'),
+        borderRightWidth:ew('right'),borderRightColor:ec('right'),
+        borderBottomWidth:ew('bottom'),borderBottomColor:ec('bottom'),
+        borderLeftWidth:ew('left'),borderLeftColor:ec('left'),
+        boxShadow:glows.join(',')||'none',animation:anim,
+        transition:'border-color 0.3s,box-shadow 0.3s',
+      }}>
+        <div style={{ position:'absolute',bottom:-24,left:'50%',transform:'translateX(-50%)',fontSize:'10px',fontWeight:500,color:PT,opacity:0.7,whiteSpace:'nowrap' }}>
+          {MODE_LABEL[mode]??mode}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Gizmo ───────────────────────────────────────────────────────────────────
+
+function GizmoOverlay({ g }: { g: GuidanceState }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF}</style><TopBar guidance={g} pct={pct}/>
+      <div style={{ position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:320,height:320,pointerEvents:'none' }}>
+        <svg width="320" height="320" viewBox="0 0 320 320" fill="none" style={{ filter:'drop-shadow(0 3px 8px rgba(30,64,175,0.18))' }}>
+          <BlueDefs/>
+          {/* X — L/R */}
+          <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite' }}>
+            <rect x="40" y="155" width="240" height="10" rx="5" fill="url(#gb-h)"/><rect x="40" y="155" width="240" height="5" rx="5" fill="url(#gb-hl)"/>
+            <path d="M40 145L20 160L40 175Z" fill="url(#gb-h)"/><path d="M280 145L300 160L280 175Z" fill="url(#gb-h)"/>
+            <text x="305" y="164" fill="#1D4ED8" fontSize="11" fontWeight="700" fontFamily="system-ui">X</text>
+          </g>
+          {/* Y — U/D */}
+          <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'0.5s' }}>
+            <rect x="155" y="40" width="10" height="240" rx="5" fill="url(#gb-v)"/><rect x="155" y="40" width="5" height="240" rx="5" fill="url(#gb-hl)"/>
+            <path d="M145 40L160 20L175 40Z" fill="url(#gb-v)"/><path d="M145 280L160 300L175 280Z" fill="url(#gb-v)"/>
+            <text x="164" y="14" fill="#16A34A" fontSize="11" fontWeight="700" fontFamily="system-ui" textAnchor="middle">Y</text>
+          </g>
+          {/* Z — F/B diagonal */}
+          <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'1s' }}>
+            <line x1="90" y1="230" x2="230" y2="90" stroke="url(#gb-d)" strokeWidth="8" strokeLinecap="round"/>
+            <path d="M90 230L78 212L102 218Z" fill="url(#gb-d)"/><path d="M230 90L218 78L242 84Z" fill="url(#gb-d)"/>
+            <text x="240" y="78" fill="#DC2626" fontSize="11" fontWeight="700" fontFamily="system-ui">Z</text>
+          </g>
+          {/* Roll arc */}
+          <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'1.5s' }}>
+            <path d="M110 70A100 100 0 0 1 210 70" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
+            <path d="M210 70L200 60L203 75Z" fill="url(#gb-d)"/>
+            <text x="160" y="56" fill="#2563EB" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Roll</text>
+          </g>
+          {/* Pitch arc */}
+          <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'2s' }}>
+            <path d="M252 110A100 100 0 0 1 252 210" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
+            <path d="M252 210L242 200L257 203Z" fill="url(#gb-d)"/>
+            <text x="268" y="164" fill="#2563EB" fontSize="9" fontWeight="600" fontFamily="system-ui">Pitch</text>
+          </g>
+          {/* Yaw arc */}
+          <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'2.5s' }}>
+            <path d="M110 252A100 100 0 0 1 210 252" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
+            <path d="M210 252L200 243L203 257Z" fill="url(#gb-d)"/>
+            <text x="160" y="272" fill="#2563EB" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Yaw</text>
+          </g>
+          <circle cx="160" cy="160" r="8" fill="url(#gb-r)"/><circle cx="158" cy="158" r="3" fill="rgba(255,255,255,0.4)"/>
+        </svg>
+        <div style={{ position:'absolute',bottom:-36,left:'50%',transform:'translateX(-50%)',fontSize:'12px',fontWeight:700,color:'#D97706',backgroundColor:'rgba(255,255,255,0.92)',padding:'4px 16px',borderRadius:'12px',whiteSpace:'nowrap',border:`1px solid ${color.borderDefault}`,boxShadow:'0 1px 4px rgba(0,0,0,0.08)' }}>
+          6 Degrees of Freedom
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main dispatcher ───────────────────────────────────────────────────────────
 
 export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, containerSize, mode }: GuidanceOverlayProps) {
-  if (mode === 'edge') {
-    return <EdgeGuideOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive} />;
-  }
-  if (mode === 'dot') {
-    return <SmartDotOverlay guidance={guidance} pointerNDC={pointerNDC} containerSize={containerSize} flashActive={flashActive} />;
-  }
-  if (mode === 'glow') {
-    return <GlowFrameOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive} />;
-  }
-  return <ClassicOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive} />;
+  // Original scan modes
+  if (mode === 'edge')  return <EdgeGuideOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive}/>;
+  if (mode === 'dot')   return <SmartDotOverlay guidance={guidance} pointerNDC={pointerNDC} containerSize={containerSize} flashActive={flashActive}/>;
+  if (mode === 'glow')  return <GlowFrameOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive}/>;
+
+  // 6DoF + Frame
+  if (mode === 'dof-lr')    return <DofLR g={guidance} f={flashActive}/>;
+  if (mode === 'dof-ud')    return <DofUD g={guidance} f={flashActive}/>;
+  if (mode === 'dof-fb')    return <DofFB g={guidance} f={flashActive}/>;
+  if (mode === 'dof-roll')  return <DofRoll g={guidance} f={flashActive}/>;
+  if (mode === 'dof-pitch') return <DofPitch g={guidance} f={flashActive}/>;
+  if (mode === 'dof-yaw')   return <DofYaw g={guidance} f={flashActive}/>;
+
+  // Arrows Only
+  if (mode === 'bare-lr')    return <DofLR g={guidance} f={flashActive} bare/>;
+  if (mode === 'bare-ud')    return <DofUD g={guidance} f={flashActive} bare/>;
+  if (mode === 'bare-fb')    return <DofFB g={guidance} f={flashActive} bare/>;
+  if (mode === 'bare-roll')  return <DofRoll g={guidance} f={flashActive} bare/>;
+  if (mode === 'bare-pitch') return <DofPitch g={guidance} f={flashActive} bare/>;
+  if (mode === 'bare-yaw')   return <DofYaw g={guidance} f={flashActive} bare/>;
+
+  // Ring
+  if (mode.startsWith('ring-')) return <RingOverlay mode={mode} g={guidance}/>;
+
+  // Pulse — both directions for L/R and U/D
+  if (mode === 'pulse-lr')    return <PulseOverlay mode={mode} g={guidance} f={flashActive} anim="pulse-drift-lr 2.8s ease-in-out infinite" lead="right"/>;
+  if (mode === 'pulse-ud')    return <PulseOverlay mode={mode} g={guidance} f={flashActive} anim="pulse-drift-ud 2.8s ease-in-out infinite" lead="bottom"/>;
+  if (mode === 'pulse-fb')    return <PulseOverlay mode={mode} g={guidance} f={flashActive} anim="pulse-breathe 3.2s ease-in-out infinite" lead="all"/>;
+  if (mode === 'pulse-roll')  return <PulseOverlay mode={mode} g={guidance} f={flashActive} anim="pulse-roll-f 3s ease-in-out infinite" lead={null}/>;
+  if (mode === 'pulse-pitch') return <PulseOverlay mode={mode} g={guidance} f={flashActive} anim="pulse-pitch-f 3s ease-in-out infinite" lead={null}/>;
+  if (mode === 'pulse-yaw')   return <PulseOverlay mode={mode} g={guidance} f={flashActive} anim="pulse-yaw-f 3s ease-in-out infinite" lead={null}/>;
+
+  // Gizmo
+  if (mode === 'dof-gizmo') return <GizmoOverlay g={guidance}/>;
+
+  return <ClassicOverlay guidance={guidance} pointerNDC={pointerNDC} flashActive={flashActive}/>;
 }

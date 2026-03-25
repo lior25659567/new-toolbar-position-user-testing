@@ -29,9 +29,19 @@ const _projVec = new THREE.Vector3();
 interface SceneProps {
   onGuidanceUpdate: (g: GuidanceState) => void;
   onReset?: boolean;
+  guidanceMode?: GuidanceMode;
 }
 
-function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
+const DOF_AXIS: Record<string, 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw'> = {
+  'dof-lr':'lr','bare-lr':'lr','ring-lr':'lr','pulse-lr':'lr',
+  'dof-ud':'ud','bare-ud':'ud','ring-ud':'ud','pulse-ud':'ud',
+  'dof-fb':'fb','bare-fb':'fb','ring-fb':'fb','pulse-fb':'fb',
+  'dof-roll':'roll','bare-roll':'roll','ring-roll':'roll','pulse-roll':'roll',
+  'dof-pitch':'pitch','bare-pitch':'pitch','ring-pitch':'pitch','pulse-pitch':'pitch',
+  'dof-yaw':'yaw','bare-yaw':'yaw','ring-yaw':'yaw','pulse-yaw':'yaw',
+};
+
+function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
   const geometry = useLoader(PLYLoader, upperJawModel);
   const meshRef  = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -43,8 +53,8 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const currentRegionRef = useRef<string | undefined>(undefined);
-  // Store weakest region center for rotation bias (updated per frame, read without re-render)
   const weakestCenterRef = useRef<{ x: number; z: number } | null>(null);
+  const dofTime = useRef(0);
 
   const { coverageTexture, captureRect, getCoverage, getRegionCoverage, reset } = useScanProgress();
   const { evaluate, resetEngine } = useGuidanceEngine();
@@ -122,6 +132,21 @@ function Scene({ onGuidanceUpdate, onReset }: SceneProps) {
     group.rotation.x += (targetX - group.rotation.x) * 0.06;
     group.rotation.y += (targetY - group.rotation.y) * 0.06;
     group.rotation.z  = BASE_ROT_Z;
+
+    // ── 6DoF model animation ──
+    const axis = guidanceMode ? DOF_AXIS[guidanceMode] : undefined;
+    dofTime.current += 0.018;
+    const sin = Math.sin(dofTime.current * 1.6);
+    const m = meshRef.current;
+    if (m) {
+      if (axis === 'lr')         { group.position.x = sin * 0.12; group.position.y *= 0.92; m.scale.setScalar(0.055); }
+      else if (axis === 'ud')    { group.position.y = sin * 0.10; group.position.x *= 0.92; m.scale.setScalar(0.055); }
+      else if (axis === 'fb')    { group.position.x *= 0.92; group.position.y *= 0.92; m.scale.setScalar(0.055 * (1 + sin * 0.12)); }
+      else if (axis === 'roll')  { group.position.x *= 0.92; group.position.y *= 0.92; group.rotation.z = BASE_ROT_Z + sin * 0.12; m.scale.setScalar(0.055); }
+      else if (axis === 'pitch') { group.position.x *= 0.92; group.position.y *= 0.92; group.rotation.x = targetX + sin * 0.15; m.scale.setScalar(0.055); }
+      else if (axis === 'yaw')   { group.position.x *= 0.92; group.position.y *= 0.92; group.rotation.y = targetY + sin * 0.18; m.scale.setScalar(0.055); }
+      else { group.position.x += (0 - group.position.x) * 0.08; group.position.y += (0 - group.position.y) * 0.08; m.scale.setScalar(0.055); }
+    }
 
     // Center ray for hover detection
     raycaster.current.setFromCamera(pointer, camera);
@@ -371,6 +396,7 @@ export default function ScanGuidanceViewer({ resetTrigger, guidanceMode = 'class
           <Scene
             onGuidanceUpdate={handleGuidance}
             onReset={resetTrigger > 0 ? true : undefined}
+            guidanceMode={guidanceMode}
           />
         </Suspense>
       </Canvas>
