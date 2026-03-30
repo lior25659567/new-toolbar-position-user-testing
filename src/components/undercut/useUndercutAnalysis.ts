@@ -327,10 +327,9 @@ export function useUndercutAnalysis(entryContext: EntryContext = DEFAULT_ENTRY_C
   }, []);
 
   const toggleSharedPath = useCallback((shared: boolean) => {
-    // Don't allow disabling shared path when bridge is linked
-    if (!shared && isBridgeLinked) return;
     setSharedPath(shared);
     if (!shared) {
+      // Switching to per-tooth: initialize each tooth with the current shared direction
       setPerToothDirs(prev => {
         const newDirs = new Map(prev);
         setSelectedTeeth(teeth => {
@@ -344,7 +343,7 @@ export function useUndercutAnalysis(entryContext: EntryContext = DEFAULT_ENTRY_C
         return newDirs;
       });
     }
-  }, [insertionDir, isBridgeLinked]);
+  }, [insertionDir]);
 
   /** Simulate triggering/clearing error state (for demo) */
   const toggleAnalysisError = useCallback(() => {

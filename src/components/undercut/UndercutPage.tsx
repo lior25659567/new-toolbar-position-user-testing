@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { color, font, space, radius, transition } from '../../design-system/tokens';
-import { PrimaryButton, SecondaryButton, IconButton, Checkbox } from '../../design-system';
+import { PrimaryButton, SecondaryButton, IconButton, Toggle } from '../../design-system';
 import UndercutViewer from './UndercutViewer';
 import StatsPanel from './StatsPanel';
 import { useUndercutAnalysis } from './useUndercutAnalysis';
@@ -16,13 +16,7 @@ interface UndercutPageProps {
 
 type ProcedureMode = 'crown' | 'bridge' | 'full-arch';
 
-const PROCEDURE_OPTIONS: { value: ProcedureMode; label: string }[] = [
-  { value: 'crown', label: 'Crown' },
-  { value: 'bridge', label: 'Bridge' },
-  { value: 'full-arch', label: 'Full Arch' },
-];
-
-// ─── Prep QC-style Heatmap Legend ────────────────────────────────────────────
+// ─── Heatmap Legend ─────────────────────────────────────────────────────────
 
 const HEATMAP_COLORS = [
   '#0066FF', '#0197EC', '#3FBAFF', '#0FF4FC', '#2CE9C6', '#54BF00',
@@ -51,20 +45,7 @@ function HeatmapLegend() {
   );
 }
 
-// ─── Icons ──────────────────────────────────────────────────────────────────
-
-function DragHandle() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', cursor: 'grab' }}>
-      {[0,1,2].map(r => (
-        <div key={r} style={{ display: 'flex', gap: '3px' }}>
-          <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: color.neutral400 }} />
-          <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: color.neutral400 }} />
-        </div>
-      ))}
-    </div>
-  );
-}
+// ─── Small Icons ────────────────────────────────────────────────────────────
 
 function CloseIcon() {
   return (
@@ -82,51 +63,40 @@ function ResetIcon() {
   );
 }
 
-function ChevronLeftIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  );
-}
+// ─── Procedure Mode Pills ───────────────────────────────────────────────────
 
-function ChevronRightIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 6 15 12 9 18" />
-    </svg>
-  );
-}
-
-function LinkIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-}
-
-// ─── Procedure Mode Selector (segmented control) ────────────────────────────
-
-function ProcedureSelector({ mode, onChange }: { mode: ProcedureMode; onChange: (m: ProcedureMode) => void }) {
+function ModePills({ mode, onChange, disabled }: {
+  mode: ProcedureMode;
+  onChange: (m: ProcedureMode) => void;
+  disabled: boolean;
+}) {
+  const options: { value: ProcedureMode; label: string }[] = [
+    { value: 'crown', label: 'Crown' },
+    { value: 'bridge', label: 'Bridge' },
+    { value: 'full-arch', label: 'Full Arch' },
+  ];
   return (
     <div style={{
-      display: 'flex', borderRadius: radius.md, overflow: 'hidden',
-      border: `1px solid ${color.borderDefault}`, backgroundColor: color.neutral50,
+      display: 'flex', gap: '4px',
+      padding: '3px', borderRadius: radius.md,
+      backgroundColor: color.neutral50,
     }}>
-      {PROCEDURE_OPTIONS.map(opt => {
-        const isActive = opt.value === mode;
+      {options.map(opt => {
+        const active = opt.value === mode;
         return (
           <button
             key={opt.value}
+            disabled={disabled}
             onClick={() => onChange(opt.value)}
             style={{
-              flex: 1, padding: '6px 0', border: 'none', cursor: 'pointer',
-              fontSize: '11px', fontWeight: isActive ? 600 : 400,
-              color: isActive ? color.white : color.textSubtle,
-              backgroundColor: isActive ? color.primary : 'transparent',
-              transition: `all ${transition.fast}`,
+              flex: 1, padding: '5px 0', border: 'none', cursor: disabled ? 'default' : 'pointer',
+              borderRadius: '6px',
+              fontSize: '11px', fontWeight: active ? 600 : 400, lineHeight: '16px',
+              color: active ? color.white : color.textSubtle,
+              backgroundColor: active ? color.primary : 'transparent',
+              boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: `all 0.15s ease`,
+              opacity: disabled ? 0.5 : 1,
             }}
           >
             {opt.label}
@@ -137,77 +107,60 @@ function ProcedureSelector({ mode, onChange }: { mode: ProcedureMode; onChange: 
   );
 }
 
-// ─── Toast messages ─────────────────────────────────────────────────────────
+// ─── Arch Navigator ─────────────────────────────────────────────────────────
 
-function getToastMessage(stage: UndercutStage, teethCount: number, mode: ProcedureMode, sharedPath: boolean): string {
-  if (stage === 'confirm') return 'Insertion path confirmed. Undercuts and path are locked.';
-
-  if (mode === 'full-arch') {
-    if (teethCount === 0) return 'Loading full arch analysis...';
-    return 'Full arch \u2014 shared insertion path. Drag the arrow to adjust.';
-  }
-
-  if (mode === 'bridge') {
-    if (teethCount === 0) return 'Tap 2 or more teeth on the model to define bridge span.';
-    if (teethCount === 1) return 'Select at least one more tooth to form a bridge.';
-    return 'Bridge \u2014 shared insertion path. Drag the arrow to adjust for all linked teeth.';
-  }
-
-  // Crown mode
-  if (teethCount === 0) return 'Tap a tooth on the model to analyze individual crown insertion path.';
-  if (teethCount === 1) {
-    return 'Individual insertion path. Drag the arrow to adjust. Tap more teeth to add crowns.';
-  }
-  return sharedPath
-    ? 'Multiple crowns \u2014 shared insertion path. Drag the arrow to adjust.'
-    : 'Multiple crowns \u2014 individual paths. Each tooth has its own arrow.';
-}
-
-// ─── Arch Switcher ──────────────────────────────────────────────────────────
-
-function ArchSwitcher({ activeArch, onSwitch, availableArches }: {
+function ArchNav({ activeArch, onSwitch, show }: {
   activeArch: ArchType;
   onSwitch: (arch: ArchType) => void;
-  availableArches: ArchType[];
+  show: boolean;
 }) {
-  if (availableArches.length < 2) return null;
-  const archLabel = activeArch === 'upper' ? 'Upper Jaw' : 'Lower Jaw';
-  const otherArch = activeArch === 'upper' ? 'lower' : 'upper';
-
+  if (!show) return null;
+  const other: ArchType = activeArch === 'upper' ? 'lower' : 'upper';
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '6px 0',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: space[3],
     }}>
-      <button
-        onClick={() => onSwitch(otherArch)}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          padding: '4px', display: 'flex', alignItems: 'center',
-          color: color.textSubtle, borderRadius: radius.sm,
-        }}
-        onMouseEnter={e => { e.currentTarget.style.backgroundColor = color.neutral100; }}
-        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-      >
-        <ChevronLeftIcon />
+      <button onClick={() => onSwitch(other)} style={navBtnStyle}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
       </button>
-      <span style={{ fontSize: font.size.xs, fontWeight: 600, color: color.textHeading }}>
-        {archLabel}
+      <span style={{ fontSize: '11px', fontWeight: 600, color: color.textHeading, minWidth: '70px', textAlign: 'center' }}>
+        {activeArch === 'upper' ? 'Upper Jaw' : 'Lower Jaw'}
       </span>
-      <button
-        onClick={() => onSwitch(otherArch)}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          padding: '4px', display: 'flex', alignItems: 'center',
-          color: color.textSubtle, borderRadius: radius.sm,
-        }}
-        onMouseEnter={e => { e.currentTarget.style.backgroundColor = color.neutral100; }}
-        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-      >
-        <ChevronRightIcon />
+      <button onClick={() => onSwitch(other)} style={navBtnStyle}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 6 15 12 9 18" /></svg>
       </button>
     </div>
   );
+}
+
+const navBtnStyle: React.CSSProperties = {
+  background: 'none', border: 'none', cursor: 'pointer',
+  padding: '4px', display: 'flex', alignItems: 'center',
+  color: color.textSubtle, borderRadius: '4px',
+};
+
+// ─── Toast messages ─────────────────────────────────────────────────────────
+
+function getToast(stage: UndercutStage, count: number, mode: ProcedureMode, linked: boolean): string {
+  if (stage === 'confirm') return 'Insertion path confirmed. Undercuts and path are locked.';
+
+  if (mode === 'full-arch') {
+    return count === 0
+      ? 'Loading full arch analysis...'
+      : 'Full arch \u2014 drag the arrow to adjust the shared insertion path.';
+  }
+
+  if (mode === 'bridge') {
+    if (count === 0) return 'Tap 2 or more adjacent teeth to define the bridge span.';
+    if (count === 1) return 'Tap at least one more tooth to complete the bridge.';
+    return linked
+      ? 'Bridge linked \u2014 drag the arrow to adjust the shared insertion path.'
+      : 'Bridge unlinked \u2014 each tooth has an independent insertion path.';
+  }
+
+  if (count === 0) return 'Tap a tooth on the model to analyze its insertion path.';
+  if (count === 1) return 'Drag the arrow to adjust. Tap more teeth to add crowns.';
+  return 'Multiple crowns \u2014 each tooth has an individual insertion path.';
 }
 
 // ─── Error Notification ─────────────────────────────────────────────────────
@@ -233,10 +186,7 @@ function ErrorNotification({ message, onDismiss }: { message: string; onDismiss:
         <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
       {message}
-      <button
-        onClick={onDismiss}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', marginLeft: 'auto', color: '#DC2626' }}
-      >
+      <button onClick={onDismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', marginLeft: 'auto', color: '#DC2626' }}>
         <CloseIcon />
       </button>
     </div>
@@ -245,13 +195,12 @@ function ErrorNotification({ message, onDismiss }: { message: string; onDismiss:
 
 // ─── Floating Panel ─────────────────────────────────────────────────────────
 
-interface UndercutPanelProps {
+interface PanelProps {
   stage: UndercutStage;
   procedureMode: ProcedureMode;
   selectedTeeth: number[];
   sharedPath: boolean;
   isCustomPath: boolean;
-  isBridgeLinked: boolean;
   hasMarginLine: boolean;
   activeArch: ArchType;
   availableArches: ArchType[];
@@ -267,179 +216,161 @@ interface UndercutPanelProps {
 
 function UndercutPanel({
   stage, procedureMode, selectedTeeth, sharedPath, isCustomPath,
-  isBridgeLinked, hasMarginLine, activeArch, availableArches,
+  hasMarginLine, activeArch, availableArches,
   onClose, onConfirm, onRestart,
   onResetToOptimal, onToggleSharedPath, onClearSelection,
   onSwitchArch, onProcedureModeChange,
-}: UndercutPanelProps) {
-  const hasTeeth = selectedTeeth.length > 0;
-  const hasMultipleTeeth = selectedTeeth.length >= 2;
-
-  // Bridge needs at least 2 teeth to confirm
-  const bridgeReady = procedureMode !== 'bridge' || selectedTeeth.length >= 2;
-
-  // Label based on mode + count
-  const modeLabel = procedureMode === 'crown'
-    ? (selectedTeeth.length === 1 ? 'Single Crown' : `${selectedTeeth.length} Crowns`)
-    : procedureMode === 'bridge'
-      ? `Bridge (${selectedTeeth.length}-unit)`
-      : `Full Arch (${selectedTeeth.length})`;
+}: PanelProps) {
+  const count = selectedTeeth.length;
+  const canConfirm = procedureMode === 'bridge' ? count >= 2 : count > 0;
 
   return (
     <div style={{
-      width: '256px',
+      width: '248px',
       borderRadius: radius.md, backgroundColor: color.bgSurface,
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
-      fontFamily: font.family,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)',
+      fontFamily: font.family, overflow: 'hidden',
     }}>
-      {/* Header */}
+      {/* ── Header ── */}
       <div style={{
-        height: '44px', padding: `0 ${space[3]}`,
+        height: '40px', padding: `0 ${space[3]}`,
         borderBottom: `1px solid ${color.borderDefault}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: space[2] }}>
-          <DragHandle />
-          <span style={{ fontSize: font.size.sm, fontWeight: 600, color: color.textHeading }}>
-            Undercuts & Path
-          </span>
-        </div>
-        <IconButton aria-label="Close" onClick={onClose} style={{ width: '28px', height: '28px', minWidth: '28px', minHeight: '28px' }}>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: color.textHeading }}>
+          Undercuts & Path
+        </span>
+        <IconButton aria-label="Close" onClick={onClose} style={{ width: '24px', height: '24px', minWidth: '24px', minHeight: '24px' }}>
           <CloseIcon />
         </IconButton>
       </div>
 
-      {/* Body */}
-      <div style={{ padding: `${space[3]} ${space[3]}`, display: 'flex', flexDirection: 'column', gap: space[3] }}>
+      {/* ── Body ── */}
+      <div style={{ padding: space[3], display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
-        {/* Procedure Mode Selector */}
+        {/* Mode pills */}
         {stage !== 'confirm' && (
-          <ProcedureSelector mode={procedureMode} onChange={onProcedureModeChange} />
+          <ModePills mode={procedureMode} onChange={onProcedureModeChange} disabled={false} />
         )}
 
-        {/* Arch Switcher */}
-        <ArchSwitcher activeArch={activeArch} onSwitch={onSwitchArch} availableArches={availableArches} />
+        {/* Arch navigator */}
+        <ArchNav activeArch={activeArch} onSwitch={onSwitchArch} show={availableArches.length >= 2} />
 
-        {/* Margin Line indicator */}
+        {/* ML badge */}
         {hasMarginLine && (
           <div style={{
-            display: 'flex', alignItems: 'center', gap: space[1],
-            padding: '4px 8px', borderRadius: radius.sm,
-            backgroundColor: '#EFF6FF', fontSize: '11px', color: '#2563EB',
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '5px 8px', borderRadius: '6px',
+            backgroundColor: '#EFF6FF', fontSize: '11px', color: '#2563EB', fontWeight: 500,
           }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5">
+              <polyline points="20 6 9 17 4 12" />
             </svg>
-            Prep boundaries derived from margin line
-          </div>
-        )}
-        {!hasMarginLine && hasTeeth && (
-          <div style={{
-            fontSize: '11px', color: color.textPlaceholder, lineHeight: '16px', fontStyle: 'italic',
-          }}>
-            Mark margin line for precise prep boundaries
+            Margin line detected
           </div>
         )}
 
-        {/* Prompt text when no teeth selected (Crown & Bridge modes only) */}
-        {stage !== 'confirm' && !hasTeeth && procedureMode !== 'full-arch' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
-            <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>
-              {procedureMode === 'bridge'
-                ? 'Tap 2 or more teeth on the model to define bridge span:'
-                : 'Tap teeth on the model to select preps:'}
-            </span>
+        {/* ── Selection area ── */}
+        {count === 0 && stage !== 'confirm' && procedureMode !== 'full-arch' && (
+          <div style={{ fontSize: '12px', color: color.textSubtle, lineHeight: '18px' }}>
+            {procedureMode === 'bridge'
+              ? 'Tap 2+ adjacent teeth on the model.'
+              : 'Tap teeth on the model to begin.'}
           </div>
         )}
 
-        {/* Selection info + case badge */}
-        {hasTeeth && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
+        {count > 0 && (
+          <>
+            {/* Count row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: space[2] }}>
-                <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>
-                  {selectedTeeth.length} {selectedTeeth.length === 1 ? 'tooth' : 'teeth'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: color.textDefault }}>
+                  {count} {count === 1 ? 'tooth' : 'teeth'}
                 </span>
                 <span style={{
-                  fontSize: '10px', fontWeight: 600, color: color.primary,
-                  backgroundColor: color.primaryLight, padding: '2px 6px',
-                  borderRadius: radius.full, lineHeight: '14px',
+                  fontSize: '10px', fontWeight: 600,
+                  padding: '1px 6px', borderRadius: radius.full, lineHeight: '16px',
+                  color: color.primary, backgroundColor: color.primaryLight,
                 }}>
-                  {modeLabel}
+                  {procedureMode === 'crown'
+                    ? (count === 1 ? 'Crown' : `${count} Crowns`)
+                    : procedureMode === 'bridge'
+                      ? `Bridge ${count}-unit`
+                      : 'Full Arch'}
                 </span>
               </div>
-              {stage !== 'confirm' && (
-                <button
-                  onClick={onClearSelection}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    fontSize: font.size.xs, fontWeight: 500, color: color.primary,
-                    padding: 0,
-                  }}
-                >
+              {stage !== 'confirm' && procedureMode !== 'full-arch' && (
+                <button onClick={onClearSelection} style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: '11px', fontWeight: 500, color: color.primary, padding: 0,
+                }}>
                   Clear
                 </button>
               )}
             </div>
 
-            {/* Bridge: linked indicator (auto-linked in bridge mode) */}
-            {procedureMode === 'bridge' && hasMultipleTeeth && (
+            {/* ── Bridge: linked toggle ── */}
+            {procedureMode === 'bridge' && count >= 2 && stage !== 'confirm' && (
               <div style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                padding: '4px 8px', borderRadius: radius.sm,
-                backgroundColor: '#F0FDF4', fontSize: '11px', color: '#16A34A', fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '6px 10px', borderRadius: '8px',
+                backgroundColor: sharedPath ? '#F0FDF4' : color.neutral50,
+                transition: 'background-color 0.15s ease',
               }}>
-                <LinkIcon />
-                Teeth linked \u2014 shared insertion path
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: color.textDefault }}>
+                    Linked insertion path
+                  </span>
+                  <span style={{ fontSize: '10px', color: color.textPlaceholder }}>
+                    {sharedPath ? 'All teeth share one path' : 'Each tooth has its own path'}
+                  </span>
+                </div>
+                <Toggle
+                  checked={sharedPath}
+                  onChange={() => onToggleSharedPath(!sharedPath)}
+                />
               </div>
             )}
 
-            {/* Bridge: warning when only 1 tooth */}
-            {procedureMode === 'bridge' && selectedTeeth.length === 1 && stage !== 'confirm' && (
+            {/* Bridge: 1-tooth warning */}
+            {procedureMode === 'bridge' && count === 1 && stage !== 'confirm' && (
               <div style={{
-                display: 'flex', alignItems: 'center', gap: '4px',
-                padding: '4px 8px', borderRadius: radius.sm,
-                backgroundColor: '#FEF3C7', fontSize: '11px', color: '#D97706',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '5px 8px', borderRadius: '6px',
+                backgroundColor: '#FEF3C7', fontSize: '11px', color: '#92400E', fontWeight: 500,
               }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                  <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5">
+                  <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                 </svg>
-                Select at least one more tooth for bridge
+                Select at least one more tooth
               </div>
             )}
 
-            {/* Crown mode: shared path checkbox when multiple crowns */}
-            {procedureMode === 'crown' && hasMultipleTeeth && stage !== 'confirm' && (
-              <Checkbox
-                checked={sharedPath}
-                onChange={() => onToggleSharedPath(!sharedPath)}
-                size={16}
-                label="Shared insertion path"
-              />
+            {/* Crown: shared path toggle when 2+ crowns */}
+            {procedureMode === 'crown' && count >= 2 && stage !== 'confirm' && (
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '6px 10px', borderRadius: '8px',
+                backgroundColor: color.neutral50,
+              }}>
+                <span style={{ fontSize: '12px', fontWeight: 500, color: color.textDefault }}>
+                  Shared path
+                </span>
+                <Toggle
+                  checked={sharedPath}
+                  onChange={() => onToggleSharedPath(!sharedPath)}
+                />
+              </div>
             )}
-          </div>
+          </>
         )}
 
-        {/* Divider */}
-        {hasTeeth && <div style={{ height: '1px', backgroundColor: color.borderDefault }} />}
-
-        {/* Path mode hint */}
-        {hasTeeth && stage !== 'confirm' && (
-          <div style={{
-            fontSize: font.size.xs, color: color.textSubtle, lineHeight: '18px',
-          }}>
-            {procedureMode === 'bridge'
-              ? (hasMultipleTeeth
-                ? 'All linked teeth share one insertion path. Drag the arrow to adjust.'
-                : 'Add more teeth to complete the bridge span.')
-              : procedureMode === 'crown' && hasMultipleTeeth && !sharedPath
-                ? 'Each crown has an individual insertion path. Drag arrows independently.'
-                : 'Drag the arrow to adjust insertion path. Tap model to add/remove teeth.'}
-          </div>
+        {/* ── Divider ── */}
+        {count > 0 && stage !== 'confirm' && (
+          <div style={{ height: '1px', backgroundColor: color.borderDefault, margin: '2px 0' }} />
         )}
 
-        {/* Actions */}
+        {/* ── Actions ── */}
         {stage === 'analyze' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {isCustomPath && (
@@ -448,7 +379,7 @@ function UndercutPanel({
                 Reset to Optimal
               </SecondaryButton>
             )}
-            {hasTeeth && bridgeReady && (
+            {canConfirm && (
               <PrimaryButton size={36} fullWidth onClick={onConfirm}>
                 Confirm Path
               </PrimaryButton>
@@ -459,11 +390,12 @@ function UndercutPanel({
         {stage === 'confirm' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{
-              borderRadius: radius.md, backgroundColor: color.successLight,
-              fontSize: font.size.xs, fontWeight: 600, color: color.success,
-              height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: '8px', backgroundColor: '#F0FDF4',
+              fontSize: '12px', fontWeight: 600, color: '#16A34A',
+              height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
             }}>
-              {'\u2713'} Path Confirmed
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+              Path Confirmed
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>
               <div style={{ flex: 1 }}>
@@ -497,33 +429,29 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   const {
     selectedTeeth, insertionDir, setInsertionDir, analysis,
     perToothDirs, setToothDir, sharedPath, toggleSharedPath,
-    toggleTooth, setTeeth, selectFullArch, clearSelection, resetToOptimal,
+    toggleTooth, selectFullArch, clearSelection, resetToOptimal,
     activeArch, setActiveArch, linkedBridges, linkTeeth, unlinkBridge,
     isBridgeLinked, analysisError, toggleAnalysisError, hasMarginLine,
     isAnalyzing,
   } = useUndercutAnalysis(entryContext);
 
-  // ─── Mode change handler ──────────────────────────────────────────────────
-  const handleProcedureModeChange = useCallback((mode: ProcedureMode) => {
+  // ─── Mode switching ───────────────────────────────────────────────────────
+  const handleModeChange = useCallback((mode: ProcedureMode) => {
     setProcedureMode(mode);
-    // Clear selection and reset when switching modes
     clearSelection();
     setStage('analyze');
 
     if (mode === 'full-arch') {
-      // Auto-select entire arch
       selectFullArch(activeArch);
       toggleSharedPath(true);
     } else if (mode === 'bridge') {
-      // Bridge: force shared path, user will tap teeth
       toggleSharedPath(true);
     } else {
-      // Crown: default to individual paths
       toggleSharedPath(false);
     }
   }, [clearSelection, selectFullArch, activeArch, toggleSharedPath]);
 
-  const handleConfirm = useCallback(() => { setStage('confirm'); }, []);
+  const handleConfirm = useCallback(() => setStage('confirm'), []);
 
   const handleRestart = useCallback(() => {
     setStage('analyze');
@@ -534,29 +462,17 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
     }
   }, [clearSelection, procedureMode, selectFullArch, activeArch, toggleSharedPath]);
 
-  // Tooth click behavior depends on mode
   const handleToothClick = useCallback((toothId: number, shiftKey: boolean) => {
     if (stage === 'confirm') setStage('analyze');
-
-    if (procedureMode === 'full-arch') {
-      // Full arch: don't allow individual tooth toggling
-      return;
-    }
-
+    if (procedureMode === 'full-arch') return;
     toggleTooth(toothId, shiftKey);
-
-    // In bridge mode: auto-link when 2+ teeth
-    if (procedureMode === 'bridge') {
-      // We need to check after toggle — handled via effect below
-    }
   }, [stage, toggleTooth, procedureMode]);
 
-  // Auto-link teeth in bridge mode when 2+ teeth selected
+  // Auto-link in bridge mode when reaching 2+ teeth
   useEffect(() => {
     if (procedureMode === 'bridge' && selectedTeeth.length >= 2 && !isBridgeLinked) {
       linkTeeth(selectedTeeth);
     }
-    // Unlink if we drop below 2 in bridge mode
     if (procedureMode === 'bridge' && selectedTeeth.length < 2 && isBridgeLinked && linkedBridges.length > 0) {
       unlinkBridge(linkedBridges[0].id);
     }
@@ -565,17 +481,11 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   const handleClear = useCallback(() => {
     clearSelection();
     setStage('analyze');
-    // In bridge mode, also unlink
-    if (linkedBridges.length > 0) {
-      unlinkBridge(linkedBridges[0].id);
-    }
-  }, [clearSelection, unlinkBridge, linkedBridges]);
+  }, [clearSelection]);
 
-  // Arch switch: clear and re-select if full arch
   const handleArchSwitch = useCallback((arch: ArchType) => {
     setActiveArch(arch);
     if (procedureMode === 'full-arch') {
-      // Small delay to let state clear, then re-select
       setTimeout(() => {
         selectFullArch(arch);
         toggleSharedPath(true);
@@ -584,14 +494,12 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   }, [setActiveArch, procedureMode, selectFullArch, toggleSharedPath]);
 
   const [showError, setShowError] = useState(false);
-  useEffect(() => {
-    if (analysisError) setShowError(true);
-  }, [analysisError]);
+  useEffect(() => { if (analysisError) setShowError(true); }, [analysisError]);
 
   const showHeatmap = selectedTeeth.length > 0;
   const interactiveArrow = selectedTeeth.length > 0 && stage !== 'confirm';
   const isCustomPath = analysis ? !analysis.insertionPath.isOptimal : false;
-  const toastMessage = getToastMessage(stage, selectedTeeth.length, procedureMode, sharedPath);
+  const toastMessage = getToast(stage, selectedTeeth.length, procedureMode, sharedPath);
 
   return (
     <div style={{
@@ -613,7 +521,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
           activeArch={activeArch}
         />
 
-        {/* Back button */}
+        {/* Back */}
         <button
           onClick={onBackToHome}
           style={{
@@ -647,7 +555,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
           {toastMessage}
         </div>
 
-        {/* Error notification */}
+        {/* Error */}
         {showError && analysisError && (
           <ErrorNotification
             message="Undercut analysis unavailable for this scan."
@@ -663,7 +571,6 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
             selectedTeeth={selectedTeeth}
             sharedPath={sharedPath}
             isCustomPath={isCustomPath}
-            isBridgeLinked={isBridgeLinked}
             hasMarginLine={hasMarginLine}
             activeArch={activeArch}
             availableArches={entryContext.availableArches}
@@ -674,21 +581,14 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
             onToggleSharedPath={toggleSharedPath}
             onClearSelection={handleClear}
             onSwitchArch={handleArchSwitch}
-            onProcedureModeChange={handleProcedureModeChange}
+            onProcedureModeChange={handleModeChange}
           />
         </div>
 
-        {/* Stats Panel (bottom-right) */}
+        {/* Stats */}
         {analysis && (
-          <div style={{
-            position: 'absolute', right: space[3], bottom: space[3], zIndex: 10,
-            width: '240px',
-          }}>
-            <StatsPanel
-              analysis={analysis}
-              isAnalyzing={isAnalyzing}
-              onResetToOptimal={resetToOptimal}
-            />
+          <div style={{ position: 'absolute', right: space[3], bottom: space[3], zIndex: 10, width: '240px' }}>
+            <StatsPanel analysis={analysis} isAnalyzing={isAnalyzing} onResetToOptimal={resetToOptimal} />
           </div>
         )}
 
