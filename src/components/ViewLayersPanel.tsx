@@ -241,7 +241,7 @@ function JawButton({
 
 function JawIcon({ type, active }: { type: 'upper' | 'lower' | 'both'; active: boolean }) {
   const color = active ? '#008EC2' : '#5E646E';
-  const sw = 3;
+  const sw = 1.5;
 
   if (type === 'upper') {
     return (
