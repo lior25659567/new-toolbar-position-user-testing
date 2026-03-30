@@ -376,6 +376,100 @@ function ToolbarTextLabel2({ isActive, onClick, buttonIndex }: { isActive: boole
   );
 }
 
+// Undercut Icon
+function UndercutNew({ isActive }: { isActive?: boolean }) {
+  const strokeColor = isActive ? "#008EC2" : "#5E646E";
+  const fillColor = isActive ? "#008EC2" : "#5E646E";
+
+  return (
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Undercut new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M22 10C22 10 18 20 18 32C18 44 22 52 28 54C31 55 34 52 35 48C36 52 39 55 42 54C48 52 52 44 52 32C52 20 48 10 48 10"
+          stroke={strokeColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M20 28C22 24 26 22 30 22C34 22 38 24 40 28"
+          stroke={fillColor}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          opacity="0.6"
+        />
+        <line x1="35" y1="6" x2="35" y2="38" stroke={strokeColor} strokeWidth="1.5" strokeLinecap="round"/>
+        <polyline points="31,12 35,6 39,12" stroke={strokeColor} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  );
+}
+
+function AohsButton3({ isActive, onClick, buttonIndex }: { isActive: boolean; onClick: () => void; buttonIndex?: number }) {
+  const [pressedButton, setPressedButton] = useState<number | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleTapStart = () => {
+    if (buttonIndex !== undefined) {
+      setPressedButton(buttonIndex);
+    }
+  };
+
+  const handleTapEnd = () => {
+    setTimeout(() => setPressedButton(null), 300);
+  };
+
+  return (
+    <motion.div
+      className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[40px] cursor-pointer overflow-hidden transition-colors duration-200"
+      style={{
+        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+      }}
+      data-name="AOHS button"
+      onClick={onClick}
+      onTapStart={handleTapStart}
+      onTapEnd={handleTapEnd}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{
+        scale: 0.9,
+        transition: {
+          type: "spring" as const,
+          stiffness: 600,
+          damping: 15
+        }
+      }}
+    >
+      {pressedButton === buttonIndex && (
+        <motion.div
+          className="absolute inset-0 rounded-full pointer-events-none z-10"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 2.5, opacity: [0, 0.5, 0] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          style={{
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%)',
+            filter: 'blur(12px)',
+          }}
+        />
+      )}
+      <div className="relative flex items-center justify-center size-[40px]">
+        <UndercutNew isActive={isActive || isHovered} />
+      </div>
+    </motion.div>
+  );
+}
+
+function ToolbarTextLabel3({ isActive, onClick, buttonIndex }: { isActive: boolean; onClick: () => void; buttonIndex?: number }) {
+  // No change here, this is just a wrapper for the button
+  return (
+    <div className="content-stretch flex items-center relative rounded-[8px] shrink-0" data-name="Toolbar Text label">
+      <AohsButton3 isActive={isActive} onClick={onClick} buttonIndex={buttonIndex} />
+    </div>
+  );
+}
+
 // Close/Collapse Icon (X icon for expanded state)
 function CloseIcon() {
   return (
@@ -422,8 +516,14 @@ function ExpandedToolbar({
         <p className="font-['Roboto'] font-normal whitespace-nowrap text-center text-[12px] leading-[14px]" style={{ color: activeButtons.has(2) ? '#008EC2' : '#000000' }}>Prep edit</p>
       </div>
 
+      {/* Undercut */}
+      <div className="flex flex-col flex-1 items-center justify-center gap-[2px] relative">
+        <AohsButton3 isActive={activeButtons.has(3)} onClick={() => onButtonClick(3)} buttonIndex={3} />
+        <p className="font-['Roboto'] font-normal whitespace-nowrap text-center text-[12px] leading-[14px]" style={{ color: activeButtons.has(3) ? '#008EC2' : '#000000' }}>Undercut</p>
+      </div>
+
       {/* Collapse Button - same size as toolbar buttons (36px) */}
-      <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36, borderWidth: 1, borderStyle: 'solid', borderColor: color.borderDefault }} onClick={() => onButtonClick(3)}>
+      <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36, borderWidth: 1, borderStyle: 'solid', borderColor: color.borderDefault }} onClick={() => onButtonClick(4)}>
         <ChevronIcon isExpanded={true} />
       </SecondaryButton>
     </div>
@@ -436,6 +536,7 @@ function Frame4({ activeButtons, onButtonClick }: { activeButtons: Set<number>; 
       <ToolbarTextLabel isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} buttonIndex={0} />
       <ToolbarTextLabel1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} buttonIndex={1} />
       <ToolbarTextLabel2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} buttonIndex={2} />
+      <ToolbarTextLabel3 isActive={activeButtons.has(3)} onClick={() => onButtonClick(3)} buttonIndex={3} />
     </div>
   );
 }
@@ -488,7 +589,7 @@ function Frame3({ onButtonClick, isExpanded }: { onButtonClick: (index: number) 
     variant="toolbar"
     size={36}
     style={{ width: 36, padding: 0, minHeight: 36, borderWidth: 1, borderStyle: 'solid', borderColor: color.borderDefault }}
-      onClick={() => onButtonClick(3)}
+      onClick={() => onButtonClick(4)}
     >
       <ChevronIcon isExpanded={isExpanded} />
     </SecondaryButton>
@@ -506,7 +607,7 @@ export function HorizontalTopToolbarScan({
   microAnimations?: boolean;
   stackVertical?: boolean;
 }) {
-  const isExpanded = activeButtons.has(3);
+  const isExpanded = activeButtons.has(4);
 
   if (isExpanded) {
     return (

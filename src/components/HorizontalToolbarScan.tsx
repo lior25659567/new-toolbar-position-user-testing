@@ -146,6 +146,38 @@ function PrepEditNew({ isActive }: { isActive?: boolean }) {
   );
 }
 
+// Undercut icon component
+function UndercutNew({ isActive }: { isActive?: boolean }) {
+  const strokeColor = isActive ? "#008EC2" : "#5E646E";
+  const fillColor = isActive ? "#008EC2" : "#5E646E";
+
+  return (
+    <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Undercut new">
+      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Tooth outline */}
+        <path
+          d="M22 10C22 10 18 20 18 32C18 44 22 52 28 54C31 55 34 52 35 48C36 52 39 55 42 54C48 52 52 44 52 32C52 20 48 10 48 10"
+          stroke={strokeColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+        {/* Undercut region */}
+        <path
+          d="M20 28C22 24 26 22 30 22C34 22 38 24 40 28"
+          stroke={fillColor}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          opacity="0.6"
+        />
+        {/* Insertion path arrow */}
+        <line x1="35" y1="6" x2="35" y2="38" stroke={strokeColor} strokeWidth="1.5" strokeLinecap="round"/>
+        <polyline points="31,12 35,6 39,12" stroke={strokeColor} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  );
+}
+
 // Expand/Collapse icon with micro animation
 function ExpandIcon({ isExpanded }: { isExpanded: boolean }) {
   return (
@@ -398,6 +430,38 @@ function CollapsedToolbar({
             <PrepEditNew isActive={activeButtons.has(2) || hoveredButton === 2} />
           </div>
         </motion.div>
+
+        {/* Button 3: Undercut */}
+        <motion.div
+          className={`content-stretch flex items-center justify-center relative rounded-[10px] shrink-0 size-[40px] cursor-pointer overflow-hidden p-[6px] transition-colors duration-200`}
+          style={{
+            backgroundColor: activeButtons.has(3) ? '#E0F2FE' : hoveredButton === 3 ? '#f5f5f5' : 'transparent'
+          }}
+          custom={activeButtons.has(3)}
+          onClick={() => handleButtonClick(3)}
+          onTapStart={() => handleTapStart(3)}
+          onTapEnd={handleTapEnd}
+          onMouseEnter={() => setHoveredButton(3)}
+          onMouseLeave={() => setHoveredButton(null)}
+          {...animationProps}
+        >
+          {pressedButton === 3 && (
+            <motion.div
+              className="absolute inset-0 rounded-full pointer-events-none z-10"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 2.5, opacity: [0, 0.5, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%)',
+                filter: 'blur(12px)',
+              }}
+            />
+          )}
+          <div className="relative flex items-center justify-center size-full overflow-hidden">
+            <UndercutNew isActive={activeButtons.has(3) || hoveredButton === 3} />
+          </div>
+        </motion.div>
       </div>
 
       {/* Expand button */}
@@ -405,7 +469,7 @@ function CollapsedToolbar({
         <SecondaryButton
           size={40}
           style={{ width: 40, padding: 0, minHeight: 40 }}
-          onClick={() => onButtonClick(3)}
+          onClick={() => onButtonClick(4)}
         >
           <ExpandIcon isExpanded={false} />
         </SecondaryButton>
@@ -463,7 +527,7 @@ function ExpandedToolbar({
   return (
     <div className="bg-white rounded-[4px] flex flex-col font-['Roboto']">
       {/* Jaw type selector row */}
-      <JawTypeRow activeJaw={activeJaw} onJawChange={setActiveJaw} onCollapse={() => onButtonClick(3)} />
+      <JawTypeRow activeJaw={activeJaw} onJawChange={setActiveJaw} onCollapse={() => onButtonClick(4)} />
 
       {/* Tool buttons */}
       <div className="flex items-center p-[4px] gap-[4px]">
@@ -571,6 +635,41 @@ function ExpandedToolbar({
           </div>
           <p className="font-['Roboto'] text-[12px] leading-[14px] whitespace-nowrap" style={{ color: activeButtons.has(2) || hoveredButton === 2 ? '#008EC2' : '#000000' }}>Prep edit</p>
         </motion.div>
+
+        {/* Button 3: Undercut */}
+        <motion.div
+          className={`rounded-[8px] px-[8px] py-[4px] cursor-pointer flex flex-col items-center justify-center gap-[4px] min-h-[40px] relative overflow-hidden transition-colors duration-200`}
+          style={{
+            backgroundColor: activeButtons.has(3) ? '#E0F2FE' : hoveredButton === 3 ? '#f5f5f5' : 'transparent'
+          }}
+          custom={activeButtons.has(3)}
+          onClick={() => handleButtonClick(3)}
+          onTapStart={() => handleTapStart(3)}
+          onTapEnd={handleTapEnd}
+          onMouseEnter={() => setHoveredButton(3)}
+          onMouseLeave={() => setHoveredButton(null)}
+          {...animationProps}
+        >
+          {pressedButton === 3 && (
+            <motion.div
+              className="absolute inset-0 rounded-full pointer-events-none z-10"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 2.5, opacity: [0, 0.5, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%)',
+                filter: 'blur(12px)',
+              }}
+            />
+          )}
+          <div className="flex items-center justify-center w-[32px] h-[32px]">
+            <div className="scale-[0.53]">
+              <UndercutNew isActive={activeButtons.has(3) || hoveredButton === 3} />
+            </div>
+          </div>
+          <p className="font-['Roboto'] text-[12px] leading-[14px] whitespace-nowrap" style={{ color: activeButtons.has(3) || hoveredButton === 3 ? '#008EC2' : '#000000' }}>Undercut</p>
+        </motion.div>
       </div>
     </div>
   );
@@ -586,7 +685,7 @@ export function HorizontalScanToolbar({
   onButtonClick: (index: number) => void;
   microAnimations?: boolean;
 }) {
-  const isExpanded = activeButtons.has(3);
+  const isExpanded = activeButtons.has(4);
 
   if (isExpanded) {
     return (

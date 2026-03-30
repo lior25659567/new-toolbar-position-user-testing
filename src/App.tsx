@@ -4,10 +4,11 @@ import HomePage from "./components/HomePage";
 import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
 import PatientReportPage from "./components/PatientReportPage";
 import ScanGuidancePage from "./components/scan-guidance/ScanGuidancePage";
+import UndercutPage from "./components/undercut/UndercutPage";
 import { DesignSystemPage } from "./design-system";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut'>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance') => {
+  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut') => {
     setCurrentView(layout);
   };
   
@@ -111,6 +112,7 @@ export default function App() {
           onOpenDesignSystem={() => setCurrentView('design-system')}
           onOpenPatientReport={() => setCurrentView('patient-report')}
           onOpenScanGuidance={() => setCurrentView('scan-guidance')}
+          onOpenUndercut={() => setCurrentView('undercut')}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
         />
@@ -207,6 +209,12 @@ export default function App() {
 
       {currentView === 'scan-guidance' && (
         <ScanGuidancePage
+          onBackToHome={handleBackToHome}
+        />
+      )}
+
+      {currentView === 'undercut' && (
+        <UndercutPage
           onBackToHome={handleBackToHome}
         />
       )}
