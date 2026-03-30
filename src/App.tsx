@@ -55,6 +55,11 @@ export default function App() {
   };
   
   const handleButtonClick = (index: number) => {
+    // Undercut button (index 3) navigates to dedicated page
+    if (index === 3) {
+      setCurrentView('undercut');
+      return;
+    }
     setActiveButtons(prev => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {

@@ -5,15 +5,27 @@ import { useFrame } from '@react-three/fiber';
 interface UndercutMaterialProps {
   insertionDir: [number, number, number];
   showHeatmap: boolean;
-  /** Normalized X positions [0–1] of selected tooth regions for highlighting */
+  /** Normalized X positions [0-1] of selected tooth regions for highlighting */
   selectedRanges: [number, number][];
+  /** Half-extent of the model bounding box in X (for normalization) */
+  modelExtent?: number;
+  /** Per-tooth insertion directions (indexed same as selectedRanges) */
+  perToothDirs?: [number, number, number][];
+  /** Whether to use per-tooth directions in the shader */
+  usePerTooth?: boolean;
 }
 
 /**
  * Custom MeshPhysicalMaterial that overlays an undercut heatmap
  * and highlights selected tooth regions with a primary-color outline.
+ * Supports per-tooth insertion directions for individual path mode.
  */
-export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRanges }: UndercutMaterialProps) {
+export default function UndercutMaterial({
+  insertionDir, showHeatmap, selectedRanges,
+  modelExtent = 700,
+  perToothDirs = [],
+  usePerTooth = false,
+}: UndercutMaterialProps) {
   const matRef = useRef<THREE.MeshPhysicalMaterial>(null);
 
   const uniformsRef = useRef<{
@@ -21,10 +33,15 @@ export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRa
     uShowHeatmap: { value: number };
     uSelectedCount: { value: number };
     uSelectedRanges: { value: Float32Array };
+    uModelExtent: { value: number };
+    uUsePerTooth: { value: number };
+    uPerToothDirs: { value: Float32Array };
   } | null>(null);
 
   // Pack ranges into a flat Float32Array (max 16 ranges = 32 floats)
   const rangesArray = useRef(new Float32Array(32));
+  // Pack per-tooth directions (max 16 teeth * 3 components = 48 floats)
+  const perToothDirsArray = useRef(new Float32Array(48));
 
   useEffect(() => {
     const mat = matRef.current;
@@ -37,11 +54,22 @@ export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRa
       rangesArray.current[i * 2 + 1] = selectedRanges[i][1];
     }
 
+    // Fill per-tooth dirs array
+    perToothDirsArray.current.fill(0);
+    for (let i = 0; i < Math.min(perToothDirs.length, 16); i++) {
+      perToothDirsArray.current[i * 3] = perToothDirs[i][0];
+      perToothDirsArray.current[i * 3 + 1] = perToothDirs[i][1];
+      perToothDirsArray.current[i * 3 + 2] = perToothDirs[i][2];
+    }
+
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uInsertionDir = { value: new THREE.Vector3(...insertionDir) };
       shader.uniforms.uShowHeatmap = { value: showHeatmap ? 1.0 : 0.0 };
       shader.uniforms.uSelectedCount = { value: selectedRanges.length };
       shader.uniforms.uSelectedRanges = { value: rangesArray.current };
+      shader.uniforms.uModelExtent = { value: modelExtent };
+      shader.uniforms.uUsePerTooth = { value: usePerTooth ? 1.0 : 0.0 };
+      shader.uniforms.uPerToothDirs = { value: perToothDirsArray.current };
 
       uniformsRef.current = shader.uniforms as any;
 
@@ -64,6 +92,9 @@ export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRa
         uniform float uShowHeatmap;
         uniform float uSelectedCount;
         uniform float uSelectedRanges[32];
+        uniform float uModelExtent;
+        uniform float uUsePerTooth;
+        uniform float uPerToothDirs[48];
         varying vec3 vWorldNormal;
         varying vec3 vLocalPos;
       ` + shader.fragmentShader;
@@ -73,23 +104,23 @@ export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRa
         `
         #include <dithering_fragment>
 
-        // Selection highlight — blue tint on selected tooth regions
+        // Selection highlight -- blue tint on selected tooth regions
         int selCount = int(uSelectedCount);
+        float normX = (vLocalPos.x + uModelExtent) / (uModelExtent * 2.0);
+
+        // Determine which tooth region this fragment belongs to (-1 if none)
+        int toothIdx = -1;
         if (selCount > 0) {
-          // vLocalPos.x is in model local space; normalize to 0–1 using a rough bbox
-          // The geometry is centered, so x goes roughly from -maxExtent to +maxExtent
-          float normX = (vLocalPos.x + 700.0) / 1400.0; // Approx range for this PLY model
-          bool isSelected = false;
           for (int i = 0; i < 16; i++) {
             if (i >= selCount) break;
             float lo = uSelectedRanges[i * 2];
             float hi = uSelectedRanges[i * 2 + 1];
             if (normX >= lo && normX <= hi) {
-              isSelected = true;
+              toothIdx = i;
               break;
             }
           }
-          if (isSelected) {
+          if (toothIdx >= 0) {
             // Tint with primary blue #009ACE
             vec3 selectColor = vec3(0.0, 0.604, 0.808);
             gl_FragColor.rgb = mix(gl_FragColor.rgb, selectColor, 0.25);
@@ -97,7 +128,20 @@ export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRa
         }
 
         if (uShowHeatmap > 0.5) {
-          vec3 insDir = normalize(uInsertionDir);
+          // Determine insertion direction for this fragment
+          vec3 insDir;
+          if (uUsePerTooth > 0.5 && toothIdx >= 0) {
+            // Per-tooth mode: use the direction for the tooth this fragment belongs to
+            insDir = normalize(vec3(
+              uPerToothDirs[toothIdx * 3],
+              uPerToothDirs[toothIdx * 3 + 1],
+              uPerToothDirs[toothIdx * 3 + 2]
+            ));
+          } else {
+            // Shared mode: single global direction
+            insDir = normalize(uInsertionDir);
+          }
+
           float dotN = dot(vWorldNormal, insDir);
           float undercutDepth = max(0.0, -dotN) * 1.2;
 
@@ -125,16 +169,23 @@ export default function UndercutMaterial({ insertionDir, showHeatmap, selectedRa
     };
 
     mat.needsUpdate = true;
-  }, [insertionDir, showHeatmap, selectedRanges]);
+  }, [insertionDir, showHeatmap, selectedRanges, modelExtent, usePerTooth, perToothDirs]);
 
   useFrame(() => {
     if (uniformsRef.current) {
       uniformsRef.current.uInsertionDir.value.set(...insertionDir);
       uniformsRef.current.uShowHeatmap.value = showHeatmap ? 1.0 : 0.0;
       uniformsRef.current.uSelectedCount.value = selectedRanges.length;
+      uniformsRef.current.uModelExtent.value = modelExtent;
+      uniformsRef.current.uUsePerTooth.value = usePerTooth ? 1.0 : 0.0;
       for (let i = 0; i < Math.min(selectedRanges.length, 16); i++) {
         rangesArray.current[i * 2] = selectedRanges[i][0];
         rangesArray.current[i * 2 + 1] = selectedRanges[i][1];
+      }
+      for (let i = 0; i < Math.min(perToothDirs.length, 16); i++) {
+        perToothDirsArray.current[i * 3] = perToothDirs[i][0];
+        perToothDirsArray.current[i * 3 + 1] = perToothDirs[i][1];
+        perToothDirsArray.current[i * 3 + 2] = perToothDirs[i][2];
       }
     }
   });

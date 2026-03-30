@@ -1,10 +1,16 @@
-import React, { Suspense, useRef, useMemo, useState, useCallback } from 'react';
+import React, { Suspense, useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, Center, Environment } from '@react-three/drei';
 import { PLYLoader } from 'three-stdlib';
 import * as THREE from 'three';
 import upperJawModel from '@/assets/3d-models/upper-jaw.ply?url';
+import lowerJawModel from '@/assets/3d-models/lower-jaw.ply?url';
 import UndercutMaterial from './UndercutMaterial';
+import type { ArchType } from './types';
+
+// Preload both models so arch switching is instant
+useLoader.preload(PLYLoader, upperJawModel);
+useLoader.preload(PLYLoader, lowerJawModel);
 
 // ─── Insertion Path Arrow ────────────────────────────────────────────────────
 
@@ -12,9 +18,10 @@ interface ArrowProps {
   direction: [number, number, number];
   onDrag: (newDir: [number, number, number]) => void;
   interactive: boolean;
+  accentColor?: string;
 }
 
-function InsertionArrow({ direction, onDrag, interactive }: ArrowProps) {
+function InsertionArrow({ direction, onDrag, interactive, accentColor }: ArrowProps) {
   const groupRef = useRef<THREE.Group>(null);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -24,6 +31,9 @@ function InsertionArrow({ direction, onDrag, interactive }: ArrowProps) {
   const shaftRadius = 0.018;
   const headRadius = 0.06;
 
+  const baseColor = accentColor || '#009ACE';
+  const baseDark = accentColor ? accentColor : '#007A9E';
+
   const quaternion = useMemo(() => {
     const q = new THREE.Quaternion();
     const from = new THREE.Vector3(0, 1, 0);
@@ -32,29 +42,37 @@ function InsertionArrow({ direction, onDrag, interactive }: ArrowProps) {
     return q;
   }, [direction]);
 
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
+
   const handlePointerDown = useCallback((e: any) => {
     if (!interactive) return;
-    e.stopPropagation();
+    pointerDownPos.current = { x: e.clientX, y: e.clientY };
     setDragging(true);
     (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
   }, [interactive]);
 
-  const handlePointerUp = useCallback(() => { setDragging(false); }, []);
+  const handlePointerUp = useCallback((e: any) => {
+    const wasClick = pointerDownPos.current &&
+      Math.abs(e.clientX - pointerDownPos.current.x) < 5 &&
+      Math.abs(e.clientY - pointerDownPos.current.y) < 5;
+    pointerDownPos.current = null;
+    setDragging(false);
+    if (wasClick) return;
+  }, []);
 
   const handlePointerMove = useCallback((e: any) => {
     if (!dragging || !interactive) return;
     e.stopPropagation();
     const ndcX = (e.clientX / window.innerWidth) * 2 - 1;
     const ndcY = -(e.clientY / window.innerHeight) * 2 + 1;
-    // Tilt the upward vector based on mouse position
     const newDir: [number, number, number] = [ndcX * 0.5, 1, ndcY * 0.5];
     const len = Math.sqrt(newDir[0] ** 2 + newDir[1] ** 2 + newDir[2] ** 2);
     newDir[0] /= len; newDir[1] /= len; newDir[2] /= len;
     onDrag(newDir);
   }, [dragging, interactive, onDrag]);
 
-  const arrowColor = dragging ? '#EAB308' : hovered ? '#00B8F0' : '#009ACE';
-  const headColor = dragging ? '#D97706' : hovered ? '#00B8F0' : '#007A9E';
+  const arrowColor = dragging ? '#EAB308' : hovered ? '#00B8F0' : baseColor;
+  const headColor = dragging ? '#D97706' : hovered ? '#00B8F0' : baseDark;
   const glowOpacity = dragging ? 0.25 : hovered ? 0.15 : 0;
 
   return (
@@ -67,38 +85,47 @@ function InsertionArrow({ direction, onDrag, interactive }: ArrowProps) {
         </mesh>
       )}
       {/* Shaft */}
-      <mesh position={[0, shaftLen / 2, 0]}>
-        <cylinderGeometry args={[shaftRadius, shaftRadius, shaftLen, 12]} />
-        <meshStandardMaterial color={arrowColor} />
+      <mesh
+        position={[0, shaftLen / 2, 0]}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerMove={handlePointerMove}
+        onPointerEnter={() => { setHovered(true); if (interactive) document.body.style.cursor = 'grab'; }}
+        onPointerLeave={() => { setHovered(false); if (!dragging) document.body.style.cursor = 'default'; }}
+      >
+        <cylinderGeometry args={[shaftRadius * 3, shaftRadius * 3, shaftLen, 12]} />
+        <meshStandardMaterial color={arrowColor} transparent opacity={0.9} />
       </mesh>
       {/* Arrowhead */}
-      <mesh position={[0, shaftLen + headLen / 2, 0]}>
+      <mesh
+        position={[0, shaftLen + headLen / 2, 0]}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerMove={handlePointerMove}
+        onPointerEnter={() => { setHovered(true); if (interactive) document.body.style.cursor = 'grab'; }}
+        onPointerLeave={() => { setHovered(false); if (!dragging) document.body.style.cursor = 'default'; }}
+      >
         <coneGeometry args={[headRadius, headLen, 12]} />
         <meshStandardMaterial color={headColor} />
       </mesh>
-      {/* Handle sphere at tip — visible grab point */}
+      {/* Handle sphere at tip */}
       {interactive && (
-        <mesh position={[0, shaftLen + headLen + 0.04, 0]}>
-          <sphereGeometry args={[0.04, 12, 12]} />
+        <mesh
+          position={[0, shaftLen + headLen + 0.04, 0]}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerMove={handlePointerMove}
+          onPointerEnter={() => { setHovered(true); document.body.style.cursor = 'grab'; }}
+          onPointerLeave={() => { setHovered(false); if (!dragging) document.body.style.cursor = 'default'; }}
+        >
+          <sphereGeometry args={[0.06, 12, 12]} />
           <meshStandardMaterial
-            color={dragging ? '#EAB308' : hovered ? '#00B8F0' : '#009ACE'}
-            emissive={dragging ? '#EAB308' : hovered ? '#00B8F0' : '#009ACE'}
+            color={dragging ? '#EAB308' : hovered ? '#00B8F0' : baseColor}
+            emissive={dragging ? '#EAB308' : hovered ? '#00B8F0' : baseColor}
             emissiveIntensity={dragging ? 0.8 : hovered ? 0.5 : 0.15}
           />
         </mesh>
       )}
-      {/* Invisible hit area — generous for easy grab */}
-      <mesh
-        position={[0, (shaftLen + headLen) / 2, 0]}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerMove={handlePointerMove}
-        onPointerEnter={() => { setHovered(true); document.body.style.cursor = interactive ? 'grab' : 'default'; }}
-        onPointerLeave={() => { setHovered(false); if (!dragging) document.body.style.cursor = 'default'; }}
-      >
-        <cylinderGeometry args={[0.12, 0.12, shaftLen + headLen + 0.25, 8]} />
-        <meshBasicMaterial visible={false} />
-      </mesh>
       {/* Base ring */}
       <mesh position={[0, -0.01, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.04, 0.07, 20]} />
@@ -111,27 +138,39 @@ function InsertionArrow({ direction, onDrag, interactive }: ArrowProps) {
 // ─── Clickable Model ─────────────────────────────────────────────────────────
 
 const UPPER_FDI = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+const LOWER_FDI = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
 
-function mapClickToTooth(point: THREE.Vector3, bbox: THREE.Box3): number {
+function mapClickToTooth(point: THREE.Vector3, bbox: THREE.Box3, arch: ArchType): number {
+  const fdi = arch === 'upper' ? UPPER_FDI : LOWER_FDI;
   const size = new THREE.Vector3();
   bbox.getSize(size);
   const t = (point.x - bbox.min.x) / size.x;
-  const idx = Math.min(UPPER_FDI.length - 1, Math.max(0, Math.floor(t * UPPER_FDI.length)));
-  return UPPER_FDI[idx];
+  const idx = Math.min(fdi.length - 1, Math.max(0, Math.floor(t * fdi.length)));
+  return fdi[idx];
 }
 
 // ─── Scene ───────────────────────────────────────────────────────────────────
 
-const BASE_ROT_X = Math.PI * 0.6;
-const BASE_ROT_Z = Math.PI;
+const UPPER_ROT_X = Math.PI * 0.6;
+const UPPER_ROT_Z = Math.PI;
+const LOWER_ROT_X = Math.PI * 0.4;
+const LOWER_ROT_Z = Math.PI;
 
-/** Convert a tooth FDI number to a normalized X range [0–1] on the model */
-function toothToRange(toothId: number): [number, number] {
-  const idx = UPPER_FDI.indexOf(toothId);
+/** Convert a tooth FDI number to a normalized X range [0-1] on the model */
+function toothToRange(toothId: number, arch: ArchType): [number, number] {
+  const fdi = arch === 'upper' ? UPPER_FDI : LOWER_FDI;
+  const idx = fdi.indexOf(toothId);
   if (idx === -1) return [0, 0];
-  const step = 1 / UPPER_FDI.length;
+  const step = 1 / fdi.length;
   return [idx * step, (idx + 1) * step];
 }
+
+// Distinct colors for per-tooth arrows
+const TOOTH_ARROW_COLORS = [
+  '#009ACE', '#E74C3C', '#27AE60', '#F39C12', '#8E44AD',
+  '#16A085', '#D35400', '#2980B9', '#C0392B', '#1ABC9C',
+  '#9B59B6', '#2ECC71', '#E67E22', '#3498DB', '#E91E63', '#00BCD4',
+];
 
 interface SceneProps {
   insertionDir: [number, number, number];
@@ -141,10 +180,20 @@ interface SceneProps {
   onToothClick?: (toothId: number, shiftKey: boolean) => void;
   selectionMode: boolean;
   selectedTeeth: number[];
+  sharedPath: boolean;
+  perToothDirs: Map<number, [number, number, number]>;
+  onDragToothDir?: (toothId: number, dir: [number, number, number]) => void;
+  activeArch: ArchType;
 }
 
-function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onToothClick, selectionMode, selectedTeeth }: SceneProps) {
-  const geometry = useLoader(PLYLoader, upperJawModel);
+function Scene({
+  insertionDir, onDragDir, showHeatmap, interactiveArrow,
+  onToothClick, selectionMode, selectedTeeth,
+  sharedPath, perToothDirs, onDragToothDir,
+  activeArch,
+}: SceneProps) {
+  const modelUrl = activeArch === 'upper' ? upperJawModel : lowerJawModel;
+  const geometry = useLoader(PLYLoader, modelUrl);
   const groupRef = useRef<THREE.Group>(null);
 
   const processedGeometry = useMemo(() => {
@@ -160,23 +209,40 @@ function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onTooth
     return b;
   }, [processedGeometry]);
 
+  // Compute half-extent for shader normalization
+  const modelExtent = useMemo(() => {
+    const size = new THREE.Vector3();
+    bbox.getSize(size);
+    return size.x / 2;
+  }, [bbox]);
+
   const selectedRanges = useMemo(() => {
-    return selectedTeeth.map(t => toothToRange(t)).filter(r => r[0] !== r[1]);
-  }, [selectedTeeth]);
+    return selectedTeeth.map(t => toothToRange(t, activeArch)).filter(r => r[0] !== r[1]);
+  }, [selectedTeeth, activeArch]);
+
+  // Build per-tooth direction array (ordered same as selectedRanges)
+  const perToothDirsArray = useMemo((): [number, number, number][] => {
+    return selectedTeeth
+      .filter(t => toothToRange(t, activeArch)[0] !== toothToRange(t, activeArch)[1])
+      .map(t => perToothDirs.get(t) || [0, 1, 0] as [number, number, number]);
+  }, [selectedTeeth, perToothDirs, activeArch]);
 
   const handleModelClick = useCallback((e: any) => {
     if (!onToothClick) return;
     e.stopPropagation();
     const localPt = e.point.clone();
     if (groupRef.current) groupRef.current.worldToLocal(localPt);
-    const toothId = mapClickToTooth(localPt, bbox);
+    const toothId = mapClickToTooth(localPt, bbox, activeArch);
     onToothClick(toothId, e.nativeEvent?.shiftKey ?? false);
-  }, [onToothClick, bbox]);
+  }, [onToothClick, bbox, activeArch]);
+
+  const rotX = activeArch === 'upper' ? UPPER_ROT_X : LOWER_ROT_X;
+  const rotZ = activeArch === 'upper' ? UPPER_ROT_Z : LOWER_ROT_Z;
 
   return (
     <>
       <Center>
-        <group ref={groupRef} rotation={[BASE_ROT_X, 0, BASE_ROT_Z]}>
+        <group ref={groupRef} rotation={[rotX, 0, rotZ]}>
           <mesh
             geometry={processedGeometry}
             scale={0.035}
@@ -184,14 +250,36 @@ function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onTooth
             onPointerEnter={() => { if (selectionMode) document.body.style.cursor = 'crosshair'; }}
             onPointerLeave={() => { document.body.style.cursor = 'default'; }}
           >
-            <UndercutMaterial insertionDir={insertionDir} showHeatmap={showHeatmap} selectedRanges={selectedRanges} />
+            <UndercutMaterial
+              insertionDir={insertionDir}
+              showHeatmap={showHeatmap}
+              selectedRanges={selectedRanges}
+              modelExtent={modelExtent}
+              perToothDirs={perToothDirsArray}
+              usePerTooth={!sharedPath && selectedTeeth.length > 0}
+            />
           </mesh>
         </group>
       </Center>
 
-      {showHeatmap && (
+      {/* Arrows */}
+      {showHeatmap && sharedPath && (
         <InsertionArrow direction={insertionDir} onDrag={onDragDir} interactive={interactiveArrow} />
       )}
+
+      {showHeatmap && !sharedPath && selectedTeeth.map((toothId, i) => {
+        const dir = perToothDirs.get(toothId) || [0, 1, 0] as [number, number, number];
+        const arrowColor = TOOTH_ARROW_COLORS[i % TOOTH_ARROW_COLORS.length];
+        return (
+          <InsertionArrow
+            key={toothId}
+            direction={dir}
+            onDrag={(d) => onDragToothDir?.(toothId, d)}
+            interactive={interactiveArrow}
+            accentColor={arrowColor}
+          />
+        );
+      })}
 
       <ambientLight intensity={0.15} />
       <directionalLight position={[5, 8, 5]} intensity={0.8} color="#f5f0e8" castShadow />
@@ -235,10 +323,17 @@ interface UndercutViewerProps {
   onToothClick?: (toothId: number, shiftKey: boolean) => void;
   selectionMode: boolean;
   selectedTeeth: number[];
+  sharedPath: boolean;
+  perToothDirs: Map<number, [number, number, number]>;
+  onDragToothDir?: (toothId: number, dir: [number, number, number]) => void;
+  activeArch: ArchType;
 }
 
 export default function UndercutViewer({
-  insertionDir, onDragDir, showHeatmap, interactiveArrow, onToothClick, selectionMode, selectedTeeth,
+  insertionDir, onDragDir, showHeatmap, interactiveArrow,
+  onToothClick, selectionMode, selectedTeeth,
+  sharedPath, perToothDirs, onDragToothDir,
+  activeArch,
 }: UndercutViewerProps) {
   return (
     <Canvas
@@ -256,6 +351,10 @@ export default function UndercutViewer({
           onToothClick={onToothClick}
           selectionMode={selectionMode}
           selectedTeeth={selectedTeeth}
+          sharedPath={sharedPath}
+          perToothDirs={perToothDirs}
+          onDragToothDir={onDragToothDir}
+          activeArch={activeArch}
         />
       </Suspense>
     </Canvas>
