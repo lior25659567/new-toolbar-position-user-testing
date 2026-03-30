@@ -14,7 +14,7 @@ interface UndercutPageProps {
 
 // ─── Procedure Mode ─────────────────────────────────────────────────────────
 
-type ProcedureMode = 'crown' | 'bridge' | 'full-arch';
+type ProcedureMode = 'crown' | 'bridge' | 'bridge-2' | 'full-arch';
 
 // ─── Heatmap Legend ─────────────────────────────────────────────────────────
 
@@ -73,6 +73,7 @@ function ModePills({ mode, onChange, disabled }: {
   const options: { value: ProcedureMode; label: string }[] = [
     { value: 'crown', label: 'Crown' },
     { value: 'bridge', label: 'Bridge' },
+    { value: 'bridge-2', label: 'Bridge 2' },
     { value: 'full-arch', label: 'Full Arch' },
   ];
   return (
@@ -141,13 +142,22 @@ const navBtnStyle: React.CSSProperties = {
 
 // ─── Toast messages ─────────────────────────────────────────────────────────
 
-function getToast(stage: UndercutStage, count: number, mode: ProcedureMode, linked: boolean): string {
+function getToast(stage: UndercutStage, count: number, mode: ProcedureMode, linked: boolean, accepted: boolean = true): string {
   if (stage === 'confirm') return 'Insertion path confirmed. Undercuts and path are locked.';
 
   if (mode === 'full-arch') {
     return count === 0
       ? 'Loading full arch analysis...'
       : 'Full arch \u2014 drag the arrow to adjust the shared insertion path.';
+  }
+
+  if (mode === 'bridge-2') {
+    if (count === 0) return 'Tap teeth on the model to define bridge span.';
+    if (count === 1) return 'Tap at least one more tooth.';
+    if (!accepted) return `${count} teeth selected \u2014 accept selection to begin analysis.`;
+    return linked
+      ? 'Bridge linked \u2014 drag the arrow to adjust the shared insertion path.'
+      : 'Bridge unlinked \u2014 each tooth has an independent insertion path.';
   }
 
   if (mode === 'bridge') {
@@ -160,7 +170,7 @@ function getToast(stage: UndercutStage, count: number, mode: ProcedureMode, link
 
   if (count === 0) return 'Tap a tooth on the model to analyze its insertion path.';
   if (count === 1) return 'Drag the arrow to adjust. Tap more teeth to add crowns.';
-  return 'Multiple crowns \u2014 each tooth has an individual insertion path.';
+  return `${count} crowns \u2014 each has its own insertion path. Drag arrows independently.`;
 }
 
 // ─── Error Notification ─────────────────────────────────────────────────────
@@ -204,6 +214,7 @@ interface PanelProps {
   hasMarginLine: boolean;
   activeArch: ArchType;
   availableArches: ArchType[];
+  selectionAccepted: boolean;
   onClose: () => void;
   onConfirm: () => void;
   onRestart: () => void;
@@ -211,18 +222,23 @@ interface PanelProps {
   onToggleSharedPath: (shared: boolean) => void;
   onClearSelection: () => void;
   onSwitchArch: (arch: ArchType) => void;
-  onProcedureModeChange: (mode: ProcedureMode) => void;
+  onAcceptSelection: () => void;
+  onEditSelection: () => void;
 }
 
 function UndercutPanel({
   stage, procedureMode, selectedTeeth, sharedPath, isCustomPath,
-  hasMarginLine, activeArch, availableArches,
+  hasMarginLine, activeArch, availableArches, selectionAccepted,
   onClose, onConfirm, onRestart,
   onResetToOptimal, onToggleSharedPath, onClearSelection,
-  onSwitchArch, onProcedureModeChange,
+  onSwitchArch, onAcceptSelection, onEditSelection,
 }: PanelProps) {
   const count = selectedTeeth.length;
-  const canConfirm = procedureMode === 'bridge' ? count >= 2 : count > 0;
+  const isBridge2 = procedureMode === 'bridge-2';
+  const bridge2Selecting = isBridge2 && !selectionAccepted;
+  const canConfirm = procedureMode === 'bridge' ? count >= 2
+    : isBridge2 ? count >= 2 && selectionAccepted
+    : count > 0;
 
   return (
     <div style={{
@@ -248,11 +264,6 @@ function UndercutPanel({
       {/* ── Body ── */}
       <div style={{ padding: space[3], display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
-        {/* Mode pills */}
-        {stage !== 'confirm' && (
-          <ModePills mode={procedureMode} onChange={onProcedureModeChange} disabled={false} />
-        )}
-
         {/* Arch navigator */}
         <ArchNav activeArch={activeArch} onSwitch={onSwitchArch} show={availableArches.length >= 2} />
 
@@ -273,7 +284,7 @@ function UndercutPanel({
         {/* ── Selection area ── */}
         {count === 0 && stage !== 'confirm' && procedureMode !== 'full-arch' && (
           <div style={{ fontSize: '12px', color: color.textSubtle, lineHeight: '18px' }}>
-            {procedureMode === 'bridge'
+            {(procedureMode === 'bridge' || isBridge2)
               ? 'Tap 2+ adjacent teeth on the model.'
               : 'Tap teeth on the model to begin.'}
           </div>
@@ -294,7 +305,7 @@ function UndercutPanel({
                 }}>
                   {procedureMode === 'crown'
                     ? (count === 1 ? 'Crown' : `${count} Crowns`)
-                    : procedureMode === 'bridge'
+                    : (procedureMode === 'bridge' || isBridge2)
                       ? `Bridge ${count}-unit`
                       : 'Full Arch'}
                 </span>
@@ -310,7 +321,7 @@ function UndercutPanel({
             </div>
 
             {/* ── Bridge: linked toggle ── */}
-            {procedureMode === 'bridge' && count >= 2 && stage !== 'confirm' && (
+            {(procedureMode === 'bridge' || (isBridge2 && selectionAccepted)) && count >= 2 && stage !== 'confirm' && (
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '6px 10px', borderRadius: '8px',
@@ -333,7 +344,7 @@ function UndercutPanel({
             )}
 
             {/* Bridge: 1-tooth warning */}
-            {procedureMode === 'bridge' && count === 1 && stage !== 'confirm' && (
+            {(procedureMode === 'bridge' || isBridge2) && count === 1 && stage !== 'confirm' && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '5px 8px', borderRadius: '6px',
@@ -346,32 +357,41 @@ function UndercutPanel({
               </div>
             )}
 
-            {/* Crown: shared path toggle when 2+ crowns */}
+            {/* Crown: always individual paths — info line */}
             {procedureMode === 'crown' && count >= 2 && stage !== 'confirm' && (
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '6px 10px', borderRadius: '8px',
-                backgroundColor: color.neutral50,
-              }}>
-                <span style={{ fontSize: '12px', fontWeight: 500, color: color.textDefault }}>
-                  Shared path
-                </span>
-                <Toggle
-                  checked={sharedPath}
-                  onChange={() => onToggleSharedPath(!sharedPath)}
-                />
+              <div style={{ fontSize: '11px', color: color.textSubtle, lineHeight: '16px' }}>
+                Each crown has its own individual insertion path.
               </div>
             )}
           </>
         )}
 
+        {/* ── Bridge 2: accept selection ── */}
+        {bridge2Selecting && count >= 2 && stage !== 'confirm' && (
+          <PrimaryButton size={36} fullWidth onClick={onAcceptSelection}>
+            Accept Selection ({count} teeth)
+          </PrimaryButton>
+        )}
+
+        {/* ── Bridge 2: edit selection after accepted ── */}
+        {isBridge2 && selectionAccepted && stage !== 'confirm' && (
+          <button onClick={onEditSelection} style={{
+            background: 'none', border: `1px dashed ${color.borderDefault}`, cursor: 'pointer',
+            borderRadius: '6px', padding: '5px 0',
+            fontSize: '11px', fontWeight: 500, color: color.textSubtle,
+            transition: 'all 0.15s ease',
+          }}>
+            Edit Selection
+          </button>
+        )}
+
         {/* ── Divider ── */}
-        {count > 0 && stage !== 'confirm' && (
+        {count > 0 && stage !== 'confirm' && !bridge2Selecting && (
           <div style={{ height: '1px', backgroundColor: color.borderDefault, margin: '2px 0' }} />
         )}
 
         {/* ── Actions ── */}
-        {stage === 'analyze' && (
+        {stage === 'analyze' && !bridge2Selecting && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {isCustomPath && (
               <SecondaryButton size={36} fullWidth onClick={onResetToOptimal}>
@@ -420,6 +440,7 @@ function UndercutPanel({
 
 export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTRY_CONTEXT }: UndercutPageProps) {
   const [stage, setStage] = useState<UndercutStage>('analyze');
+  const [selectionAccepted, setSelectionAccepted] = useState(false);
   const [procedureMode, setProcedureMode] = useState<ProcedureMode>(
     entryContext.procedureType === 'bridge' ? 'bridge'
       : entryContext.procedureType === 'full-arch' ? 'full-arch'
@@ -440,11 +461,12 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
     setProcedureMode(mode);
     clearSelection();
     setStage('analyze');
+    setSelectionAccepted(false);
 
     if (mode === 'full-arch') {
       selectFullArch(activeArch);
       toggleSharedPath(true);
-    } else if (mode === 'bridge') {
+    } else if (mode === 'bridge' || mode === 'bridge-2') {
       toggleSharedPath(true);
     } else {
       toggleSharedPath(false);
@@ -456,6 +478,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   const handleRestart = useCallback(() => {
     setStage('analyze');
     clearSelection();
+    setSelectionAccepted(false);
     if (procedureMode === 'full-arch') {
       selectFullArch(activeArch);
       toggleSharedPath(true);
@@ -465,23 +488,41 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   const handleToothClick = useCallback((toothId: number, shiftKey: boolean) => {
     if (stage === 'confirm') setStage('analyze');
     if (procedureMode === 'full-arch') return;
+    if (procedureMode === 'bridge-2' && selectionAccepted) return;
     toggleTooth(toothId, shiftKey);
-  }, [stage, toggleTooth, procedureMode]);
+  }, [stage, toggleTooth, procedureMode, selectionAccepted]);
 
   // Auto-link in bridge mode when reaching 2+ teeth
   useEffect(() => {
-    if (procedureMode === 'bridge' && selectedTeeth.length >= 2 && !isBridgeLinked) {
+    const shouldLink =
+      (procedureMode === 'bridge' && selectedTeeth.length >= 2) ||
+      (procedureMode === 'bridge-2' && selectionAccepted && selectedTeeth.length >= 2);
+
+    const shouldUnlink =
+      ((procedureMode === 'bridge' || procedureMode === 'bridge-2') && selectedTeeth.length < 2) ||
+      (procedureMode === 'bridge-2' && !selectionAccepted);
+
+    if (shouldLink && !isBridgeLinked) {
       linkTeeth(selectedTeeth);
     }
-    if (procedureMode === 'bridge' && selectedTeeth.length < 2 && isBridgeLinked && linkedBridges.length > 0) {
+    if (shouldUnlink && isBridgeLinked && linkedBridges.length > 0) {
       unlinkBridge(linkedBridges[0].id);
     }
-  }, [procedureMode, selectedTeeth.length, isBridgeLinked, linkTeeth, unlinkBridge, linkedBridges, selectedTeeth]);
+  }, [procedureMode, selectedTeeth.length, selectionAccepted, isBridgeLinked, linkTeeth, unlinkBridge, linkedBridges, selectedTeeth]);
 
   const handleClear = useCallback(() => {
     clearSelection();
     setStage('analyze');
+    setSelectionAccepted(false);
   }, [clearSelection]);
+
+  const handleAcceptSelection = useCallback(() => {
+    setSelectionAccepted(true);
+  }, []);
+
+  const handleEditSelection = useCallback(() => {
+    setSelectionAccepted(false);
+  }, []);
 
   const handleArchSwitch = useCallback((arch: ArchType) => {
     setActiveArch(arch);
@@ -496,10 +537,11 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   const [showError, setShowError] = useState(false);
   useEffect(() => { if (analysisError) setShowError(true); }, [analysisError]);
 
-  const showHeatmap = selectedTeeth.length > 0;
-  const interactiveArrow = selectedTeeth.length > 0 && stage !== 'confirm';
+  const bridge2Selecting = procedureMode === 'bridge-2' && !selectionAccepted;
+  const showHeatmap = selectedTeeth.length > 0 && !bridge2Selecting;
+  const interactiveArrow = selectedTeeth.length > 0 && stage !== 'confirm' && !bridge2Selecting;
   const isCustomPath = analysis ? !analysis.insertionPath.isOptimal : false;
-  const toastMessage = getToast(stage, selectedTeeth.length, procedureMode, sharedPath);
+  const toastMessage = getToast(stage, selectedTeeth.length, procedureMode, sharedPath, selectionAccepted);
 
   return (
     <div style={{
@@ -513,7 +555,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
           showHeatmap={showHeatmap}
           interactiveArrow={interactiveArrow}
           onToothClick={handleToothClick}
-          selectionMode={stage !== 'confirm' && procedureMode !== 'full-arch'}
+          selectionMode={stage !== 'confirm' && procedureMode !== 'full-arch' && !(procedureMode === 'bridge-2' && selectionAccepted)}
           selectedTeeth={selectedTeeth}
           sharedPath={sharedPath}
           perToothDirs={perToothDirs}
@@ -563,8 +605,25 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
           />
         )}
 
-        {/* Panel */}
-        <div style={{ position: 'absolute', left: space[3], bottom: space[3], zIndex: 10 }}>
+        {/* Mode switcher + Panel */}
+        <div style={{
+          position: 'absolute', left: space[3], bottom: space[3], zIndex: 10,
+          display: 'flex', flexDirection: 'column', gap: '8px',
+        }}>
+          {/* Mode pills — outside the panel */}
+          {stage !== 'confirm' && (
+            <div style={{
+              width: '248px', padding: '6px',
+              borderRadius: radius.md,
+              backgroundColor: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              border: `1px solid ${color.borderDefault}`,
+            }}>
+              <ModePills mode={procedureMode} onChange={handleModeChange} disabled={false} />
+            </div>
+          )}
+
           <UndercutPanel
             stage={stage}
             procedureMode={procedureMode}
@@ -574,6 +633,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
             hasMarginLine={hasMarginLine}
             activeArch={activeArch}
             availableArches={entryContext.availableArches}
+            selectionAccepted={selectionAccepted}
             onClose={onBackToHome}
             onConfirm={handleConfirm}
             onRestart={handleRestart}
@@ -581,7 +641,8 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
             onToggleSharedPath={toggleSharedPath}
             onClearSelection={handleClear}
             onSwitchArch={handleArchSwitch}
-            onProcedureModeChange={handleModeChange}
+            onAcceptSelection={handleAcceptSelection}
+            onEditSelection={handleEditSelection}
           />
         </div>
 
