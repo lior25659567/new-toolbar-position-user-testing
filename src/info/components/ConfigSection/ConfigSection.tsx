@@ -1,5 +1,5 @@
 import React from "react";
-import type { InfoState, TagColor } from "../../types";
+import type { InfoState } from "../../types";
 import type { InfoAction } from "../../state/infoReducer";
 import { FixedRestorativeConfig } from "./FixedRestorativeConfig";
 import { StudyModelConfig } from "./StudyModelConfig";
@@ -10,7 +10,7 @@ import { ApplianceConfig } from "./ApplianceConfig";
 
 interface ConfigSectionProps {
   state: InfoState;
-  toothColorMap: Record<number, TagColor>;
+  toothColorMap: Record<number, string>;
   dispatch: React.Dispatch<InfoAction>;
 }
 

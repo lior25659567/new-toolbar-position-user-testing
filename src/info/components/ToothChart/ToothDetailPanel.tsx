@@ -4,15 +4,6 @@ import type { InfoAction } from "../../state/infoReducer";
 import { DropdownList, IconButton } from "../../../design-system";
 import { TOOTH_PROCEDURES, TOOTH_PROCEDURE_COLORS, MATERIALS, SHADE_SYSTEMS, SHADE_OPTIONS } from "../../constants";
 
-const tagColors: Record<string, { bg: string; border: string; text: string }> = {
-  red: { bg: "#FFF0F3", border: "#FFE0E7", text: "#A30F34" },
-  orange: { bg: "#FFF2E3", border: "#FFE5D6", text: "#8A4300" },
-  magenta: { bg: "#FFF0F9", border: "#FFE3F4", text: "#A30463" },
-  purple: { bg: "#F8F2FF", border: "#F2E6FF", text: "#6C37A1" },
-  blue: { bg: "#E6F7FF", border: "#D1F1FF", text: "#005780" },
-  green: { bg: "#ECFDF5", border: "#D1FAE5", text: "#065F46" },
-};
-
 interface ToothDetailPanelProps {
   toothNumbers: number[];
   specs: ToothSpec[];
@@ -74,15 +65,14 @@ export function ToothDetailPanel({ toothNumbers, specs, dispatch }: ToothDetailP
         </IconButton>
       </div>
 
-      {/* Procedure chips */}
+      {/* Procedure buttons */}
       <div style={{ marginBottom: "16px" }}>
         <div style={{ fontSize: "12px", fontWeight: 400, color: "#6a7282", fontFamily: "Inter, sans-serif", marginBottom: "8px" }}>
           Procedure
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
           {TOOTH_PROCEDURES.map((proc) => {
-            const colorKey = TOOTH_PROCEDURE_COLORS[proc.value as ToothProcedure];
-            const palette = tagColors[colorKey] || tagColors.blue;
+            const color = TOOTH_PROCEDURE_COLORS[proc.value as ToothProcedure];
             const isSelected = procedure === proc.value;
             const isHovered = hoveredProc === proc.value;
 
@@ -96,20 +86,30 @@ export function ToothDetailPanel({ toothNumbers, specs, dispatch }: ToothDetailP
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  padding: "5px 12px",
-                  borderRadius: "16px",
-                  border: `1.5px solid ${isSelected ? palette.text : palette.border}`,
-                  backgroundColor: isSelected ? palette.bg : isHovered ? palette.bg : "white",
-                  color: palette.text,
+                  gap: "6px",
+                  height: "36px",
+                  padding: "0 12px",
+                  borderRadius: "8px",
+                  border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? color : isHovered ? "#9CA3AF" : "#E5E7EB"}`,
+                  backgroundColor: "#ffffff",
+                  color: "#1e2939",
                   fontSize: "13px",
                   fontWeight: isSelected ? 600 : 400,
                   fontFamily: "Inter, sans-serif",
                   cursor: "pointer",
-                  transition: "all 0.15s ease",
+                  transition: "border-color 0.15s ease",
                   outline: "none",
-                  boxShadow: isSelected ? `0 0 0 1px ${palette.text}20` : "none",
                 }}
               >
+                <div
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    borderRadius: "50%",
+                    backgroundColor: color,
+                    flexShrink: 0,
+                  }}
+                />
                 {proc.label}
               </button>
             );

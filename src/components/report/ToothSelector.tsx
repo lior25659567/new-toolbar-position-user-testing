@@ -3,13 +3,13 @@ import { color, font, space, radius, transition } from '../../design-system/toke
 import { SecondaryButton } from '../../design-system/SecondaryButton';
 import { PrimaryButton } from '../../design-system/PrimaryButton';
 
-// Universal numbering (1-32) in arch order
-// Upper: 1 (right 3rd molar) → 16 (left 3rd molar)
-// Lower: 17 (left 3rd molar) → 32 (right 3rd molar)
-const UPPER_RIGHT = [1, 2, 3, 4, 5, 6, 7, 8];
-const UPPER_LEFT  = [9, 10, 11, 12, 13, 14, 15, 16];
-const LOWER_LEFT  = [17, 18, 19, 20, 21, 22, 23, 24];
-const LOWER_RIGHT = [25, 26, 27, 28, 29, 30, 31, 32];
+// FDI numbering displayed from left to right on screen (patient facing viewer)
+// Upper: Q1 right (18→11) | Q2 left (21→28)
+// Lower: Q4 right (48→41) | Q3 left (31→38)
+const UPPER_RIGHT = [18, 17, 16, 15, 14, 13, 12, 11];
+const UPPER_LEFT  = [21, 22, 23, 24, 25, 26, 27, 28];
+const LOWER_RIGHT = [48, 47, 46, 45, 44, 43, 42, 41];
+const LOWER_LEFT  = [31, 32, 33, 34, 35, 36, 37, 38];
 
 interface ToothSelectorProps {
   selected: number[];
@@ -116,7 +116,7 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
               lineHeight: '1.4',
             }}
           >
-            #{t}
+            {t}
             <span
               onClick={(e) => { e.stopPropagation(); toggle(t); }}
               style={{ cursor: 'pointer', opacity: 0.6, fontSize: '10px' }}
@@ -252,18 +252,18 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
 
         {/* Lower arch */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: space[1] }}>
-          {renderArch(LOWER_LEFT, 'lower')}
-          <div style={{ width: '2px', flexShrink: 0, backgroundColor: color.neutral300, borderRadius: '1px', alignSelf: 'stretch' }} />
           {renderArch(LOWER_RIGHT, 'lower')}
+          <div style={{ width: '2px', flexShrink: 0, backgroundColor: color.neutral300, borderRadius: '1px', alignSelf: 'stretch' }} />
+          {renderArch(LOWER_LEFT, 'lower')}
         </div>
 
         {/* Quadrant labels bottom */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: space[1], padding: `0 ${space[1]}` }}>
           <span style={{ fontSize: '9px', fontWeight: font.weight.semibold, color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Lower left
+            Lower right
           </span>
           <span style={{ fontSize: '9px', fontWeight: font.weight.semibold, color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Lower right
+            Lower left
           </span>
         </div>
       </div>
@@ -291,7 +291,7 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
                 borderRadius: radius.sm,
               }}
             >
-              #{t}
+              {t}
             </span>
           ))}
         </div>

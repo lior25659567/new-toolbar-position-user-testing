@@ -36,16 +36,16 @@ export const TOOTH_PROCEDURES: { value: ToothProcedure; label: string }[] = [
 ];
 
 // ─── Color coding per procedure ──────────────────────────────
-export const TOOTH_PROCEDURE_COLORS: Record<ToothProcedure, TagColor> = {
-  crown: "red",
-  bridge: "orange",
-  veneer: "purple",
-  inlay: "blue",
-  onlay: "green",
-  eggshell: "magenta",
-  mockup: "orange",
-  missing: "red",
-  "implant-based": "blue",
+export const TOOTH_PROCEDURE_COLORS: Record<ToothProcedure, string> = {
+  crown: "#9F00A7",
+  bridge: "#5FD4C4",
+  veneer: "#F5C563",
+  inlay: "#F9A8D4",
+  onlay: "#AB8ED9",
+  eggshell: "#6B8BF5",
+  mockup: "#7C3AED",
+  missing: "#D4D4D8",
+  "implant-based": "#EF4444",
 };
 
 // ─── Materials ───────────────────────────────────────────────

@@ -2,7 +2,6 @@ import { useReducer, useMemo } from "react";
 import { infoReducer, initialInfoState } from "./infoReducer";
 import type { InfoState, CaseInfo, ToothProcedure } from "../types";
 import { TOOTH_PROCEDURE_COLORS } from "../constants";
-import type { TagColor } from "../types";
 
 // ─── Derived values ─────────────────────────────────────────────
 
@@ -47,8 +46,8 @@ function buildCaseInfo(state: InfoState): CaseInfo | null {
   };
 }
 
-function buildToothColorMap(state: InfoState): Record<number, TagColor> {
-  const map: Record<number, TagColor> = {};
+function buildToothColorMap(state: InfoState): Record<number, string> {
+  const map: Record<number, string> = {};
   for (const spec of state.toothSpecs) {
     map[spec.toothNumber] = TOOTH_PROCEDURE_COLORS[spec.procedure as ToothProcedure];
   }

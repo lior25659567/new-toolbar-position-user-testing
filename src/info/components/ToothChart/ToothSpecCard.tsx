@@ -4,15 +4,6 @@ import type { InfoAction } from "../../state/infoReducer";
 import { DropdownList, IconButton } from "../../../design-system";
 import { TOOTH_PROCEDURES, TOOTH_PROCEDURE_COLORS, MATERIALS, SHADE_SYSTEMS, SHADE_OPTIONS } from "../../constants";
 
-const tagColors: Record<string, { bg: string; border: string; text: string }> = {
-  red: { bg: "#FFF0F3", border: "#FFE0E7", text: "#A30F34" },
-  orange: { bg: "#FFF2E3", border: "#FFE5D6", text: "#8A4300" },
-  magenta: { bg: "#FFF0F9", border: "#FFE3F4", text: "#A30463" },
-  purple: { bg: "#F8F2FF", border: "#F2E6FF", text: "#6C37A1" },
-  blue: { bg: "#E6F7FF", border: "#D1F1FF", text: "#005780" },
-  green: { bg: "#ECFDF5", border: "#D1FAE5", text: "#065F46" },
-};
-
 interface ToothSpecCardProps {
   specs: ToothSpec[];
   expanded: boolean;
@@ -24,8 +15,7 @@ export function ToothSpecCard({ specs, expanded, onToggle, dispatch }: ToothSpec
   const [hoveredProc, setHoveredProc] = useState<string | null>(null);
 
   const firstSpec = specs[0];
-  const colorKey = TOOTH_PROCEDURE_COLORS[firstSpec.procedure];
-  const palette = colorKey ? tagColors[colorKey] : tagColors.blue;
+  const procColor = TOOTH_PROCEDURE_COLORS[firstSpec.procedure] || "#9CA3AF";
   const procLabel = TOOTH_PROCEDURES.find((p) => p.value === firstSpec.procedure)?.label || firstSpec.procedure;
   const toothNumbers = specs.map((s) => s.toothNumber).sort((a, b) => a - b);
 
@@ -92,16 +82,26 @@ export function ToothSpecCard({ specs, expanded, onToggle, dispatch }: ToothSpec
           style={{
             display: "inline-flex",
             alignItems: "center",
-            padding: "2px 10px",
-            borderRadius: "12px",
-            backgroundColor: palette.bg,
-            border: `1px solid ${palette.border}`,
-            color: palette.text,
+            gap: "5px",
+            padding: "2px 8px",
+            borderRadius: "9999px",
+            border: `1px solid ${procColor}40`,
+            backgroundColor: `${procColor}14`,
             fontSize: "11px",
             fontWeight: 500,
             fontFamily: "Inter, sans-serif",
+            color: "#1e2939",
           }}
         >
+          <div
+            style={{
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              backgroundColor: procColor,
+              flexShrink: 0,
+            }}
+          />
           {procLabel}
         </span>
         {firstSpec.material && (
@@ -140,8 +140,7 @@ export function ToothSpecCard({ specs, expanded, onToggle, dispatch }: ToothSpec
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
               {TOOTH_PROCEDURES.map((proc) => {
-                const pColorKey = TOOTH_PROCEDURE_COLORS[proc.value as ToothProcedure];
-                const pPalette = tagColors[pColorKey] || tagColors.blue;
+                const pColor = TOOTH_PROCEDURE_COLORS[proc.value as ToothProcedure];
                 const isSelected = firstSpec.procedure === proc.value;
                 const isHovered = hoveredProc === proc.value;
 
@@ -155,19 +154,30 @@ export function ToothSpecCard({ specs, expanded, onToggle, dispatch }: ToothSpec
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
-                      padding: "2px 10px",
-                      borderRadius: "12px",
-                      border: `1px solid ${isSelected ? pPalette.text : pPalette.border}`,
-                      backgroundColor: pPalette.bg,
-                      color: pPalette.text,
+                      gap: "5px",
+                      height: "32px",
+                      padding: "0 10px",
+                      borderRadius: "8px",
+                      border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? pColor : isHovered ? "#9CA3AF" : "#E5E7EB"}`,
+                      backgroundColor: "#ffffff",
+                      color: "#1e2939",
                       fontSize: "11px",
-                      fontWeight: 500,
+                      fontWeight: isSelected ? 600 : 400,
                       fontFamily: "Inter, sans-serif",
                       cursor: "pointer",
-                      transition: "all 0.15s ease",
+                      transition: "border-color 0.15s ease",
                       outline: "none",
                     }}
                   >
+                    <div
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: pColor,
+                        flexShrink: 0,
+                      }}
+                    />
                     {proc.label}
                   </button>
                 );

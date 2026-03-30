@@ -1,5 +1,5 @@
 import React from "react";
-import type { InfoState, TagColor } from "../../types";
+import type { InfoState } from "../../types";
 import type { InfoAction } from "../../state/infoReducer";
 import { DueDateSendTo } from "./shared/DueDateSendTo";
 import { NotesField } from "./shared/NotesField";
@@ -8,7 +8,7 @@ import { ToothChart } from "../ToothChart/ToothChart";
 
 interface Props {
   state: InfoState;
-  toothColorMap: Record<number, TagColor>;
+  toothColorMap: Record<number, string>;
   dispatch: React.Dispatch<InfoAction>;
 }
 

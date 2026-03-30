@@ -1,21 +1,12 @@
 import React, { useState } from "react";
-import type { InfoState, ToothProcedure, TagColor } from "../../types";
+import type { InfoState, ToothProcedure } from "../../types";
 import type { InfoAction } from "../../state/infoReducer";
 import { IconButton } from "../../../design-system";
-import { TOOTH_PROCEDURES, TOOTH_PROCEDURE_COLORS, MATERIALS, SHADE_SYSTEMS } from "../../constants";
-
-const tagColors: Record<string, { bg: string; border: string; text: string }> = {
-  red: { bg: "#FFF0F3", border: "#FFE0E7", text: "#A30F34" },
-  orange: { bg: "#FFF2E3", border: "#FFE5D6", text: "#8A4300" },
-  magenta: { bg: "#FFF0F9", border: "#FFE3F4", text: "#A30463" },
-  purple: { bg: "#F8F2FF", border: "#F2E6FF", text: "#6C37A1" },
-  blue: { bg: "#E6F7FF", border: "#D1F1FF", text: "#005780" },
-  green: { bg: "#ECFDF5", border: "#D1FAE5", text: "#065F46" },
-};
+import { TOOTH_PROCEDURES, TOOTH_PROCEDURE_COLORS, MATERIALS } from "../../constants";
 
 interface ToothTableProps {
   state: InfoState;
-  toothColorMap: Record<number, TagColor>;
+  toothColorMap: Record<number, string>;
   dispatch: React.Dispatch<InfoAction>;
 }
 
@@ -60,8 +51,7 @@ export function ToothTable({ state, toothColorMap, dispatch }: ToothTableProps) 
             .slice()
             .sort((a, b) => a.toothNumber - b.toothNumber)
             .map((spec) => {
-              const colorKey = toothColorMap[spec.toothNumber];
-              const palette = colorKey ? tagColors[colorKey] : null;
+              const procColor = TOOTH_PROCEDURE_COLORS[spec.procedure as ToothProcedure];
               const procLabel = TOOTH_PROCEDURES.find((p) => p.value === spec.procedure)?.label || spec.procedure;
               const matLabel = spec.material ? MATERIALS.find((m) => m.value === spec.material)?.label || spec.material : "—";
               const shadeLabel = spec.shadeBody || "—";
@@ -82,25 +72,29 @@ export function ToothTable({ state, toothColorMap, dispatch }: ToothTableProps) 
                 >
                   <td style={{ ...cellStyle, fontWeight: 600, color: "#1e2939" }}>{spec.toothNumber}</td>
                   <td style={cellStyle}>
-                    {palette ? (
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "2px 10px",
-                          borderRadius: "12px",
-                          backgroundColor: palette.bg,
-                          border: `1px solid ${palette.border}`,
-                          color: palette.text,
-                          fontSize: "12px",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {procLabel}
-                      </span>
-                    ) : (
-                      procLabel
-                    )}
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "12px",
+                        fontWeight: 500,
+                        color: "#1e2939",
+                      }}
+                    >
+                      {procColor && (
+                        <div
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            backgroundColor: procColor,
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
+                      {procLabel}
+                    </span>
                   </td>
                   <td style={{ ...cellStyle, color: "#374151" }}>{matLabel}</td>
                   <td style={{ ...cellStyle, color: "#374151" }}>{shadeLabel}</td>

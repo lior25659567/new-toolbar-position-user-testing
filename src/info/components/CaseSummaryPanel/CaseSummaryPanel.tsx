@@ -1,7 +1,6 @@
 import React from "react";
-import type { InfoState, TagColor } from "../../types";
+import type { InfoState } from "../../types";
 import { PrimaryButton } from "../../../design-system";
-import { Tag } from "../../../design-system";
 import { PROCEDURES, TOOTH_PROCEDURES, TOOTH_PROCEDURE_COLORS, LAB_DESTINATIONS, INVISALIGN_TYPES, TREATMENT_STAGES, DENTURE_TYPES, DENTURE_STAGES } from "../../constants";
 
 interface CaseSummaryPanelProps {
@@ -119,11 +118,26 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             {state.toothSpecs.map((spec) => {
               const procLabel = TOOTH_PROCEDURES.find((p) => p.value === spec.procedure)?.label || spec.procedure;
-              const tagColor = TOOTH_PROCEDURE_COLORS[spec.procedure] || "blue";
+              const procColor = TOOTH_PROCEDURE_COLORS[spec.procedure] || "#9CA3AF";
               return (
-                <Tag key={spec.toothNumber} color={tagColor} size="small">
+                <span
+                  key={spec.toothNumber}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "2px 8px",
+                    borderRadius: "9999px",
+                    border: `1px solid ${procColor}40`,
+                    backgroundColor: `${procColor}14`,
+                    fontSize: "12px",
+                    fontFamily: "Inter, sans-serif",
+                    color: "#1e2939",
+                  }}
+                >
+                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: procColor, flexShrink: 0 }} />
                   {spec.toothNumber} · {procLabel}
-                </Tag>
+                </span>
               );
             })}
           </div>

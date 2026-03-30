@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState, useMemo, useEffect } from "react";
-import type { InfoState, TagColor, ToothSpec } from "../../types";
+import type { InfoState, ToothSpec } from "../../types";
 import type { InfoAction } from "../../state/infoReducer";
 import { UPPER_TEETH, LOWER_TEETH, ALL_TEETH } from "../../constants";
 import { ToothArc } from "./ToothArc";
@@ -11,7 +11,7 @@ import { GhostButton } from "../../../design-system";
 
 interface ToothChartProps {
   state: InfoState;
-  toothColorMap: Record<number, TagColor>;
+  toothColorMap: Record<number, string>;
   dispatch: React.Dispatch<InfoAction>;
   title?: string;
 }

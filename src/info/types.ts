@@ -110,4 +110,4 @@ export interface CaseInfo {
 }
 
 // ─── Tag color mapping ───────────────────────────────────────
-export type TagColor = "red" | "orange" | "magenta" | "purple" | "blue" | "green";
+export type TagColor = string;

@@ -1,35 +1,13 @@
 import React, { useState } from "react";
-import type { TagColor } from "../../types";
 
 interface ToothProps {
   number: number;
   selected: boolean;
-  color?: TagColor;
+  color?: string;
   procedure?: string;
   expanded: boolean;
   onClick: (e: React.MouseEvent) => void;
 }
-
-const tagColors: Record<string, { bg: string; border: string; text: string }> = {
-  red: { bg: "#FFF0F3", border: "#FFE0E7", text: "#A30F34" },
-  orange: { bg: "#FFF2E3", border: "#FFE5D6", text: "#8A4300" },
-  magenta: { bg: "#FFF0F9", border: "#FFE3F4", text: "#A30463" },
-  purple: { bg: "#F8F2FF", border: "#F2E6FF", text: "#6C37A1" },
-  blue: { bg: "#E6F7FF", border: "#D1F1FF", text: "#005780" },
-  green: { bg: "#ECFDF5", border: "#D1FAE5", text: "#065F46" },
-};
-
-const procAbbrev: Record<string, string> = {
-  crown: "Cr",
-  bridge: "Br",
-  veneer: "Vn",
-  inlay: "In",
-  onlay: "On",
-  eggshell: "Eg",
-  mockup: "Mk",
-  missing: "—",
-  "implant-based": "Im",
-};
 
 function ToothIcon({ number, color: iconColor }: { number: number; color: string }) {
   const isUpper = number <= 28;
@@ -54,28 +32,23 @@ export function Tooth({ number, selected, color, procedure, expanded, onClick }:
   const [hovered, setHovered] = useState(false);
 
   const isMissing = procedure === "missing";
-  const colorPalette = color ? tagColors[color] : null;
   const hasProc = !!procedure;
 
-  const bgColor = colorPalette
-    ? colorPalette.bg
+  const bgColor = hasProc && color
+    ? `${color}18`
     : selected ? "#F3F4F6"
     : hovered ? "#F9FAFB"
     : "white";
 
   const borderColor = expanded
     ? "#374151"
-    : colorPalette ? colorPalette.border
+    : hasProc && color ? color
     : selected ? "#9CA3AF"
     : hovered ? "#9CA3AF"
     : "#E5E7EB";
 
-  const textColor = colorPalette
-    ? colorPalette.text
-    : selected ? "#1e2939"
-    : "#374151";
-
-  const iconColor = colorPalette ? colorPalette.text : selected ? "#374151" : "#9CA3AF";
+  const textColor = hasProc && color ? color : selected ? "#1e2939" : "#374151";
+  const iconColor = hasProc && color ? color : selected ? "#374151" : "#9CA3AF";
 
   return (
     <div
@@ -103,7 +76,7 @@ export function Tooth({ number, selected, color, procedure, expanded, onClick }:
       <span
         style={{
           fontSize: "10px",
-          fontWeight: selected || colorPalette ? 600 : 500,
+          fontWeight: selected || hasProc ? 600 : 500,
           color: textColor,
           fontFamily: "Inter, sans-serif",
           textDecoration: isMissing ? "line-through" : "none",
@@ -112,24 +85,19 @@ export function Tooth({ number, selected, color, procedure, expanded, onClick }:
       >
         {number}
       </span>
-      {hasProc && (
-        <span
+      {hasProc && color && (
+        <div
           style={{
             position: "absolute",
-            top: "-1px",
-            right: "-1px",
-            fontSize: "7px",
-            fontWeight: 700,
-            color: "white",
-            backgroundColor: colorPalette ? colorPalette.text : "#6a7282",
-            borderRadius: "0 5px 0 4px",
-            padding: "1px 3px",
-            lineHeight: 1.2,
-            fontFamily: "Inter, sans-serif",
+            top: "4px",
+            right: "4px",
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            backgroundColor: color,
+            flexShrink: 0,
           }}
-        >
-          {procAbbrev[procedure] || "?"}
-        </span>
+        />
       )}
     </div>
   );

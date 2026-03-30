@@ -1,5 +1,4 @@
 import React from "react";
-import type { TagColor } from "../../types";
 import type { ToothSpec } from "../../types";
 import { Tooth } from "./Tooth";
 
@@ -7,7 +6,7 @@ interface ToothArcProps {
   teeth: number[];
   selectedTeeth: number[];
   toothSpecs: ToothSpec[];
-  toothColorMap: Record<number, TagColor>;
+  toothColorMap: Record<number, string>;
   expandedTeeth: number[];
   onToothClick: (num: number, e?: React.MouseEvent) => void;
   label: string;
