@@ -5,14 +5,24 @@ import UndercutViewer from './UndercutViewer';
 import StatsPanel from './StatsPanel';
 import { useUndercutAnalysis } from './useUndercutAnalysis';
 import type { UndercutStage, EntryContext, ArchType } from './types';
-import { UPPER_TEETH, DEFAULT_ENTRY_CONTEXT } from './types';
+import { DEFAULT_ENTRY_CONTEXT } from './types';
 
 interface UndercutPageProps {
   onBackToHome: () => void;
   entryContext?: EntryContext;
 }
 
-// ─── Prep QC-style Heatmap Legend ─────────────��──────────────────────────────
+// ─── Procedure Mode ─────────────────────────────────────────────────────────
+
+type ProcedureMode = 'crown' | 'bridge' | 'full-arch';
+
+const PROCEDURE_OPTIONS: { value: ProcedureMode; label: string }[] = [
+  { value: 'crown', label: 'Crown' },
+  { value: 'bridge', label: 'Bridge' },
+  { value: 'full-arch', label: 'Full Arch' },
+];
+
+// ─── Prep QC-style Heatmap Legend ────────────────────────────────────────────
 
 const HEATMAP_COLORS = [
   '#0066FF', '#0197EC', '#3FBAFF', '#0FF4FC', '#2CE9C6', '#54BF00',
@@ -41,7 +51,7 @@ function HeatmapLegend() {
   );
 }
 
-// ─── Icons ────────────────────────────���─────────────────────────────────────
+// ─── Icons ──────────────────────────────────────────────────────────────────
 
 function DragHandle() {
   return (
@@ -97,30 +107,60 @@ function LinkIcon() {
   );
 }
 
-// ─── Auto-detected case label ───────────────────────────────────────────────
+// ─── Procedure Mode Selector (segmented control) ────────────────────────────
 
-function getCaseLabel(count: number): string {
-  if (count === 0) return '';
-  if (count === 1) return 'Single Crown';
-  if (count <= 4) return `Bridge (${count}-unit)`;
-  return `Full Arch (${count})`;
+function ProcedureSelector({ mode, onChange }: { mode: ProcedureMode; onChange: (m: ProcedureMode) => void }) {
+  return (
+    <div style={{
+      display: 'flex', borderRadius: radius.md, overflow: 'hidden',
+      border: `1px solid ${color.borderDefault}`, backgroundColor: color.neutral50,
+    }}>
+      {PROCEDURE_OPTIONS.map(opt => {
+        const isActive = opt.value === mode;
+        return (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            style={{
+              flex: 1, padding: '6px 0', border: 'none', cursor: 'pointer',
+              fontSize: '11px', fontWeight: isActive ? 600 : 400,
+              color: isActive ? color.white : color.textSubtle,
+              backgroundColor: isActive ? color.primary : 'transparent',
+              transition: `all ${transition.fast}`,
+            }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 // ─── Toast messages ─────────────────────────────────────────────────────────
 
-function getToastMessage(stage: UndercutStage, teethCount: number, sharedPath: boolean, procedureType: string | null): string {
+function getToastMessage(stage: UndercutStage, teethCount: number, mode: ProcedureMode, sharedPath: boolean): string {
   if (stage === 'confirm') return 'Insertion path confirmed. Undercuts and path are locked.';
 
-  if (teethCount === 0) {
-    if (procedureType === 'bridge') return 'Select teeth for bridge analysis';
-    return 'Tap teeth on the model to select preps for undercut analysis';
+  if (mode === 'full-arch') {
+    if (teethCount === 0) return 'Loading full arch analysis...';
+    return 'Full arch \u2014 shared insertion path. Drag the arrow to adjust.';
   }
 
-  if (teethCount === 1) return 'Drag the arrow to adjust insertion path. Tap more teeth to add.';
+  if (mode === 'bridge') {
+    if (teethCount === 0) return 'Tap 2 or more teeth on the model to define bridge span.';
+    if (teethCount === 1) return 'Select at least one more tooth to form a bridge.';
+    return 'Bridge \u2014 shared insertion path. Drag the arrow to adjust for all linked teeth.';
+  }
 
+  // Crown mode
+  if (teethCount === 0) return 'Tap a tooth on the model to analyze individual crown insertion path.';
+  if (teethCount === 1) {
+    return 'Individual insertion path. Drag the arrow to adjust. Tap more teeth to add crowns.';
+  }
   return sharedPath
-    ? 'Shared insertion path active. Drag the arrow to adjust for all selected teeth.'
-    : 'Individual paths active. Each tooth has its own arrow \u2014 drag to adjust independently.';
+    ? 'Multiple crowns \u2014 shared insertion path. Drag the arrow to adjust.'
+    : 'Multiple crowns \u2014 individual paths. Each tooth has its own arrow.';
 }
 
 // ─── Arch Switcher ──────────────────────────────────────────────────────────
@@ -207,6 +247,7 @@ function ErrorNotification({ message, onDismiss }: { message: string; onDismiss:
 
 interface UndercutPanelProps {
   stage: UndercutStage;
+  procedureMode: ProcedureMode;
   selectedTeeth: number[];
   sharedPath: boolean;
   isCustomPath: boolean;
@@ -215,28 +256,34 @@ interface UndercutPanelProps {
   activeArch: ArchType;
   availableArches: ArchType[];
   onClose: () => void;
-  onSelectAllUpper: () => void;
-  onSelectAllLower: () => void;
   onConfirm: () => void;
   onRestart: () => void;
   onResetToOptimal: () => void;
   onToggleSharedPath: (shared: boolean) => void;
   onClearSelection: () => void;
   onSwitchArch: (arch: ArchType) => void;
-  onLinkBridge: () => void;
-  onUnlinkBridge: () => void;
+  onProcedureModeChange: (mode: ProcedureMode) => void;
 }
 
 function UndercutPanel({
-  stage, selectedTeeth, sharedPath, isCustomPath,
+  stage, procedureMode, selectedTeeth, sharedPath, isCustomPath,
   isBridgeLinked, hasMarginLine, activeArch, availableArches,
-  onClose, onSelectAllUpper, onSelectAllLower, onConfirm, onRestart,
+  onClose, onConfirm, onRestart,
   onResetToOptimal, onToggleSharedPath, onClearSelection,
-  onSwitchArch, onLinkBridge, onUnlinkBridge,
+  onSwitchArch, onProcedureModeChange,
 }: UndercutPanelProps) {
   const hasTeeth = selectedTeeth.length > 0;
   const hasMultipleTeeth = selectedTeeth.length >= 2;
-  const caseLabel = getCaseLabel(selectedTeeth.length);
+
+  // Bridge needs at least 2 teeth to confirm
+  const bridgeReady = procedureMode !== 'bridge' || selectedTeeth.length >= 2;
+
+  // Label based on mode + count
+  const modeLabel = procedureMode === 'crown'
+    ? (selectedTeeth.length === 1 ? 'Single Crown' : `${selectedTeeth.length} Crowns`)
+    : procedureMode === 'bridge'
+      ? `Bridge (${selectedTeeth.length}-unit)`
+      : `Full Arch (${selectedTeeth.length})`;
 
   return (
     <div style={{
@@ -265,6 +312,11 @@ function UndercutPanel({
       {/* Body */}
       <div style={{ padding: `${space[3]} ${space[3]}`, display: 'flex', flexDirection: 'column', gap: space[3] }}>
 
+        {/* Procedure Mode Selector */}
+        {stage !== 'confirm' && (
+          <ProcedureSelector mode={procedureMode} onChange={onProcedureModeChange} />
+        )}
+
         {/* Arch Switcher */}
         <ArchSwitcher activeArch={activeArch} onSwitch={onSwitchArch} availableArches={availableArches} />
 
@@ -289,22 +341,14 @@ function UndercutPanel({
           </div>
         )}
 
-        {/* Quick select */}
-        {stage !== 'confirm' && !hasTeeth && (
+        {/* Prompt text when no teeth selected (Crown & Bridge modes only) */}
+        {stage !== 'confirm' && !hasTeeth && procedureMode !== 'full-arch' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
             <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>
-              Tap teeth on model or use quick select:
+              {procedureMode === 'bridge'
+                ? 'Tap 2 or more teeth on the model to define bridge span:'
+                : 'Tap teeth on the model to select preps:'}
             </span>
-            {(activeArch === 'upper' || availableArches.length < 2) && (
-              <SecondaryButton size={36} fullWidth onClick={onSelectAllUpper}>
-                Select All Upper Arch
-              </SecondaryButton>
-            )}
-            {(activeArch === 'lower' || availableArches.length < 2) && (
-              <SecondaryButton size={36} fullWidth onClick={onSelectAllLower}>
-                Select All Lower Arch
-              </SecondaryButton>
-            )}
           </div>
         )}
 
@@ -321,7 +365,7 @@ function UndercutPanel({
                   backgroundColor: color.primaryLight, padding: '2px 6px',
                   borderRadius: radius.full, lineHeight: '14px',
                 }}>
-                  {caseLabel}
+                  {modeLabel}
                 </span>
               </div>
               {stage !== 'confirm' && (
@@ -338,47 +382,41 @@ function UndercutPanel({
               )}
             </div>
 
-            {/* Bridge linking */}
-            {hasMultipleTeeth && stage !== 'confirm' && !isBridgeLinked && (
-              <SecondaryButton size={32} fullWidth onClick={onLinkBridge}>
-                <LinkIcon />
-                Link as Bridge
-              </SecondaryButton>
-            )}
-            {isBridgeLinked && (
+            {/* Bridge: linked indicator (auto-linked in bridge mode) */}
+            {procedureMode === 'bridge' && hasMultipleTeeth && (
               <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                display: 'flex', alignItems: 'center', gap: '4px',
                 padding: '4px 8px', borderRadius: radius.sm,
-                backgroundColor: '#F0FDF4', fontSize: '11px',
+                backgroundColor: '#F0FDF4', fontSize: '11px', color: '#16A34A', fontWeight: 600,
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#16A34A', fontWeight: 600 }}>
-                  <LinkIcon />
-                  Bridge Linked
-                </div>
-                {stage !== 'confirm' && (
-                  <button
-                    onClick={onUnlinkBridge}
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      fontSize: '11px', color: color.textSubtle, padding: 0,
-                    }}
-                  >
-                    Unlink
-                  </button>
-                )}
+                <LinkIcon />
+                Teeth linked \u2014 shared insertion path
               </div>
             )}
 
-            {/* Shared path checkbox */}
-            {hasMultipleTeeth && stage !== 'confirm' && (
-              <div style={{ opacity: isBridgeLinked ? 0.5 : 1 }}>
-                <Checkbox
-                  checked={sharedPath}
-                  onChange={() => !isBridgeLinked && onToggleSharedPath(!sharedPath)}
-                  size={16}
-                  label={isBridgeLinked ? 'Shared insertion path (bridge)' : 'Shared insertion path'}
-                />
+            {/* Bridge: warning when only 1 tooth */}
+            {procedureMode === 'bridge' && selectedTeeth.length === 1 && stage !== 'confirm' && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                padding: '4px 8px', borderRadius: radius.sm,
+                backgroundColor: '#FEF3C7', fontSize: '11px', color: '#D97706',
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                Select at least one more tooth for bridge
               </div>
+            )}
+
+            {/* Crown mode: shared path checkbox when multiple crowns */}
+            {procedureMode === 'crown' && hasMultipleTeeth && stage !== 'confirm' && (
+              <Checkbox
+                checked={sharedPath}
+                onChange={() => onToggleSharedPath(!sharedPath)}
+                size={16}
+                label="Shared insertion path"
+              />
             )}
           </div>
         )}
@@ -391,9 +429,13 @@ function UndercutPanel({
           <div style={{
             fontSize: font.size.xs, color: color.textSubtle, lineHeight: '18px',
           }}>
-            {hasMultipleTeeth && !sharedPath
-              ? 'Each tooth has an individual insertion path. Drag arrows independently.'
-              : 'Drag the arrow to adjust. Tap model to add/remove teeth.'}
+            {procedureMode === 'bridge'
+              ? (hasMultipleTeeth
+                ? 'All linked teeth share one insertion path. Drag the arrow to adjust.'
+                : 'Add more teeth to complete the bridge span.')
+              : procedureMode === 'crown' && hasMultipleTeeth && !sharedPath
+                ? 'Each crown has an individual insertion path. Drag arrows independently.'
+                : 'Drag the arrow to adjust insertion path. Tap model to add/remove teeth.'}
           </div>
         )}
 
@@ -406,7 +448,7 @@ function UndercutPanel({
                 Reset to Optimal
               </SecondaryButton>
             )}
-            {hasTeeth && (
+            {hasTeeth && bridgeReady && (
               <PrimaryButton size={36} fullWidth onClick={onConfirm}>
                 Confirm Path
               </PrimaryButton>
@@ -442,10 +484,15 @@ function UndercutPanel({
   );
 }
 
-// ─── Page ──────────��─────────────────────────────────────────────────────────
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTRY_CONTEXT }: UndercutPageProps) {
   const [stage, setStage] = useState<UndercutStage>('analyze');
+  const [procedureMode, setProcedureMode] = useState<ProcedureMode>(
+    entryContext.procedureType === 'bridge' ? 'bridge'
+      : entryContext.procedureType === 'full-arch' ? 'full-arch'
+      : 'crown'
+  );
 
   const {
     selectedTeeth, insertionDir, setInsertionDir, analysis,
@@ -456,42 +503,85 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
     isAnalyzing,
   } = useUndercutAnalysis(entryContext);
 
+  // ─── Mode change handler ──────────────────────────────────────────────────
+  const handleProcedureModeChange = useCallback((mode: ProcedureMode) => {
+    setProcedureMode(mode);
+    // Clear selection and reset when switching modes
+    clearSelection();
+    setStage('analyze');
+
+    if (mode === 'full-arch') {
+      // Auto-select entire arch
+      selectFullArch(activeArch);
+      toggleSharedPath(true);
+    } else if (mode === 'bridge') {
+      // Bridge: force shared path, user will tap teeth
+      toggleSharedPath(true);
+    } else {
+      // Crown: default to individual paths
+      toggleSharedPath(false);
+    }
+  }, [clearSelection, selectFullArch, activeArch, toggleSharedPath]);
+
   const handleConfirm = useCallback(() => { setStage('confirm'); }, []);
 
   const handleRestart = useCallback(() => {
     setStage('analyze');
     clearSelection();
-  }, [clearSelection]);
+    if (procedureMode === 'full-arch') {
+      selectFullArch(activeArch);
+      toggleSharedPath(true);
+    }
+  }, [clearSelection, procedureMode, selectFullArch, activeArch, toggleSharedPath]);
 
+  // Tooth click behavior depends on mode
   const handleToothClick = useCallback((toothId: number, shiftKey: boolean) => {
     if (stage === 'confirm') setStage('analyze');
+
+    if (procedureMode === 'full-arch') {
+      // Full arch: don't allow individual tooth toggling
+      return;
+    }
+
     toggleTooth(toothId, shiftKey);
-  }, [stage, toggleTooth]);
+
+    // In bridge mode: auto-link when 2+ teeth
+    if (procedureMode === 'bridge') {
+      // We need to check after toggle — handled via effect below
+    }
+  }, [stage, toggleTooth, procedureMode]);
+
+  // Auto-link teeth in bridge mode when 2+ teeth selected
+  useEffect(() => {
+    if (procedureMode === 'bridge' && selectedTeeth.length >= 2 && !isBridgeLinked) {
+      linkTeeth(selectedTeeth);
+    }
+    // Unlink if we drop below 2 in bridge mode
+    if (procedureMode === 'bridge' && selectedTeeth.length < 2 && isBridgeLinked && linkedBridges.length > 0) {
+      unlinkBridge(linkedBridges[0].id);
+    }
+  }, [procedureMode, selectedTeeth.length, isBridgeLinked, linkTeeth, unlinkBridge, linkedBridges, selectedTeeth]);
 
   const handleClear = useCallback(() => {
     clearSelection();
     setStage('analyze');
-  }, [clearSelection]);
-
-  const handleSelectAllUpper = useCallback(() => {
-    selectFullArch('upper');
-    toggleSharedPath(true);
-  }, [selectFullArch, toggleSharedPath]);
-
-  const handleSelectAllLower = useCallback(() => {
-    selectFullArch('lower');
-    toggleSharedPath(true);
-  }, [selectFullArch, toggleSharedPath]);
-
-  const handleLinkBridge = useCallback(() => {
-    linkTeeth(selectedTeeth);
-  }, [linkTeeth, selectedTeeth]);
-
-  const handleUnlinkBridge = useCallback(() => {
+    // In bridge mode, also unlink
     if (linkedBridges.length > 0) {
       unlinkBridge(linkedBridges[0].id);
     }
-  }, [unlinkBridge, linkedBridges]);
+  }, [clearSelection, unlinkBridge, linkedBridges]);
+
+  // Arch switch: clear and re-select if full arch
+  const handleArchSwitch = useCallback((arch: ArchType) => {
+    setActiveArch(arch);
+    if (procedureMode === 'full-arch') {
+      // Small delay to let state clear, then re-select
+      setTimeout(() => {
+        selectFullArch(arch);
+        toggleSharedPath(true);
+      }, 50);
+    }
+  }, [setActiveArch, procedureMode, selectFullArch, toggleSharedPath]);
 
   const [showError, setShowError] = useState(false);
   useEffect(() => {
@@ -501,7 +591,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
   const showHeatmap = selectedTeeth.length > 0;
   const interactiveArrow = selectedTeeth.length > 0 && stage !== 'confirm';
   const isCustomPath = analysis ? !analysis.insertionPath.isOptimal : false;
-  const toastMessage = getToastMessage(stage, selectedTeeth.length, sharedPath, entryContext.procedureType);
+  const toastMessage = getToastMessage(stage, selectedTeeth.length, procedureMode, sharedPath);
 
   return (
     <div style={{
@@ -515,7 +605,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
           showHeatmap={showHeatmap}
           interactiveArrow={interactiveArrow}
           onToothClick={handleToothClick}
-          selectionMode={stage !== 'confirm'}
+          selectionMode={stage !== 'confirm' && procedureMode !== 'full-arch'}
           selectedTeeth={selectedTeeth}
           sharedPath={sharedPath}
           perToothDirs={perToothDirs}
@@ -569,6 +659,7 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
         <div style={{ position: 'absolute', left: space[3], bottom: space[3], zIndex: 10 }}>
           <UndercutPanel
             stage={stage}
+            procedureMode={procedureMode}
             selectedTeeth={selectedTeeth}
             sharedPath={sharedPath}
             isCustomPath={isCustomPath}
@@ -577,16 +668,13 @@ export default function UndercutPage({ onBackToHome, entryContext = DEFAULT_ENTR
             activeArch={activeArch}
             availableArches={entryContext.availableArches}
             onClose={onBackToHome}
-            onSelectAllUpper={handleSelectAllUpper}
-            onSelectAllLower={handleSelectAllLower}
             onConfirm={handleConfirm}
             onRestart={handleRestart}
             onResetToOptimal={resetToOptimal}
             onToggleSharedPath={toggleSharedPath}
             onClearSelection={handleClear}
-            onSwitchArch={setActiveArch}
-            onLinkBridge={handleLinkBridge}
-            onUnlinkBridge={handleUnlinkBridge}
+            onSwitchArch={handleArchSwitch}
+            onProcedureModeChange={handleProcedureModeChange}
           />
         </div>
 
