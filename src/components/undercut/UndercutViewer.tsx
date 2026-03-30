@@ -125,6 +125,14 @@ function mapClickToTooth(point: THREE.Vector3, bbox: THREE.Box3): number {
 const BASE_ROT_X = Math.PI * 0.6;
 const BASE_ROT_Z = Math.PI;
 
+/** Convert a tooth FDI number to a normalized X range [0–1] on the model */
+function toothToRange(toothId: number): [number, number] {
+  const idx = UPPER_FDI.indexOf(toothId);
+  if (idx === -1) return [0, 0];
+  const step = 1 / UPPER_FDI.length;
+  return [idx * step, (idx + 1) * step];
+}
+
 interface SceneProps {
   insertionDir: [number, number, number];
   onDragDir: (dir: [number, number, number]) => void;
@@ -132,9 +140,10 @@ interface SceneProps {
   interactiveArrow: boolean;
   onToothClick?: (toothId: number, shiftKey: boolean) => void;
   selectionMode: boolean;
+  selectedTeeth: number[];
 }
 
-function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onToothClick, selectionMode }: SceneProps) {
+function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onToothClick, selectionMode, selectedTeeth }: SceneProps) {
   const geometry = useLoader(PLYLoader, upperJawModel);
   const groupRef = useRef<THREE.Group>(null);
 
@@ -150,6 +159,10 @@ function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onTooth
     b.setFromBufferAttribute(processedGeometry.getAttribute('position') as THREE.BufferAttribute);
     return b;
   }, [processedGeometry]);
+
+  const selectedRanges = useMemo(() => {
+    return selectedTeeth.map(t => toothToRange(t)).filter(r => r[0] !== r[1]);
+  }, [selectedTeeth]);
 
   const handleModelClick = useCallback((e: any) => {
     if (!onToothClick) return;
@@ -171,7 +184,7 @@ function Scene({ insertionDir, onDragDir, showHeatmap, interactiveArrow, onTooth
             onPointerEnter={() => { if (selectionMode) document.body.style.cursor = 'crosshair'; }}
             onPointerLeave={() => { document.body.style.cursor = 'default'; }}
           >
-            <UndercutMaterial insertionDir={insertionDir} showHeatmap={showHeatmap} />
+            <UndercutMaterial insertionDir={insertionDir} showHeatmap={showHeatmap} selectedRanges={selectedRanges} />
           </mesh>
         </group>
       </Center>
@@ -221,10 +234,11 @@ interface UndercutViewerProps {
   interactiveArrow: boolean;
   onToothClick?: (toothId: number, shiftKey: boolean) => void;
   selectionMode: boolean;
+  selectedTeeth: number[];
 }
 
 export default function UndercutViewer({
-  insertionDir, onDragDir, showHeatmap, interactiveArrow, onToothClick, selectionMode,
+  insertionDir, onDragDir, showHeatmap, interactiveArrow, onToothClick, selectionMode, selectedTeeth,
 }: UndercutViewerProps) {
   return (
     <Canvas
@@ -241,6 +255,7 @@ export default function UndercutViewer({
           interactiveArrow={interactiveArrow}
           onToothClick={onToothClick}
           selectionMode={selectionMode}
+          selectedTeeth={selectedTeeth}
         />
       </Suspense>
     </Canvas>

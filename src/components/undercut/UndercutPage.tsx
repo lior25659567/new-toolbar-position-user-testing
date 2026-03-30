@@ -136,7 +136,6 @@ interface UndercutPanelProps {
   selectedTeeth: number[];
   linkedTeeth: boolean;
   isCustomPath: boolean;
-  isAnalyzing: boolean;
   onClose: () => void;
   onFlowChange: (flow: CaseType) => void;
   onConfirm: () => void;
@@ -147,7 +146,7 @@ interface UndercutPanelProps {
 }
 
 function UndercutPanel({
-  stage, flow, selectedTeeth, linkedTeeth, isCustomPath, isAnalyzing,
+  stage, flow, selectedTeeth, linkedTeeth, isCustomPath,
   onClose, onFlowChange, onConfirm, onRestart,
   onResetToOptimal, onToggleLink, onClearSelection,
 }: UndercutPanelProps) {
@@ -223,33 +222,19 @@ function UndercutPanel({
 
         {/* Actions */}
         {stage === 'analyze' && (
-          <>
-            {isAnalyzing ? (
-              <div style={{ textAlign: 'center', padding: `${space[2]} 0` }}>
-                <div style={{
-                  width: '20px', height: '20px', border: `2px solid ${color.borderDefault}`,
-                  borderTopColor: color.primary, borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite', margin: '0 auto 6px',
-                }} />
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Computing optimal path...</span>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {isCustomPath && (
-                  <SecondaryButton size={36} fullWidth onClick={onResetToOptimal}>
-                    <ResetIcon />
-                    Reset to Optimal
-                  </SecondaryButton>
-                )}
-                {hasTeeth && (
-                  <PrimaryButton size={36} fullWidth onClick={onConfirm}>
-                    Confirm Path
-                  </PrimaryButton>
-                )}
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {isCustomPath && (
+              <SecondaryButton size={36} fullWidth onClick={onResetToOptimal}>
+                <ResetIcon />
+                Reset to Optimal
+              </SecondaryButton>
             )}
-          </>
+            {hasTeeth && (
+              <PrimaryButton size={36} fullWidth onClick={onConfirm}>
+                Confirm Path
+              </PrimaryButton>
+            )}
+          </div>
         )}
 
         {stage === 'confirm' && (
@@ -288,8 +273,8 @@ export default function UndercutPage({ onBackToHome }: UndercutPageProps) {
   const [linkedTeeth, setLinkedTeeth] = useState(false);
 
   const {
-    selectedTeeth, insertionDir, setInsertionDir, analysis, isAnalyzing,
-    toggleTooth, selectSingleTooth, setTeeth, clearSelection, runAnalysis, resetToOptimal,
+    selectedTeeth, insertionDir, setInsertionDir, analysis,
+    toggleTooth, selectSingleTooth, setTeeth, clearSelection, resetToOptimal,
   } = useUndercutAnalysis();
 
   const handleFlowChange = useCallback((newFlow: CaseType) => {
@@ -305,11 +290,9 @@ export default function UndercutPage({ onBackToHome }: UndercutPageProps) {
     }
   }, [clearSelection, setTeeth]);
 
-  useEffect(() => {
-    if (selectedTeeth.length > 0) {
-      runAnalysis();
-    }
-  }, [selectedTeeth]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The debounced useEffect in useUndercutAnalysis already recalculates
+  // the analysis when selectedTeeth or insertionDir changes (50ms debounce).
+  // No need to call runAnalysis here — it blocks with a spinner.
 
   const handleConfirm = useCallback(() => { setStage('confirm'); }, []);
 
@@ -362,6 +345,7 @@ export default function UndercutPage({ onBackToHome }: UndercutPageProps) {
           interactiveArrow={interactiveArrow}
           onToothClick={handleToothClick}
           selectionMode={stage !== 'confirm'}
+          selectedTeeth={selectedTeeth}
         />
 
         {/* Back button */}
@@ -406,7 +390,6 @@ export default function UndercutPage({ onBackToHome }: UndercutPageProps) {
             selectedTeeth={selectedTeeth}
             linkedTeeth={linkedTeeth}
             isCustomPath={isCustomPath}
-            isAnalyzing={isAnalyzing}
             onClose={onBackToHome}
             onFlowChange={handleFlowChange}
             onConfirm={handleConfirm}
