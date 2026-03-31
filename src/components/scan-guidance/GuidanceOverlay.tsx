@@ -1631,7 +1631,7 @@ function WandFrame({ mode, flashActive, children, anim }: {
   return (
     <div style={{
       position: 'absolute', top: '50%', left: '50%',
-      width: 'clamp(100px, 10vw, 140px)', height: 'clamp(220px, 22vw, 320px)',
+      width: 'clamp(140px, 14vw, 200px)', height: 'clamp(310px, 31vw, 450px)',
       transform: 'translate(-50%,-29.3%)', pointerEvents: 'none',
       animation: anim,
     }}>
@@ -1859,8 +1859,8 @@ function GhostWandOverlay({ mode, g, f, showArrows = true, ghostFull = false }: 
 
   const wandColor = f ? '#16A34A' : isScanning ? 'rgba(0,154,206,0.7)' : 'rgba(0,154,206,0.55)';
 
-  const wandW = 'clamp(100px, 10vw, 140px)';
-  const wandH = 'clamp(220px, 22vw, 320px)';
+  const wandW = 'clamp(140px, 14vw, 200px)';
+  const wandH = 'clamp(310px, 31vw, 450px)';
 
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
