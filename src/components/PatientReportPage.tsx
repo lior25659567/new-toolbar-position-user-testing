@@ -547,48 +547,39 @@ export default function PatientReportPage({
           <div style={{ flex: 1, overflowY: 'auto', padding: space[4] }}>
             {activeTab === 'blocks' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: space[4] }}>
-                {/* Template undo banner */}
-                {appliedTemplate && blocksBeforeTemplate && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: `${space[2]} ${space[3]}`,
-                    backgroundColor: color.tagBlue.bg,
-                    border: `1px solid ${color.tagBlue.border}`,
-                    borderRadius: radius.md,
-                  }}>
-                    <span style={{ fontSize: font.size.xs, color: color.tagBlue.text }}>
-                      Template "{appliedTemplate}" applied
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleUndoTemplate}
-                      style={{
-                        fontSize: font.size.xs,
-                        fontWeight: font.weight.semibold,
-                        color: color.primary,
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                      }}
-                    >
-                      Undo
-                    </button>
-                  </div>
-                )}
-
-                {/* Template quick-start */}
-                <SidebarSection title="Templates" isOpen={templatesOpen} onToggle={setTemplatesOpen}>
+                {/* Templates */}
+                <SidebarSection
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: space[2], flex: 1 }}>
+                      <span>{appliedTemplate || 'Templates'}</span>
+                      {appliedTemplate && blocksBeforeTemplate && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleUndoTemplate(); }}
+                          style={{
+                            fontSize: font.size.xs, fontWeight: font.weight.semibold,
+                            color: color.primary, backgroundColor: 'transparent',
+                            border: 'none', cursor: 'pointer', padding: `2px ${space[2]}`,
+                            borderRadius: radius.sm, transition: `background-color ${transition.fast}`,
+                            marginLeft: 'auto',
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#E0F2FE')}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                        >
+                          Undo
+                        </button>
+                      )}
+                    </div>
+                  }
+                  isOpen={templatesOpen}
+                  onToggle={setTemplatesOpen}
+                >
                   <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
                 </SidebarSection>
 
-                {/* Block count */}
+                {/* Content count */}
                 <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                   <span style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textHeading }}>
                     Content
@@ -605,60 +596,42 @@ export default function PatientReportPage({
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: space[4] }}>
-                {/* Report Name */}
+                {/* Report & Patient */}
                 <SidebarSection title="Report">
-                  <div>
-                    <FieldLabel>Report Name</FieldLabel>
-                    <SmallInput
-                      value={settings.reportName}
-                      onChange={(v) => { setSettings((s) => ({ ...s, reportName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
-                      placeholder="e.g. Patient Report"
-                    />
-                  </div>
+                  <SmallInput
+                    value={settings.reportName}
+                    onChange={(v) => { setSettings((s) => ({ ...s, reportName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
+                    placeholder="Report name"
+                  />
                 </SidebarSection>
 
-                {/* Patient info */}
-                <SidebarSection title="Patient Information">
-                  <div>
-                    <FieldLabel>Patient Name</FieldLabel>
-                    <SmallInput
-                      value={patient.patientName}
-                      onChange={(v) => setPatient((p) => ({ ...p, patientName: v }))}
-                      placeholder="Full name"
-                    />
-                  </div>
+                <SidebarSection title="Patient">
+                  <SmallInput
+                    value={patient.patientName}
+                    onChange={(v) => setPatient((p) => ({ ...p, patientName: v }))}
+                    placeholder="Patient name"
+                  />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2] }}>
-                    <div>
-                      <FieldLabel>Birth Date</FieldLabel>
-                      <SmallInput
-                        value={patient.birthDate}
-                        onChange={(v) => setPatient((p) => ({ ...p, birthDate: v }))}
-                        placeholder="MM/DD/YYYY"
-                      />
-                    </div>
-                    <div>
-                      <FieldLabel>Chart #</FieldLabel>
-                      <SmallInput
-                        value={patient.chartNumber}
-                        onChange={(v) => setPatient((p) => ({ ...p, chartNumber: v }))}
-                        placeholder="e.g. 10042"
-                      />
-                    </div>
+                    <SmallInput
+                      value={patient.birthDate}
+                      onChange={(v) => setPatient((p) => ({ ...p, birthDate: v }))}
+                      placeholder="Birth date"
+                    />
+                    <SmallInput
+                      value={patient.chartNumber}
+                      onChange={(v) => setPatient((p) => ({ ...p, chartNumber: v }))}
+                      placeholder="Chart #"
+                    />
                   </div>
                 </SidebarSection>
 
-                {/* Doctor */}
-                <SidebarSection title="Doctor / Clinic">
+                <SidebarSection title="Doctor">
+                  <SmallInput
+                    value={settings.doctorName}
+                    onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
+                    placeholder="Doctor name"
+                  />
                   <div>
-                    <FieldLabel>Doctor Name</FieldLabel>
-                    <SmallInput
-                      value={settings.doctorName}
-                      onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
-                      placeholder="Doctor name"
-                    />
-                  </div>
-                  <div>
-                    <FieldLabel>Clinic / Practice Logo</FieldLabel>
                     {settings.clinicLogoUrl ? (
                       <div style={{
                         display: 'flex',
@@ -779,8 +752,7 @@ export default function PatientReportPage({
                   </SidebarSection>
                 </div>
 
-                {/* Report Security */}
-                <SidebarSection title="Report Security" defaultOpen={false}>
+                <SidebarSection title="Security" defaultOpen={false}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: font.size.xs, color: color.textDefault }}>
                       PIN Protection
@@ -842,16 +814,6 @@ export default function PatientReportPage({
           padding: space[6],
           backgroundColor: color.neutral100,
         }}>
-          <div style={{
-            fontSize: font.size.xs,
-            fontWeight: font.weight.medium,
-            color: color.textSubtle,
-            textTransform: 'uppercase' as const,
-            letterSpacing: font.tracking.wide,
-            marginBottom: space[4],
-          }}>
-            Live Preview
-          </div>
           <ReportPreview
             settings={settings}
             patient={patient}

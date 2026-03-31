@@ -109,9 +109,9 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
               padding: `2px ${space[2]}`,
               fontSize: font.size.xs,
               fontWeight: font.weight.medium,
-              color: color.tagBlue.text,
-              backgroundColor: color.tagBlue.bg,
-              border: `1px solid ${color.tagBlue.border}`,
+              color: '#374151',
+              backgroundColor: '#F9FAFB',
+              border: `1px solid ${color.borderDefault}`,
               borderRadius: radius.sm,
               lineHeight: '1.4',
             }}

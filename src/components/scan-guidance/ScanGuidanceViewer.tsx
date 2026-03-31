@@ -33,12 +33,12 @@ interface SceneProps {
 }
 
 const DOF_AXIS: Record<string, 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw'> = {
-  'dof-lr':'lr','bare-lr':'lr','ring-lr':'lr','pulse-lr':'lr','ghost-lr':'lr',
-  'dof-ud':'ud','bare-ud':'ud','ring-ud':'ud','pulse-ud':'ud','ghost-ud':'ud',
-  'dof-fb':'fb','bare-fb':'fb','ring-fb':'fb','pulse-fb':'fb','ghost-fb':'fb',
-  'dof-roll':'roll','bare-roll':'roll','ring-roll':'roll','pulse-roll':'roll','ghost-roll':'roll',
-  'dof-pitch':'pitch','bare-pitch':'pitch','ring-pitch':'pitch','pulse-pitch':'pitch','ghost-pitch':'pitch',
-  'dof-yaw':'yaw','bare-yaw':'yaw','ring-yaw':'yaw','pulse-yaw':'yaw','ghost-yaw':'yaw',
+  'dof-lr':'lr','bare-lr':'lr','ring-lr':'lr','pulse-lr':'lr','ghost-lr':'lr','wand-lr':'lr','gwand-lr':'lr','bgwand-lr':'lr','fgwand-lr':'lr','fagwand-lr':'lr',
+  'dof-ud':'ud','bare-ud':'ud','ring-ud':'ud','pulse-ud':'ud','ghost-ud':'ud','wand-ud':'ud','gwand-ud':'ud','bgwand-ud':'ud','fgwand-ud':'ud','fagwand-ud':'ud',
+  'dof-fb':'fb','bare-fb':'fb','ring-fb':'fb','pulse-fb':'fb','ghost-fb':'fb','wand-fb':'fb','gwand-fb':'fb','bgwand-fb':'fb','fgwand-fb':'fb','fagwand-fb':'fb',
+  'dof-roll':'roll','bare-roll':'roll','ring-roll':'roll','pulse-roll':'roll','ghost-roll':'roll','wand-roll':'roll','gwand-roll':'roll','bgwand-roll':'roll','fgwand-roll':'roll','fagwand-roll':'roll',
+  'dof-pitch':'pitch','bare-pitch':'pitch','ring-pitch':'pitch','pulse-pitch':'pitch','ghost-pitch':'pitch','wand-pitch':'pitch','gwand-pitch':'pitch','bgwand-pitch':'pitch','fgwand-pitch':'pitch','fagwand-pitch':'pitch',
+  'dof-yaw':'yaw','bare-yaw':'yaw','ring-yaw':'yaw','pulse-yaw':'yaw','ghost-yaw':'yaw','wand-yaw':'yaw','gwand-yaw':'yaw','bgwand-yaw':'yaw','fgwand-yaw':'yaw','fagwand-yaw':'yaw',
 };
 
 function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
@@ -274,7 +274,7 @@ function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
         </group>
       </Center>
 
-      <ScanningBoundary meshRef={meshRef} isScanning={isHovering} />
+      {/* ScanningBoundary removed — scanning happens from the guidance element itself */}
 
       <OrbitControls
         enablePan={true}

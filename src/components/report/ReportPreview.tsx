@@ -15,13 +15,13 @@ function PreviewTeethTags({ teeth }: { teeth: number[] }) {
         <span key={t} style={{
           display: 'inline-flex',
           alignItems: 'center',
-          padding: `1px 6px`,
+          padding: `2px 8px`,
           fontSize: '10px',
           fontWeight: 500,
-          color: color.tagBlue.text,
-          backgroundColor: color.tagBlue.bg,
-          border: `1px solid ${color.tagBlue.border}`,
-          borderRadius: '3px',
+          color: '#374151',
+          backgroundColor: '#F9FAFB',
+          border: `1px solid ${color.borderDefault}`,
+          borderRadius: '9999px',
         }}>
           {t}
         </span>
@@ -58,7 +58,7 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
             width: '100%',
             maxHeight: '200px',
             objectFit: 'contain',
-            borderRadius: '4px',
+            borderRadius: '8px',
             backgroundColor: color.neutral50,
             display: 'block',
           }}
@@ -68,7 +68,7 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           width: '100%',
           height: '80px',
           backgroundColor: color.neutral50,
-          borderRadius: '4px',
+          borderRadius: '8px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -84,8 +84,8 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           color: color.textDefault,
           lineHeight: '1.5',
           marginTop: space[2],
-          paddingLeft: space[2],
-          borderLeft: `2px solid ${color.neutral200}`,
+          paddingLeft: space[3],
+          borderLeft: `2px solid ${color.primary}`,
         }}>
           {block.notes}
         </div>
@@ -94,12 +94,13 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
       {(block.diagnosis || block.treatment || block.estimatedCost || block.treatmentDate) && (
         <div style={{
           marginTop: space[2],
-          padding: space[2],
+          padding: space[3],
           backgroundColor: color.neutral50,
-          borderRadius: '4px',
+          borderRadius: '8px',
+          border: `1px solid ${color.borderDefault}`,
           display: 'flex',
           flexDirection: 'column',
-          gap: '2px',
+          gap: '4px',
         }}>
           <PreviewClinicalRow label="Diagnosis" value={block.diagnosis} />
           <PreviewClinicalRow label="Treatment" value={block.treatment} />
@@ -120,12 +121,12 @@ function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
       {img.previewUrl ? (
         <img src={img.previewUrl} alt={label} style={{
           width: '100%', height: '100px', objectFit: 'contain',
-          borderRadius: '4px', backgroundColor: color.neutral50, display: 'block',
+          borderRadius: '8px', backgroundColor: color.neutral50, display: 'block',
         }} />
       ) : (
         <div style={{
           width: '100%', height: '100px', backgroundColor: color.neutral50,
-          borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: color.textPlaceholder, fontSize: '10px',
         }}>
           No image
@@ -302,24 +303,25 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
       {/* Patient info */}
       <div style={{
         backgroundColor: color.neutral50,
-        borderRadius: '4px',
-        padding: space[3],
+        borderRadius: '8px',
+        border: `1px solid ${color.borderDefault}`,
+        padding: `${space[4]} ${space[5]}`,
         marginBottom: space[5],
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr',
-        gap: space[3],
+        gap: space[4],
       }}>
         <div>
-          <div style={{ fontSize: '9px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Patient</div>
-          <div style={{ fontSize: '11px', fontWeight: 500, color: color.textDefault }}>{patient.patientName || '---'}</div>
+          <div style={{ fontSize: '10px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 500 }}>Patient</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{patient.patientName || '---'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '9px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Birth Date</div>
-          <div style={{ fontSize: '11px', fontWeight: 500, color: color.textDefault }}>{patient.birthDate || '---'}</div>
+          <div style={{ fontSize: '10px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 500 }}>Birth Date</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{patient.birthDate || '---'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '9px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Chart #</div>
-          <div style={{ fontSize: '11px', fontWeight: 500, color: color.textDefault }}>{patient.chartNumber || '---'}</div>
+          <div style={{ fontSize: '10px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 500 }}>Chart #</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{patient.chartNumber || '---'}</div>
         </div>
       </div>
 

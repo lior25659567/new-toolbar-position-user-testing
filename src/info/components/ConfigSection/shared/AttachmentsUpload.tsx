@@ -6,37 +6,10 @@ interface AttachmentsUploadProps {
   dispatch: React.Dispatch<InfoAction>;
 }
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "12px",
-  fontWeight: 500,
-  color: "#6a7282",
-  fontFamily: "Inter, sans-serif",
-  marginBottom: "8px",
-};
-
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function FileIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5L9 1z" />
-      <path d="M9 1v4h4" />
-    </svg>
-  );
-}
-
-function UploadIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 14V6" />
-      <path d="M7 9l3-3 3 3" />
-      <path d="M17 14v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2" />
-    </svg>
-  );
 }
 
 export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadProps) {
@@ -59,120 +32,93 @@ export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadPr
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={labelStyle}>Attachments</div>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ fontSize: "16px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif", marginBottom: "16px" }}>
+        Attachments
+      </div>
+
       <input ref={inputRef} type="file" multiple hidden onChange={handleFiles} />
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        style={{
-          flex: 1,
-          borderRadius: "8px",
-          border: `1.5px dashed ${dragOver ? "#009ACE" : "#D1D5DB"}`,
-          backgroundColor: dragOver ? "#E0F2FE" : "white",
-          padding: "12px",
-          minHeight: "120px",
-          display: "flex",
-          flexDirection: "column",
-          cursor: "pointer",
-          transition: "border-color 0.15s, background-color 0.15s",
-        }}
-      >
-        {attachments.length === 0 ? (
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-            }}
-          >
-            <UploadIcon />
-            <span style={{ fontSize: "12px", color: "#9CA3AF", fontFamily: "Inter, sans-serif" }}>
-              Drop files here or click to browse
-            </span>
+
+      {attachments.length === 0 ? (
+        /* Empty state */
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          style={{
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            gap: "12px", padding: "40px 20px", cursor: "pointer",
+            borderRadius: "8px",
+            backgroundColor: dragOver ? "#E0F2FE" : "transparent",
+            transition: "background-color 0.15s",
+          }}
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+            <line x1="8" y1="8" x2="16" y2="8" />
+            <line x1="8" y1="16" x2="12" y2="16" />
+            <line x1="9" y1="3" x2="5" y2="8" />
+            <line x1="15" y1="3" x2="19" y2="8" />
+          </svg>
+          <div style={{ fontSize: "14px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif" }}>
+            No Attachments
           </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {attachments.map((f, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "6px 10px",
-                  backgroundColor: "white",
-                  borderRadius: "6px",
-                  border: "1px solid #E5E7EB",
-                }}
-              >
-                <FileIcon />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: "#1e2939",
-                      fontFamily: "Inter, sans-serif",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {f.name}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#9CA3AF", fontFamily: "Inter, sans-serif" }}>
-                    {formatSize(f.size)}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dispatch({ type: "REMOVE_ATTACHMENT", index: i });
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#9CA3AF",
-                    padding: "2px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: "4px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <path d="M10.5 3.5L3.5 10.5M3.5 3.5l7 7" />
-                  </svg>
-                </button>
-              </div>
-            ))}
+          <div style={{ fontSize: "13px", color: "#9CA3AF", fontFamily: "Inter, sans-serif", textAlign: "center", lineHeight: "1.5" }}>
+            You can share external-related files, including images, videos and X-rays, with your lab.
+            <br />
+            To upload files use MyiTero.com
+          </div>
+        </div>
+      ) : (
+        /* Files list */
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {attachments.map((f, i) => (
             <div
+              key={i}
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "4px",
-                padding: "6px",
-                fontSize: "12px",
-                color: "#009ACE",
-                fontWeight: 500,
-                fontFamily: "Inter, sans-serif",
+                display: "flex", alignItems: "center", gap: "10px",
+                padding: "10px 14px", backgroundColor: "#F9FAFB",
+                borderRadius: "8px", border: "1px solid #E5E7EB",
               }}
             >
-              + Add more files
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5L9 1z" />
+                <path d="M9 1v4h4" />
+              </svg>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "12px", fontWeight: 500, color: "#1e2939", fontFamily: "Inter, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {f.name}
+                </div>
+                <div style={{ fontSize: "11px", color: "#9CA3AF", fontFamily: "Inter, sans-serif" }}>
+                  {formatSize(f.size)}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => dispatch({ type: "REMOVE_ATTACHMENT", index: i })}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "2px", display: "flex" }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M10.5 3.5L3.5 10.5M3.5 3.5l7 7" />
+                </svg>
+              </button>
             </div>
-          </div>
-        )}
-      </div>
+          ))}
+          <button
+            onClick={() => inputRef.current?.click()}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
+              padding: "10px", fontSize: "13px", color: "#009ACE", fontWeight: 500,
+              fontFamily: "Inter, sans-serif", background: "none", border: "1px dashed #D1D5DB",
+              borderRadius: "8px", cursor: "pointer",
+            }}
+          >
+            + Add more files
+          </button>
+        </div>
+      )}
     </div>
   );
 }

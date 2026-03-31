@@ -9,6 +9,11 @@ export type GuidanceMode = 'classic' | 'edge' | 'dot' | 'glow'
   | 'pulse-lr' | 'pulse-ud' | 'pulse-fb' | 'pulse-roll' | 'pulse-pitch' | 'pulse-yaw'
   | 'dof-gizmo'
   | 'ghost-lr' | 'ghost-ud' | 'ghost-fb' | 'ghost-roll' | 'ghost-pitch' | 'ghost-yaw'
+  | 'wand-lr' | 'wand-ud' | 'wand-fb' | 'wand-roll' | 'wand-pitch' | 'wand-yaw'
+  | 'gwand-lr' | 'gwand-ud' | 'gwand-fb' | 'gwand-roll' | 'gwand-pitch' | 'gwand-yaw'
+  | 'bgwand-lr' | 'bgwand-ud' | 'bgwand-fb' | 'bgwand-roll' | 'bgwand-pitch' | 'bgwand-yaw'
+  | 'fgwand-lr' | 'fgwand-ud' | 'fgwand-fb' | 'fgwand-roll' | 'fgwand-pitch' | 'fgwand-yaw'
+  | 'fagwand-lr' | 'fagwand-ud' | 'fagwand-fb' | 'fagwand-roll' | 'fagwand-pitch' | 'fagwand-yaw'
   | 'scan-indicator'
   | 'surface-guide';
 

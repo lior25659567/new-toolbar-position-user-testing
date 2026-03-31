@@ -5,6 +5,7 @@ import { DropdownList } from "../../../design-system";
 import { INVISALIGN_TYPES, TREATMENT_STAGES } from "../../constants";
 import { ScanOptionsCheckboxes } from "./shared/ScanOptionsCheckboxes";
 import { NotesField } from "./shared/NotesField";
+import { AttachmentsUpload } from "./shared/AttachmentsUpload";
 
 interface Props {
   state: InfoState;
@@ -13,25 +14,15 @@ interface Props {
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: "white",
-  borderRadius: "10px",
+  borderRadius: "12px",
   border: "1px solid #E5E7EB",
-  padding: "20px",
-};
-
-const cardTitleStyle: React.CSSProperties = {
-  fontSize: "14px",
-  fontWeight: 600,
-  color: "#1e2939",
-  fontFamily: "Inter, sans-serif",
-  marginBottom: "16px",
+  padding: "24px",
 };
 
 export function InvisalignConfig({ state, dispatch }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      {/* Card 1: Treatment Details */}
       <div style={cardStyle}>
-        <div style={cardTitleStyle}>Treatment Details</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
           <DropdownList
             label="Invisalign type"
@@ -53,17 +44,18 @@ export function InvisalignConfig({ state, dispatch }: Props) {
           />
         </div>
       </div>
-
-      {/* Card 2: Scan Options */}
       <div style={cardStyle}>
-        <div style={cardTitleStyle}>Scan Options</div>
         <ScanOptionsCheckboxes procedure="invisalign" scanOptions={state.scanOptions} dispatch={dispatch} />
       </div>
-
-      {/* Card 3: Notes */}
       <div style={cardStyle}>
-        <div style={cardTitleStyle}>Notes</div>
-        <NotesField notes={state.notes} dispatch={dispatch} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+          <div style={{ borderRadius: "10px", border: "1px solid #E5E7EB", padding: "20px" }}>
+            <NotesField notes={state.notes} dispatch={dispatch} />
+          </div>
+          <div style={{ borderRadius: "10px", border: "1px solid #E5E7EB", padding: "20px" }}>
+            <AttachmentsUpload attachments={state.attachments} dispatch={dispatch} />
+          </div>
+        </div>
       </div>
     </div>
   );

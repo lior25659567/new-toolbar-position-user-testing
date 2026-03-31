@@ -15,19 +15,6 @@ interface ToothArcProps {
 export function ToothArc({ teeth, selectedTeeth, toothSpecs, toothColorMap, expandedTeeth, onToothClick, label }: ToothArcProps) {
   return (
     <div>
-      <div
-        style={{
-          fontSize: "11px",
-          fontWeight: 500,
-          color: "#9CA3AF",
-          textTransform: "uppercase",
-          letterSpacing: "0.5px",
-          fontFamily: "Inter, sans-serif",
-          marginBottom: "6px",
-        }}
-      >
-        {label}
-      </div>
       <div style={{ display: "flex", gap: "3px" }}>
         {teeth.map((num) => {
           const spec = toothSpecs.find((s) => s.toothNumber === num);

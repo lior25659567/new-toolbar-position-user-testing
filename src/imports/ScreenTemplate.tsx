@@ -2452,6 +2452,7 @@ export default function ScreenTemplate({
   const [localCurrentPage, setLocalCurrentPage] = useState<string>(initialPage);
   const [localActiveButtons, setLocalActiveButtons] = useState<Set<number>>(new Set());
   const [localViewActiveButtons, setLocalViewActiveButtons] = useState<Set<number>>(new Set());
+  const [patientName, setPatientName] = useState<string>('Mina Y.');
   
   // Use external state if provided, otherwise fall back to local state
   // When using external state, use initialPage prop (which contains currentPage from App.tsx)
@@ -2529,7 +2530,10 @@ export default function ScreenTemplate({
       {/* Info page - full layout without 3D model */}
       {currentPage === 'info' && (
         <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, bottom: 0, zIndex: 10 }}>
-          <InfoPage onContinue={() => handlePageChange('scan')} />
+          <InfoPage
+            onContinue={() => handlePageChange('scan')}
+            onPatientChange={(p) => setPatientName(p ? `${p.firstName} ${p.lastName.charAt(0)}.` : 'Select Patient')}
+          />
         </div>
       )}
       {/* Render single 3D Model - shared between scan and view to preserve camera state */}
@@ -2559,7 +2563,7 @@ export default function ScreenTemplate({
       )}
       <HeaderNavigation 
         currentStep={currentPage as 'info' | 'scan' | 'view' | 'send'} 
-        patientName="Patient: Mina Y." 
+        patientName={`Patient: ${patientName}`}
         onStepChange={(step) => handlePageChange(step)}
         jawImageOffset={tabsOffset}
         scanTabs={externalScanTabs}

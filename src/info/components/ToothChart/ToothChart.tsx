@@ -18,7 +18,7 @@ interface ToothChartProps {
 
 function ChartIcon({ active }: { active: boolean }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke={active ? "#009ACE" : "#9CA3AF"} strokeWidth="1.5" strokeLinecap="round">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke={active ? "#ffffff" : "#9CA3AF"} strokeWidth="1.5" strokeLinecap="round">
       <rect x="1" y="1" width="6" height="6" rx="1" />
       <rect x="11" y="1" width="6" height="6" rx="1" />
       <rect x="1" y="11" width="6" height="6" rx="1" />
@@ -29,7 +29,7 @@ function ChartIcon({ active }: { active: boolean }) {
 
 function TableIcon({ active }: { active: boolean }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke={active ? "#009ACE" : "#9CA3AF"} strokeWidth="1.5" strokeLinecap="round">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke={active ? "#ffffff" : "#9CA3AF"} strokeWidth="1.5" strokeLinecap="round">
       <line x1="1" y1="4" x2="17" y2="4" />
       <line x1="1" y1="9" x2="17" y2="9" />
       <line x1="1" y1="14" x2="17" y2="14" />
@@ -64,16 +64,9 @@ export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChart
           dispatch({ type: "SELECT_TEETH_RANGE", from: lastClickedRef.current, to: num, teeth: range });
         }
       } else {
-        const spec = state.toothSpecs.find((s) => s.toothNumber === num);
-        if (spec) {
-          // Assigned tooth: just toggle its card open/closed, don't deselect
-          const gid = spec.groupId || `solo-${spec.toothNumber}`;
-          setExpandedGroupId((prev) => prev === gid ? null : gid);
-        } else {
-          // Unassigned tooth: toggle selection, close any open card
-          setExpandedGroupId(null);
-          dispatch({ type: "TOGGLE_TOOTH", toothNumber: num });
-        }
+        // Click any tooth: toggle selection or remove procedure
+        setExpandedGroupId(null);
+        dispatch({ type: "TOGGLE_TOOTH", toothNumber: num });
       }
       lastClickedRef.current = num;
     },
@@ -110,14 +103,14 @@ export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChart
             {title}
           </span>
         )}
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px", marginLeft: "auto" }}>
           <button
             type="button"
             onClick={() => setViewMode("chart")}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               width: "32px", height: "32px", borderRadius: "6px", border: "none",
-              backgroundColor: viewMode === "chart" ? "#f3f4f6" : "transparent",
+              backgroundColor: viewMode === "chart" ? "#009ACE" : "transparent",
               cursor: "pointer", transition: "background-color 0.15s",
             }}
             title="Chart view"
@@ -130,7 +123,7 @@ export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChart
             style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               width: "32px", height: "32px", borderRadius: "6px", border: "none",
-              backgroundColor: viewMode === "table" ? "#f3f4f6" : "transparent",
+              backgroundColor: viewMode === "table" ? "#009ACE" : "transparent",
               cursor: "pointer", transition: "background-color 0.15s",
             }}
             title="Table view"
@@ -199,29 +192,11 @@ export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChart
         <ToothTable state={state} toothColorMap={toothColorMap} dispatch={dispatch} />
       )}
 
-      {/* Grouped spec cards */}
+      {/* Divider + spec cards */}
       {groups.length > 0 && (
-        <div style={{ marginTop: "16px" }}>
-          <div
-            style={{
-              fontSize: "12px",
-              fontWeight: 600,
-              color: "#6a7282",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              fontFamily: "Inter, sans-serif",
-              marginBottom: "8px",
-            }}
-          >
-            Assigned teeth ({totalAssigned})
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-            }}
-          >
+        <>
+          <div style={{ height: "1px", backgroundColor: "#E5E7EB", margin: "20px 0" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {groups.slice().reverse().map((groupSpecs) => {
               const gid = groupSpecs[0].groupId || `solo-${groupSpecs[0].toothNumber}`;
               return (
@@ -237,7 +212,7 @@ export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChart
               );
             })}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

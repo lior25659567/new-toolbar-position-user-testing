@@ -28,17 +28,6 @@ export function ConfigSection({ state, toothColorMap, dispatch }: ConfigSectionP
 
   return (
     <section>
-      <h3
-        style={{
-          fontSize: "18px",
-          fontWeight: 600,
-          color: "#1e2939",
-          fontFamily: "Inter, sans-serif",
-          marginBottom: "16px",
-        }}
-      >
-        Configuration
-      </h3>
       {configMap[state.selectedProcedure]}
     </section>
   );

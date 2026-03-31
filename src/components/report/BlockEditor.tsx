@@ -129,8 +129,10 @@ function BlockCardShell({
         backgroundColor: color.bgSurface,
         border: `1px solid ${isDragTarget ? color.primary : hovered ? color.borderHover : color.borderDefault}`,
         borderRadius: radius.lg,
-        transition: transition.border,
+        transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
         overflow: 'hidden',
+        transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
+        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
       }}
     >
       {/* Card header */}
@@ -1233,6 +1235,7 @@ function ImageCardEditor({ block, onUpdate }: {
 
   return (
     <>
+      {/* Image upload */}
       <ImageUploadZone
         previewUrl={block.previewUrl}
         onFileSelect={(file, url) => { onUpdate({ file, previewUrl: url }); setIsAnnotated(false); }}
@@ -1253,24 +1256,9 @@ function ImageCardEditor({ block, onUpdate }: {
         />
       )}
 
-      <TextInput
-        value={block.title}
-        onChange={(v) => onUpdate({ title: v })}
-        placeholder="Image title (optional)"
-      />
-
+      {/* Teeth */}
       <div>
-        <FieldLabel>Notes</FieldLabel>
-        <TextArea
-          value={block.notes}
-          onChange={(v) => onUpdate({ notes: v })}
-          placeholder="Clinical notes for this image..."
-          rows={2}
-        />
-      </div>
-
-      <div>
-        <FieldLabel>Tooth Reference</FieldLabel>
+        <FieldLabel>Teeth</FieldLabel>
         <ToothSelector
           selected={block.teeth}
           onChange={(teeth) => onUpdate({ teeth })}
@@ -1278,62 +1266,62 @@ function ImageCardEditor({ block, onUpdate }: {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={() => onUpdate({ showClinicalFields: !block.showClinicalFields })}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: space[2],
-          padding: `${space[2]} 0`,
-          fontSize: font.size.xs,
-          fontWeight: font.weight.medium,
-          color: color.primary,
-          backgroundColor: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-      >
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-          {block.showClinicalFields ? (
-            <path d="M2 6h8" />
-          ) : (
-            <><line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" /></>
-          )}
-        </svg>
-        {block.showClinicalFields ? 'Hide clinical fields' : 'Add diagnosis, treatment & cost'}
-      </button>
+      {/* Notes */}
+      <div>
+        <FieldLabel>Notes</FieldLabel>
+        <TextArea
+          value={block.notes}
+          onChange={(v) => onUpdate({ notes: v })}
+          placeholder="Add notes..."
+          rows={2}
+        />
+      </div>
 
-      {block.showClinicalFields && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: space[3],
-          padding: space[3],
-          backgroundColor: color.neutral50,
-          borderRadius: radius.md,
-          border: `1px solid ${color.borderDefault}`,
-        }}>
-          <div>
-            <FieldLabel>Diagnosis</FieldLabel>
-            <TextInput value={block.diagnosis} onChange={(v) => onUpdate({ diagnosis: v })} placeholder="e.g. Caries on mesial surface" />
+      {/* Clinical details toggle */}
+      <div style={{
+        borderTop: `1px solid ${color.borderDefault}`,
+        paddingTop: space[3],
+      }}>
+        <button
+          type="button"
+          onClick={() => onUpdate({ showClinicalFields: !block.showClinicalFields })}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: space[2],
+            padding: 0,
+            fontSize: font.size.xs,
+            fontWeight: font.weight.medium,
+            color: color.textSubtle,
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <svg
+            width="14" height="14" viewBox="0 0 16 16" fill="none"
+            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+            style={{ transition: `transform ${transition.fast}`, transform: block.showClinicalFields ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          >
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+          Clinical details
+        </button>
+
+        {block.showClinicalFields && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: space[3],
+            marginTop: space[3],
+          }}>
+            <TextInput value={block.diagnosis} onChange={(v) => onUpdate({ diagnosis: v })} placeholder="Diagnosis" />
+            <TextInput value={block.treatment} onChange={(v) => onUpdate({ treatment: v })} placeholder="Treatment" />
+            <TextInput value={block.estimatedCost} onChange={(v) => onUpdate({ estimatedCost: v })} placeholder="Est. cost" />
+            <TextInput value={block.treatmentDate} onChange={(v) => onUpdate({ treatmentDate: v })} placeholder="Date" />
           </div>
-          <div>
-            <FieldLabel>Treatment</FieldLabel>
-            <TextInput value={block.treatment} onChange={(v) => onUpdate({ treatment: v })} placeholder="e.g. Composite restoration" />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[3] }}>
-            <div>
-              <FieldLabel>Estimated Cost</FieldLabel>
-              <TextInput value={block.estimatedCost} onChange={(v) => onUpdate({ estimatedCost: v })} placeholder="$0.00" />
-            </div>
-            <div>
-              <FieldLabel>Treatment Date</FieldLabel>
-              <TextInput value={block.treatmentDate} onChange={(v) => onUpdate({ treatmentDate: v })} placeholder="MM/DD/YYYY" />
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }

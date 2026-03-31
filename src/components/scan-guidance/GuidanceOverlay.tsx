@@ -103,7 +103,6 @@ function TopBar({ guidance, pct }: { guidance: GuidanceState; pct: number }) {
           {pct}%
         </span>
       </div>
-      <StagePill stage={guidance.stage} phase={guidance.phase} />
     </div>
   );
 }
@@ -1551,16 +1550,6 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
             )}
           </div>
 
-          {/* Stage badge */}
-          <div style={{
-            fontSize: '9px', fontWeight: 700, textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: stage === 'occlusal' ? '#64748B' : stage === 'buccal' ? color.primary : '#009ACE',
-            backgroundColor: stage === 'occlusal' ? color.neutral100 : stage === 'buccal' ? 'rgba(0,154,206,0.08)' : 'rgba(0,154,206,0.08)',
-            padding: '2px 8px', borderRadius: '6px',
-          }}>
-            {stage}
-          </div>
         </div>
       )}
 
@@ -1593,6 +1582,336 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
         border: '1px solid rgba(0,154,206,0.1)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}>
         Scan Indicator
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SCAN WAND — wand silhouette replacing frame, same 6DoF arrows as DofFrame
+// ════════════════════════════════════════════════════════════════════════════
+
+const WAND_KF = `
+  @keyframes wand-slide-lr  { 0%{transform:translate(-50%,-50%) translateX(-20px)} 50%{transform:translate(-50%,-50%) translateX(20px)} 100%{transform:translate(-50%,-50%) translateX(-20px)} }
+  @keyframes wand-slide-ud  { 0%{transform:translate(-50%,-50%) translateY(-16px)} 50%{transform:translate(-50%,-50%) translateY(16px)} 100%{transform:translate(-50%,-50%) translateY(-16px)} }
+  @keyframes wand-scale-fb  { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) scale(0.88)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) scale(1.12)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) scale(0.88)} }
+  @keyframes wand-roll      { 0%{transform:translate(-50%,-29.3%) rotate(0deg)} 100%{transform:translate(-50%,-29.3%) rotate(360deg)} }
+  @keyframes wand-pitch     { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateX(-14deg)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateX(14deg)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateX(-14deg)} }
+  @keyframes wand-yaw       { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateY(-16deg)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateY(16deg)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateY(-16deg)} }
+`;
+
+function WandSilhouette({ strokeColor, opacity, dashed }: { strokeColor: string; opacity: number; dashed?: boolean }) {
+  const dash = dashed ? '8 5' : undefined;
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 251 561" fill="none" preserveAspectRatio="xMidYMid meet" style={{ opacity }}>
+      <path
+        d="M249.361 560.044L232.599 25.1221C232.185 11.8815 221.331 1.36279 208.084 1.36279H53.8173C40.7683 1.36279 30.0037 11.5798 29.3232 24.6111L1.36084 560.044"
+        stroke={strokeColor} strokeWidth="2.72527" strokeDasharray={dash}
+      />
+      <rect x="49.7235" y="30.7254" width="163.516" height="267.077" stroke={strokeColor} strokeWidth="2.72527" strokeDasharray={dash} />
+    </svg>
+  );
+}
+
+const WAND_LABELS: Record<string, string> = {
+  'wand-lr': 'Left / Right', 'wand-ud': 'Up / Down', 'wand-fb': 'Forward / Back',
+  'wand-roll': 'Roll', 'wand-pitch': 'Pitch', 'wand-yaw': 'Yaw',
+};
+
+// Center of the wand's screen rectangle as % of the full wand container
+// rect: x=49.7235 y=30.7254 w=163.516 h=267.077  viewBox: 0 0 251 561
+const WRECT_CX = '52.4%';  // (49.7235 + 163.516/2) / 251
+const WRECT_CY = '29.3%';  // (30.7254 + 267.077/2) / 561
+
+/** Wand wrapper — positioned so the wand's screen rectangle center aligns with viewport center */
+function WandFrame({ mode, flashActive, children, anim }: {
+  mode: string; flashActive: boolean; children?: React.ReactNode; anim?: string;
+}) {
+  const bc = flashActive ? '#16A34A' : 'rgba(0,154,206,0.55)';
+  return (
+    <div style={{
+      position: 'absolute', top: '50%', left: '50%',
+      width: 'clamp(100px, 10vw, 140px)', height: 'clamp(220px, 22vw, 320px)',
+      transform: 'translate(-50%,-29.3%)', pointerEvents: 'none',
+      animation: anim,
+    }}>
+      <WandSilhouette strokeColor={bc} opacity={1} />
+      {/* Mode label */}
+      <div style={{
+        position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
+        fontSize: '11px', fontWeight: 600, color: '#009ACE',
+        backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
+        borderRadius: '10px', whiteSpace: 'nowrap',
+        border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      }}>
+        {WAND_LABELS[mode] ?? mode}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function WandLR({ g, f }: { g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF+WAND_KF}</style><TopBar guidance={g} pct={pct}/>
+      <WandFrame mode="wand-lr" flashActive={f}>
+        <div style={{ position:'absolute',left:-64,top:WRECT_CY,transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="left"/></div>
+        <div style={{ position:'absolute',right:-64,top:WRECT_CY,transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="right"/></div>
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'wand-slide-lr 2.5s ease-in-out infinite' }}/>
+      </WandFrame>
+    </div>
+  );
+}
+
+function WandUD({ g, f }: { g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF+WAND_KF}</style><TopBar guidance={g} pct={pct}/>
+      <WandFrame mode="wand-ud" flashActive={f}>
+        <div style={{ position:'absolute',top:-64,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="up"/></div>
+        <div style={{ position:'absolute',bottom:-64,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="down"/></div>
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'wand-slide-ud 2.5s ease-in-out infinite' }}/>
+      </WandFrame>
+    </div>
+  );
+}
+
+function WandFB({ g, f }: { g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF+WAND_KF}</style><TopBar guidance={g} pct={pct}/>
+      <WandFrame mode="wand-fb" flashActive={f} anim="wand-scale-fb 3s ease-in-out infinite">
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,transform:'translate(-50%,-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowDepth s={68}/></div>
+      </WandFrame>
+    </div>
+  );
+}
+
+function WandRoll({ g, f }: { g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF+WAND_KF}</style><TopBar guidance={g} pct={pct}/>
+      <WandFrame mode="wand-roll" flashActive={f}>
+        <div style={{ position:'absolute',top:-68,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={110}/></div>
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:70,height:70,animation:'wand-roll 4s linear infinite' }}>
+          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style={{ filter:BF }}>
+            <BlueDefs/><circle cx="35" cy="35" r="28" stroke="url(#gb-d)" strokeWidth="2" opacity="0.25" fill="none"/>
+            <line x1="35" y1="7" x2="35" y2="20" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="35" y1="50" x2="35" y2="63" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="7" y1="35" x2="20" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="50" y1="35" x2="63" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+            <circle cx="35" cy="35" r="3" fill="url(#gb-r)"/>
+          </svg>
+        </div>
+      </WandFrame>
+    </div>
+  );
+}
+
+function WandPitch({ g, f }: { g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF+WAND_KF}</style><TopBar guidance={g} pct={pct}/>
+      <WandFrame mode="wand-pitch" flashActive={f} anim="wand-pitch 3s ease-in-out infinite">
+        <div style={{ position:'absolute',right:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(90deg)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={100}/></div>
+        <div style={{ position:'absolute',left:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(-90deg) scaleX(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={80}/></div>
+      </WandFrame>
+    </div>
+  );
+}
+
+function WandYaw({ g, f }: { g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  return (
+    <div style={{ position:'absolute',inset:0,pointerEvents:'none',fontFamily:font.family }}>
+      <style>{KF+DOF_KF+WAND_KF}</style><TopBar guidance={g} pct={pct}/>
+      <WandFrame mode="wand-yaw" flashActive={f} anim="wand-yaw 3s ease-in-out infinite">
+        <div style={{ position:'absolute',top:-68,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={120}/></div>
+        <div style={{ position:'absolute',bottom:-68,left:WRECT_CX,transform:'translateX(-50%) scaleY(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={100}/></div>
+      </WandFrame>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// GHOST SCAN WAND — center rect of wand (stationary) + ghost rect + 6DoF arrows
+// ════════════════════════════════════════════════════════════════════════════
+
+const GWAND_KF = `
+  @keyframes gwand-float-lr    { 0%{transform:translate(calc(-50% + 34px),-29.3%)} 50%{transform:translate(calc(-50% - 34px),-29.3%)} 100%{transform:translate(calc(-50% + 34px),-29.3%)} }
+  @keyframes gwand-float-ud    { 0%{transform:translate(-50%,calc(-29.3% + 26px))} 50%{transform:translate(-50%,calc(-29.3% - 26px))} 100%{transform:translate(-50%,calc(-29.3% + 26px))} }
+  @keyframes gwand-float-fb    { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) scale(0.85)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) scale(1.15)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) scale(0.85)} }
+  @keyframes gwand-float-roll  { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) rotate(-10deg)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) rotate(10deg)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) rotate(-10deg)} }
+  @keyframes gwand-float-pitch { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateX(-14deg)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateX(14deg)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateX(-14deg)} }
+  @keyframes gwand-float-yaw   { 0%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateY(-16deg)} 50%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateY(16deg)} 100%{transform-origin:52.4% 29.3%;transform:translate(-50%,-29.3%) perspective(400px) rotateY(-16deg)} }
+`;
+
+const GWAND_ANIM: Record<string, string> = {
+  'gwand-lr':    'gwand-float-lr 2.8s ease-in-out infinite',
+  'gwand-ud':    'gwand-float-ud 2.8s ease-in-out infinite',
+  'gwand-fb':    'gwand-float-fb 3.2s ease-in-out infinite',
+  'gwand-roll':  'gwand-float-roll 3s ease-in-out infinite',
+  'gwand-pitch': 'gwand-float-pitch 3s ease-in-out infinite',
+  'gwand-yaw':   'gwand-float-yaw 3s ease-in-out infinite',
+  'bgwand-lr':   'gwand-float-lr 2.8s ease-in-out infinite',
+  'bgwand-ud':   'gwand-float-ud 2.8s ease-in-out infinite',
+  'bgwand-fb':   'gwand-float-fb 3.2s ease-in-out infinite',
+  'bgwand-roll': 'gwand-float-roll 3s ease-in-out infinite',
+  'bgwand-pitch':'gwand-float-pitch 3s ease-in-out infinite',
+  'bgwand-yaw':  'gwand-float-yaw 3s ease-in-out infinite',
+  'fgwand-lr':   'gwand-float-lr 2.8s ease-in-out infinite',
+  'fgwand-ud':   'gwand-float-ud 2.8s ease-in-out infinite',
+  'fgwand-fb':   'gwand-float-fb 3.2s ease-in-out infinite',
+  'fgwand-roll': 'gwand-float-roll 3s ease-in-out infinite',
+  'fgwand-pitch':'gwand-float-pitch 3s ease-in-out infinite',
+  'fgwand-yaw':  'gwand-float-yaw 3s ease-in-out infinite',
+  'fagwand-lr':  'gwand-float-lr 2.8s ease-in-out infinite',
+  'fagwand-ud':  'gwand-float-ud 2.8s ease-in-out infinite',
+  'fagwand-fb':  'gwand-float-fb 3.2s ease-in-out infinite',
+  'fagwand-roll':'gwand-float-roll 3s ease-in-out infinite',
+  'fagwand-pitch':'gwand-float-pitch 3s ease-in-out infinite',
+  'fagwand-yaw': 'gwand-float-yaw 3s ease-in-out infinite',
+};
+
+const GWAND_LABELS: Record<string, string> = {
+  'gwand-lr': 'Left / Right', 'gwand-ud': 'Up / Down', 'gwand-fb': 'Forward / Back',
+  'gwand-roll': 'Roll', 'gwand-pitch': 'Pitch', 'gwand-yaw': 'Yaw',
+  'bgwand-lr': 'Left / Right', 'bgwand-ud': 'Up / Down', 'bgwand-fb': 'Forward / Back',
+  'bgwand-roll': 'Roll', 'bgwand-pitch': 'Pitch', 'bgwand-yaw': 'Yaw',
+  'fgwand-lr': 'Left / Right', 'fgwand-ud': 'Up / Down', 'fgwand-fb': 'Forward / Back',
+  'fgwand-roll': 'Roll', 'fgwand-pitch': 'Pitch', 'fgwand-yaw': 'Yaw',
+  'fagwand-lr': 'Left / Right', 'fagwand-ud': 'Up / Down', 'fagwand-fb': 'Forward / Back',
+  'fagwand-roll': 'Roll', 'fagwand-pitch': 'Pitch', 'fagwand-yaw': 'Yaw',
+};
+
+/** Just the center rectangle from the wand SVG — same viewBox so it aligns perfectly with the full wand */
+function WandScreenRect({ strokeColor, opacity, dashed }: { strokeColor: string; opacity: number; dashed?: boolean }) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 251 561" fill="none" preserveAspectRatio="xMidYMid meet" style={{ opacity }}>
+      <rect
+        x="49.7235" y="30.7254" width="163.516" height="267.077"
+        stroke={strokeColor} strokeWidth="2.72527"
+        strokeDasharray={dashed ? '8 5' : undefined}
+        fill="none"
+      />
+    </svg>
+  );
+}
+
+/** Arrows placed around the stationary wand — positioned at the wand rect center */
+function GWandArrows({ mode }: { mode: string }) {
+  const variant = mode.replace(/^(?:g|bg|fg|fag)wand-/, '');
+  if (variant === 'lr') return (
+    <>
+      <div style={{ position:'absolute',left:-64,top:WRECT_CY,transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="left"/></div>
+      <div style={{ position:'absolute',right:-64,top:WRECT_CY,transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="right"/></div>
+    </>
+  );
+  if (variant === 'ud') return (
+    <>
+      <div style={{ position:'absolute',top:-64,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="up"/></div>
+      <div style={{ position:'absolute',bottom:-64,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="down"/></div>
+    </>
+  );
+  if (variant === 'fb') return (
+    <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,transform:'translate(-50%,-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowDepth s={68}/></div>
+  );
+  if (variant === 'roll') return (
+    <>
+      <div style={{ position:'absolute',top:-68,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={110}/></div>
+      <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:70,height:70,animation:'wand-roll 4s linear infinite' }}>
+        <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style={{ filter:BF }}>
+          <BlueDefs/><circle cx="35" cy="35" r="28" stroke="url(#gb-d)" strokeWidth="2" opacity="0.25" fill="none"/>
+          <line x1="35" y1="7" x2="35" y2="20" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="35" y1="50" x2="35" y2="63" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="7" y1="35" x2="20" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="50" y1="35" x2="63" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+          <circle cx="35" cy="35" r="3" fill="url(#gb-r)"/>
+        </svg>
+      </div>
+    </>
+  );
+  if (variant === 'pitch') return (
+    <>
+      <div style={{ position:'absolute',right:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(90deg)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={100}/></div>
+      <div style={{ position:'absolute',left:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(-90deg) scaleX(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={80}/></div>
+    </>
+  );
+  if (variant === 'yaw') return (
+    <>
+      <div style={{ position:'absolute',top:-68,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={120}/></div>
+      <div style={{ position:'absolute',bottom:-68,left:WRECT_CX,transform:'translateX(-50%) scaleY(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={100}/></div>
+    </>
+  );
+  return null;
+}
+
+function GhostWandOverlay({ mode, g, f, showArrows = true, ghostFull = false }: { mode: string; g: GuidanceState; f: boolean; showArrows?: boolean; ghostFull?: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const isScanning = g.phase === 'scanning';
+  const ghostAnim = GWAND_ANIM[mode] ?? 'none';
+
+  const wandColor = f ? '#16A34A' : isScanning ? 'rgba(0,154,206,0.7)' : 'rgba(0,154,206,0.55)';
+
+  const wandW = 'clamp(100px, 10vw, 140px)';
+  const wandH = 'clamp(220px, 22vw, 320px)';
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
+      <style>{KF + DOF_KF + WAND_KF + GWAND_KF}</style>
+      <TopBar guidance={g} pct={pct} />
+
+      {/* Ghost — full wand or just the center rect */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: wandW, height: wandH,
+        pointerEvents: 'none',
+        animation: ghostAnim,
+      }}>
+        {ghostFull
+          ? <WandSilhouette strokeColor="rgba(0,154,206,0.25)" opacity={1} dashed />
+          : <WandScreenRect strokeColor="rgba(0,154,206,0.25)" opacity={1} dashed />
+        }
+        <div style={{
+          position: 'absolute', bottom: ghostFull ? -30 : -22, left: '50%', transform: 'translateX(-50%)',
+          fontSize: '10px', fontWeight: 600, color: '#009ACE', opacity: 0.7,
+          backgroundColor: 'rgba(255,255,255,0.88)', padding: '2px 10px',
+          borderRadius: '8px', whiteSpace: 'nowrap',
+          border: '1px solid rgba(0,154,206,0.12)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        }}>
+          scan here
+        </div>
+      </div>
+
+      {/* Stationary full wand silhouette + arrows */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: wandW, height: wandH,
+        transform: 'translate(-50%,-29.3%)',
+        pointerEvents: 'none',
+      }}>
+        <WandSilhouette strokeColor={wandColor} opacity={1} />
+
+        {/* Arrows */}
+        {showArrows && <GWandArrows mode={mode} />}
+
+        {/* Mode label */}
+        <div style={{
+          position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
+          fontSize: '11px', fontWeight: 600, color: '#009ACE',
+          backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
+          borderRadius: '10px', whiteSpace: 'nowrap',
+          border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        }}>
+          {GWAND_LABELS[mode] ?? mode}
+        </div>
       </div>
     </div>
   );
@@ -1638,6 +1957,26 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, con
 
   // Ghost Wand (6DoF)
   if (mode.startsWith('ghost-')) return <GhostOverlay mode={mode} g={guidance} f={flashActive}/>;
+
+  // Scan Wand (6DoF with wand silhouette)
+  if (mode === 'wand-lr')    return <WandLR g={guidance} f={flashActive}/>;
+  if (mode === 'wand-ud')    return <WandUD g={guidance} f={flashActive}/>;
+  if (mode === 'wand-fb')    return <WandFB g={guidance} f={flashActive}/>;
+  if (mode === 'wand-roll')  return <WandRoll g={guidance} f={flashActive}/>;
+  if (mode === 'wand-pitch') return <WandPitch g={guidance} f={flashActive}/>;
+  if (mode === 'wand-yaw')   return <WandYaw g={guidance} f={flashActive}/>;
+
+  // Ghost Scan Wand (wand + ghost rect + arrows)
+  if (mode.startsWith('gwand-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive}/>;
+
+  // Bare Ghost Wand (wand + ghost rect, no arrows)
+  if (mode.startsWith('bgwand-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive} showArrows={false}/>;
+
+  // Full Ghost Wand (wand + full ghost wand silhouette, no arrows)
+  if (mode.startsWith('fgwand-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive} showArrows={false} ghostFull/>;
+
+  // Full Ghost Wand + Arrows
+  if (mode.startsWith('fagwand-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive} showArrows ghostFull/>;
 
   // Scan Indicator
   if (mode === 'scan-indicator') return <ScanIndicatorOverlay guidance={guidance} containerSize={containerSize} pointerNDC={pointerNDC} flashActive={flashActive}/>;

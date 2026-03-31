@@ -143,13 +143,11 @@ export function infoReducer(state: InfoState, action: InfoAction): InfoState {
       const hasSpec = state.toothSpecs.some((s) => s.toothNumber === action.toothNumber);
 
       if (hasSpec) {
-        // Assigned tooth → toggle in expandedTeeth for immediate editing
-        const isExpanded = state.expandedTeeth.includes(action.toothNumber);
+        // Assigned tooth → remove its procedure (reset to unassigned)
         return {
           ...state,
-          expandedTeeth: isExpanded
-            ? state.expandedTeeth.filter((t) => t !== action.toothNumber)
-            : [...state.expandedTeeth, action.toothNumber],
+          toothSpecs: state.toothSpecs.filter((s) => s.toothNumber !== action.toothNumber),
+          expandedTeeth: state.expandedTeeth.filter((t) => t !== action.toothNumber),
         };
       }
 

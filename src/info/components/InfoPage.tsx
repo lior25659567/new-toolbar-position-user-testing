@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useInfoState } from "../state/useInfoState";
 import { PatientSection } from "./PatientSection/PatientSection";
 import { ProcedureSection } from "./ProcedureSection/ProcedureSection";
 import { ConfigSection } from "./ConfigSection/ConfigSection";
 import { CaseSummaryPanel } from "./CaseSummaryPanel/CaseSummaryPanel";
+import type { Patient } from "../types";
 
 interface InfoPageProps {
   onContinue: () => void;
+  onPatientChange?: (patient: Patient | null) => void;
 }
+
+const ANIM_KF = `
+  @keyframes info-fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+`;
 
 const sectionCardStyle: React.CSSProperties = {
   backgroundColor: "white",
@@ -15,10 +24,15 @@ const sectionCardStyle: React.CSSProperties = {
   padding: "24px",
   border: "1px solid #E5E7EB",
   flexShrink: 0,
+  animation: "info-fade-in 0.35s ease-out both",
 };
 
-export function InfoPage({ onContinue }: InfoPageProps) {
+export function InfoPage({ onContinue, onPatientChange }: InfoPageProps) {
   const { state, dispatch, canProceed, toothColorMap } = useInfoState();
+
+  useEffect(() => {
+    onPatientChange?.(state.patient);
+  }, [state.patient, onPatientChange]);
 
   return (
     <div
@@ -28,6 +42,7 @@ export function InfoPage({ onContinue }: InfoPageProps) {
         backgroundColor: "#F8FAFC",
       }}
     >
+      <style>{ANIM_KF}</style>
       {/* Left column - scroll container */}
       <div
         style={{
@@ -45,7 +60,7 @@ export function InfoPage({ onContinue }: InfoPageProps) {
             gap: "24px",
           }}
         >
-          <div style={sectionCardStyle}>
+          <div style={{ ...sectionCardStyle, animationDelay: "0s" }}>
             <PatientSection
               patient={state.patient}
               searchQuery={state.patientSearchQuery}
@@ -53,7 +68,7 @@ export function InfoPage({ onContinue }: InfoPageProps) {
               dispatch={dispatch}
             />
           </div>
-          <div style={sectionCardStyle}>
+          <div style={{ ...sectionCardStyle, animationDelay: "0.06s" }}>
             <ProcedureSection
               selectedProcedure={state.selectedProcedure}
               hasPatient={!!state.patient}
@@ -61,13 +76,11 @@ export function InfoPage({ onContinue }: InfoPageProps) {
             />
           </div>
           {state.selectedProcedure && (
-            <div style={sectionCardStyle}>
-              <ConfigSection
-                state={state}
-                toothColorMap={toothColorMap}
-                dispatch={dispatch}
-              />
-            </div>
+            <ConfigSection
+              state={state}
+              toothColorMap={toothColorMap}
+              dispatch={dispatch}
+            />
           )}
         </div>
       </div>

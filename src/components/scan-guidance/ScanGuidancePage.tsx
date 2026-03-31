@@ -10,7 +10,7 @@ interface ScanGuidancePageProps {
 
 // ─── Group definitions ───────────────────────────────────────────────────────
 
-type GroupId = 'scan' | 'dof-frame' | 'bare' | 'ring' | 'pulse' | 'gizmo' | 'ghost-wand' | 'scan-indicator' | 'surface-guide';
+type GroupId = 'scan' | 'dof-frame' | 'bare' | 'pulse' | 'ghost-wand' | 'scan-wand' | 'ghost-scan-wand' | 'bare-ghost-wand' | 'full-ghost-wand' | 'full-arrow-ghost-wand' | 'scan-indicator';
 
 interface GroupDef {
   id: GroupId;
@@ -52,17 +52,6 @@ const GROUPS: GroupDef[] = [
     ],
   },
   {
-    id: 'ring', label: 'Ring', accent: color.primary,
-    modes: [
-      { id: 'ring-lr',    label: 'Left / Right' },
-      { id: 'ring-ud',    label: 'Up / Down' },
-      { id: 'ring-fb',    label: 'Forward / Back' },
-      { id: 'ring-roll',  label: 'Roll' },
-      { id: 'ring-pitch', label: 'Pitch' },
-      { id: 'ring-yaw',   label: 'Yaw' },
-    ],
-  },
-  {
     id: 'pulse', label: 'Pulse', accent: color.primary,
     modes: [
       { id: 'pulse-lr',    label: 'Left / Right' },
@@ -71,12 +60,6 @@ const GROUPS: GroupDef[] = [
       { id: 'pulse-roll',  label: 'Roll' },
       { id: 'pulse-pitch', label: 'Pitch' },
       { id: 'pulse-yaw',   label: 'Yaw' },
-    ],
-  },
-  {
-    id: 'gizmo', label: '6DoF Gizmo', accent: color.primary,
-    modes: [
-      { id: 'dof-gizmo', label: 'Overview' },
     ],
   },
   {
@@ -91,15 +74,64 @@ const GROUPS: GroupDef[] = [
     ],
   },
   {
-    id: 'scan-indicator', label: 'Scan Indicator', accent: color.primary,
+    id: 'scan-wand', label: 'Scan Wand', accent: color.primary,
     modes: [
-      { id: 'scan-indicator', label: 'Scan Indicator' },
+      { id: 'wand-lr',    label: 'Left / Right' },
+      { id: 'wand-ud',    label: 'Up / Down' },
+      { id: 'wand-fb',    label: 'Forward / Back' },
+      { id: 'wand-roll',  label: 'Roll' },
+      { id: 'wand-pitch', label: 'Pitch' },
+      { id: 'wand-yaw',   label: 'Yaw' },
     ],
   },
   {
-    id: 'surface-guide', label: 'Surface Guide', accent: color.primary,
+    id: 'ghost-scan-wand', label: 'Ghost Scan Wand', accent: color.primary,
     modes: [
-      { id: 'surface-guide', label: 'Surface Guide' },
+      { id: 'gwand-lr',    label: 'Left / Right' },
+      { id: 'gwand-ud',    label: 'Up / Down' },
+      { id: 'gwand-fb',    label: 'Forward / Back' },
+      { id: 'gwand-roll',  label: 'Roll' },
+      { id: 'gwand-pitch', label: 'Pitch' },
+      { id: 'gwand-yaw',   label: 'Yaw' },
+    ],
+  },
+  {
+    id: 'bare-ghost-wand', label: 'Bare Ghost Wand', accent: color.primary,
+    modes: [
+      { id: 'bgwand-lr',    label: 'Left / Right' },
+      { id: 'bgwand-ud',    label: 'Up / Down' },
+      { id: 'bgwand-fb',    label: 'Forward / Back' },
+      { id: 'bgwand-roll',  label: 'Roll' },
+      { id: 'bgwand-pitch', label: 'Pitch' },
+      { id: 'bgwand-yaw',   label: 'Yaw' },
+    ],
+  },
+  {
+    id: 'full-ghost-wand', label: 'Full Ghost Wand', accent: color.primary,
+    modes: [
+      { id: 'fgwand-lr',    label: 'Left / Right' },
+      { id: 'fgwand-ud',    label: 'Up / Down' },
+      { id: 'fgwand-fb',    label: 'Forward / Back' },
+      { id: 'fgwand-roll',  label: 'Roll' },
+      { id: 'fgwand-pitch', label: 'Pitch' },
+      { id: 'fgwand-yaw',   label: 'Yaw' },
+    ],
+  },
+  {
+    id: 'full-arrow-ghost-wand', label: 'Full Ghost + Arrows', accent: color.primary,
+    modes: [
+      { id: 'fagwand-lr',    label: 'Left / Right' },
+      { id: 'fagwand-ud',    label: 'Up / Down' },
+      { id: 'fagwand-fb',    label: 'Forward / Back' },
+      { id: 'fagwand-roll',  label: 'Roll' },
+      { id: 'fagwand-pitch', label: 'Pitch' },
+      { id: 'fagwand-yaw',   label: 'Yaw' },
+    ],
+  },
+  {
+    id: 'scan-indicator', label: 'Scan Indicator', accent: color.primary,
+    modes: [
+      { id: 'scan-indicator', label: 'Scan Indicator' },
     ],
   },
 ];

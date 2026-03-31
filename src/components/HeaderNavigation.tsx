@@ -351,6 +351,7 @@ function IteroLogo() {
 function Dropdown1({ patientName }: { patientName: string }) {
   // Parse patient name to separate label and actual name
   const displayName = patientName.replace('Patient:', '').trim();
+  const initials = displayName.split(/\s+/).map(w => w.charAt(0).toUpperCase()).join('').slice(0, 2);
   
   return (
     <div 
@@ -395,7 +396,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
               letterSpacing: '0.02em'
             }}
           >
-            MY
+            {initials}
           </span>
         </div>
         
