@@ -7,6 +7,7 @@ import ReportPreview from './report/ReportPreview';
 import SignaturePanel from './report/SignaturePanel';
 import type { ImageBlock, ComparisonBlock, CostSummaryBlock, PatientInfo, ReportSettings } from './report/types';
 import { createImageBlock, REPORT_TEMPLATES } from './report/types';
+import ShareModal from './report/ShareModal';
 
 type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
 
@@ -333,18 +334,22 @@ export default function PatientReportPage({
     if (settings.signatureUrl && signatureWarning) setSignatureWarning(false);
   }, [settings.signatureUrl, signatureWarning]);
 
+  const [shareOpen, setShareOpen] = useState(false);
+
   const handleExportOrShare = (action: 'share' | 'export') => {
     if (!settings.signatureUrl) {
       setActiveTab('settings');
       setSignatureWarning(true);
-      // Scroll to signature after tab switch renders
       setTimeout(() => {
         signatureRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
       return;
     }
-    // TODO: actual export/share logic
-    alert(action === 'export' ? 'Exporting PDF...' : 'Sharing report...');
+    if (action === 'share') {
+      setShareOpen(true);
+    } else {
+      alert('Exporting PDF...');
+    }
   };
 
   // Mark unsaved on any change
@@ -822,6 +827,12 @@ export default function PatientReportPage({
         </div>
       </div>
 
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        reportName={settings.reportName}
+        patientName={patient.patientName}
+      />
     </div>
   );
 }
