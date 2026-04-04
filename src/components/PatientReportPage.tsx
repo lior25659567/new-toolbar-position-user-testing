@@ -817,7 +817,7 @@ export default function PatientReportPage({
           flex: 1,
           overflowY: 'auto',
           padding: space[6],
-          backgroundColor: '#F4F4F4',
+          backgroundColor: color.neutral100,
         }}>
           <ReportPreview
             settings={settings}
