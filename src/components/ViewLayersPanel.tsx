@@ -578,8 +578,8 @@ function OpacitySlider({
           transform: `translateX(-50%) scale(${dragging ? 1 : 0.8})`,
           opacity: dragging ? 1 : 0,
           pointerEvents: 'none',
-          backgroundColor: '#1e2939',
-          color: '#FFFFFF',
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          color: '#374151',
           fontSize: '11px',
           fontWeight: 600,
           fontFamily: "'Roboto', system-ui, sans-serif",
@@ -587,7 +587,9 @@ function OpacitySlider({
           padding: '4px 8px',
           borderRadius: '6px',
           whiteSpace: 'nowrap',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          backdropFilter: 'blur(4px)',
           transition: 'opacity 0.15s ease, transform 0.15s ease',
         }}>
           {value}%
@@ -599,7 +601,9 @@ function OpacitySlider({
             transform: 'translateX(-50%) rotate(45deg)',
             width: '8px',
             height: '8px',
-            backgroundColor: '#1e2939',
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderRight: '1px solid #E5E7EB',
+            borderBottom: '1px solid #E5E7EB',
           }} />
         </div>
       </div>
