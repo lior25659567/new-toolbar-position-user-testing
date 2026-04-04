@@ -90,9 +90,9 @@ export default function Panel() {
       className="bg-white flex flex-col overflow-visible"
       data-name="MarginLinePanel"
       style={{
-        width: '260px',
-        minWidth: '260px',
-        maxWidth: '260px',
+        width: '300px',
+        minWidth: '300px',
+        maxWidth: '300px',
         borderRadius: '8px',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)'
       }}

@@ -243,38 +243,41 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
         const nz = (pz - minZ) / (maxZ - minZ);
         const ny = (py - minY) / (maxY - minY);
 
-        // Height-based base pressure — higher surfaces = more pressure
-        const heightPressure = Math.pow(Math.max(0, ny), 1.2) * 0.6;
+        // Use vertex normal Y to detect surface facing — cusps point up, valleys point sideways
+        const normalY = geo.attributes.normal ? Math.abs(geo.attributes.normal.getY(i)) : ny;
 
-        // Surface curvature approximation using high-frequency noise
-        const curv1 = Math.sin(px * 0.35) * Math.cos(pz * 0.28) * Math.sin(py * 0.32);
-        const curv2 = Math.cos(px * 0.22 + 1.7) * Math.sin(pz * 0.31 + 0.9) * Math.cos(py * 0.27 + 2.1);
-        const curv3 = Math.sin(px * 0.45 + 3.1) * Math.cos(pz * 0.38 + 1.5);
-        const surfaceDetail = (curv1 + curv2 + curv3 * 0.7) * 0.18;
+        // Base: use normal direction — flat top surfaces (high normalY) get moderate, edges get low
+        const basePressure = normalY * 0.3;
 
-        // Many distributed cusp/contact hot spots across the arch
-        const spots = [
-          { x: 0.12, z: 0.25, s: 12 }, { x: 0.22, z: 0.35, s: 15 }, { x: 0.15, z: 0.55, s: 10 },
-          { x: 0.30, z: 0.20, s: 14 }, { x: 0.35, z: 0.65, s: 11 }, { x: 0.42, z: 0.40, s: 13 },
-          { x: 0.50, z: 0.25, s: 16 }, { x: 0.50, z: 0.75, s: 12 }, { x: 0.55, z: 0.50, s: 10 },
-          { x: 0.62, z: 0.30, s: 14 }, { x: 0.68, z: 0.60, s: 13 }, { x: 0.75, z: 0.22, s: 15 },
-          { x: 0.78, z: 0.45, s: 11 }, { x: 0.85, z: 0.35, s: 12 }, { x: 0.88, z: 0.55, s: 10 },
-          { x: 0.25, z: 0.80, s: 9 },  { x: 0.72, z: 0.78, s: 9 },  { x: 0.45, z: 0.15, s: 11 },
+        // Height contributes gently — only the very top gets boost
+        const heightBoost = Math.pow(Math.max(0, ny - 0.5), 2) * 0.4;
+
+        // Surface variation from position-based noise (creates the organic spread)
+        const n1 = Math.sin(px * 0.3 + pz * 0.2) * Math.cos(py * 0.25 + 1.3);
+        const n2 = Math.cos(px * 0.18 + 2.1) * Math.sin(pz * 0.22 + py * 0.15);
+        const n3 = Math.sin(px * 0.4 + pz * 0.35 + 3.0) * 0.5;
+        const surfaceNoise = (n1 + n2 + n3) * 0.12;
+
+        // Sparse hot spots for cusp tips (few, sharp, small radius)
+        const hotSpots = [
+          { x: 0.15, z: 0.3, s: 35 }, { x: 0.25, z: 0.6, s: 30 },
+          { x: 0.5, z: 0.25, s: 40 },  { x: 0.75, z: 0.35, s: 32 },
+          { x: 0.85, z: 0.6, s: 28 },  { x: 0.45, z: 0.75, s: 25 },
+          { x: 0.65, z: 0.7, s: 30 },  { x: 0.35, z: 0.4, s: 35 },
         ];
-        let spotPressure = 0;
-        for (const sp of spots) {
-          spotPressure += Math.exp(-((nx - sp.x) ** 2 + (nz - sp.z) ** 2) * sp.s);
+        let hotSpotVal = 0;
+        for (const sp of hotSpots) {
+          hotSpotVal = Math.max(hotSpotVal, Math.exp(-((nx - sp.x) ** 2 + (nz - sp.z) ** 2) * sp.s));
         }
 
-        // Ridge lines running along the arch
-        const ridgeA = Math.exp(-((nz - 0.35) ** 2) * 4) * 0.25;
-        const ridgeB = Math.exp(-((nz - 0.65) ** 2) * 5) * 0.2;
-        const ridgeC = Math.exp(-((nx - 0.5) ** 2) * 3) * Math.exp(-((nz - 0.5) ** 2) * 3) * 0.15;
+        // Gentle ridges (wide, low intensity → green/cyan bands)
+        const ridge1 = Math.exp(-((nz - 0.4) ** 2) * 2.5) * 0.15;
+        const ridge2 = Math.exp(-((nz - 0.65) ** 2) * 3) * 0.12;
 
-        // Combine all factors
-        let pressure = heightPressure + surfaceDetail + spotPressure * 0.7 + ridgeA + ridgeB + ridgeC;
-        // Add micro-texture noise for realism
-        pressure += Math.sin(px * 1.2) * Math.cos(pz * 0.9) * Math.sin(py * 1.1) * 0.06;
+        // Combine: mostly low (blue/cyan), some medium (green/yellow), few peaks (red)
+        let pressure = basePressure + heightBoost + surfaceNoise + hotSpotVal * 0.5 + ridge1 + ridge2;
+        // Micro-texture
+        pressure += Math.sin(px * 0.8 + py * 0.6) * Math.cos(pz * 0.7 + px * 0.5) * 0.04;
         pressure = Math.min(1, Math.max(0, pressure));
 
         // Jet colormap: deep blue → cyan → green → yellow → orange → red
