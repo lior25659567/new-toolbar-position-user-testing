@@ -727,22 +727,23 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           padding: `${space[3]} ${space[5]}`,
           borderTop: `1px solid ${color.borderDefault}`,
           flexShrink: 0,
           backgroundColor: color.white,
-          gap: space[2],
         }}>
           <SecondaryButton size={36} onClick={handleClear}>
             Clear
           </SecondaryButton>
-          <SecondaryButton size={36} onClick={onClose}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton size={36} onClick={handleSave}>
-            Save
-          </PrimaryButton>
+          <div style={{ display: 'flex', gap: space[2] }}>
+            <SecondaryButton size={36} onClick={onClose}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton size={36} onClick={handleSave}>
+              Save
+            </PrimaryButton>
+          </div>
         </div>
       </div>
     </>
