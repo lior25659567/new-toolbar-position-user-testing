@@ -75,9 +75,10 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           alt={block.title || 'Clinical image'}
           style={{
             width: '100%',
-            height: '140px',
-            objectFit: 'cover',
+            height: '200px',
+            objectFit: 'contain',
             display: 'block',
+            backgroundColor: color.neutral50,
           }}
         />
       ) : (
