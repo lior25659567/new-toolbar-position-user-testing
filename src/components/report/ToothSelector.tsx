@@ -220,16 +220,6 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
         width: '100%',
         boxSizing: 'border-box',
       }}>
-        {/* Quadrant labels top */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: space[1], padding: `0 ${space[1]}` }}>
-          <span style={{ fontSize: '9px', fontWeight: font.weight.semibold, color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Upper right
-          </span>
-          <span style={{ fontSize: '9px', fontWeight: font.weight.semibold, color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Upper left
-          </span>
-        </div>
-
         {/* Upper arch */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: space[1] }}>
           {renderArch(UPPER_RIGHT, 'upper')}
@@ -237,34 +227,13 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
           {renderArch(UPPER_LEFT, 'upper')}
         </div>
 
-        {/* YOUR TEETH label */}
-        <div style={{
-          textAlign: 'center',
-          padding: `${space[2]} 0`,
-          fontSize: '10px',
-          fontWeight: font.weight.semibold,
-          color: color.neutral400,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-        }}>
-          Your Teeth
-        </div>
+        <div style={{ height: space[2] }} />
 
         {/* Lower arch */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: space[1] }}>
           {renderArch(LOWER_RIGHT, 'lower')}
           <div style={{ width: '2px', flexShrink: 0, backgroundColor: color.neutral300, borderRadius: '1px', alignSelf: 'stretch' }} />
           {renderArch(LOWER_LEFT, 'lower')}
-        </div>
-
-        {/* Quadrant labels bottom */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: space[1], padding: `0 ${space[1]}` }}>
-          <span style={{ fontSize: '9px', fontWeight: font.weight.semibold, color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Lower right
-          </span>
-          <span style={{ fontSize: '9px', fontWeight: font.weight.semibold, color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Lower left
-          </span>
         </div>
       </div>
 
