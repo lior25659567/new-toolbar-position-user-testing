@@ -233,44 +233,73 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
       g = Math.min(1, Math.max(0, g));
       b = Math.min(1, Math.max(0, b));
       
-      // Heatmap: occlusal pressure visualization (red = high, yellow = medium, green = low, blue = minimal)
+      // Heatmap: full-coverage occlusal pressure visualization
       if (heatmap) {
         const px = geo.attributes.position.getX(i);
         const py = geo.attributes.position.getY(i);
         const pz = geo.attributes.position.getZ(i);
 
-        // Simulate contact pressure using height + spatial noise
         const nx = (px - minX) / (maxX - minX);
         const nz = (pz - minZ) / (maxZ - minZ);
         const ny = (py - minY) / (maxY - minY);
 
-        // Create pressure zones: higher on cusps, ridges
-        const cusp1 = Math.exp(-((nx - 0.3) ** 2 + (nz - 0.35) ** 2) * 18);
-        const cusp2 = Math.exp(-((nx - 0.7) ** 2 + (nz - 0.3) ** 2) * 20);
-        const cusp3 = Math.exp(-((nx - 0.5) ** 2 + (nz - 0.7) ** 2) * 15);
-        const ridge = Math.exp(-((nz - 0.5) ** 2) * 8) * 0.4;
-        const noise = Math.sin(px * 0.2) * Math.cos(pz * 0.18) * 0.15;
-        const heightFactor = Math.max(0, ny - 0.3) * 1.5;
+        // Height-based base pressure — higher surfaces = more pressure
+        const heightPressure = Math.pow(Math.max(0, ny), 1.2) * 0.6;
 
-        let pressure = Math.min(1, Math.max(0, cusp1 + cusp2 + cusp3 + ridge + noise + heightFactor * 0.3));
+        // Surface curvature approximation using high-frequency noise
+        const curv1 = Math.sin(px * 0.35) * Math.cos(pz * 0.28) * Math.sin(py * 0.32);
+        const curv2 = Math.cos(px * 0.22 + 1.7) * Math.sin(pz * 0.31 + 0.9) * Math.cos(py * 0.27 + 2.1);
+        const curv3 = Math.sin(px * 0.45 + 3.1) * Math.cos(pz * 0.38 + 1.5);
+        const surfaceDetail = (curv1 + curv2 + curv3 * 0.7) * 0.18;
 
-        // Map pressure to heatmap color (blue → green → yellow → red)
-        let hr: number, hg: number, hb: number;
-        if (pressure < 0.25) {
-          const t = pressure / 0.25;
-          hr = 0.1; hg = 0.2 + t * 0.5; hb = 0.8 - t * 0.4;
-        } else if (pressure < 0.5) {
-          const t = (pressure - 0.25) / 0.25;
-          hr = t * 0.3; hg = 0.7 + t * 0.3; hb = 0.4 - t * 0.35;
-        } else if (pressure < 0.75) {
-          const t = (pressure - 0.5) / 0.25;
-          hr = 0.3 + t * 0.7; hg = 1.0 - t * 0.2; hb = 0.05;
-        } else {
-          const t = (pressure - 0.75) / 0.25;
-          hr = 1.0; hg = 0.8 - t * 0.8; hb = 0.0;
+        // Many distributed cusp/contact hot spots across the arch
+        const spots = [
+          { x: 0.12, z: 0.25, s: 12 }, { x: 0.22, z: 0.35, s: 15 }, { x: 0.15, z: 0.55, s: 10 },
+          { x: 0.30, z: 0.20, s: 14 }, { x: 0.35, z: 0.65, s: 11 }, { x: 0.42, z: 0.40, s: 13 },
+          { x: 0.50, z: 0.25, s: 16 }, { x: 0.50, z: 0.75, s: 12 }, { x: 0.55, z: 0.50, s: 10 },
+          { x: 0.62, z: 0.30, s: 14 }, { x: 0.68, z: 0.60, s: 13 }, { x: 0.75, z: 0.22, s: 15 },
+          { x: 0.78, z: 0.45, s: 11 }, { x: 0.85, z: 0.35, s: 12 }, { x: 0.88, z: 0.55, s: 10 },
+          { x: 0.25, z: 0.80, s: 9 },  { x: 0.72, z: 0.78, s: 9 },  { x: 0.45, z: 0.15, s: 11 },
+        ];
+        let spotPressure = 0;
+        for (const sp of spots) {
+          spotPressure += Math.exp(-((nx - sp.x) ** 2 + (nz - sp.z) ** 2) * sp.s);
         }
 
-        const blend = 0.85;
+        // Ridge lines running along the arch
+        const ridgeA = Math.exp(-((nz - 0.35) ** 2) * 4) * 0.25;
+        const ridgeB = Math.exp(-((nz - 0.65) ** 2) * 5) * 0.2;
+        const ridgeC = Math.exp(-((nx - 0.5) ** 2) * 3) * Math.exp(-((nz - 0.5) ** 2) * 3) * 0.15;
+
+        // Combine all factors
+        let pressure = heightPressure + surfaceDetail + spotPressure * 0.7 + ridgeA + ridgeB + ridgeC;
+        // Add micro-texture noise for realism
+        pressure += Math.sin(px * 1.2) * Math.cos(pz * 0.9) * Math.sin(py * 1.1) * 0.06;
+        pressure = Math.min(1, Math.max(0, pressure));
+
+        // Jet colormap: deep blue → cyan → green → yellow → orange → red
+        let hr: number, hg: number, hb: number;
+        if (pressure < 0.15) {
+          const t = pressure / 0.15;
+          hr = 0.0; hg = 0.0; hb = 0.4 + t * 0.6; // dark blue → blue
+        } else if (pressure < 0.3) {
+          const t = (pressure - 0.15) / 0.15;
+          hr = 0.0; hg = t * 0.8; hb = 1.0 - t * 0.3; // blue → cyan
+        } else if (pressure < 0.5) {
+          const t = (pressure - 0.3) / 0.2;
+          hr = t * 0.2; hg = 0.8 + t * 0.2; hb = 0.7 - t * 0.7; // cyan → green
+        } else if (pressure < 0.65) {
+          const t = (pressure - 0.5) / 0.15;
+          hr = 0.2 + t * 0.8; hg = 1.0; hb = 0.0; // green → yellow
+        } else if (pressure < 0.8) {
+          const t = (pressure - 0.65) / 0.15;
+          hr = 1.0; hg = 1.0 - t * 0.5; hb = 0.0; // yellow → orange
+        } else {
+          const t = (pressure - 0.8) / 0.2;
+          hr = 1.0; hg = 0.5 - t * 0.5; hb = 0.0; // orange → red
+        }
+
+        const blend = 0.92;
         r = r * (1 - blend) + hr * blend;
         g = g * (1 - blend) + hg * blend;
         b = b * (1 - blend) + hb * blend;
