@@ -530,7 +530,6 @@ function Frame4({ activeButtons, onButtonClick }: { activeButtons: Set<number>; 
       <ToolbarTextLabel isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} buttonIndex={0} />
       <ToolbarTextLabel1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} buttonIndex={1} />
       <ToolbarTextLabel2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} buttonIndex={2} />
-      <ToolbarTextLabel3 isActive={activeButtons.has(3)} onClick={() => onButtonClick(3)} buttonIndex={3} />
     </div>
   );
 }
