@@ -516,12 +516,6 @@ function ExpandedToolbar({
         <p className="font-['Roboto'] font-normal whitespace-nowrap text-center text-[12px] leading-[14px]" style={{ color: activeButtons.has(2) ? '#008EC2' : '#000000' }}>Prep edit</p>
       </div>
 
-      {/* Undercut */}
-      <div className="flex flex-col flex-1 items-center justify-center gap-[2px] relative">
-        <AohsButton3 isActive={activeButtons.has(3)} onClick={() => onButtonClick(3)} buttonIndex={3} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-center text-[12px] leading-[14px]" style={{ color: activeButtons.has(3) ? '#008EC2' : '#000000' }}>Undercut</p>
-      </div>
-
       {/* Collapse Button - same size as toolbar buttons (36px) */}
       <SecondaryButton variant="toolbar" size={36} style={{ width: 36, padding: 0, minHeight: 36, borderWidth: 1, borderStyle: 'solid', borderColor: color.borderDefault }} onClick={() => onButtonClick(4)}>
         <ChevronIcon isExpanded={true} />
