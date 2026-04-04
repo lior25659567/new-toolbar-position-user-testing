@@ -1,7 +1,7 @@
 import React from "react";
 import { IconButton } from "../design-system";
-import colorImage from "../assets/button-images/review-tool/upper-arch-color.png";
-import niriImage from "../assets/button-images/review-tool/lower-arch-niri.png";
+import colorImage from "../assets/button-images/review-tool/Color.png";
+import niriImage from "../assets/button-images/review-tool/Niri.png";
 
 const PLACEHOLDER_IMAGE_COLOR = colorImage;
 const PLACEHOLDER_IMAGE_NIRI = niriImage;

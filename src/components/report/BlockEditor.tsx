@@ -272,9 +272,9 @@ function ActionButton({ children, onClick, title, danger }: {
 
 // ─── Gallery images ─────────────────────────────────────────────────────────
 
-import upperArchColor from '../../assets/button-images/review-tool/upper-arch-color.png';
-import lowerArchNiri from '../../assets/button-images/review-tool/lower-arch-niri.png';
-import occlusalView from '../../assets/button-images/review-tool/occlusal-view-old.png';
+import upperArchColor from '../../assets/button-images/review-tool/Color.png';
+import lowerArchNiri from '../../assets/button-images/review-tool/Niri.png';
+import occlusalView from '../../assets/button-images/review-tool/Color.png';
 import dentalArchColor from '../../assets/button-images/default/dental-arch-color.png';
 import prepModel1 from '../../assets/button-images/prep-qc/prep-model-1.png';
 import prepModel2 from '../../assets/button-images/prep-qc/prep-model-2.png';

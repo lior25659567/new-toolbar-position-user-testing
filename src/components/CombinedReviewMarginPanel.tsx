@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PrimaryButton as DSPrimaryButton, SecondaryButton as DSSecondaryButton } from "../design-system";
-import niriImage from "../assets/button-images/review-tool/lower-arch-niri.png";
-import colorImage from "../assets/button-images/review-tool/upper-arch-color.png";
+import niriImage from "../assets/button-images/review-tool/Niri.png";
+import colorImage from "../assets/button-images/review-tool/Color.png";
 
 // Image URLs from Figma - Updated to latest design
 const imgIcon = "https://www.figma.com/api/mcp/asset/b496beac-7b33-48d3-824e-6ab16f9b6788";
