@@ -743,9 +743,6 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
   onMultiSelect?: (urls: string[]) => void;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
-  const [search, setSearch] = useState('');
-  const [selectMode, setSelectMode] = useState(!!multiSelect);
-  const searchRef = useRef<HTMLInputElement>(null);
 
   const toggleSelection = (url: string) => {
     setSelected((prev) =>
@@ -753,9 +750,7 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
     );
   };
 
-  const filteredImages = GALLERY_IMAGES.filter((img) =>
-    !search || img.label.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredImages = GALLERY_IMAGES;
 
   // Group by category
   const groupedImages = CATEGORY_ORDER.reduce<{ category: GalleryCategory; images: GalleryImage[] }[]>((acc, cat) => {
@@ -765,12 +760,10 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
   }, []);
 
   const handleImageClick = (url: string) => {
-    if (selectMode) {
-      toggleSelection(url);
-    } else {
-      onSelect(url);
-    }
+    toggleSelection(url);
   };
+
+  const selectMode = true;
 
   return (
     <>
@@ -803,179 +796,7 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
         flexDirection: 'column',
         overflow: 'hidden',
       }}>
-        {/* ── Top bar — switches between search mode and select mode ── */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: `${space[3]} ${space[5]}`,
-          borderBottom: `1px solid ${color.borderDefault}`,
-          flexShrink: 0,
-          gap: space[3],
-          minHeight: '52px',
-        }}>
-          {selectMode ? (
-            /* ── Select mode bar ── */
-            <>
-              <span style={{
-                fontSize: font.size.sm,
-                fontWeight: font.weight.semibold,
-                color: color.textHeading,
-              }}>
-                {selected.length} selected
-              </span>
-
-              <button
-                type="button"
-                onClick={() => setSelected(filteredImages.map((img) => img.url))}
-                style={{
-                  height: '32px',
-                  padding: `0 ${space[3]}`,
-                  fontSize: font.size.xs,
-                  fontWeight: font.weight.medium,
-                  color: color.textDefault,
-                  backgroundColor: color.white,
-                  border: `1px solid ${color.borderDefault}`,
-                  borderRadius: radius.md,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: `all ${transition.fast}`,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.borderHover; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.borderDefault; }}
-              >
-                Select all {filteredImages.length}
-              </button>
-
-              <div style={{ flex: 1 }} />
-
-              <button
-                type="button"
-                onClick={() => { setSelectMode(false); setSelected([]); }}
-                style={{
-                  height: '32px',
-                  padding: `0 ${space[4]}`,
-                  fontSize: font.size.xs,
-                  fontWeight: font.weight.medium,
-                  color: color.textDefault,
-                  backgroundColor: color.white,
-                  border: `1px solid ${color.borderDefault}`,
-                  borderRadius: radius.md,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: `all ${transition.fast}`,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.borderHover; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.borderDefault; }}
-              >
-                Deselect all
-              </button>
-            </>
-          ) : (
-            /* ── Browse mode bar ── */
-            <>
-              <span style={{
-                fontSize: font.size.md,
-                fontWeight: font.weight.bold,
-                color: color.textHeading,
-              }}>
-                Images
-              </span>
-
-              <div style={{ flex: 1 }} />
-
-              {/* Search */}
-              <div style={{ position: 'relative', width: '280px' }}>
-                <svg
-                  width="14" height="14" viewBox="0 0 16 16" fill="none" stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round"
-                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
-                >
-                  <circle cx="7" cy="7" r="4.5" />
-                  <path d="M10.5 10.5L14 14" />
-                </svg>
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search assets"
-                  style={{
-                    width: '100%',
-                    height: '36px',
-                    paddingLeft: '36px',
-                    paddingRight: search ? '32px' : space[3],
-                    fontSize: font.size.sm,
-                    fontFamily: font.family,
-                    color: color.textDefault,
-                    backgroundColor: color.neutral50,
-                    border: `1px solid ${color.borderDefault}`,
-                    borderRadius: radius.md,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    transition: transition.input,
-                  }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.boxShadow = shadow.focusPrimaryLight; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = color.borderDefault; e.currentTarget.style.boxShadow = 'none'; }}
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => { setSearch(''); searchRef.current?.focus(); }}
-                    style={{
-                      position: 'absolute',
-                      right: '8px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: '20px',
-                      height: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: 'none',
-                      borderRadius: '50%',
-                      backgroundColor: color.neutral200,
-                      color: color.textSubtle,
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
-                  >
-                    <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                      <line x1="2" y1="2" x2="8" y2="8" /><line x1="8" y1="2" x2="2" y2="8" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-
-              {/* Select button */}
-              <button
-                type="button"
-                onClick={() => setSelectMode(true)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: space[2],
-                  height: '36px',
-                  padding: `0 ${space[4]}`,
-                  fontSize: font.size.sm,
-                  fontWeight: font.weight.medium,
-                  color: color.textDefault,
-                  backgroundColor: color.white,
-                  border: `1px solid ${color.borderDefault}`,
-                  borderRadius: radius.md,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: `all ${transition.fast}`,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.borderHover; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.borderDefault; }}
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="12" height="12" rx="2" />
-                </svg>
-                Select
-              </button>
-            </>
-          )}
-        </div>
+        {/* No header */}
 
         {/* ── Image grid ── */}
         <div style={{
@@ -1058,7 +879,7 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
           )}
         </div>
 
-        {/* ── Bottom bar — always visible with Cancel + Add ── */}
+        {/* ── Footer ── */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -1066,61 +887,29 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
           padding: `${space[3]} ${space[5]}`,
           borderTop: `1px solid ${color.borderDefault}`,
           flexShrink: 0,
-          backgroundColor: color.neutral50,
+          backgroundColor: color.white,
+          gap: space[2],
         }}>
-          {/* Cancel + Add buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: space[2] }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                height: '36px',
-                padding: `0 ${space[5]}`,
-                fontSize: font.size.sm,
-                fontWeight: font.weight.medium,
-                color: color.textDefault,
-                backgroundColor: color.white,
-                border: `1px solid ${color.borderDefault}`,
-                borderRadius: radius.md,
-                cursor: 'pointer',
-                transition: `all ${transition.fast}`,
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = color.neutral50; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = color.white; }}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={selected.length === 0}
-              onClick={() => {
-                if (multiSelect && onMultiSelect) {
-                  onMultiSelect(selected);
-                } else if (selected.length === 1) {
-                  onSelect(selected[0]);
-                }
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: space[2],
-                height: '36px',
-                padding: `0 ${space[5]}`,
-                fontSize: font.size.sm,
-                fontWeight: font.weight.semibold,
-                color: selected.length === 0 ? color.textPlaceholder : color.textOnPrimary,
-                backgroundColor: selected.length === 0 ? color.neutral100 : color.primary,
-                border: 'none',
-                borderRadius: radius.md,
-                cursor: selected.length === 0 ? 'default' : 'pointer',
-                transition: `all ${transition.fast}`,
-              }}
-              onMouseEnter={(e) => { if (selected.length > 0) e.currentTarget.style.backgroundColor = color.primaryHover; }}
-              onMouseLeave={(e) => { if (selected.length > 0) e.currentTarget.style.backgroundColor = color.primary; }}
-            >
-              Add {selected.length > 0 ? `${selected.length} ` : ''}Image{selected.length !== 1 ? 's' : ''}
-            </button>
-          </div>
+          <SecondaryButton size={36} onClick={onClose}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton
+            size={36}
+            disabled={selected.length === 0}
+            onClick={() => {
+              if (multiSelect && onMultiSelect) {
+                onMultiSelect(selected);
+              } else if (selected.length === 1) {
+                onSelect(selected[0]);
+              } else if (selected.length > 1 && onMultiSelect) {
+                onMultiSelect(selected);
+              } else if (selected.length > 0) {
+                onSelect(selected[0]);
+              }
+            }}
+          >
+            {selected.length > 0 ? `Add Image (${selected.length})` : 'Add Image'}
+          </PrimaryButton>
         </div>
       </div>
     </>
