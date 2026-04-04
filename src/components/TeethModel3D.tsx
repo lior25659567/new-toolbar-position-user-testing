@@ -280,26 +280,20 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
         pressure += Math.sin(px * 0.8 + py * 0.6) * Math.cos(pz * 0.7 + px * 0.5) * 0.04;
         pressure = Math.min(1, Math.max(0, pressure));
 
-        // Jet colormap: deep blue → cyan → green → yellow → orange → red
+        // Colormap: deep blue → blue → cyan → green → red (minimal yellow)
         let hr: number, hg: number, hb: number;
-        if (pressure < 0.15) {
-          const t = pressure / 0.15;
-          hr = 0.0; hg = 0.0; hb = 0.4 + t * 0.6; // dark blue → blue
-        } else if (pressure < 0.3) {
-          const t = (pressure - 0.15) / 0.15;
-          hr = 0.0; hg = t * 0.8; hb = 1.0 - t * 0.3; // blue → cyan
-        } else if (pressure < 0.5) {
-          const t = (pressure - 0.3) / 0.2;
-          hr = t * 0.2; hg = 0.8 + t * 0.2; hb = 0.7 - t * 0.7; // cyan → green
-        } else if (pressure < 0.65) {
-          const t = (pressure - 0.5) / 0.15;
-          hr = 0.2 + t * 0.8; hg = 1.0; hb = 0.0; // green → yellow
-        } else if (pressure < 0.8) {
-          const t = (pressure - 0.65) / 0.15;
-          hr = 1.0; hg = 1.0 - t * 0.5; hb = 0.0; // yellow → orange
+        if (pressure < 0.25) {
+          const t = pressure / 0.25;
+          hr = 0.0; hg = 0.0; hb = 0.35 + t * 0.65; // dark blue → blue
+        } else if (pressure < 0.45) {
+          const t = (pressure - 0.25) / 0.2;
+          hr = 0.0; hg = t * 0.7; hb = 1.0 - t * 0.3; // blue → cyan
+        } else if (pressure < 0.7) {
+          const t = (pressure - 0.45) / 0.25;
+          hr = t * 0.15; hg = 0.7 + t * 0.3; hb = 0.7 - t * 0.7; // cyan → green
         } else {
-          const t = (pressure - 0.8) / 0.2;
-          hr = 1.0; hg = 0.5 - t * 0.5; hb = 0.0; // orange → red
+          const t = (pressure - 0.7) / 0.3;
+          hr = 0.15 + t * 0.85; hg = 1.0 - t * 0.85; hb = 0.0; // green → red (skip yellow)
         }
 
         const blend = 0.92;
