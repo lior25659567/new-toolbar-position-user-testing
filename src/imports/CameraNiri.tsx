@@ -1,8 +1,10 @@
 import React from "react";
 import { IconButton } from "../design-system";
+import colorImage from "../assets/button-images/review-tool/upper-arch-color.png";
+import niriImage from "../assets/button-images/review-tool/lower-arch-niri.png";
 
-const PLACEHOLDER_IMAGE_COLOR = "https://placehold.co/320x160/e2e8f0/64748b?text=Color";
-const PLACEHOLDER_IMAGE_NIRI = "https://placehold.co/320x160/e2e8f0/64748b?text=NIRI";
+const PLACEHOLDER_IMAGE_COLOR = colorImage;
+const PLACEHOLDER_IMAGE_NIRI = niriImage;
 
 function DragHandle() {
   return (
