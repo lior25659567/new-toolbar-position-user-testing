@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { PrimaryButton as DSPrimaryButton, SecondaryButton as DSSecondaryButton } from "../design-system";
+import niriImage from "../assets/button-images/review-tool/lower-arch-niri.png";
+import colorImage from "../assets/button-images/review-tool/upper-arch-color.png";
 
 // Image URLs from Figma - Updated to latest design
 const imgIcon = "https://www.figma.com/api/mcp/asset/b496beac-7b33-48d3-824e-6ab16f9b6788";
@@ -202,36 +204,36 @@ function ReviewToolImages() {
       {/* Container fills ALL available height and splits evenly between two images */}
       <div className="flex-1 min-h-0 flex flex-col gap-[8px] p-[16px]">
         
-        {/* First Placeholder - Color Image - STRETCHES to fill 50% of available height */}
-        <div className="w-full flex-1 min-h-0 rounded-[4px] overflow-hidden bg-gradient-to-br from-cyan-50 to-cyan-100 border-2 border-cyan-300 flex items-center justify-center">
-          <svg className="w-full h-full" viewBox="0 0 400 300" preserveAspectRatio="none">
-            <rect width="400" height="300" fill="url(#gradient1)" />
-            <circle cx="200" cy="150" r="60" fill="white" opacity="0.2" />
-            <text x="200" y="140" textAnchor="middle" fill="#0891b2" fontSize="28" fontWeight="bold">Color Image</text>
-            <text x="200" y="175" textAnchor="middle" fill="#06b6d4" fontSize="18">Upper Arch View</text>
-            <defs>
-              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#cffafe" />
-                <stop offset="100%" stopColor="#a5f3fc" />
-              </linearGradient>
-            </defs>
-          </svg>
+        {/* NIRI Image */}
+        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black flex items-center justify-center relative">
+          <img
+            src={niriImage}
+            alt="NIRI Scan"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <span style={{
+            position: 'absolute', top: 8, left: 8,
+            fontSize: '10px', fontWeight: 600, color: 'white',
+            backgroundColor: 'rgba(0,0,0,0.5)', padding: '2px 8px',
+            borderRadius: '4px', fontFamily: "'Inter', sans-serif",
+            letterSpacing: '0.05em', textTransform: 'uppercase',
+          }}>NIRI</span>
         </div>
-        
-        {/* Second Placeholder - NIRI Image - STRETCHES to fill 50% of available height */}
-        <div className="w-full flex-1 min-h-0 rounded-[4px] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-300 flex items-center justify-center">
-          <svg className="w-full h-full" viewBox="0 0 400 300" preserveAspectRatio="none">
-            <rect width="400" height="300" fill="url(#gradient2)" />
-            <circle cx="200" cy="150" r="60" fill="white" opacity="0.2" />
-            <text x="200" y="140" textAnchor="middle" fill="#475569" fontSize="28" fontWeight="bold">NIRI Scan</text>
-            <text x="200" y="175" textAnchor="middle" fill="#64748b" fontSize="18">Lower Arch View</text>
-            <defs>
-              <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#e2e8f0" />
-                <stop offset="100%" stopColor="#cbd5e1" />
-              </linearGradient>
-            </defs>
-          </svg>
+
+        {/* Color Image */}
+        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black flex items-center justify-center relative">
+          <img
+            src={colorImage}
+            alt="Color Capture"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <span style={{
+            position: 'absolute', top: 8, left: 8,
+            fontSize: '10px', fontWeight: 600, color: 'white',
+            backgroundColor: 'rgba(0,0,0,0.5)', padding: '2px 8px',
+            borderRadius: '4px', fontFamily: "'Inter', sans-serif",
+            letterSpacing: '0.05em', textTransform: 'uppercase',
+          }}>Color</span>
         </div>
       </div>
     </div>
