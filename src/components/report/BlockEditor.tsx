@@ -514,20 +514,29 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    isDrawing.current = true;
+
     const { x, y } = getPos(e);
+
+    // Text tool: prompt for text and place it
+    if (tool === 'text') {
+      const text = prompt('Enter text:');
+      if (text) {
+        ctx.font = `${Math.max(14, brushSize * 4)}px Inter, sans-serif`;
+        ctx.fillStyle = brushColor;
+        ctx.globalAlpha = 1;
+        ctx.fillText(text, x, y);
+      }
+      return;
+    }
+
+    isDrawing.current = true;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = brushColor;
     ctx.lineWidth = brushSize;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    if (tool === 'highlighter') {
-      ctx.globalAlpha = 0.3;
-      ctx.lineWidth = brushSize * 4;
-    } else {
-      ctx.globalAlpha = 1;
-    }
+    ctx.globalAlpha = 1;
   };
 
   const onMove = (e: React.MouseEvent | React.TouchEvent) => {
@@ -572,8 +581,8 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
       icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2.5l3.5 3.5L5 14.5H1.5V11L10 2.5z" /></svg>,
     },
     {
-      id: 'highlighter', label: 'Highlight',
-      icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 14h4M4 10l4-8 4 8" /><path d="M5.5 7h5" /></svg>,
+      id: 'text' as AnnotationTool, label: 'Text',
+      icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h10M8 3v10M5.5 13h5" /></svg>,
     },
   ];
 
@@ -585,8 +594,9 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: '900px',
+        width: '1200px',
         maxWidth: '96vw',
+        height: '85vh',
         maxHeight: '94vh',
         backgroundColor: color.white,
         borderRadius: radius.xl,
@@ -701,7 +711,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#1a1a2e',
+          backgroundColor: '#F4F4F4',
           overflow: 'auto',
         }}>
           <canvas
@@ -800,9 +810,9 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: '1100px',
+        width: '1200px',
         maxWidth: '96vw',
-        height: '780px',
+        height: '85vh',
         maxHeight: '94vh',
         backgroundColor: color.white,
         borderRadius: radius.xl,
