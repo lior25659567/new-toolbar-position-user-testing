@@ -72,6 +72,11 @@ export default function ScanTabs({
 
   const handleAddLayer = (layerType: ScanLayerType) => {
     if (layerType === 'additional-bite') {
+      // Pre-populate with already-added bite types so they show as checked
+      const existingBites = new Set<BiteType>(
+        tabs.filter(t => t.layerType === 'additional-bite' && t.biteType).map(t => t.biteType!)
+      );
+      setSelectedBites(existingBites);
       setShowBiteDropdown(!showBiteDropdown);
       return;
     }
@@ -110,25 +115,40 @@ export default function ScanTabs({
   };
 
   const handleAddSelectedBites = () => {
-    if (selectedBites.size === 0) return;
-    let newTabs = [...tabs];
+    const existingBiteTypes = new Set<BiteType>(
+      tabs.filter(t => t.layerType === 'additional-bite' && t.biteType).map(t => t.biteType!)
+    );
+
+    // Remove bite tabs that were unchecked
+    let newTabs = tabs.filter(t => {
+      if (t.layerType === 'additional-bite' && t.biteType) {
+        return selectedBites.has(t.biteType);
+      }
+      return true;
+    });
+
+    // Add new bite tabs that were checked but don't exist yet
     let lastTab: ScanTab | null = null;
     selectedBites.forEach((biteType) => {
-      const newTab: ScanTab = {
-        id: Date.now().toString() + '-' + biteType,
-        label: `Bite - ${biteLabels[biteType]}`,
-        layerType: 'additional-bite',
-        biteType,
-      };
-      newTabs = [...newTabs, newTab];
-      lastTab = newTab;
+      if (!existingBiteTypes.has(biteType)) {
+        const newTab: ScanTab = {
+          id: Date.now().toString() + '-' + biteType,
+          label: `Bite - ${biteLabels[biteType]}`,
+          layerType: 'additional-bite',
+          biteType,
+        };
+        newTabs = [...newTabs, newTab];
+        lastTab = newTab;
+      }
     });
+
     setTabs(newTabs);
     if (lastTab) {
       setActiveTabId((lastTab as ScanTab).id);
       onTabSelect?.(lastTab);
+    } else if (newTabs.length > 0 && !newTabs.find(t => t.id === activeTabId)) {
+      setActiveTabId(newTabs[0].id);
     }
-    setSelectedBites(new Set());
     setShowBiteDropdown(false);
     setShowAddDropdown(false);
     onTabsChange?.(newTabs);
@@ -151,7 +171,7 @@ export default function ScanTabs({
         paddingRight: '14px',
         paddingTop: '16px',
         paddingBottom: 0,
-        gap: '6px',
+        gap: '4px',
         borderBottom: '1px solid #E5E7EB',
       }}
     >
@@ -341,7 +361,7 @@ export default function ScanTabs({
                     textAlign: 'center',
                   }}
                 >
-                  Add Selected ({selectedBites.size})
+                  {tabs.some(t => t.layerType === 'additional-bite') ? 'Update' : 'Add Selected'} ({selectedBites.size})
                 </button>
               </div>
             )}
