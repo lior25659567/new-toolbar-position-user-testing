@@ -69,27 +69,7 @@ function ImageCard({ src, label, badge }: { src: string; label: string; badge: s
           left: 0,
         }}
       />
-      {/* Badge */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '8px',
-          left: '8px',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '6px',
-          padding: '4px 10px',
-          fontSize: '11px',
-          fontWeight: 600,
-          color: '#374151',
-          fontFamily: 'Inter, sans-serif',
-          letterSpacing: '0.3px',
-          textTransform: 'uppercase' as const,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-        }}
-      >
-        {badge}
-      </div>
+      {/* Badge removed */}
       {/* Expand button */}
       <div
         style={{

@@ -205,35 +205,13 @@ function ReviewToolImages() {
       <div className="flex-1 min-h-0 flex flex-col gap-[8px] p-[16px]">
         
         {/* NIRI Image */}
-        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black flex items-center justify-center relative">
-          <img
-            src={niriImage}
-            alt="NIRI Scan"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-          <span style={{
-            position: 'absolute', top: 8, left: 8,
-            fontSize: '10px', fontWeight: 600, color: 'white',
-            backgroundColor: 'rgba(0,0,0,0.5)', padding: '2px 8px',
-            borderRadius: '4px', fontFamily: "'Inter', sans-serif",
-            letterSpacing: '0.05em', textTransform: 'uppercase',
-          }}>NIRI</span>
+        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black">
+          <img src={niriImage} alt="NIRI Scan" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
 
         {/* Color Image */}
-        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black flex items-center justify-center relative">
-          <img
-            src={colorImage}
-            alt="Color Capture"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-          <span style={{
-            position: 'absolute', top: 8, left: 8,
-            fontSize: '10px', fontWeight: 600, color: 'white',
-            backgroundColor: 'rgba(0,0,0,0.5)', padding: '2px 8px',
-            borderRadius: '4px', fontFamily: "'Inter', sans-serif",
-            letterSpacing: '0.05em', textTransform: 'uppercase',
-          }}>Color</span>
+        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black">
+          <img src={colorImage} alt="Color Capture" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
       </div>
     </div>
