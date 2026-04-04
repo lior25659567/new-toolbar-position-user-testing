@@ -256,7 +256,7 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         )}
 
         {/* iTero logo */}
-        <img src={iteroLogo} alt="iTero" style={{ height: '24px', objectFit: 'contain' }} />
+        <img src={iteroLogo} alt="iTero" style={{ height: '28px', objectFit: 'contain', display: 'block', flexShrink: 0 }} />
       </div>
 
       {/* Report Header */}
@@ -364,27 +364,7 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         <span>Page 1</span>
       </div>
 
-      {/* Page break indicator */}
-      <div style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: '120px',
-        borderTop: `1px dashed ${color.neutral300}`,
-        pointerEvents: 'none',
-      }}>
-        <span style={{
-          position: 'absolute',
-          right: space[2],
-          top: '-10px',
-          fontSize: '9px',
-          color: color.neutral400,
-          backgroundColor: color.white,
-          padding: '0 4px',
-        }}>
-          Page break
-        </span>
-      </div>
+      {/* Page break indicator removed */}
     </div>
   );
 }
