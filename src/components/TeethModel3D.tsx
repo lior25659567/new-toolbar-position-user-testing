@@ -85,7 +85,7 @@ function STLModel({ url }: { url: string }) {
 }
 
 // PLY Model Loader (supports vertex colors from scans)
-function PLYModel({ url, monochrome = false, feedback = false, opacity = 100 }: { url: string; monochrome?: boolean; feedback?: boolean; opacity?: number }) {
+function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, heatmap = false }: { url: string; monochrome?: boolean; feedback?: boolean; opacity?: number; heatmap?: boolean }) {
   const geometry = useLoader(PLYLoader, url);
 
   // Generate organic "problem areas" using noise-like patterns
@@ -184,6 +184,19 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100 }: 
     const posCount = geo.attributes.position.count;
     const hasColors = geo.attributes.color !== undefined;
     
+    // Compute bounding box for heatmap normalization
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    for (let i = 0; i < posCount; i++) {
+      const x = geo.attributes.position.getX(i);
+      const y = geo.attributes.position.getY(i);
+      const z = geo.attributes.position.getZ(i);
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+      if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+    }
+
     // Primary blue color for feedback marks: #009ACE
     const blueR = 0 / 255;
     const blueG = 154 / 255;
@@ -220,6 +233,49 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100 }: 
       g = Math.min(1, Math.max(0, g));
       b = Math.min(1, Math.max(0, b));
       
+      // Heatmap: occlusal pressure visualization (red = high, yellow = medium, green = low, blue = minimal)
+      if (heatmap) {
+        const px = geo.attributes.position.getX(i);
+        const py = geo.attributes.position.getY(i);
+        const pz = geo.attributes.position.getZ(i);
+
+        // Simulate contact pressure using height + spatial noise
+        const nx = (px - minX) / (maxX - minX);
+        const nz = (pz - minZ) / (maxZ - minZ);
+        const ny = (py - minY) / (maxY - minY);
+
+        // Create pressure zones: higher on cusps, ridges
+        const cusp1 = Math.exp(-((nx - 0.3) ** 2 + (nz - 0.35) ** 2) * 18);
+        const cusp2 = Math.exp(-((nx - 0.7) ** 2 + (nz - 0.3) ** 2) * 20);
+        const cusp3 = Math.exp(-((nx - 0.5) ** 2 + (nz - 0.7) ** 2) * 15);
+        const ridge = Math.exp(-((nz - 0.5) ** 2) * 8) * 0.4;
+        const noise = Math.sin(px * 0.2) * Math.cos(pz * 0.18) * 0.15;
+        const heightFactor = Math.max(0, ny - 0.3) * 1.5;
+
+        let pressure = Math.min(1, Math.max(0, cusp1 + cusp2 + cusp3 + ridge + noise + heightFactor * 0.3));
+
+        // Map pressure to heatmap color (blue → green → yellow → red)
+        let hr: number, hg: number, hb: number;
+        if (pressure < 0.25) {
+          const t = pressure / 0.25;
+          hr = 0.1; hg = 0.2 + t * 0.5; hb = 0.8 - t * 0.4;
+        } else if (pressure < 0.5) {
+          const t = (pressure - 0.25) / 0.25;
+          hr = t * 0.3; hg = 0.7 + t * 0.3; hb = 0.4 - t * 0.35;
+        } else if (pressure < 0.75) {
+          const t = (pressure - 0.5) / 0.25;
+          hr = 0.3 + t * 0.7; hg = 1.0 - t * 0.2; hb = 0.05;
+        } else {
+          const t = (pressure - 0.75) / 0.25;
+          hr = 1.0; hg = 0.8 - t * 0.8; hb = 0.0;
+        }
+
+        const blend = 0.85;
+        r = r * (1 - blend) + hr * blend;
+        g = g * (1 - blend) + hg * blend;
+        b = b * (1 - blend) + hb * blend;
+      }
+
       // Blend with blue based on feedback
       if (feedback) {
         const intensity = problemIntensity[i] || 0;
@@ -257,7 +313,7 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100 }: 
     geo.setAttribute('color', new THREE.BufferAttribute(enhancedColors, 3));
     
     return geo;
-  }, [geometry, feedback, problemIntensity]);
+  }, [geometry, feedback, heatmap, problemIntensity]);
 
   // Create material based on monochrome state - always use vertex colors now
   const opacityValue = opacity / 100;
@@ -371,6 +427,7 @@ interface TeethModel3DProps {
   feedback?: boolean; // Show blue marks for missing scan areas
   zoomIn?: boolean; // Zoom in on the model (for margin line view)
   opacity?: number; // 0-100, controls model transparency
+  heatmap?: boolean; // Show occlusal heatmap coloring
   className?: string;
 }
 
@@ -385,6 +442,7 @@ export default function TeethModel3D({
   feedback = false,
   zoomIn = false,
   opacity = 100,
+  heatmap = false,
   className = '',
 }: TeethModel3DProps) {
   return (
@@ -452,7 +510,7 @@ export default function TeethModel3D({
             modelUrl.toLowerCase().endsWith('.stl') ? (
               <STLModel url={modelUrl} />
             ) : modelUrl.toLowerCase().endsWith('.ply') ? (
-              <PLYModel url={modelUrl} monochrome={monochrome} feedback={feedback} opacity={opacity} />
+              <PLYModel url={modelUrl} monochrome={monochrome} feedback={feedback} opacity={opacity} heatmap={heatmap} />
             ) : (
               <GLTFModel url={modelUrl} />
             )

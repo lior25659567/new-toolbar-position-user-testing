@@ -98,10 +98,12 @@ function Component3DModelShared({ activeButtons, isViewPage, opacity = 100 }: { 
   const isFeedback = !isViewPage && activeButtons.has(1);
   // Check if margin line button (index 3) is active for zoom - only for view page
   const isMarginLineActive = isViewPage && activeButtons.has(3);
-  
+  // Heatmap when Occlusalgram (2) or Prep QC (4) is active in view mode
+  const isHeatmap = isViewPage && (activeButtons.has(2) || activeButtons.has(4));
+
   return (
-    <div 
-      className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]" 
+    <div
+      className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]"
       data-name="3D model - Shared"
       style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px' }}
     >
@@ -116,6 +118,7 @@ function Component3DModelShared({ activeButtons, isViewPage, opacity = 100 }: { 
         feedback={isFeedback}
         zoomIn={isMarginLineActive}
         opacity={opacity}
+        heatmap={isHeatmap}
       />
     </div>
   );
