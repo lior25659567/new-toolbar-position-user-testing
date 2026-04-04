@@ -274,26 +274,26 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
         const ridge1 = Math.exp(-((nz - 0.4) ** 2) * 2.5) * 0.15;
         const ridge2 = Math.exp(-((nz - 0.65) ** 2) * 3) * 0.12;
 
-        // Combine: mostly low (blue/cyan), some medium (green/yellow), few peaks (red)
-        let pressure = basePressure + heightBoost + surfaceNoise + hotSpotVal * 0.5 + ridge1 + ridge2;
+        // Combine: blue base, green mid, generous red on cusps/ridges
+        let pressure = basePressure + heightBoost + surfaceNoise + hotSpotVal * 0.8 + ridge1 + ridge2;
         // Micro-texture
         pressure += Math.sin(px * 0.8 + py * 0.6) * Math.cos(pz * 0.7 + px * 0.5) * 0.04;
         pressure = Math.min(1, Math.max(0, pressure));
 
-        // Colormap: deep blue → blue → cyan → green → red (minimal yellow)
+        // Colormap: blue → cyan → green → red (more red coverage)
         let hr: number, hg: number, hb: number;
-        if (pressure < 0.25) {
-          const t = pressure / 0.25;
+        if (pressure < 0.2) {
+          const t = pressure / 0.2;
           hr = 0.0; hg = 0.0; hb = 0.35 + t * 0.65; // dark blue → blue
-        } else if (pressure < 0.45) {
-          const t = (pressure - 0.25) / 0.2;
+        } else if (pressure < 0.35) {
+          const t = (pressure - 0.2) / 0.15;
           hr = 0.0; hg = t * 0.7; hb = 1.0 - t * 0.3; // blue → cyan
-        } else if (pressure < 0.7) {
-          const t = (pressure - 0.45) / 0.25;
+        } else if (pressure < 0.5) {
+          const t = (pressure - 0.35) / 0.15;
           hr = t * 0.15; hg = 0.7 + t * 0.3; hb = 0.7 - t * 0.7; // cyan → green
         } else {
-          const t = (pressure - 0.7) / 0.3;
-          hr = 0.15 + t * 0.85; hg = 1.0 - t * 0.85; hb = 0.0; // green → red (skip yellow)
+          const t = (pressure - 0.5) / 0.5;
+          hr = 0.15 + t * 0.85; hg = 1.0 - t * 0.9; hb = 0.0; // green → red (wide)
         }
 
         const blend = 0.92;
