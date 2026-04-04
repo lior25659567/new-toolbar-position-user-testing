@@ -427,27 +427,6 @@ function LayerRow({
             disabled={isHidden}
             onChange={(val) => onOpacityChange(val)}
           />
-          <div
-            style={{
-              minWidth: '44px',
-              height: '28px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '6px',
-              border: '1px solid #E5E7EB',
-              backgroundColor: '#FFFFFF',
-              fontSize: '12px',
-              fontWeight: 500,
-              color: isHidden ? '#CCCCCC' : '#333333',
-              fontVariantNumeric: 'tabular-nums',
-              fontFamily: "'Roboto', system-ui, sans-serif",
-              flexShrink: 0,
-              padding: '4px 8px',
-            }}
-          >
-            {state.opacity}%
-          </div>
         </div>
       </div>
     </div>
@@ -590,7 +569,40 @@ function OpacitySlider({
         boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
         transition: dragging ? 'none' : 'left 0.1s ease',
         cursor: disabled ? 'default' : 'grab',
-      }} />
+      }}>
+        {/* Floating toast */}
+        <div style={{
+          position: 'absolute',
+          bottom: '22px',
+          left: '50%',
+          transform: `translateX(-50%) scale(${dragging ? 1 : 0.8})`,
+          opacity: dragging ? 1 : 0,
+          pointerEvents: 'none',
+          backgroundColor: '#1e2939',
+          color: '#FFFFFF',
+          fontSize: '11px',
+          fontWeight: 600,
+          fontFamily: "'Roboto', system-ui, sans-serif",
+          fontVariantNumeric: 'tabular-nums',
+          padding: '4px 8px',
+          borderRadius: '6px',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          transition: 'opacity 0.15s ease, transform 0.15s ease',
+        }}>
+          {value}%
+          {/* Arrow */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-4px',
+            left: '50%',
+            transform: 'translateX(-50%) rotate(45deg)',
+            width: '8px',
+            height: '8px',
+            backgroundColor: '#1e2939',
+          }} />
+        </div>
+      </div>
     </div>
   );
 }
