@@ -1,6 +1,7 @@
 import React from 'react';
 import { color, font, space, radius, shadow } from '../../design-system/tokens';
 import type { PatientInfo, ReportSettings, ImageBlock, ComparisonBlock, CostSummaryBlock } from './types';
+import iteroLogo from '../../assets/iTero logo.png';
 
 type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
 
@@ -254,27 +255,8 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
           </div>
         )}
 
-        {/* Align logo */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '5px',
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill={color.primary} opacity="0.15" />
-            <path d="M12 5c-3.87 0-7 3.13-7 7s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" fill={color.primary} opacity="0.3" />
-            <path d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7z" fill={color.primary} />
-          </svg>
-          <span style={{
-            fontSize: '12px',
-            fontWeight: 700,
-            color: color.primary,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase' as const,
-          }}>
-            Align
-          </span>
-        </div>
+        {/* iTero logo */}
+        <img src={iteroLogo} alt="iTero" style={{ height: '24px', objectFit: 'contain' }} />
       </div>
 
       {/* Report Header */}
