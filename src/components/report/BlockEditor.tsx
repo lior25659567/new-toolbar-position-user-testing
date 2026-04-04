@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { color, font, space, radius, shadow, transition } from '../../design-system/tokens';
 import { SecondaryButton } from '../../design-system/SecondaryButton';
 import { PrimaryButton } from '../../design-system/PrimaryButton';
@@ -578,18 +579,19 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
 
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 200 }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 100 }} />
       <div style={{
         position: 'fixed',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        maxWidth: '90vw',
-        maxHeight: '90vh',
-        backgroundColor: color.bgSurface,
-        borderRadius: radius.lg,
-        boxShadow: shadow.lg,
-        zIndex: 201,
+        width: '900px',
+        maxWidth: '96vw',
+        maxHeight: '94vh',
+        backgroundColor: color.white,
+        borderRadius: radius.xl,
+        boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04)',
+        zIndex: 101,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -690,25 +692,16 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
             ))}
           </div>
 
-          {/* Spacer */}
-          <div style={{ flex: 1 }} />
-
-          {/* Actions */}
-          <SecondaryButton size={36} onClick={onClose}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton size={36} onClick={handleSave}>
-            Save
-          </PrimaryButton>
         </div>
 
         {/* Canvas */}
         <div style={{
+          flex: 1,
           padding: space[4],
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: '#1a1a2e',
           overflow: 'auto',
         }}>
           <canvas
@@ -728,6 +721,28 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
             onTouchMove={onMove}
             onTouchEnd={onUp}
           />
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: `${space[3]} ${space[5]}`,
+          borderTop: `1px solid ${color.borderDefault}`,
+          flexShrink: 0,
+          backgroundColor: color.white,
+          gap: space[2],
+        }}>
+          <SecondaryButton size={36} onClick={handleClear}>
+            Clear
+          </SecondaryButton>
+          <SecondaryButton size={36} onClick={onClose}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton size={36} onClick={handleSave}>
+            Save
+          </PrimaryButton>
         </div>
       </div>
     </>
@@ -1033,7 +1048,7 @@ function ImageCardEditor({ block, onUpdate }: {
         isAnnotated={isAnnotated}
       />
 
-      {showAnnotation && block.previewUrl && (
+      {showAnnotation && block.previewUrl && ReactDOM.createPortal(
         <AnnotationLightbox
           imageUrl={block.previewUrl}
           onSave={(annotatedUrl) => {
@@ -1042,7 +1057,8 @@ function ImageCardEditor({ block, onUpdate }: {
             setShowAnnotation(false);
           }}
           onClose={() => setShowAnnotation(false)}
-        />
+        />,
+        document.body
       )}
 
       {/* Teeth */}
