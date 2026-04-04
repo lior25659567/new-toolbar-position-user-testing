@@ -79,6 +79,8 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
             objectFit: 'contain',
             display: 'block',
             backgroundColor: color.neutral50,
+            padding: '8px',
+            boxSizing: 'border-box',
           }}
         />
       ) : (

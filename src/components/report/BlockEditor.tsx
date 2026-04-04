@@ -488,7 +488,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
     img.onload = () => {
       imgRef.current = img;
       // Scale canvas to image, max 800px wide
-      const scale = Math.min(800 / img.width, 600 / img.height, 1);
+      const scale = Math.min(1100 / img.width, 800 / img.height, 1);
       canvas.width = img.width * scale;
       canvas.height = img.height * scale;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -718,7 +718,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
             ref={canvasRef}
             style={{
               maxWidth: '100%',
-              maxHeight: '70vh',
+              maxHeight: '100%',
               cursor: 'crosshair',
               borderRadius: radius.sm,
               touchAction: 'none',
