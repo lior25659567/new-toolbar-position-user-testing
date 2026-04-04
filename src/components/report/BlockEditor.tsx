@@ -910,13 +910,16 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           padding: `${space[3]} ${space[5]}`,
           borderTop: `1px solid ${color.borderDefault}`,
           flexShrink: 0,
           backgroundColor: color.white,
-          gap: space[2],
         }}>
+          <SecondaryButton size={36} onClick={() => setSelected([])} disabled={selected.length === 0}>
+            Clear
+          </SecondaryButton>
+          <div style={{ display: 'flex', gap: space[2] }}>
           <SecondaryButton size={36} onClick={onClose}>
             Cancel
           </SecondaryButton>
@@ -937,6 +940,7 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
           >
             {selected.length > 0 ? `Add Image (${selected.length})` : 'Add Image'}
           </PrimaryButton>
+          </div>
         </div>
       </div>
     </>
