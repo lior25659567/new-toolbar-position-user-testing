@@ -431,37 +431,7 @@ function CollapsedToolbar({
           </div>
         </motion.div>
 
-        {/* Button 3: Undercut */}
-        <motion.div
-          className={`content-stretch flex items-center justify-center relative rounded-[10px] shrink-0 size-[40px] cursor-pointer overflow-hidden p-[6px] transition-colors duration-200`}
-          style={{
-            backgroundColor: activeButtons.has(3) ? '#E0F2FE' : hoveredButton === 3 ? '#f5f5f5' : 'transparent'
-          }}
-          custom={activeButtons.has(3)}
-          onClick={() => handleButtonClick(3)}
-          onTapStart={() => handleTapStart(3)}
-          onTapEnd={handleTapEnd}
-          onMouseEnter={() => setHoveredButton(3)}
-          onMouseLeave={() => setHoveredButton(null)}
-          {...animationProps}
-        >
-          {pressedButton === 3 && (
-            <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none z-10"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 2.5, opacity: [0, 0.5, 0] }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              style={{
-                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%)',
-                filter: 'blur(12px)',
-              }}
-            />
-          )}
-          <div className="relative flex items-center justify-center size-full overflow-hidden">
-            <UndercutNew isActive={activeButtons.has(3) || hoveredButton === 3} />
-          </div>
-        </motion.div>
+        {/* Button 3: Undercut - removed */}
       </div>
 
       {/* Expand button */}
@@ -636,40 +606,7 @@ function ExpandedToolbar({
           <p className="font-['Roboto'] text-[12px] leading-[14px] whitespace-nowrap" style={{ color: activeButtons.has(2) || hoveredButton === 2 ? '#008EC2' : '#000000' }}>Prep edit</p>
         </motion.div>
 
-        {/* Button 3: Undercut */}
-        <motion.div
-          className={`rounded-[8px] px-[8px] py-[4px] cursor-pointer flex flex-col items-center justify-center gap-[4px] min-h-[40px] relative overflow-hidden transition-colors duration-200`}
-          style={{
-            backgroundColor: activeButtons.has(3) ? '#E0F2FE' : hoveredButton === 3 ? '#f5f5f5' : 'transparent'
-          }}
-          custom={activeButtons.has(3)}
-          onClick={() => handleButtonClick(3)}
-          onTapStart={() => handleTapStart(3)}
-          onTapEnd={handleTapEnd}
-          onMouseEnter={() => setHoveredButton(3)}
-          onMouseLeave={() => setHoveredButton(null)}
-          {...animationProps}
-        >
-          {pressedButton === 3 && (
-            <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none z-10"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 2.5, opacity: [0, 0.5, 0] }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              style={{
-                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 70%)',
-                filter: 'blur(12px)',
-              }}
-            />
-          )}
-          <div className="flex items-center justify-center w-[32px] h-[32px]">
-            <div className="scale-[0.53]">
-              <UndercutNew isActive={activeButtons.has(3) || hoveredButton === 3} />
-            </div>
-          </div>
-          <p className="font-['Roboto'] text-[12px] leading-[14px] whitespace-nowrap" style={{ color: activeButtons.has(3) || hoveredButton === 3 ? '#008EC2' : '#000000' }}>Undercut</p>
-        </motion.div>
+        {/* Button 3: Undercut - removed */}
       </div>
     </div>
   );

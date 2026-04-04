@@ -13,9 +13,10 @@ interface LayerState {
 
 interface ViewLayersPanelProps {
   scanTabs: ScanTab[];
+  onOpacityChange?: (opacity: number) => void;
 }
 
-export default function ViewLayersPanel({ scanTabs }: ViewLayersPanelProps) {
+export default function ViewLayersPanel({ scanTabs, onOpacityChange }: ViewLayersPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [jawSelection, setJawSelection] = useState<JawSelection>('both');
   const [layerStates, setLayerStates] = useState<Record<string, LayerState>>(() => {
@@ -48,10 +49,15 @@ export default function ViewLayersPanel({ scanTabs }: ViewLayersPanelProps) {
   };
 
   const setOpacity = (id: string, value: number) => {
-    setLayerStates((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], opacity: value },
-    }));
+    setLayerStates((prev) => {
+      const next = { ...prev, [id]: { ...prev[id], opacity: value } };
+      // Find the selected/first visible layer's opacity to send to 3D model
+      const selectedId = Object.keys(next).find(k => next[k].selected) || Object.keys(next)[0];
+      if (selectedId && id === selectedId) {
+        onOpacityChange?.(value);
+      }
+      return next;
+    });
   };
 
   const selectLayer = (id: string) => {
@@ -179,7 +185,7 @@ function PanelChevronIcon({ isExpanded }: { isExpanded: boolean }) {
         <path
           d="M6 9L12 15L18 9"
           stroke="#717182"
-          strokeWidth="1"
+          strokeWidth={1.5}
           strokeLinecap="round"
           strokeLinejoin="round"
         />

@@ -85,7 +85,7 @@ function STLModel({ url }: { url: string }) {
 }
 
 // PLY Model Loader (supports vertex colors from scans)
-function PLYModel({ url, monochrome = false, feedback = false }: { url: string; monochrome?: boolean; feedback?: boolean }) {
+function PLYModel({ url, monochrome = false, feedback = false, opacity = 100 }: { url: string; monochrome?: boolean; feedback?: boolean; opacity?: number }) {
   const geometry = useLoader(PLYLoader, url);
 
   // Generate organic "problem areas" using noise-like patterns
@@ -260,18 +260,22 @@ function PLYModel({ url, monochrome = false, feedback = false }: { url: string; 
   }, [geometry, feedback, problemIntensity]);
 
   // Create material based on monochrome state - always use vertex colors now
+  const opacityValue = opacity / 100;
+  const isTransparent = opacity < 100;
+
   const material = useMemo(() => {
     if (monochrome) {
-      // Completely gray stone material - no vertex colors
       return new THREE.MeshStandardMaterial({
         color: new THREE.Color(0x707070),
         roughness: 0.8,
         metalness: 0.0,
         side: THREE.DoubleSide,
         vertexColors: false,
+        transparent: isTransparent,
+        opacity: opacityValue,
+        depthWrite: !isTransparent,
       });
     } else {
-      // Realistic dental material with vertex colors - darker, natural look
       return new THREE.MeshPhysicalMaterial({
         vertexColors: true,
         color: new THREE.Color(0xc8c8c0),
@@ -286,9 +290,12 @@ function PLYModel({ url, monochrome = false, feedback = false }: { url: string; 
         sheen: 0.1,
         sheenRoughness: 0.4,
         sheenColor: new THREE.Color(0xe8e8e0),
+        transparent: isTransparent,
+        opacity: opacityValue,
+        depthWrite: !isTransparent,
       });
     }
-  }, [monochrome]);
+  }, [monochrome, opacityValue, isTransparent]);
 
   return (
     <Center>
@@ -363,6 +370,7 @@ interface TeethModel3DProps {
   monochrome?: boolean; // Stone/gray texture mode
   feedback?: boolean; // Show blue marks for missing scan areas
   zoomIn?: boolean; // Zoom in on the model (for margin line view)
+  opacity?: number; // 0-100, controls model transparency
   className?: string;
 }
 
@@ -376,6 +384,7 @@ export default function TeethModel3D({
   monochrome = false,
   feedback = false,
   zoomIn = false,
+  opacity = 100,
   className = '',
 }: TeethModel3DProps) {
   return (
@@ -443,7 +452,7 @@ export default function TeethModel3D({
             modelUrl.toLowerCase().endsWith('.stl') ? (
               <STLModel url={modelUrl} />
             ) : modelUrl.toLowerCase().endsWith('.ply') ? (
-              <PLYModel url={modelUrl} monochrome={monochrome} feedback={feedback} />
+              <PLYModel url={modelUrl} monochrome={monochrome} feedback={feedback} opacity={opacity} />
             ) : (
               <GLTFModel url={modelUrl} />
             )

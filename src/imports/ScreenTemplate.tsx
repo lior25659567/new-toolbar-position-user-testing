@@ -91,7 +91,7 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
 }
 
 // Shared 3D model component that stays mounted across page switches
-function Component3DModelShared({ activeButtons, isViewPage }: { activeButtons: Set<number>; isViewPage: boolean }) {
+function Component3DModelShared({ activeButtons, isViewPage, opacity = 100 }: { activeButtons: Set<number>; isViewPage: boolean; opacity?: number }) {
   // Check if monochrome button (index 0) is active
   const isMonochrome = activeButtons.has(0);
   // Check if feedback button (index 1) is active - only for scan page
@@ -115,6 +115,7 @@ function Component3DModelShared({ activeButtons, isViewPage }: { activeButtons: 
         monochrome={isMonochrome}
         feedback={isFeedback}
         zoomIn={isMarginLineActive}
+        opacity={opacity}
       />
     </div>
   );
@@ -2453,6 +2454,7 @@ export default function ScreenTemplate({
   const [localActiveButtons, setLocalActiveButtons] = useState<Set<number>>(new Set());
   const [localViewActiveButtons, setLocalViewActiveButtons] = useState<Set<number>>(new Set());
   const [patientName, setPatientName] = useState<string>('Mina Y.');
+  const [modelOpacity, setModelOpacity] = useState<number>(100);
   
   // Use external state if provided, otherwise fall back to local state
   // When using external state, use initialPage prop (which contains currentPage from App.tsx)
@@ -2541,6 +2543,7 @@ export default function ScreenTemplate({
         <Component3DModelShared
           activeButtons={currentPage === 'scan' ? activeButtons : viewActiveButtons}
           isViewPage={currentPage === 'view'}
+          opacity={modelOpacity}
         />
       )}
       {currentPage === 'scan' && activeButtons.has(2) && (
@@ -2561,12 +2564,13 @@ export default function ScreenTemplate({
           {viewActiveButtons.has(5) && <Panel881668 />}
         </div>
       )}
-      <HeaderNavigation 
-        currentStep={currentPage as 'info' | 'scan' | 'view' | 'send'} 
+      <HeaderNavigation
+        currentStep={currentPage as 'info' | 'scan' | 'view' | 'send'}
         patientName={`Patient: ${patientName}`}
         onStepChange={(step) => handlePageChange(step)}
         jawImageOffset={tabsOffset}
         scanTabs={externalScanTabs}
+        onModelOpacityChange={setModelOpacity}
       />
 
       {/* Scan Tabs - only shown when showScanTabs is true (DedicatedTopToolbarPage) */}
