@@ -1,7 +1,19 @@
 import React from 'react';
 import { color, font, space, radius, shadow } from '../../design-system/tokens';
 import type { PatientInfo, ReportSettings, ImageBlock, ComparisonBlock, CostSummaryBlock } from './types';
-import iteroLogo from '../../assets/iTero logo.png';
+// iTero logo inline SVG component
+function IteroLogoSvg() {
+  return (
+    <svg width="80" height="22" viewBox="0 0 103 28" fill="none">
+      <path d="M79.2389 19.7792C79.2417 18.7027 79.0308 17.6364 78.6182 16.6421C78.2057 15.6478 77.5999 14.7454 76.8358 13.987C75.2477 12.4036 73.0828 11.532 70.7364 11.532C68.3919 11.532 66.2252 12.4036 64.639 13.987C63.8772 14.7461 63.2741 15.6491 62.8649 16.6435C62.4556 17.6379 62.2483 18.7039 62.2551 19.7792C62.2551 22.0073 63.0658 24.0664 64.5746 25.579C66.1307 27.1397 68.3202 28 70.7364 28C73.1527 28 75.3422 27.1397 76.9001 25.579C78.407 24.0664 79.2389 22.0073 79.2389 19.7792ZM75.4197 19.7792C75.4197 22.3042 73.2321 24.5192 70.7364 24.5192C68.2426 24.5192 66.0531 22.3042 66.0531 19.7792C66.0483 19.1467 66.1696 18.5196 66.4098 17.9344C66.6501 17.3493 67.0045 16.8179 67.4523 16.3712C68.3236 15.5008 69.5048 15.0118 70.7365 15.0118C71.9681 15.0118 73.1493 15.5008 74.0206 16.3712C74.4688 16.8176 74.8234 17.349 75.0636 17.9342C75.3039 18.5194 75.4249 19.1466 75.4197 19.7792ZM56.1254 15.8294H60.7869V11.8713H52.1682V27.7249H56.1254V15.8294ZM36.5939 21.2945H49.0215V20.7378C49.0215 18.0643 48.2312 15.7681 46.7357 14.0977C45.2534 12.4433 43.1358 11.532 40.7743 11.532C38.4506 11.532 36.3481 12.3989 34.8583 13.9738C33.427 15.4855 32.6386 17.5369 32.6386 19.7517C32.6386 21.9185 33.4195 23.9415 34.8356 25.4476C36.4067 27.117 38.6056 28 41.1959 28C43.8145 28 45.9738 27.0196 47.9608 24.9239L45.4216 22.3798C44.2172 23.7799 42.7463 24.5192 41.1675 24.5192C39.9273 24.5192 38.823 24.1401 37.9742 23.4217C37.315 22.8637 36.8349 22.1238 36.5939 21.2945ZM36.577 18.0956C36.9948 16.5584 38.2634 15.0118 40.746 15.0118C42.8219 15.0118 44.4611 16.2521 44.9281 18.0956H36.577ZM29.392 7.91404H34.8675V3.95686H19.9593V7.91404H25.4347V27.7249H29.392V7.91404Z" fill="black" fillOpacity="0.93"/>
+      <path d="M56.1254 15.8294H60.7869V11.8713H52.1682V27.7249H56.1254V15.8294Z" fill="black" fillOpacity="0.93"/>
+      <path d="M19.9572 11.8713H16V27.7249H19.9572V11.8713Z" fill="black" fillOpacity="0.93"/>
+      <path d="M19.9572 0H16V3.95718H19.9572V0Z" fill="black" fillOpacity="0.93"/>
+      <path d="M80.4516 11.8664H82.8465V12.3382H81.9222V14.8167H81.3708V12.3382H80.4516V11.8664Z" fill="black" fillOpacity="0.93"/>
+      <path d="M83.2317 11.8664H83.9573L84.4414 13.2707C84.5565 13.6152 84.6992 14.2613 84.6992 14.2613H84.7114C84.7114 14.2613 84.8541 13.6192 84.9652 13.2707L85.4401 11.8664H86.182V14.8167H85.6704V13.2778C85.6704 12.9568 85.7061 12.3586 85.7061 12.3586H85.6979C85.6979 12.3586 85.5756 12.9018 85.4798 13.1953L84.9214 14.8167H84.477L83.9145 13.1953C83.8187 12.9018 83.6964 12.3586 83.6964 12.3586H83.6882C83.6882 12.3586 83.7239 12.9568 83.7239 13.2778V14.8167H83.2317V11.8664Z" fill="black" fillOpacity="0.93"/>
+    </svg>
+  );
+}
 
 type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
 
@@ -44,23 +56,27 @@ function PreviewClinicalRow({ label, value }: { label: string; value: string }) 
 // ─── Block Previews ─────────────────────────────────────────────────────────
 
 function ImageBlockPreview({ block }: { block: ImageBlock }) {
+  const hasNotes = !!block.notes;
+  const hasClinical = !!(block.diagnosis || block.treatment || block.estimatedCost || block.treatmentDate);
+  const hasTeeth = block.teeth.length > 0;
+  const hasMeta = hasNotes || hasClinical || hasTeeth;
+
   return (
-    <div style={{ marginBottom: space[4] }}>
-      {block.title && (
-        <div style={{ fontSize: '11px', fontWeight: 600, color: color.textHeading, marginBottom: space[1] }}>
-          {block.title}
-        </div>
-      )}
+    <div style={{
+      borderRadius: '8px',
+      border: `1px solid ${color.borderDefault}`,
+      overflow: 'hidden',
+      backgroundColor: color.white,
+    }}>
+      {/* Image */}
       {block.previewUrl ? (
         <img
           src={block.previewUrl}
           alt={block.title || 'Clinical image'}
           style={{
             width: '100%',
-            maxHeight: '200px',
-            objectFit: 'contain',
-            borderRadius: '8px',
-            backgroundColor: color.neutral50,
+            height: '140px',
+            objectFit: 'cover',
             display: 'block',
           }}
         />
@@ -69,7 +85,6 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           width: '100%',
           height: '80px',
           backgroundColor: color.neutral50,
-          borderRadius: '8px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -79,34 +94,29 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           No image
         </div>
       )}
-      {block.notes && (
-        <div style={{
-          fontSize: '10px',
-          color: color.textDefault,
-          lineHeight: '1.5',
-          marginTop: space[2],
-          paddingLeft: space[3],
-          borderLeft: `2px solid ${color.primary}`,
-        }}>
-          {block.notes}
-        </div>
-      )}
-      <PreviewTeethTags teeth={block.teeth} />
-      {(block.diagnosis || block.treatment || block.estimatedCost || block.treatmentDate) && (
-        <div style={{
-          marginTop: space[2],
-          padding: space[3],
-          backgroundColor: color.neutral50,
-          borderRadius: '8px',
-          border: `1px solid ${color.borderDefault}`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-        }}>
-          <PreviewClinicalRow label="Diagnosis" value={block.diagnosis} />
-          <PreviewClinicalRow label="Treatment" value={block.treatment} />
-          <PreviewClinicalRow label="Est. Cost" value={block.estimatedCost} />
-          <PreviewClinicalRow label="Date" value={block.treatmentDate} />
+
+      {/* Meta below image */}
+      {hasMeta && (
+        <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {block.title && (
+            <div style={{ fontSize: '10px', fontWeight: 600, color: color.textHeading }}>
+              {block.title}
+            </div>
+          )}
+          {hasNotes && (
+            <div style={{ fontSize: '9px', color: color.textSubtle, lineHeight: '1.4' }}>
+              {block.notes}
+            </div>
+          )}
+          <PreviewTeethTags teeth={block.teeth} />
+          {hasClinical && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
+              <PreviewClinicalRow label="Diagnosis" value={block.diagnosis} />
+              <PreviewClinicalRow label="Treatment" value={block.treatment} />
+              <PreviewClinicalRow label="Est. Cost" value={block.estimatedCost} />
+              <PreviewClinicalRow label="Date" value={block.treatmentDate} />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -256,7 +266,7 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         )}
 
         {/* iTero logo */}
-        <img src={iteroLogo} alt="iTero" style={{ height: '28px', objectFit: 'contain', display: 'block', flexShrink: 0 }} />
+        <IteroLogoSvg />
       </div>
 
       {/* Report Header */}
@@ -317,20 +327,35 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         }}>
           Add blocks to see the report preview
         </div>
-      ) : (
-        blocks.map((block) => {
-          switch (block.type) {
-            case 'image':
-              return <ImageBlockPreview key={block.id} block={block} />;
-            case 'comparison':
-              return <ComparisonBlockPreview key={block.id} block={block} />;
-            case 'cost-summary':
-              return <CostSummaryBlockPreview key={block.id} block={block} />;
-            default:
-              return null;
-          }
-        })
-      )}
+      ) : (() => {
+        // Separate image blocks from other blocks for 2-column layout
+        const imageBlocks = blocks.filter(b => b.type === 'image') as ImageBlock[];
+        const otherBlocks = blocks.filter(b => b.type !== 'image');
+
+        return (
+          <>
+            {/* Image blocks in 2-column grid */}
+            {imageBlocks.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[3], marginBottom: otherBlocks.length > 0 ? space[4] : 0 }}>
+                {imageBlocks.map((block) => (
+                  <ImageBlockPreview key={block.id} block={block} />
+                ))}
+              </div>
+            )}
+            {/* Other blocks full width */}
+            {otherBlocks.map((block) => {
+              switch (block.type) {
+                case 'comparison':
+                  return <ComparisonBlockPreview key={block.id} block={block as ComparisonBlock} />;
+                case 'cost-summary':
+                  return <CostSummaryBlockPreview key={block.id} block={block as CostSummaryBlock} />;
+                default:
+                  return null;
+              }
+            })}
+          </>
+        );
+      })()}
 
       {/* Signature */}
       {settings.signatureUrl && (
