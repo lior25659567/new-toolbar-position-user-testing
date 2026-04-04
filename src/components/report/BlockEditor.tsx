@@ -399,11 +399,12 @@ function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate
         />
       </div>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
-      {showGallery && (
+      {showGallery && ReactDOM.createPortal(
         <GalleryOverlayModal
           onSelect={(url) => { onGallerySelect(url); setShowGallery(false); }}
           onClose={() => setShowGallery(false)}
-        />
+        />,
+        document.body
       )}
     </>
   );
@@ -1570,13 +1571,14 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
       ))}
 
       {/* Gallery overlay modal */}
-      {showGallery && (
+      {showGallery && ReactDOM.createPortal(
         <GalleryOverlayModal
           multiSelect
           onSelect={() => {}}
           onMultiSelect={(urls) => { addImagesFromGallery(urls); setShowGallery(false); }}
           onClose={() => setShowGallery(false)}
-        />
+        />,
+        document.body
       )}
 
       {/* Action buttons */}
