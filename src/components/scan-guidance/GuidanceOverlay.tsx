@@ -1810,31 +1810,50 @@ function WandScreenRect({ strokeColor, opacity, dashed }: { strokeColor: string;
 
 /** Arrows placed around the stationary wand — positioned at the wand rect center */
 function GWandArrows({ mode }: { mode: string }) {
-  // Rotation modes — show curved arrow + spinning ring
+  // Rotation modes — show circular rotation arrows + spinning ring
   if (mode === 'rot-cw' || mode === 'rot-ccw' || mode === 'rot-tilt') {
     const isTilt = mode === 'rot-tilt';
+    const isCCW = mode === 'rot-ccw';
     return (
       <>
-        <div style={{ position:'absolute',top:-68,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={isTilt ? 100 : 110}/></div>
-        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:70,height:70,animation: isTilt ? undefined : `wand-roll 4s linear infinite${mode === 'rot-ccw' ? ' reverse' : ''}` }}>
-          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style={{ filter:BF }}>
-            <BlueDefs/><circle cx="35" cy="35" r="28" stroke="url(#gb-d)" strokeWidth="2" opacity="0.25" fill="none"/>
-            <line x1="35" y1="7" x2="35" y2="20" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
-            <line x1="35" y1="50" x2="35" y2="63" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
-            <line x1="7" y1="35" x2="20" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
-            <line x1="50" y1="35" x2="63" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
-            <circle cx="35" cy="35" r="3" fill="url(#gb-r)"/>
+        {/* Circular rotation arrow */}
+        <div style={{
+          position:'absolute', top:WRECT_CY, left:WRECT_CX,
+          width: 140, height: 140,
+          transform: `translate(-50%,-50%)${isCCW ? ' scaleX(-1)' : ''}`,
+          animation: 'dof-breathe 2s ease-in-out infinite',
+        }}>
+          <svg width="140" height="140" viewBox="0 0 140 140" fill="none" style={{ filter: BF }}>
+            <BlueDefs/>
+            {/* 270° arc */}
+            <path
+              d="M70 10 A 60 60 0 1 1 10 70"
+              stroke="url(#gb-d)" strokeWidth="3.5" fill="none" strokeLinecap="round"
+              strokeDasharray={isTilt ? '8 6' : 'none'}
+            />
+            {/* Arrowhead at end of arc */}
+            <polygon points="10,70 20,58 4,58" fill="url(#gb-d)" />
+            {/* Small starting dot */}
+            <circle cx="70" cy="10" r="4" fill="url(#gb-r)" />
           </svg>
         </div>
-        {!isTilt && (
-          <div style={{ position:'absolute',bottom:-68,left:WRECT_CX,transform:'translateX(-50%) scaleY(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={90}/></div>
-        )}
-        {isTilt && (
-          <>
-            <div style={{ position:'absolute',right:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(90deg)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={100}/></div>
-            <div style={{ position:'absolute',left:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(-90deg) scaleX(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={80}/></div>
-          </>
-        )}
+
+        {/* Center crosshair ring */}
+        <div style={{
+          position:'absolute', top:WRECT_CY, left:WRECT_CX,
+          width:50, height:50,
+          animation: isTilt ? undefined : `wand-roll 4s linear infinite${isCCW ? ' reverse' : ''}`,
+        }}>
+          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" style={{ filter: BF }}>
+            <BlueDefs/>
+            <circle cx="25" cy="25" r="20" stroke="url(#gb-d)" strokeWidth="1.5" opacity="0.25" fill="none"/>
+            <line x1="25" y1="5" x2="25" y2="15" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="25" y1="35" x2="25" y2="45" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="5" y1="25" x2="15" y2="25" stroke="url(#gb-h)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="35" y1="25" x2="45" y2="25" stroke="url(#gb-h)" strokeWidth="2" strokeLinecap="round"/>
+            <circle cx="25" cy="25" r="3" fill="url(#gb-r)"/>
+          </svg>
+        </div>
       </>
     );
   }
@@ -1967,75 +1986,50 @@ const ROT_LABELS: Record<string, string> = {
 
 function RotationOverlay({ mode, g, f }: { mode: string; g: GuidanceState; f: boolean }) {
   const pct = Math.round(g.coveragePercent * 100);
-  const variant = mode.replace('rot-', '');
-
-  const anim = variant === 'cw' ? 'rot-spin-cw 4s linear infinite'
-    : variant === 'ccw' ? 'rot-spin-ccw 4s linear infinite'
-    : 'rot-tilt-f 3s ease-in-out infinite';
-
-  const ringSize = 200;
+  const isCCW = mode === 'rot-ccw';
+  const isTilt = mode === 'rot-tilt';
 
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
       <style>{KF + DOF_KF + ROT_KF}</style>
       <TopBar guidance={g} pct={pct} />
 
-      {/* Rotating ring with arrow */}
+      {/* Large circular rotation arrow */}
       <div style={{
         position: 'absolute', top: '50%', left: '50%',
-        width: ringSize, height: ringSize,
-        animation: anim,
+        width: 220, height: 220,
+        transform: `translate(-50%,-50%)${isCCW ? ' scaleX(-1)' : ''}`,
+        animation: 'dof-breathe 2s ease-in-out infinite',
       }}>
-        <svg width={ringSize} height={ringSize} viewBox="0 0 200 200" fill="none" style={{
-          filter: 'drop-shadow(0 2px 8px rgba(0,154,206,0.25))',
-        }}>
-          <BlueDefs />
-          {/* Outer ring */}
-          <circle cx="100" cy="100" r="85" stroke="url(#gb-d)" strokeWidth="3" fill="none" opacity="0.3"
-            strokeDasharray={variant === 'tilt' ? 'none' : '12 6'}
+        <svg width="220" height="220" viewBox="0 0 220 220" fill="none" style={{ filter: BF }}>
+          <BlueDefs/>
+          {/* 270° circular arc */}
+          <path d="M110 15 A 95 95 0 1 1 15 110" stroke="url(#gb-d)" strokeWidth="4" fill="none" strokeLinecap="round"
+            strokeDasharray={isTilt ? '10 7' : 'none'}
           />
-          {/* Inner ring */}
-          <circle cx="100" cy="100" r="70" stroke="url(#gb-d)" strokeWidth="2" fill="none" opacity="0.15" />
-          {/* Arrow head at top of ring */}
-          <path d="M100 12 L92 26 L108 26 Z" fill="url(#gb-r)" style={{ animation: 'rot-arrow-pulse 1.5s ease-in-out infinite' }} />
-          {/* Directional ticks */}
-          {[0, 90, 180, 270].map(deg => (
-            <g key={deg} transform={`rotate(${deg} 100 100)`}>
-              <line x1="100" y1="18" x2="100" y2="30" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round" />
-            </g>
-          ))}
-          {/* Center dot */}
-          <circle cx="100" cy="100" r="4" fill="url(#gb-r)" />
-          {/* Direction indicator lines from center */}
-          <line x1="100" y1="60" x2="100" y2="80" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-          <line x1="100" y1="120" x2="100" y2="140" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-          <line x1="60" y1="100" x2="80" y2="100" stroke="url(#gb-h)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-          <line x1="120" y1="100" x2="140" y2="100" stroke="url(#gb-h)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+          {/* Arrowhead */}
+          <polygon points="15,110 28,96 6,96" fill="url(#gb-d)" />
+          {/* Start dot */}
+          <circle cx="110" cy="15" r="5" fill="url(#gb-r)" />
         </svg>
       </div>
 
-      {/* Curved arrows on sides */}
-      {variant !== 'tilt' && (
-        <>
-          <div style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            animation: 'dof-breathe 2s ease-in-out infinite',
-          }}>
-            <svg width="260" height="260" viewBox="0 0 260 260" fill="none" style={{ filter: BF }}>
-              <BlueDefs />
-              <path d={variant === 'cw'
-                ? "M190 60 A 90 90 0 0 1 200 130"
-                : "M70 60 A 90 90 0 0 0 60 130"
-              } stroke="url(#gb-d)" strokeWidth="3" fill="none" strokeLinecap="round" />
-              <path d={variant === 'cw'
-                ? "M200 130 L210 118 L194 122Z"
-                : "M60 130 L50 118 L66 122Z"
-              } fill="url(#gb-d)" />
-            </svg>
-          </div>
-        </>
-      )}
+      {/* Spinning crosshair in center */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: 60, height: 60,
+        animation: isTilt ? 'rot-tilt-f 3s ease-in-out infinite' : `rot-spin-cw 4s linear infinite${isCCW ? ' reverse' : ''}`,
+      }}>
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none" style={{ filter: BF }}>
+          <BlueDefs/>
+          <circle cx="30" cy="30" r="24" stroke="url(#gb-d)" strokeWidth="1.5" opacity="0.2" fill="none"/>
+          <line x1="30" y1="6" x2="30" y2="18" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="30" y1="42" x2="30" y2="54" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="6" y1="30" x2="18" y2="30" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="42" y1="30" x2="54" y2="30" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+          <circle cx="30" cy="30" r="3.5" fill="url(#gb-r)"/>
+        </svg>
+      </div>
 
       {/* Mode label */}
       <div style={{

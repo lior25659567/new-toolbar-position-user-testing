@@ -28,7 +28,7 @@ const _projVec = new THREE.Vector3();
 
 interface SceneProps {
   onGuidanceUpdate: (g: GuidanceState) => void;
-  onReset?: boolean;
+  onReset?: number;
   guidanceMode?: GuidanceMode;
 }
 
@@ -105,14 +105,14 @@ function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
 
   // ── Reset ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (onReset) {
+    if (onReset && onReset > 0) {
       reset(); resetEngine();
       setPhase('idle'); setStartTime(null); setIsHovering(false);
       currentRegionRef.current = undefined;
       weakestCenterRef.current = null;
       if (groupRef.current) groupRef.current.rotation.set(BASE_ROT_X, 0, BASE_ROT_Z);
     }
-  }, [onReset, reset, resetEngine]);
+  }, [onReset]);
 
   // ── Frame loop ────────────────────────────────────────────────────────────
   useFrame(() => {
@@ -404,7 +404,7 @@ export default function ScanGuidanceViewer({ resetTrigger, guidanceMode = 'class
         <Suspense fallback={<LoadingSpinner />}>
           <Scene
             onGuidanceUpdate={handleGuidance}
-            onReset={resetTrigger > 0 ? true : undefined}
+            onReset={resetTrigger}
             guidanceMode={guidanceMode}
           />
         </Suspense>
