@@ -39,6 +39,7 @@ const DOF_AXIS: Record<string, 'lr'|'ud'|'fb'|'roll'|'pitch'|'yaw'> = {
   'dof-roll':'roll','bare-roll':'roll','ring-roll':'roll','pulse-roll':'roll','ghost-roll':'roll','wand-roll':'roll','gwand-roll':'roll','bgwand-roll':'roll','fgwand-roll':'roll','fagwand-roll':'roll',
   'dof-pitch':'pitch','bare-pitch':'pitch','ring-pitch':'pitch','pulse-pitch':'pitch','ghost-pitch':'pitch','wand-pitch':'pitch','gwand-pitch':'pitch','bgwand-pitch':'pitch','fgwand-pitch':'pitch','fagwand-pitch':'pitch',
   'dof-yaw':'yaw','bare-yaw':'yaw','ring-yaw':'yaw','pulse-yaw':'yaw','ghost-yaw':'yaw','wand-yaw':'yaw','gwand-yaw':'yaw','bgwand-yaw':'yaw','fgwand-yaw':'yaw','fagwand-yaw':'yaw',
+  'rot-cw':'roll','rot-ccw':'roll','rot-tilt':'pitch',
 };
 
 function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {

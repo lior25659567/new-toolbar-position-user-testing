@@ -123,6 +123,9 @@ const GROUPS: GroupDef[] = [
       { id: 'fgwand-roll',  label: 'Roll' },
       { id: 'fgwand-pitch', label: 'Pitch' },
       { id: 'fgwand-yaw',   label: 'Yaw' },
+      { id: 'rot-cw',       label: 'Rotate CW' },
+      { id: 'rot-ccw',      label: 'Rotate CCW' },
+      { id: 'rot-tilt',     label: 'Tilt' },
     ],
   },
   {
@@ -134,6 +137,9 @@ const GROUPS: GroupDef[] = [
       { id: 'fagwand-roll',  label: 'Roll' },
       { id: 'fagwand-pitch', label: 'Pitch' },
       { id: 'fagwand-yaw',   label: 'Yaw' },
+      { id: 'rot-cw',        label: 'Rotate CW' },
+      { id: 'rot-ccw',       label: 'Rotate CCW' },
+      { id: 'rot-tilt',      label: 'Tilt' },
     ],
   },
   {
@@ -195,14 +201,6 @@ export default function ScanGuidancePage({ onBackToHome }: ScanGuidancePageProps
             Home
           </button>
           <div style={{ width: '1px', height: '20px', backgroundColor: color.borderDefault }} />
-          <div>
-            <div style={{ fontSize: font.size.base, fontWeight: font.weight.bold, color: color.textHeading, letterSpacing: font.tracking.tight }}>
-              Smart Scan Guidance
-            </div>
-            <div style={{ fontSize: font.size.xs, color: color.textPlaceholder, marginTop: '1px' }}>
-              Hover to scan · Drag to rotate · Right-drag to pan · Scroll to zoom
-            </div>
-          </div>
         </div>
 
         {/* Center: GROUP switcher (top level) */}
