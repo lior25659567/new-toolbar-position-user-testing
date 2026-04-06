@@ -1777,6 +1777,9 @@ const GWAND_ANIM: Record<string, string> = {
   'fagwand-roll':'gwand-float-roll 3s ease-in-out infinite',
   'fagwand-pitch':'gwand-float-pitch 3s ease-in-out infinite',
   'fagwand-yaw': 'gwand-float-yaw 3s ease-in-out infinite',
+  'rot-cw':  'gwand-float-roll 3s ease-in-out infinite',
+  'rot-ccw': 'gwand-float-roll 3s ease-in-out infinite',
+  'rot-tilt':'gwand-float-pitch 3s ease-in-out infinite',
 };
 
 const GWAND_LABELS: Record<string, string> = {
@@ -1788,6 +1791,7 @@ const GWAND_LABELS: Record<string, string> = {
   'fgwand-roll': 'Roll', 'fgwand-pitch': 'Pitch', 'fgwand-yaw': 'Yaw',
   'fagwand-lr': 'Left / Right', 'fagwand-ud': 'Up / Down', 'fagwand-fb': 'Forward / Back',
   'fagwand-roll': 'Roll', 'fagwand-pitch': 'Pitch', 'fagwand-yaw': 'Yaw',
+  'rot-cw': 'Rotate CW', 'rot-ccw': 'Rotate CCW', 'rot-tilt': 'Tilt',
 };
 
 /** Just the center rectangle from the wand SVG — same viewBox so it aligns perfectly with the full wand */
@@ -1806,6 +1810,35 @@ function WandScreenRect({ strokeColor, opacity, dashed }: { strokeColor: string;
 
 /** Arrows placed around the stationary wand — positioned at the wand rect center */
 function GWandArrows({ mode }: { mode: string }) {
+  // Rotation modes — show curved arrow + spinning ring
+  if (mode === 'rot-cw' || mode === 'rot-ccw' || mode === 'rot-tilt') {
+    const isTilt = mode === 'rot-tilt';
+    return (
+      <>
+        <div style={{ position:'absolute',top:-68,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={isTilt ? 100 : 110}/></div>
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:70,height:70,animation: isTilt ? undefined : `wand-roll 4s linear infinite${mode === 'rot-ccw' ? ' reverse' : ''}` }}>
+          <svg width="70" height="70" viewBox="0 0 70 70" fill="none" style={{ filter:BF }}>
+            <BlueDefs/><circle cx="35" cy="35" r="28" stroke="url(#gb-d)" strokeWidth="2" opacity="0.25" fill="none"/>
+            <line x1="35" y1="7" x2="35" y2="20" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="35" y1="50" x2="35" y2="63" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="7" y1="35" x2="20" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="50" y1="35" x2="63" y2="35" stroke="url(#gb-h)" strokeWidth="2.5" strokeLinecap="round"/>
+            <circle cx="35" cy="35" r="3" fill="url(#gb-r)"/>
+          </svg>
+        </div>
+        {!isTilt && (
+          <div style={{ position:'absolute',bottom:-68,left:WRECT_CX,transform:'translateX(-50%) scaleY(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={90}/></div>
+        )}
+        {isTilt && (
+          <>
+            <div style={{ position:'absolute',right:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(90deg)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowCurve s={100}/></div>
+            <div style={{ position:'absolute',left:-68,top:WRECT_CY,transform:'translateY(-50%) rotate(-90deg) scaleX(-1)',animation:'dof-breathe 2s ease-in-out infinite',animationDelay:'1s',opacity:0.35 }}><ArrowCurve s={80}/></div>
+          </>
+        )}
+      </>
+    );
+  }
+
   const variant = mode.replace(/^(?:g|bg|fg|fag)wand-/, '');
   if (variant === 'lr') return (
     <>
@@ -2080,8 +2113,8 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, con
   if (mode.startsWith('fagwand-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive} showArrows ghostFull/>;
 
   // Scan Indicator
-  // Rotation guidance
-  if (mode.startsWith('rot-')) return <RotationOverlay mode={mode} g={guidance} f={flashActive}/>;
+  // Rotation guidance — rendered with ghost wand silhouette + arrows
+  if (mode.startsWith('rot-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive} showArrows ghostFull/>;
 
   if (mode === 'scan-indicator') return <ScanIndicatorOverlay guidance={guidance} containerSize={containerSize} pointerNDC={pointerNDC} flashActive={flashActive}/>;
 
