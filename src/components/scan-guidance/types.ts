@@ -14,6 +14,7 @@ export type GuidanceMode = 'classic' | 'edge' | 'dot' | 'glow'
   | 'bgwand-lr' | 'bgwand-ud' | 'bgwand-fb' | 'bgwand-roll' | 'bgwand-pitch' | 'bgwand-yaw'
   | 'fgwand-lr' | 'fgwand-ud' | 'fgwand-fb' | 'fgwand-roll' | 'fgwand-pitch' | 'fgwand-yaw'
   | 'fagwand-lr' | 'fagwand-ud' | 'fagwand-fb' | 'fagwand-roll' | 'fagwand-pitch' | 'fagwand-yaw'
+  | 'rot-cw' | 'rot-ccw' | 'rot-tilt'
   | 'scan-indicator'
   | 'surface-guide';
 

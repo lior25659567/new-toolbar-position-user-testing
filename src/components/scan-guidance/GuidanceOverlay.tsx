@@ -1917,6 +1917,107 @@ function GhostWandOverlay({ mode, g, f, showArrows = true, ghostFull = false }: 
   );
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// ROTATION GUIDANCE — circular arrow overlays
+// ════════════════════════════════════════════════════════════════════════════
+
+const ROT_KF = `
+  @keyframes rot-spin-cw  { 0%{transform:translate(-50%,-50%) rotate(0deg)}   100%{transform:translate(-50%,-50%) rotate(360deg)} }
+  @keyframes rot-spin-ccw { 0%{transform:translate(-50%,-50%) rotate(0deg)}   100%{transform:translate(-50%,-50%) rotate(-360deg)} }
+  @keyframes rot-tilt-f   { 0%{transform:translate(-50%,-50%) perspective(500px) rotateX(-15deg)} 50%{transform:translate(-50%,-50%) perspective(500px) rotateX(15deg)} 100%{transform:translate(-50%,-50%) perspective(500px) rotateX(-15deg)} }
+  @keyframes rot-arrow-pulse { 0%,100%{opacity:0.9} 50%{opacity:0.4} }
+`;
+
+const ROT_LABELS: Record<string, string> = {
+  'rot-cw': 'Clockwise', 'rot-ccw': 'Counter-Clockwise', 'rot-tilt': 'Tilt',
+};
+
+function RotationOverlay({ mode, g, f }: { mode: string; g: GuidanceState; f: boolean }) {
+  const pct = Math.round(g.coveragePercent * 100);
+  const variant = mode.replace('rot-', '');
+
+  const anim = variant === 'cw' ? 'rot-spin-cw 4s linear infinite'
+    : variant === 'ccw' ? 'rot-spin-ccw 4s linear infinite'
+    : 'rot-tilt-f 3s ease-in-out infinite';
+
+  const ringSize = 200;
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', fontFamily: font.family }}>
+      <style>{KF + DOF_KF + ROT_KF}</style>
+      <TopBar guidance={g} pct={pct} />
+
+      {/* Rotating ring with arrow */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        width: ringSize, height: ringSize,
+        animation: anim,
+      }}>
+        <svg width={ringSize} height={ringSize} viewBox="0 0 200 200" fill="none" style={{
+          filter: 'drop-shadow(0 2px 8px rgba(0,154,206,0.25))',
+        }}>
+          <BlueDefs />
+          {/* Outer ring */}
+          <circle cx="100" cy="100" r="85" stroke="url(#gb-d)" strokeWidth="3" fill="none" opacity="0.3"
+            strokeDasharray={variant === 'tilt' ? 'none' : '12 6'}
+          />
+          {/* Inner ring */}
+          <circle cx="100" cy="100" r="70" stroke="url(#gb-d)" strokeWidth="2" fill="none" opacity="0.15" />
+          {/* Arrow head at top of ring */}
+          <path d="M100 12 L92 26 L108 26 Z" fill="url(#gb-r)" style={{ animation: 'rot-arrow-pulse 1.5s ease-in-out infinite' }} />
+          {/* Directional ticks */}
+          {[0, 90, 180, 270].map(deg => (
+            <g key={deg} transform={`rotate(${deg} 100 100)`}>
+              <line x1="100" y1="18" x2="100" y2="30" stroke="url(#gb-v)" strokeWidth="2.5" strokeLinecap="round" />
+            </g>
+          ))}
+          {/* Center dot */}
+          <circle cx="100" cy="100" r="4" fill="url(#gb-r)" />
+          {/* Direction indicator lines from center */}
+          <line x1="100" y1="60" x2="100" y2="80" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+          <line x1="100" y1="120" x2="100" y2="140" stroke="url(#gb-v)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+          <line x1="60" y1="100" x2="80" y2="100" stroke="url(#gb-h)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+          <line x1="120" y1="100" x2="140" y2="100" stroke="url(#gb-h)" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+        </svg>
+      </div>
+
+      {/* Curved arrows on sides */}
+      {variant !== 'tilt' && (
+        <>
+          <div style={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            animation: 'dof-breathe 2s ease-in-out infinite',
+          }}>
+            <svg width="260" height="260" viewBox="0 0 260 260" fill="none" style={{ filter: BF }}>
+              <BlueDefs />
+              <path d={variant === 'cw'
+                ? "M190 60 A 90 90 0 0 1 200 130"
+                : "M70 60 A 90 90 0 0 0 60 130"
+              } stroke="url(#gb-d)" strokeWidth="3" fill="none" strokeLinecap="round" />
+              <path d={variant === 'cw'
+                ? "M200 130 L210 118 L194 122Z"
+                : "M60 130 L50 118 L66 122Z"
+              } fill="url(#gb-d)" />
+            </svg>
+          </div>
+        </>
+      )}
+
+      {/* Mode label */}
+      <div style={{
+        position: 'absolute', bottom: 36, left: '50%', transform: 'translateX(-50%)',
+        fontSize: '11px', fontWeight: 600, color: '#009ACE',
+        backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
+        borderRadius: '10px', whiteSpace: 'nowrap',
+        border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      }}>
+        {ROT_LABELS[mode] ?? mode}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main dispatcher ───────────────────────────────────────────────────────────
 
 export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, containerSize, mode }: GuidanceOverlayProps) {
@@ -1979,6 +2080,9 @@ export default function GuidanceOverlay({ guidance, pointerNDC, flashActive, con
   if (mode.startsWith('fagwand-')) return <GhostWandOverlay mode={mode} g={guidance} f={flashActive} showArrows ghostFull/>;
 
   // Scan Indicator
+  // Rotation guidance
+  if (mode.startsWith('rot-')) return <RotationOverlay mode={mode} g={guidance} f={flashActive}/>;
+
   if (mode === 'scan-indicator') return <ScanIndicatorOverlay guidance={guidance} containerSize={containerSize} pointerNDC={pointerNDC} flashActive={flashActive}/>;
 
   // Surface Guide

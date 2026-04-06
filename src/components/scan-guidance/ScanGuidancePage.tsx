@@ -10,7 +10,7 @@ interface ScanGuidancePageProps {
 
 // ─── Group definitions ───────────────────────────────────────────────────────
 
-type GroupId = 'scan' | 'dof-frame' | 'bare' | 'pulse' | 'ghost-wand' | 'scan-wand' | 'ghost-scan-wand' | 'bare-ghost-wand' | 'full-ghost-wand' | 'full-arrow-ghost-wand' | 'scan-indicator';
+type GroupId = 'scan' | 'dof-frame' | 'bare' | 'pulse' | 'rotation' | 'ghost-wand' | 'scan-wand' | 'ghost-scan-wand' | 'bare-ghost-wand' | 'full-ghost-wand' | 'full-arrow-ghost-wand' | 'scan-indicator';
 
 interface GroupDef {
   id: GroupId;
@@ -60,6 +60,14 @@ const GROUPS: GroupDef[] = [
       { id: 'pulse-roll',  label: 'Roll' },
       { id: 'pulse-pitch', label: 'Pitch' },
       { id: 'pulse-yaw',   label: 'Yaw' },
+    ],
+  },
+  {
+    id: 'rotation', label: 'Rotation', accent: color.primary,
+    modes: [
+      { id: 'rot-cw',   label: 'Clockwise' },
+      { id: 'rot-ccw',  label: 'Counter-CW' },
+      { id: 'rot-tilt', label: 'Tilt' },
     ],
   },
   {
