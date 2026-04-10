@@ -233,7 +233,7 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
       g = Math.min(1, Math.max(0, g));
       b = Math.min(1, Math.max(0, b));
       
-      // Heatmap: full-coverage occlusal pressure visualization
+      // Heatmap: occlusal pressure on teeth only
       if (heatmap) {
         const px = geo.attributes.position.getX(i);
         const py = geo.attributes.position.getY(i);
@@ -243,63 +243,85 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
         const nz = (pz - minZ) / (maxZ - minZ);
         const ny = (py - minY) / (maxY - minY);
 
-        // Use vertex normal Y to detect surface facing — cusps point up, valleys point sideways
-        const normalY = geo.attributes.normal ? Math.abs(geo.attributes.normal.getY(i)) : ny;
+        // Detect teeth vs gums using original vertex color
+        // Gums are pink/red (high r, lower g/b), teeth are lighter/whiter
+        const origR = hasColors ? geo.attributes.color.getX(i) : 0.9;
+        const origG = hasColors ? geo.attributes.color.getY(i) : 0.85;
+        const origB = hasColors ? geo.attributes.color.getZ(i) : 0.8;
 
-        // Base: use normal direction — flat top surfaces (high normalY) get moderate, edges get low
-        const basePressure = normalY * 0.3;
+        const brightness = (origR + origG + origB) / 3;
+        const pinkness = origR - (origG + origB) / 2;
+        const isTooth = brightness > 0.45 && pinkness < 0.15;
 
-        // Height contributes gently — only the very top gets boost
-        const heightBoost = Math.pow(Math.max(0, ny - 0.5), 2) * 0.4;
+        if (isTooth) {
+          // Occlusal surface detection via normals
+          const normalY = geo.attributes.normal ? Math.abs(geo.attributes.normal.getY(i)) : ny;
 
-        // Surface variation from position-based noise (creates the organic spread)
-        const n1 = Math.sin(px * 0.3 + pz * 0.2) * Math.cos(py * 0.25 + 1.3);
-        const n2 = Math.cos(px * 0.18 + 2.1) * Math.sin(pz * 0.22 + py * 0.15);
-        const n3 = Math.sin(px * 0.4 + pz * 0.35 + 3.0) * 0.5;
-        const surfaceNoise = (n1 + n2 + n3) * 0.12;
+          const basePressure = normalY * 0.35;
+          const heightBoost = Math.pow(Math.max(0, ny - 0.4), 2) * 0.5;
 
-        // Sparse hot spots for cusp tips (few, sharp, small radius)
-        const hotSpots = [
-          { x: 0.15, z: 0.3, s: 35 }, { x: 0.25, z: 0.6, s: 30 },
-          { x: 0.5, z: 0.25, s: 40 },  { x: 0.75, z: 0.35, s: 32 },
-          { x: 0.85, z: 0.6, s: 28 },  { x: 0.45, z: 0.75, s: 25 },
-          { x: 0.65, z: 0.7, s: 30 },  { x: 0.35, z: 0.4, s: 35 },
-        ];
-        let hotSpotVal = 0;
-        for (const sp of hotSpots) {
-          hotSpotVal = Math.max(hotSpotVal, Math.exp(-((nx - sp.x) ** 2 + (nz - sp.z) ** 2) * sp.s));
+          // Surface noise for organic variation
+          const n1 = Math.sin(px * 0.3 + pz * 0.2) * Math.cos(py * 0.25 + 1.3);
+          const n2 = Math.cos(px * 0.18 + 2.1) * Math.sin(pz * 0.22 + py * 0.15);
+          const n3 = Math.sin(px * 0.4 + pz * 0.35 + 3.0) * 0.5;
+          const surfaceNoise = (n1 + n2 + n3) * 0.15;
+
+          // Hot spots on cusp tips
+          const hotSpots = [
+            { x: 0.12, z: 0.28, s: 40 }, { x: 0.22, z: 0.62, s: 35 },
+            { x: 0.48, z: 0.22, s: 45 }, { x: 0.72, z: 0.32, s: 38 },
+            { x: 0.88, z: 0.58, s: 32 }, { x: 0.42, z: 0.72, s: 30 },
+            { x: 0.62, z: 0.68, s: 35 }, { x: 0.32, z: 0.42, s: 40 },
+            { x: 0.55, z: 0.5, s: 28 },  { x: 0.78, z: 0.7, s: 33 },
+            { x: 0.18, z: 0.48, s: 36 }, { x: 0.38, z: 0.58, s: 30 },
+          ];
+          let hotSpotVal = 0;
+          for (const sp of hotSpots) {
+            hotSpotVal = Math.max(hotSpotVal, Math.exp(-((nx - sp.x) ** 2 + (nz - sp.z) ** 2) * sp.s));
+          }
+
+          const ridge1 = Math.exp(-((nz - 0.38) ** 2) * 3) * 0.18;
+          const ridge2 = Math.exp(-((nz - 0.62) ** 2) * 3.5) * 0.15;
+
+          let pressure = basePressure + heightBoost + surfaceNoise + hotSpotVal * 0.85 + ridge1 + ridge2;
+          pressure += Math.sin(px * 0.8 + py * 0.6) * Math.cos(pz * 0.7 + px * 0.5) * 0.04;
+          pressure = Math.min(1, Math.max(0, pressure));
+
+          // Colormap matching prep QC legend gradient
+          // Stops: #0066FF → #0197EC → #3FBAFF → #0FF4FC → #2CE9C6 → #54BF00 → #FFE600 → #FFD600 → #FFA008 → #F7771A → #FF0000 → #C61313
+          const stops = [
+            { t: 0.000, r: 0/255, g: 102/255, b: 255/255 },
+            { t: 0.091, r: 1/255, g: 151/255, b: 236/255 },
+            { t: 0.182, r: 63/255, g: 186/255, b: 255/255 },
+            { t: 0.273, r: 15/255, g: 244/255, b: 252/255 },
+            { t: 0.364, r: 44/255, g: 233/255, b: 198/255 },
+            { t: 0.455, r: 84/255, g: 191/255, b: 0/255 },
+            { t: 0.545, r: 255/255, g: 230/255, b: 0/255 },
+            { t: 0.636, r: 255/255, g: 214/255, b: 0/255 },
+            { t: 0.727, r: 255/255, g: 160/255, b: 8/255 },
+            { t: 0.818, r: 247/255, g: 119/255, b: 26/255 },
+            { t: 0.909, r: 255/255, g: 0/255, b: 0/255 },
+            { t: 1.000, r: 198/255, g: 19/255, b: 19/255 },
+          ];
+          let hr = stops[0].r, hg = stops[0].g, hb = stops[0].b;
+          for (let s = 0; s < stops.length - 1; s++) {
+            if (pressure >= stops[s].t && pressure <= stops[s + 1].t) {
+              const lt = (pressure - stops[s].t) / (stops[s + 1].t - stops[s].t);
+              hr = stops[s].r + (stops[s + 1].r - stops[s].r) * lt;
+              hg = stops[s].g + (stops[s + 1].g - stops[s].g) * lt;
+              hb = stops[s].b + (stops[s + 1].b - stops[s].b) * lt;
+              break;
+            }
+          }
+
+          // Edge-aware blend: fade in at low pressures so edges are soft
+          const edgeSoftness = Math.min(1, pressure * 3);
+          const blend = 0.9 * edgeSoftness;
+          r = r * (1 - blend) + hr * blend;
+          g = g * (1 - blend) + hg * blend;
+          b = b * (1 - blend) + hb * blend;
         }
-
-        // Gentle ridges (wide, low intensity → green/cyan bands)
-        const ridge1 = Math.exp(-((nz - 0.4) ** 2) * 2.5) * 0.15;
-        const ridge2 = Math.exp(-((nz - 0.65) ** 2) * 3) * 0.12;
-
-        // Combine: blue base, green mid, generous red on cusps/ridges
-        let pressure = basePressure + heightBoost + surfaceNoise + hotSpotVal * 0.8 + ridge1 + ridge2;
-        // Micro-texture
-        pressure += Math.sin(px * 0.8 + py * 0.6) * Math.cos(pz * 0.7 + px * 0.5) * 0.04;
-        pressure = Math.min(1, Math.max(0, pressure));
-
-        // Colormap: blue → cyan → green → red (more red coverage)
-        let hr: number, hg: number, hb: number;
-        if (pressure < 0.2) {
-          const t = pressure / 0.2;
-          hr = 0.0; hg = 0.0; hb = 0.35 + t * 0.65; // dark blue → blue
-        } else if (pressure < 0.35) {
-          const t = (pressure - 0.2) / 0.15;
-          hr = 0.0; hg = t * 0.7; hb = 1.0 - t * 0.3; // blue → cyan
-        } else if (pressure < 0.5) {
-          const t = (pressure - 0.35) / 0.15;
-          hr = t * 0.15; hg = 0.7 + t * 0.3; hb = 0.7 - t * 0.7; // cyan → green
-        } else {
-          const t = (pressure - 0.5) / 0.5;
-          hr = 0.15 + t * 0.85; hg = 1.0 - t * 0.9; hb = 0.0; // green → red (wide)
-        }
-
-        const blend = 0.92;
-        r = r * (1 - blend) + hr * blend;
-        g = g * (1 - blend) + hg * blend;
-        b = b * (1 - blend) + hb * blend;
+        // Gums keep original color
       }
 
       // Blend with blue based on feedback

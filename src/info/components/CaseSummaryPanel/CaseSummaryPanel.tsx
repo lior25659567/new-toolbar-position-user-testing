@@ -244,11 +244,29 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
           <SummarySection title="Details">
             <SummaryRow label="Due date" value={state.dueDate} />
             <SummaryRow label="Send to" value={labName} />
-            {state.notes && (
-              <div style={{ fontSize: "13px", color: "#6a7282", fontFamily: "Inter, sans-serif", fontStyle: "italic", marginTop: "4px" }}>
-                "{state.notes.length > 80 ? state.notes.slice(0, 80) + "…" : state.notes}"
-              </div>
-            )}
+            {state.notes && (() => {
+              const noteItems = state.notes.split("\n---\n");
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "4px" }}>
+                  <span style={{ fontSize: "13px", color: "#6a7282", fontFamily: "Inter, sans-serif", flexShrink: 0 }}>
+                    Notes ({noteItems.length})
+                  </span>
+                  {noteItems.map((note, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        fontSize: "12px", color: "#374151", fontFamily: "Inter, sans-serif",
+                        lineHeight: "1.4",
+                        wordBreak: "break-word",
+                        animation: "info-fade-in 0.35s ease-out both",
+                      }}
+                    >
+                      {note.length > 60 ? note.slice(0, 60) + "…" : note}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </SummarySection>
         )}
       </div>

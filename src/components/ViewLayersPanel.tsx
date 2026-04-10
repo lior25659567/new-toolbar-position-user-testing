@@ -14,9 +14,10 @@ interface LayerState {
 interface ViewLayersPanelProps {
   scanTabs: ScanTab[];
   onOpacityChange?: (opacity: number) => void;
+  onVisibilityChange?: (layerVisibility: Record<string, boolean>) => void;
 }
 
-export default function ViewLayersPanel({ scanTabs, onOpacityChange }: ViewLayersPanelProps) {
+export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilityChange }: ViewLayersPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [jawSelection, setJawSelection] = useState<JawSelection>('both');
   const [layerStates, setLayerStates] = useState<Record<string, LayerState>>(() => {
@@ -42,10 +43,19 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange }: ViewLayer
   }, [scanTabs]);
 
   const toggleVisibility = (id: string) => {
-    setLayerStates((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], visible: !prev[id].visible },
-    }));
+    setLayerStates((prev) => {
+      const next = {
+        ...prev,
+        [id]: { ...prev[id], visible: !prev[id].visible },
+      };
+      // Report visibility changes to parent
+      if (onVisibilityChange) {
+        const visMap: Record<string, boolean> = {};
+        Object.keys(next).forEach((k) => { visMap[k] = next[k].visible; });
+        onVisibilityChange(visMap);
+      }
+      return next;
+    });
   };
 
   const setOpacity = (id: string, value: number) => {

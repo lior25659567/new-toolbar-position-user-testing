@@ -91,7 +91,7 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
 }
 
 // Shared 3D model component that stays mounted across page switches
-function Component3DModelShared({ activeButtons, isViewPage, opacity = 100 }: { activeButtons: Set<number>; isViewPage: boolean; opacity?: number }) {
+function Component3DModelShared({ activeButtons, isViewPage, opacity = 100, visible = true }: { activeButtons: Set<number>; isViewPage: boolean; opacity?: number; visible?: boolean }) {
   // Check if monochrome button (index 0) is active
   const isMonochrome = activeButtons.has(0);
   // Check if feedback button (index 1) is active - only for scan page
@@ -105,7 +105,12 @@ function Component3DModelShared({ activeButtons, isViewPage, opacity = 100 }: { 
     <div
       className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%]"
       data-name="3D model - Shared"
-      style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px' }}
+      style={{
+        width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '1000px',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+        pointerEvents: visible ? 'auto' : 'none',
+      }}
     >
       <TeethModel3D
         modelUrl={upperJawModel}
@@ -2458,6 +2463,7 @@ export default function ScreenTemplate({
   const [localViewActiveButtons, setLocalViewActiveButtons] = useState<Set<number>>(new Set());
   const [patientName, setPatientName] = useState<string>('Mina Y.');
   const [modelOpacity, setModelOpacity] = useState<number>(100);
+  const [modelVisible, setModelVisible] = useState<boolean>(true);
   
   // Use external state if provided, otherwise fall back to local state
   // When using external state, use initialPage prop (which contains currentPage from App.tsx)
@@ -2547,6 +2553,7 @@ export default function ScreenTemplate({
           activeButtons={currentPage === 'scan' ? activeButtons : viewActiveButtons}
           isViewPage={currentPage === 'view'}
           opacity={modelOpacity}
+          visible={modelVisible}
         />
       )}
       {currentPage === 'scan' && activeButtons.has(2) && (
@@ -2574,6 +2581,10 @@ export default function ScreenTemplate({
         jawImageOffset={tabsOffset}
         scanTabs={externalScanTabs}
         onModelOpacityChange={setModelOpacity}
+        onModelVisibilityChange={(layerVis) => {
+          const anyVisible = Object.values(layerVis).some(Boolean);
+          setModelVisible(anyVisible);
+        }}
       />
 
       {/* Scan Tabs - only shown when showScanTabs is true (DedicatedTopToolbarPage) */}

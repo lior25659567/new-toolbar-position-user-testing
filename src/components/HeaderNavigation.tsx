@@ -20,6 +20,7 @@ interface HeaderNavigationProps {
   jawImageOffset?: number;
   scanTabs?: ScanTab[];
   onModelOpacityChange?: (opacity: number) => void;
+  onModelVisibilityChange?: (layerVisibility: Record<string, boolean>) => void;
 }
 
 // ============================================================================
@@ -439,6 +440,7 @@ export default function HeaderNavigation({
   jawImageOffset = 0,
   scanTabs,
   onModelOpacityChange,
+  onModelVisibilityChange,
 }: HeaderNavigationProps) {
   const isViewMode = currentStep === 'view';
   const isInfoMode = currentStep === 'info';
@@ -460,7 +462,7 @@ export default function HeaderNavigation({
       {!isInfoMode && (
         <div className="absolute left-[16px]" style={{ top: `${72 + jawImageOffset}px` }}>
           {isViewMode && scanTabs ? (
-            <ViewLayersPanel scanTabs={scanTabs} onOpacityChange={onModelOpacityChange} />
+            <ViewLayersPanel scanTabs={scanTabs} onOpacityChange={onModelOpacityChange} onVisibilityChange={onModelVisibilityChange} />
           ) : (
             <img
               src={jawNavigationImage}
