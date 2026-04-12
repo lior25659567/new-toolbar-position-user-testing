@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { color, font, space, radius, transition } from '../../design-system/tokens';
 import { SecondaryButton } from '../../design-system/SecondaryButton';
 import { PrimaryButton } from '../../design-system/PrimaryButton';
-
-// FDI numbering displayed from left to right on screen (patient facing viewer)
-// Upper: Q1 right (18→11) | Q2 left (21→28)
-// Lower: Q4 right (48→41) | Q3 left (31→38)
-const UPPER_RIGHT = [18, 17, 16, 15, 14, 13, 12, 11];
-const UPPER_LEFT  = [21, 22, 23, 24, 25, 26, 27, 28];
-const LOWER_RIGHT = [48, 47, 46, 45, 44, 43, 42, 41];
-const LOWER_LEFT  = [31, 32, 33, 34, 35, 36, 37, 38];
+import { TOOTH_PATHS } from './toothChartPaths';
 
 interface ToothSelectorProps {
   selected: number[];
@@ -17,68 +10,57 @@ interface ToothSelectorProps {
   compact?: boolean;
 }
 
-function ToothButton({
+function ToothShape({
   num,
+  d,
+  cx,
+  cy,
   isSelected,
   onClick,
-  position,
 }: {
   num: number;
+  d: string;
+  cx: number;
+  cy: number;
   isSelected: boolean;
   onClick: () => void;
-  position: 'upper' | 'lower';
 }) {
   const [hovered, setHovered] = useState(false);
 
+  const fill = isSelected ? color.primary : hovered ? '#E0F2FE' : color.white;
+  const stroke = isSelected ? color.primary : hovered ? color.primary : color.neutral400;
+  const strokeWidth = isSelected || hovered ? 4 : 2;
+  const textColor = isSelected ? color.white : color.textSubtle;
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: position === 'upper' ? 'column' : 'column-reverse',
-        alignItems: 'center',
-        gap: '1px',
-        cursor: 'pointer',
-        minWidth: 0,
-      }}
+    <g
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      style={{ cursor: 'pointer' }}
     >
-      {/* Tooth number */}
-      <span style={{
-        fontSize: '8px',
-        fontWeight: font.weight.medium,
-        color: isSelected ? color.primary : color.textPlaceholder,
-        lineHeight: '1',
-        userSelect: 'none',
-        width: '18px',
-        textAlign: 'center',
-      }}>
+      <title>{num}</title>
+      <path
+        d={d}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={strokeWidth}
+        style={{ transition: `fill ${transition.fast}, stroke ${transition.fast}` }}
+      />
+      <text
+        x={cx}
+        y={cy}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize="30"
+        fontWeight="400"
+        fontFamily={font.family}
+        fill={textColor}
+        style={{ pointerEvents: 'none', userSelect: 'none', transition: `fill ${transition.fast}` }}
+      >
         {num}
-      </span>
-      {/* Tooth circle */}
-      <div style={{
-        width: '18px',
-        height: '18px',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: isSelected ? color.primary : hovered ? '#E0F2FE' : 'transparent',
-        border: `1.5px solid ${isSelected ? color.primary : hovered ? color.primary : color.neutral300}`,
-        transition: `all ${transition.fast}`,
-      }}>
-        {/* Tooth icon shape */}
-        <div style={{
-          width: '8px',
-          height: '10px',
-          borderRadius: position === 'upper' ? '2px 2px 4px 4px' : '4px 4px 2px 2px',
-          backgroundColor: isSelected ? color.white : hovered ? color.primary : color.neutral400,
-          transition: `all ${transition.fast}`,
-          opacity: isSelected ? 0.9 : 0.5,
-        }} />
-      </div>
-    </div>
+      </text>
+    </g>
   );
 }
 
@@ -149,20 +131,6 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
     );
   }
 
-  const renderArch = (teeth: number[], position: 'upper' | 'lower') => (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '1px', flexShrink: 0 }}>
-      {teeth.map((num) => (
-        <ToothButton
-          key={num}
-          num={num}
-          isSelected={selected.includes(num)}
-          onClick={() => toggle(num)}
-          position={position}
-        />
-      ))}
-    </div>
-  );
-
   return (
     <div style={{
       border: `1px solid ${color.borderDefault}`,
@@ -211,30 +179,34 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
         </div>
       </div>
 
-      {/* Arch chart — content wraps inside container */}
+      {/* Arch chart — full SVG tooth illustration */}
       <div style={{
         backgroundColor: color.neutral50,
         borderRadius: radius.md,
-        padding: `${space[2]} ${space[2]}`,
+        padding: space[3],
         overflow: 'hidden',
         width: '100%',
         boxSizing: 'border-box',
+        display: 'flex',
+        justifyContent: 'center',
       }}>
-        {/* Upper arch */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: space[1] }}>
-          {renderArch(UPPER_RIGHT, 'upper')}
-          <div style={{ width: '2px', flexShrink: 0, backgroundColor: color.neutral300, borderRadius: '1px', alignSelf: 'stretch' }} />
-          {renderArch(UPPER_LEFT, 'upper')}
-        </div>
-
-        <div style={{ height: space[2] }} />
-
-        {/* Lower arch */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: space[1] }}>
-          {renderArch(LOWER_RIGHT, 'lower')}
-          <div style={{ width: '2px', flexShrink: 0, backgroundColor: color.neutral300, borderRadius: '1px', alignSelf: 'stretch' }} />
-          {renderArch(LOWER_LEFT, 'lower')}
-        </div>
+        <svg
+          viewBox="0 0 1094 1651"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ width: '100%', maxWidth: '300px', height: 'auto', display: 'block' }}
+        >
+          {TOOTH_PATHS.map(({ num, d, cx, cy }) => (
+            <ToothShape
+              key={num}
+              num={num}
+              d={d}
+              cx={cx}
+              cy={cy}
+              isSelected={selected.includes(num)}
+              onClick={() => toggle(num)}
+            />
+          ))}
+        </svg>
       </div>
 
       {/* Selected summary */}

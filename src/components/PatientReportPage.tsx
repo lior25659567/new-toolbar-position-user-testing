@@ -46,20 +46,81 @@ function InlineInput({ value, onChange, placeholder, style }: {
 
 // ─── Metadata chip in header ─────────────────────────────────────────────────
 
-function MetaChip({ label, value }: { label: string; value: string }) {
+function MetaChip({ label, value, onChange, placeholder }: {
+  label: string;
+  value: string;
+  onChange?: (v: string) => void;
+  placeholder?: string;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const editable = !!onChange;
+  const showPencil = editable && (hovered || focused);
+
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: space[1],
-      padding: `${space[1]} ${space[3]}`,
-      backgroundColor: color.neutral50,
-      borderRadius: radius.full,
-      fontSize: font.size.xs,
-      lineHeight: '1',
-    }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: space[1],
+        padding: `${space[1]} ${space[3]}`,
+        backgroundColor: color.neutral50,
+        borderRadius: radius.md,
+        fontSize: font.size.xs,
+        lineHeight: '1',
+        border: `1px solid ${focused ? color.primary : 'transparent'}`,
+        transition: `border-color ${transition.fast}`,
+      }}
+    >
       <span style={{ color: color.textPlaceholder, fontWeight: font.weight.medium }}>{label}</span>
-      <span style={{ color: color.textDefault, fontWeight: font.weight.medium }}>{value || '---'}</span>
+      {editable ? (
+        <input
+          value={value}
+          onChange={(e) => onChange!(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder || '---'}
+          style={{
+            color: color.textDefault,
+            fontWeight: font.weight.medium,
+            fontSize: font.size.xs,
+            fontFamily: font.family,
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            padding: 0,
+            margin: 0,
+            minWidth: '60px',
+            width: `${Math.max(6, (value || placeholder || '---').length + 1)}ch`,
+            lineHeight: '1',
+            cursor: 'text',
+          }}
+        />
+      ) : (
+        <span style={{ color: color.textDefault, fontWeight: font.weight.medium }}>{value || '---'}</span>
+      )}
+      {editable && (
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={focused ? color.primary : color.textPlaceholder}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            flexShrink: 0,
+            opacity: showPencil ? 1 : 0,
+            transition: `opacity ${transition.fast}`,
+          }}
+        >
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        </svg>
+      )}
     </div>
   );
 }
@@ -303,7 +364,7 @@ export default function PatientReportPage({
   const [settings, setSettings] = useState<ReportSettings>({
     reportName: 'Patient Report',
     doctorName: 'Dr. Smith',
-    clinicName: '',
+    clinicName: 'Bright Smile Clinic',
     clinicLogoUrl: '',
     pinEnabled: false,
     pin: '',
@@ -438,9 +499,24 @@ export default function PatientReportPage({
           />
 
           <div style={{ display: 'flex', gap: space[2], alignItems: 'center', flexShrink: 0 }}>
-            <MetaChip label="Dr." value={settings.doctorName} />
-            <MetaChip label="Patient" value={patient.patientName} />
-            <MetaChip label="#" value={patient.chartNumber} />
+            <MetaChip
+              label="Doctor"
+              value={settings.doctorName}
+              placeholder="Doctor name"
+              onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
+            />
+            <MetaChip
+              label="Clinic"
+              value={settings.clinicName}
+              placeholder="Clinic name"
+              onChange={(v) => { setSettings((s) => ({ ...s, clinicName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
+            />
+            <MetaChip
+              label="Patient"
+              value={patient.patientName}
+              placeholder="Patient name"
+              onChange={(v) => setPatient((p) => ({ ...p, patientName: v }))}
+            />
           </div>
         </div>
 
@@ -591,7 +667,7 @@ export default function PatientReportPage({
                     Content
                   </span>
                   <span style={{ fontSize: font.size.xs, color: color.textPlaceholder }}>
-                    {blocks.length} block{blocks.length !== 1 ? 's' : ''}
+                    {blocks.length} section{blocks.length !== 1 ? 's' : ''}
                   </span>
                 </div>
 
@@ -815,6 +891,8 @@ export default function PatientReportPage({
           overflowY: 'auto',
           padding: space[6],
           backgroundColor: color.neutral100,
+          display: 'flex',
+          flexDirection: 'column',
         }}>
           <ReportPreview
             settings={settings}

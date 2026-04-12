@@ -1087,6 +1087,16 @@ function ImageCardEditor({ block, onUpdate }: {
         />
       </div>
 
+      {/* Title */}
+      <div>
+        <FieldLabel>Title</FieldLabel>
+        <TextInput
+          value={block.title}
+          onChange={(v) => onUpdate({ title: v })}
+          placeholder="Image title"
+        />
+      </div>
+
       {/* Notes */}
       <div>
         <FieldLabel>Notes</FieldLabel>
@@ -1319,7 +1329,7 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
           <line x1="7" y1="3" x2="7" y2="11" /><line x1="3" y1="7" x2="11" y2="7" />
         </svg>
-        Add Block
+        Add Section
       </button>
 
       {open && (
