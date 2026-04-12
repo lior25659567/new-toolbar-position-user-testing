@@ -29,14 +29,14 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
   });
   const [hoveredLayerId, setHoveredLayerId] = useState<string | null>(null);
 
-  // Sync if new tabs appear
+  // Sync layer states with scan tabs — add new, remove stale
   React.useEffect(() => {
     setLayerStates((prev) => {
-      const next = { ...prev };
+      const tabIds = new Set(scanTabs.map((t) => t.id));
+      const next: Record<string, LayerState> = {};
+      // Keep existing states for current tabs
       scanTabs.forEach((tab) => {
-        if (!next[tab.id]) {
-          next[tab.id] = { visible: true, opacity: 100, selected: false };
-        }
+        next[tab.id] = prev[tab.id] || { visible: true, opacity: 100, selected: false };
       });
       return next;
     });
@@ -57,11 +57,14 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
   React.useEffect(() => {
     if (prevLayerStatesRef.current !== layerStates && onVisibilityChange) {
       const visMap: Record<string, boolean> = {};
-      Object.keys(layerStates).forEach((k) => { visMap[k] = layerStates[k].visible; });
+      // Only report for tabs that currently exist
+      scanTabs.forEach((tab) => {
+        if (layerStates[tab.id]) visMap[tab.id] = layerStates[tab.id].visible;
+      });
       onVisibilityChange(visMap);
     }
     prevLayerStatesRef.current = layerStates;
-  }, [layerStates, onVisibilityChange]);
+  }, [layerStates, onVisibilityChange, scanTabs]);
 
   const setOpacity = (id: string, value: number) => {
     setLayerStates((prev) => {
