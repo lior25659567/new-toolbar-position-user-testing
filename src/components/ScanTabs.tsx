@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 export type ScanLayerType = 'treatment-scan' | 'pre-treatment' | 'additional-scan' | 'additional-bite';
 
@@ -31,6 +31,7 @@ export default function ScanTabs({
   const [showBiteDropdown, setShowBiteDropdown] = useState(false);
   const [plusHovered, setPlusHovered] = useState(false);
   const [selectedBites, setSelectedBites] = useState<Set<BiteType>>(new Set());
+  const [newTabIds, setNewTabIds] = useState<Set<string>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -88,6 +89,8 @@ export default function ScanTabs({
     const newTabs = [...tabs, newTab];
     setTabs(newTabs);
     setActiveTabId(newTab.id);
+    setNewTabIds(prev => new Set(prev).add(newTab.id));
+    setTimeout(() => setNewTabIds(prev => { const n = new Set(prev); n.delete(newTab.id); return n; }), 400);
     setShowAddDropdown(false);
     setShowBiteDropdown(false);
     onTabsChange?.(newTabs);
@@ -139,6 +142,8 @@ export default function ScanTabs({
         };
         newTabs = [...newTabs, newTab];
         lastTab = newTab;
+        setNewTabIds(prev => new Set(prev).add(newTab.id));
+        setTimeout(() => setNewTabIds(prev => { const n = new Set(prev); n.delete(newTab.id); return n; }), 400);
       }
     });
 
@@ -158,7 +163,7 @@ export default function ScanTabs({
   const addButtonSize = 32;
 
   return (
-    <div 
+    <div
       className="w-full"
       style={{ 
         minHeight: '60px',
@@ -175,10 +180,12 @@ export default function ScanTabs({
         borderBottom: '1px solid #E5E7EB',
       }}
     >
+      <style>{`@keyframes scan-tab-in { from { opacity: 0; transform: translateX(12px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }`}</style>
       {/* Tabs */}
       {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
         const isHovered = hoveredTabId === tab.id && !isActive;
+        const isNew = newTabIds.has(tab.id);
 
         return (
           <div
@@ -194,6 +201,7 @@ export default function ScanTabs({
               borderRadius: '8px 8px 0 0',
               backgroundColor: isActive ? '#FFFFFF' : isHovered ? '#F0F0F0' : '#F5F5F5',
               transition: 'background-color 0.15s ease',
+              ...(isNew ? { animation: 'scan-tab-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both' } : {}),
               minWidth: '140px',
               maxWidth: '260px',
               overflow: 'hidden',
