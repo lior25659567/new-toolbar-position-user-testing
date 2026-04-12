@@ -109,6 +109,11 @@ export function ToothSpecCard({ specs, expanded, onToggle, dispatch }: ToothSpec
             {MATERIALS.find((m) => m.value === firstSpec.material)?.label}
           </span>
         )}
+        {firstSpec.shadeSystem && (
+          <span style={{ fontSize: "11px", color: "#6a7282", fontFamily: "Inter, sans-serif" }}>
+            {SHADE_SYSTEMS.find((s) => s.value === firstSpec.shadeSystem)?.label || firstSpec.shadeSystem}
+          </span>
+        )}
         {firstSpec.shadeBody && (
           <span style={{ fontSize: "11px", color: "#6a7282", fontFamily: "Inter, sans-serif" }}>
             {firstSpec.shadeBody}
