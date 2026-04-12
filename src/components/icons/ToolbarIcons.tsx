@@ -157,19 +157,26 @@ export function ChevronIcon({ isExpanded, direction = 'vertical' }: { isExpanded
 }
 
 // Default exports object for convenience
+// Import view icons for default export object
+import _ReviewToolIcon from '../../imports/NiriIonNew';
+import _OcclusalgramIcon from '../../imports/OcculsgramNew';
+import _MarginLineIcon from '../../imports/MarginLineNew';
+import _PrepQcIcon from '../../imports/PrepQcNew';
+import _TrimIcon from '../../imports/TrimNew';
+
 const ToolbarIcons = {
   // Scan page icons
   MonochromeIcon,
   ScanAssistIcon,
   PrepEditIcon,
-  
-  // View page icons (re-exported)
-  ReviewToolIcon: require('../../imports/NiriIonNew').default,
-  OcclusalgramIcon: require('../../imports/OcculsgramNew').default,
-  MarginLineIcon: require('../../imports/MarginLineNew').default,
-  PrepQcIcon: require('../../imports/PrepQcNew').default,
-  TrimIcon: require('../../imports/TrimNew').default,
-  
+
+  // View page icons
+  ReviewToolIcon: _ReviewToolIcon,
+  OcclusalgramIcon: _OcclusalgramIcon,
+  MarginLineIcon: _MarginLineIcon,
+  PrepQcIcon: _PrepQcIcon,
+  TrimIcon: _TrimIcon,
+
   // Utility icons
   ChevronIcon,
 };

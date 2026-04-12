@@ -303,6 +303,7 @@ export default function PatientReportPage({
   const [settings, setSettings] = useState<ReportSettings>({
     reportName: 'Patient Report',
     doctorName: 'Dr. Smith',
+    clinicName: '',
     clinicLogoUrl: '',
     pinEnabled: false,
     pin: '',
@@ -610,31 +611,19 @@ export default function PatientReportPage({
                   />
                 </SidebarSection>
 
-                <SidebarSection title="Patient">
-                  <SmallInput
-                    value={patient.patientName}
-                    onChange={(v) => setPatient((p) => ({ ...p, patientName: v }))}
-                    placeholder="Patient name"
-                  />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2] }}>
-                    <SmallInput
-                      value={patient.birthDate}
-                      onChange={(v) => setPatient((p) => ({ ...p, birthDate: v }))}
-                      placeholder="Birth date"
-                    />
-                    <SmallInput
-                      value={patient.chartNumber}
-                      onChange={(v) => setPatient((p) => ({ ...p, chartNumber: v }))}
-                      placeholder="Chart #"
-                    />
-                  </div>
-                </SidebarSection>
-
                 <SidebarSection title="Doctor">
                   <SmallInput
                     value={settings.doctorName}
                     onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
                     placeholder="Doctor name"
+                  />
+                </SidebarSection>
+
+                <SidebarSection title="Clinic">
+                  <SmallInput
+                    value={settings.clinicName}
+                    onChange={(v) => { setSettings((s) => ({ ...s, clinicName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
+                    placeholder="Clinic name"
                   />
                   <div>
                     {settings.clinicLogoUrl ? (
@@ -719,6 +708,14 @@ export default function PatientReportPage({
                       </label>
                     )}
                   </div>
+                </SidebarSection>
+
+                <SidebarSection title="Patient">
+                  <SmallInput
+                    value={patient.patientName}
+                    onChange={(v) => setPatient((p) => ({ ...p, patientName: v }))}
+                    placeholder="Patient name"
+                  />
                 </SidebarSection>
 
                 {/* Signature */}

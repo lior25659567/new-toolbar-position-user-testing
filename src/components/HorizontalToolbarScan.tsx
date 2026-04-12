@@ -207,7 +207,7 @@ function ExpandIcon({ isExpanded }: { isExpanded: boolean }) {
 // Jaw Type Selector – upper / lower / both
 type JawType = 'upper' | 'lower' | 'both';
 
-function UpperJawIcon({ isActive }: { isActive: boolean }) {
+export function UpperJawIcon({ isActive }: { isActive: boolean }) {
   const c = isActive ? '#009ACE' : '#717182';
   const sw1 = 1.6;
   const sw2 = 1.1;
@@ -219,7 +219,7 @@ function UpperJawIcon({ isActive }: { isActive: boolean }) {
   );
 }
 
-function LowerJawIcon({ isActive }: { isActive: boolean }) {
+export function LowerJawIcon({ isActive }: { isActive: boolean }) {
   const c = isActive ? '#009ACE' : '#717182';
   const sw1 = 1.6;
   const sw2 = 1.1;
@@ -231,7 +231,7 @@ function LowerJawIcon({ isActive }: { isActive: boolean }) {
   );
 }
 
-function BothJawsIcon({ isActive }: { isActive: boolean }) {
+export function BothJawsIcon({ isActive }: { isActive: boolean }) {
   const c = isActive ? '#009ACE' : '#717182';
   const sw1 = 1.6;
   const sw2 = 1.1;

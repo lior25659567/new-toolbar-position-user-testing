@@ -111,6 +111,7 @@ export interface PatientInfo {
 export interface ReportSettings {
   reportName: string;
   doctorName: string;
+  clinicName: string;
   clinicLogoUrl: string;
   pinEnabled: boolean;
   pin: string;
