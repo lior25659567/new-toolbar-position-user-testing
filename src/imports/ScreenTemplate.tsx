@@ -2582,8 +2582,9 @@ export default function ScreenTemplate({
         scanTabs={externalScanTabs}
         onModelOpacityChange={setModelOpacity}
         onModelVisibilityChange={(layerVis) => {
-          const anyVisible = Object.values(layerVis).some(Boolean);
-          setModelVisible(anyVisible);
+          // Hide model if any layer is toggled hidden
+          const allVisible = Object.values(layerVis).every(Boolean);
+          setModelVisible(allVisible);
         }}
       />
 
