@@ -205,18 +205,32 @@ function UndercutIcon() {
   );
 }
 
+function DemoIcon() {
+  return (
+    <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="16" y="22" width="80" height="56" rx="6" stroke="#009ACE" strokeWidth="2" fill="#F0F9FF"/>
+      <polygon points="48,40 48,60 66,50" fill="#009ACE"/>
+      <line x1="40" y1="88" x2="72" y2="88" stroke="#009ACE" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="52" y1="78" x2="52" y2="88" stroke="#009ACE" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="60" y1="78" x2="60" y2="88" stroke="#009ACE" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
 export default function HomePage({
   onSelectLayout,
   onOpenDesignSystem,
   onOpenPatientReport,
   onOpenScanGuidance,
   onOpenUndercut,
+  onOpenDemo,
 }: {
   onSelectLayout: (layout: 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top') => void;
   onOpenDesignSystem?: () => void;
   onOpenPatientReport?: () => void;
   onOpenScanGuidance?: () => void;
   onOpenUndercut?: () => void;
+  onOpenDemo?: () => void;
   combinedPanelMode?: boolean;
   onCombinedPanelModeChange?: (enabled: boolean) => void;
 }) {
@@ -231,10 +245,11 @@ export default function HomePage({
       if ((e.key === 'p' || e.key === 'P') && onOpenPatientReport) onOpenPatientReport();
       if ((e.key === 'g' || e.key === 'G') && onOpenScanGuidance) onOpenScanGuidance();
       if ((e.key === 'u' || e.key === 'U') && onOpenUndercut) onOpenUndercut();
+      if ((e.key === 'd' || e.key === 'D') && onOpenDemo) onOpenDemo();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onSelectLayout, onOpenPatientReport, onOpenScanGuidance, onOpenUndercut]);
+  }, [onSelectLayout, onOpenPatientReport, onOpenScanGuidance, onOpenUndercut, onOpenDemo]);
 
   return (
     <div
@@ -316,6 +331,12 @@ export default function HomePage({
           icon={<UndercutIcon />}
           onClick={() => onOpenUndercut?.()}
           shortcut="U"
+        />
+        <LayoutCard
+          title="Demo"
+          icon={<DemoIcon />}
+          onClick={() => onOpenDemo?.()}
+          shortcut="D"
         />
       </div>
 

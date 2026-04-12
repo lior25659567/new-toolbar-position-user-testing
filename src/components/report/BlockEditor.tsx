@@ -1337,10 +1337,10 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
           <div style={{ position: 'fixed', inset: 0, zIndex: 9 }} onClick={() => setOpen(false)} />
           <div style={{
             position: 'absolute',
-            top: '100%',
+            bottom: '100%',
             left: 0,
             right: 0,
-            marginTop: space[1],
+            marginBottom: space[1],
             backgroundColor: color.bgSurface,
             border: `1px solid ${color.borderDefault}`,
             borderRadius: radius.lg,
@@ -1595,34 +1595,46 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
         document.body
       )}
 
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: space[2] }}>
-        <ActionBottomButton
-          label="Upload from Device"
-          icon={
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 9.5V4M4.5 6L7 3.5 9.5 6" />
-              <path d="M2 9.5v1.5a1 1 0 001 1h8a1 1 0 001-1V9.5" />
-            </svg>
-          }
-          onClick={() => fileRef.current?.click()}
-        />
-        <ActionBottomButton
-          label="Select from Gallery"
-          icon={
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="1" width="5" height="5" rx="1" />
-              <rect x="8" y="1" width="5" height="5" rx="1" />
-              <rect x="1" y="8" width="5" height="5" rx="1" />
-              <rect x="8" y="8" width="5" height="5" rx="1" />
-            </svg>
-          }
-          onClick={() => setShowGallery(true)}
-        />
+      {/* Sticky footer: action buttons + add block menu pinned to the bottom of the scroll container */}
+      <div style={{
+        position: 'sticky',
+        bottom: 0,
+        marginTop: space[2],
+        paddingTop: space[3],
+        paddingBottom: space[2],
+        backgroundColor: color.bgSurface,
+        borderTop: `1px solid ${color.borderDefault}`,
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: space[2],
+      }}>
+        <div style={{ display: 'flex', gap: space[2] }}>
+          <ActionBottomButton
+            label="Upload from Device"
+            icon={
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 9.5V4M4.5 6L7 3.5 9.5 6" />
+                <path d="M2 9.5v1.5a1 1 0 001 1h8a1 1 0 001-1V9.5" />
+              </svg>
+            }
+            onClick={() => fileRef.current?.click()}
+          />
+          <ActionBottomButton
+            label="Select from Gallery"
+            icon={
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="1" width="5" height="5" rx="1" />
+                <rect x="8" y="1" width="5" height="5" rx="1" />
+                <rect x="1" y="8" width="5" height="5" rx="1" />
+                <rect x="8" y="8" width="5" height="5" rx="1" />
+              </svg>
+            }
+            onClick={() => setShowGallery(true)}
+          />
+        </div>
+        <AddBlockMenu onAdd={addBlock} />
       </div>
-
-      {/* Add block menu */}
-      <AddBlockMenu onAdd={addBlock} />
 
       <input
         ref={fileRef}

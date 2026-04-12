@@ -8,6 +8,7 @@ import SignaturePanel from './report/SignaturePanel';
 import type { ImageBlock, ComparisonBlock, CostSummaryBlock, PatientInfo, ReportSettings } from './report/types';
 import { createImageBlock, REPORT_TEMPLATES } from './report/types';
 import ShareModal from './report/ShareModal';
+import PatientReportDemoPage from './report/PatientReportDemoPage';
 
 type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
 
@@ -389,6 +390,7 @@ export default function PatientReportPage({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [signatureWarning, setSignatureWarning] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(true);
+  const [demoOpen, setDemoOpen] = useState(false);
   const signatureRef = useRef<HTMLDivElement>(null);
 
   // Clear warning when signature is added
@@ -541,6 +543,14 @@ export default function PatientReportPage({
               'Saving...'
             )}
           </span>
+
+          {/* View Demo */}
+          <SecondaryButton size={36} onClick={() => setDemoOpen(true)}>
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="5,3 5,11 11,7" fill="currentColor" stroke="none" />
+            </svg>
+            View Demo
+          </SecondaryButton>
 
           {/* Share */}
           <SecondaryButton size={36} onClick={() => handleExportOrShare('share')}>
@@ -908,6 +918,8 @@ export default function PatientReportPage({
         reportName={settings.reportName}
         patientName={patient.patientName}
       />
+
+      {demoOpen && <PatientReportDemoPage onClose={() => setDemoOpen(false)} />}
     </div>
   );
 }

@@ -3,12 +3,13 @@ import ScreenTemplate from "./imports/ScreenTemplate";
 import HomePage from "./components/HomePage";
 import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
 import PatientReportPage from "./components/PatientReportPage";
+import DemoPage from "./components/demo/DemoPage";
 import ScanGuidancePage from "./components/scan-guidance/ScanGuidancePage";
 import UndercutPage from "./components/undercut/UndercutPage";
 import { DesignSystemPage } from "./design-system";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut' | 'demo'>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut') => {
+  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut' | 'demo') => {
     setCurrentView(layout);
   };
   
@@ -118,6 +119,7 @@ export default function App() {
           onOpenPatientReport={() => setCurrentView('patient-report')}
           onOpenScanGuidance={() => setCurrentView('scan-guidance')}
           onOpenUndercut={() => setCurrentView('undercut')}
+          onOpenDemo={() => setCurrentView('demo')}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
         />
@@ -220,6 +222,12 @@ export default function App() {
 
       {currentView === 'undercut' && (
         <UndercutPage
+          onBackToHome={handleBackToHome}
+        />
+      )}
+
+      {currentView === 'demo' && (
+        <DemoPage
           onBackToHome={handleBackToHome}
         />
       )}
