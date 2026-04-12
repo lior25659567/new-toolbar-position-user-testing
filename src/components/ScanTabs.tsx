@@ -61,13 +61,15 @@ export default function ScanTabs({
 
   const handleTabClose = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation();
+    const closedIndex = tabs.findIndex(t => t.id === tabId);
     const newTabs = tabs.filter(t => t.id !== tabId);
     if (newTabs.length === 0) return;
     setTabs(newTabs);
     onTabsChange?.(newTabs);
     if (activeTabId === tabId) {
-      setActiveTabId(newTabs[0].id);
-      onTabSelect?.(newTabs[0]);
+      const prevTab = newTabs[Math.min(closedIndex, newTabs.length) - 1] || newTabs[0];
+      setActiveTabId(prevTab.id);
+      onTabSelect?.(prevTab);
     }
   };
 
