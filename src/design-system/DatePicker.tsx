@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as ReactDOM from "react-dom";
 import { color, font, radius, transition, space } from "./tokens";
 
 export interface DatePickerProps {
@@ -40,9 +41,10 @@ function toISO(y: number, m: number, d: number): string {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-function CalendarDropdown({ value, min, max, onChange, onClose }: {
+function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
   value?: string; min?: string; max?: string;
   onChange: (v: string) => void; onClose: () => void;
+  anchorRect: { top: number; left: number; height: number };
 }) {
   const today = new Date();
   const selected = value ? new Date(value + "T00:00:00") : null;
@@ -93,9 +95,12 @@ function CalendarDropdown({ value, min, max, onChange, onClose }: {
     return today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === d;
   };
 
-  return (
+  const dropdown = (
     <div ref={ref} style={{
-      position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 9999,
+      position: "fixed",
+      top: anchorRect.top + anchorRect.height + 4,
+      left: anchorRect.left,
+      zIndex: 9999,
       backgroundColor: "white", border: `1px solid ${color.borderDefault}`,
       borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
       padding: "12px", width: "280px",
@@ -175,6 +180,8 @@ function CalendarDropdown({ value, min, max, onChange, onClose }: {
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(dropdown, document.body);
 }
 
 const navBtnStyle: React.CSSProperties = {
@@ -200,8 +207,19 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  const [anchorRect, setAnchorRect] = React.useState({ top: 0, left: 0, height: 0 });
   const hasError = Boolean(error);
   const hasValue = Boolean(value || defaultValue);
+
+  const handleOpen = () => {
+    if (disabled) return;
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setAnchorRect({ top: rect.top, left: rect.left, height: rect.height });
+    }
+    setOpen(!open);
+  };
 
   return (
     <div style={{
@@ -216,9 +234,10 @@ export function DatePicker({
       )}
       <div style={{ position: "relative" }}>
         <button
+          ref={btnRef}
           type="button"
           disabled={disabled}
-          onClick={() => !disabled && setOpen(!open)}
+          onClick={handleOpen}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           style={{
@@ -245,6 +264,7 @@ export function DatePicker({
             value={value}
             min={min}
             max={max}
+            anchorRect={anchorRect}
             onChange={(v) => { onChange?.(v); }}
             onClose={() => setOpen(false)}
           />
