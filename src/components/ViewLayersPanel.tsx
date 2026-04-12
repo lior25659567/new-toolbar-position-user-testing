@@ -48,15 +48,20 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
         ...prev,
         [id]: { ...prev[id], visible: !prev[id].visible },
       };
-      // Report visibility changes to parent
-      if (onVisibilityChange) {
-        const visMap: Record<string, boolean> = {};
-        Object.keys(next).forEach((k) => { visMap[k] = next[k].visible; });
-        onVisibilityChange(visMap);
-      }
       return next;
     });
   };
+
+  // Report visibility changes to parent whenever layerStates change
+  const prevLayerStatesRef = React.useRef(layerStates);
+  React.useEffect(() => {
+    if (prevLayerStatesRef.current !== layerStates && onVisibilityChange) {
+      const visMap: Record<string, boolean> = {};
+      Object.keys(layerStates).forEach((k) => { visMap[k] = layerStates[k].visible; });
+      onVisibilityChange(visMap);
+    }
+    prevLayerStatesRef.current = layerStates;
+  }, [layerStates, onVisibilityChange]);
 
   const setOpacity = (id: string, value: number) => {
     setLayerStates((prev) => {
