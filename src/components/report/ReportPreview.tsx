@@ -86,14 +86,14 @@ type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
 function PreviewTeethTags({ teeth }: { teeth: number[] }) {
   if (teeth.length === 0) return null;
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: space[2] }}>
-      <span style={{ fontSize: '10px', color: color.textSubtle, marginRight: '4px', lineHeight: '20px' }}>Teeth:</span>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: space[2] }}>
+      <span style={{ fontSize: '12px', color: color.textSubtle, marginRight: '4px', lineHeight: '20px' }}>Teeth:</span>
       {teeth.map((t) => (
         <span key={t} style={{
           display: 'inline-flex',
           alignItems: 'center',
-          padding: `2px 8px`,
-          fontSize: '10px',
+          padding: `2px 9px`,
+          fontSize: '12px',
           fontWeight: 500,
           color: '#374151',
           backgroundColor: '#F9FAFB',
@@ -169,14 +169,14 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
       )}
 
       {hasMeta && (
-        <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
           {block.title && (
-            <div style={{ fontSize: '10px', fontWeight: 600, color: color.textHeading }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: color.textHeading }}>
               {block.title}
             </div>
           )}
           {hasNotes && (
-            <div style={{ fontSize: '9px', color: color.textSubtle, lineHeight: '1.4' }}>
+            <div style={{ fontSize: '12px', color: color.textSubtle, lineHeight: '1.45' }}>
               {block.notes}
             </div>
           )}
