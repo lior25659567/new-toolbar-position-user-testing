@@ -70,7 +70,7 @@ export function Modal({ open, onClose, title, children, footer, width = 480 }: M
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: `${space[5]} ${space[6]}`,
+              padding: `${space[3]} ${space[5]}`,
               borderBottom: `1px solid ${color.borderDefault}`,
               flexShrink: 0,
             }}

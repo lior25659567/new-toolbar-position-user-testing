@@ -544,14 +544,6 @@ export default function PatientReportPage({
             )}
           </span>
 
-          {/* View Demo */}
-          <SecondaryButton size={36} onClick={() => setDemoOpen(true)}>
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="5,3 5,11 11,7" fill="currentColor" stroke="none" />
-            </svg>
-            View Demo
-          </SecondaryButton>
-
           {/* Share */}
           <SecondaryButton size={36} onClick={() => handleExportOrShare('share')}>
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

@@ -806,24 +806,77 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
       />
 
       {/* Modal */}
-      <div style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '1200px',
-        maxWidth: '96vw',
-        height: '85vh',
-        maxHeight: '94vh',
-        backgroundColor: color.white,
-        borderRadius: radius.xl,
-        boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04)',
-        zIndex: 101,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}>
-        {/* No header */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gallery-modal-title"
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '1200px',
+          maxWidth: '96vw',
+          height: '85vh',
+          maxHeight: '94vh',
+          backgroundColor: color.white,
+          borderRadius: radius.lg,
+          boxShadow: shadow.lg,
+          zIndex: 101,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          fontFamily: font.family,
+        }}
+      >
+        {/* ── Header ── */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: `${space[3]} ${space[5]}`,
+            borderBottom: `1px solid ${color.borderDefault}`,
+            flexShrink: 0,
+          }}
+        >
+          <h2
+            id="gallery-modal-title"
+            style={{
+              margin: 0,
+              fontSize: font.size.lg,
+              fontWeight: font.weight.semibold,
+              color: color.textHeading,
+              letterSpacing: font.tracking.tight,
+            }}
+          >
+            Image Gallery
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 32,
+              height: 32,
+              border: 'none',
+              background: 'none',
+              borderRadius: radius.sm,
+              cursor: 'pointer',
+              color: color.textSubtle,
+              transition: transition.fast,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = color.bgHover; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="4" y1="4" x2="12" y2="12" /><line x1="12" y1="4" x2="4" y2="12" />
+            </svg>
+          </button>
+        </div>
 
         {/* ── Image grid ── */}
         <div style={{
