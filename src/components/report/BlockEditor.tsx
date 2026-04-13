@@ -844,7 +844,7 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
             id="gallery-modal-title"
             style={{
               margin: 0,
-              fontSize: font.size.lg,
+              fontSize: font.size.md,
               fontWeight: font.weight.semibold,
               color: color.textHeading,
               letterSpacing: font.tracking.tight,
@@ -1055,7 +1055,6 @@ function GalleryThumbnail({ url, label, onClick, isSelected, showCheckbox }: {
         aspectRatio: '1',
         overflow: 'hidden',
         backgroundColor: color.neutral100,
-        borderRadius: `${isSelected ? '10px' : radius.lg} ${isSelected ? '10px' : radius.lg} 0 0`,
         position: 'relative',
       }}>
         <img
@@ -1072,27 +1071,6 @@ function GalleryThumbnail({ url, label, onClick, isSelected, showCheckbox }: {
         />
       </div>
 
-      {/* Label below image */}
-      <div style={{
-        padding: `${space[2]} ${space[2]}`,
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: isSelected ? '#E0F2FE' : 'transparent',
-      }}>
-        <span style={{
-          fontSize: font.size.xs,
-          fontWeight: font.weight.medium,
-          color: isSelected ? color.primary : color.textDefault,
-          display: 'block',
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          transition: `color ${transition.fast}`,
-        }}>
-          {label}
-        </span>
-      </div>
     </button>
   );
 }

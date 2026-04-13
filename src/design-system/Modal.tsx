@@ -79,7 +79,7 @@ export function Modal({ open, onClose, title, children, footer, width = 480 }: M
               id="modal-title"
               style={{
                 margin: 0,
-                fontSize: font.size.lg,
+                fontSize: font.size.md,
                 fontWeight: font.weight.semibold,
                 color: color.textHeading,
                 letterSpacing: font.tracking.tight,
