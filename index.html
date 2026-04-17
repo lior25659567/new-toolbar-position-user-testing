@@ -9,6 +9,15 @@
       html, body { height: 100%; min-height: 100vh; width: 100%; margin: 0; padding: 0; }
       #root { height: 100%; min-height: 100vh; width: 100%; }
     </style>
+    <script>
+      // FOUC prevention: apply saved theme before first paint
+      (function(){
+        var t = localStorage.getItem('ds-theme');
+        var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

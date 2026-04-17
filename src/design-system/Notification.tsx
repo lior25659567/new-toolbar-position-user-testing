@@ -12,10 +12,10 @@ export interface NotificationProps {
 }
 
 const palette: Record<NotificationType, { bg: string; border: string; icon: string; title: string }> = {
-  info:    { bg: "#E6F7FF", border: "#BAE7FF", icon: color.primary,  title: "#005780" },
-  success: { bg: color.successLight, border: color.successBorder, icon: color.success, title: color.successText },
-  warning: { bg: "#FFF7E6", border: "#FFE7BA", icon: "#D48806", title: "#874D00" },
-  error:   { bg: "#FFF0F3", border: "#FFE0E7", icon: color.danger, title: "#A30F34" },
+  info:    { bg: "var(--ds-notif-info-bg)",    border: "var(--ds-notif-info-border)",    icon: "var(--ds-notif-info-icon)",    title: "var(--ds-color-info)" },
+  success: { bg: "var(--ds-notif-success-bg)", border: "var(--ds-notif-success-border)", icon: "var(--ds-notif-success-icon)", title: "var(--ds-color-success)" },
+  warning: { bg: "var(--ds-notif-warning-bg)", border: "var(--ds-notif-warning-border)", icon: "var(--ds-notif-warning-icon)", title: "var(--ds-color-warning)" },
+  error:   { bg: "var(--ds-notif-error-bg)",   border: "var(--ds-notif-error-border)",   icon: "var(--ds-notif-error-icon)",   title: color.danger },
 };
 
 const icons: Record<NotificationType, React.ReactNode> = {

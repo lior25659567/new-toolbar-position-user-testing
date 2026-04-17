@@ -1,6 +1,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { ThemeProvider } from "./design-system/ThemeProvider";
 import App from "./App.tsx";
+import "./design-system/theme.css";
 import "./index.css";
 
 class ErrorBoundary extends React.Component<
@@ -45,7 +47,9 @@ if (!root) {
   root.style.minHeight = "100vh";
   createRoot(root).render(
     <ErrorBoundary>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

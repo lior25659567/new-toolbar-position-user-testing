@@ -101,8 +101,8 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
       top: anchorRect.top + anchorRect.height + 4,
       left: anchorRect.left,
       zIndex: 9999,
-      backgroundColor: "white", border: `1px solid ${color.borderDefault}`,
-      borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+      backgroundColor: color.bgSurface, border: `1px solid ${color.borderDefault}`,
+      borderRadius: "12px", boxShadow: "var(--ds-shadow-lg)",
       padding: "12px", width: "280px",
       animation: "dp-fade-in 0.15s ease-out",
     }}>
@@ -146,7 +146,7 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
               style={{
                 width: "100%", aspectRatio: "1", display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: "12px", fontWeight: sel ? 600 : 400, fontFamily: font.family,
-                color: disabled ? color.neutral300 : sel ? "white" : tod ? color.primary : color.textDefault,
+                color: disabled ? color.neutral300 : sel ? color.textOnPrimary : tod ? color.primary : color.textDefault,
                 backgroundColor: sel ? color.primary : "transparent",
                 border: tod && !sel ? `1px solid ${color.primary}` : "1px solid transparent",
                 borderRadius: "50%", cursor: disabled ? "default" : "pointer",
@@ -172,7 +172,7 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
             padding: "4px 12px", borderRadius: "6px",
             transition: `background-color ${transition.fast}`,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#E0F2FE")}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--ds-color-primary-subtle)")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
         >
           Today
@@ -187,7 +187,7 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
 const navBtnStyle: React.CSSProperties = {
   width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center",
   border: "none", borderRadius: "6px", backgroundColor: "transparent",
-  cursor: "pointer", color: "#6a7282", transition: "background-color 0.1s",
+  cursor: "pointer", color: color.textSubtle, transition: "background-color 0.1s",
 };
 
 export function DatePicker({

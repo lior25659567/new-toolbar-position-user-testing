@@ -7,7 +7,10 @@ export type BlockType =
   | 'diagnosis'
   | 'treatment'
   | 'cost-summary'
-  | 'comparison';
+  | 'comparison'
+  | 'rx'
+  | 'next-appointment'
+  | 'patient-instructions';
 
 export interface BaseBlock {
   id: string;
@@ -75,6 +78,39 @@ export interface ComparisonBlock extends BaseBlock {
   notes: string;
 }
 
+export interface RxItem {
+  id: string;
+  medication: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+}
+
+export interface RxBlock extends BaseBlock {
+  type: 'rx';
+  items: RxItem[];
+  notes: string;
+}
+
+export interface NextAppointmentBlock extends BaseBlock {
+  type: 'next-appointment';
+  date: string;
+  time: string;
+  procedure: string;
+  instructions: string;
+}
+
+export interface InstructionItem {
+  id: string;
+  text: string;
+}
+
+export interface PatientInstructionsBlock extends BaseBlock {
+  type: 'patient-instructions';
+  title: string;
+  items: InstructionItem[];
+}
+
 export type ReportBlock =
   | ImageBlock
   | NotesBlock
@@ -82,7 +118,10 @@ export type ReportBlock =
   | DiagnosisBlock
   | TreatmentBlock
   | CostSummaryBlock
-  | ComparisonBlock;
+  | ComparisonBlock
+  | RxBlock
+  | NextAppointmentBlock
+  | PatientInstructionsBlock;
 
 // ─── Annotation ──────────────────────────────────────────────────────────────
 
@@ -111,6 +150,7 @@ export interface PatientInfo {
 export interface ReportSettings {
   reportName: string;
   doctorName: string;
+  doctorImageUrl: string;
   clinicName: string;
   clinicLogoUrl: string;
   pinEnabled: boolean;
@@ -170,6 +210,28 @@ export function createComparisonBlock(): ComparisonBlock {
   };
 }
 
+export function createRxBlock(): RxBlock {
+  return {
+    id: uid(), type: 'rx', collapsed: false, notes: '',
+    items: [{ id: uid(), medication: '', dosage: '', frequency: '', duration: '' }],
+  };
+}
+
+export function createNextAppointmentBlock(): NextAppointmentBlock {
+  return {
+    id: uid(), type: 'next-appointment', collapsed: false,
+    date: '', time: '', procedure: '', instructions: '',
+  };
+}
+
+export function createPatientInstructionsBlock(): PatientInstructionsBlock {
+  return {
+    id: uid(), type: 'patient-instructions', collapsed: false,
+    title: 'Post-Treatment Instructions',
+    items: [{ id: uid(), text: '' }],
+  };
+}
+
 // ─── Block metadata for the "Add block" menu ────────────────────────────────
 
 export const BLOCK_CATALOG: { type: BlockType; label: string; description: string }[] = [
@@ -180,6 +242,9 @@ export const BLOCK_CATALOG: { type: BlockType; label: string; description: strin
   { type: 'treatment',     label: 'Treatment',        description: 'Treatment plan and cost' },
   { type: 'cost-summary',  label: 'Cost Summary',     description: 'Itemized cost table' },
   { type: 'comparison',    label: 'Before / After',   description: 'Side-by-side comparison' },
+  { type: 'rx',              label: 'Prescription',     description: 'Medication & dosage details' },
+  { type: 'next-appointment', label: 'Next Appointment', description: 'Schedule follow-up visit' },
+  { type: 'patient-instructions', label: 'Patient Instructions', description: 'Post-treatment care checklist' },
 ];
 
 // ─── Templates ───────────────────────────────────────────────────────────────
@@ -190,8 +255,9 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     name: 'General Scan Report',
     description: 'Standard clinical scan with images and notes',
     blocks: [
-      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Full arch scan', notes: 'Replace with your clinical scan image', teeth: [], diagnosis: '', treatment: '', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: false },
-      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Area of concern', notes: 'Add detailed view of the region of interest', teeth: [], diagnosis: 'Replace with diagnosis', treatment: 'Replace with treatment plan', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
+      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Full arch scan', notes: '', teeth: [], diagnosis: '', treatment: '', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: false },
+      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Area of concern', notes: '', teeth: [], diagnosis: '', treatment: '', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
+      { type: 'notes', collapsed: false, content: '' },
     ],
   },
   {
@@ -199,9 +265,12 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     name: 'Implant Planning',
     description: 'Pre-operative implant assessment',
     blocks: [
-      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Pre-operative scan', notes: 'Replace with pre-op scan image', teeth: [19], diagnosis: 'Missing tooth', treatment: 'Implant placement', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
-      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Implant planning view', notes: 'Replace with planning software screenshot', teeth: [19], diagnosis: '', treatment: '', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: false },
+      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Pre-operative scan', notes: '', teeth: [19], diagnosis: 'Missing tooth', treatment: 'Implant placement', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
+      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Implant planning view', notes: '', teeth: [19], diagnosis: '', treatment: '', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: false },
       { type: 'cost-summary', collapsed: false, items: [{ id: 'tpl-1', description: 'Implant placement', amount: '$2,500' }, { id: 'tpl-2', description: 'Abutment', amount: '$800' }, { id: 'tpl-3', description: 'Crown', amount: '$1,200' }] },
+      { type: 'rx', collapsed: false, notes: '', items: [{ id: 'tpl-rx1', medication: 'Amoxicillin', dosage: '500mg', frequency: '3x daily', duration: '7 days' }, { id: 'tpl-rx2', medication: 'Ibuprofen', dosage: '600mg', frequency: 'Every 6 hours as needed', duration: '5 days' }] },
+      { type: 'patient-instructions', collapsed: false, title: 'Post-Surgical Instructions', items: [{ id: 'tpl-pi1', text: 'Apply ice packs for 20 min on / 20 min off for the first 24 hours' }, { id: 'tpl-pi2', text: 'Eat soft foods for the first 48 hours' }, { id: 'tpl-pi3', text: 'Do not rinse, spit, or use a straw for 24 hours' }, { id: 'tpl-pi4', text: 'Take prescribed antibiotics as directed' }] },
+      { type: 'next-appointment', collapsed: false, date: '', time: '', procedure: 'Post-op check & suture removal', instructions: 'Bring any medications you are currently taking' },
     ],
   },
   {
@@ -209,9 +278,11 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     name: 'Crown Preparation',
     description: 'Crown prep documentation',
     blocks: [
-      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Initial tooth condition', notes: 'Replace with initial scan of the tooth', teeth: [5], diagnosis: 'Fractured cusp', treatment: 'Full crown restoration', estimatedCost: '$1,200', treatmentDate: '', annotations: [], showClinicalFields: true },
-      { type: 'comparison', collapsed: false, labelA: 'Before prep', labelB: 'After prep', notes: 'Replace images with before and after preparation scans', imageA: { file: null, previewUrl: '' }, imageB: { file: null, previewUrl: '' } },
+      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Initial tooth condition', notes: '', teeth: [5], diagnosis: 'Fractured cusp', treatment: 'Full crown restoration', estimatedCost: '$1,200', treatmentDate: '', annotations: [], showClinicalFields: true },
+      { type: 'comparison', collapsed: false, labelA: 'Before prep', labelB: 'After prep', notes: '', imageA: { file: null, previewUrl: '' }, imageB: { file: null, previewUrl: '' } },
       { type: 'cost-summary', collapsed: false, items: [{ id: 'tpl-c1', description: 'Crown preparation', amount: '$400' }, { id: 'tpl-c2', description: 'Ceramic crown', amount: '$1,200' }] },
+      { type: 'patient-instructions', collapsed: false, title: 'Temporary Crown Care', items: [{ id: 'tpl-ci1', text: 'Avoid sticky or hard foods on the temporary crown' }, { id: 'tpl-ci2', text: 'Brush gently around the temporary crown' }, { id: 'tpl-ci3', text: 'Call the office if the temporary crown comes loose' }] },
+      { type: 'next-appointment', collapsed: false, date: '', time: '', procedure: 'Permanent crown cementation', instructions: 'Appointment takes approximately 30 minutes' },
     ],
   },
   {
@@ -219,8 +290,11 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     name: 'Follow-up Visit',
     description: 'Progress tracking with before/after',
     blocks: [
-      { type: 'comparison', collapsed: false, labelA: 'Previous visit', labelB: 'Current visit', notes: 'Replace with comparison images showing treatment progress', imageA: { file: null, previewUrl: '' }, imageB: { file: null, previewUrl: '' } },
-      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Current condition', notes: 'Replace with current scan showing healing progress', teeth: [], diagnosis: 'Healing as expected', treatment: 'Continue monitoring', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
+      { type: 'comparison', collapsed: false, labelA: 'Previous visit', labelB: 'Current visit', notes: '', imageA: { file: null, previewUrl: '' }, imageB: { file: null, previewUrl: '' } },
+      { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Current condition', notes: '', teeth: [], diagnosis: 'Healing as expected', treatment: 'Continue monitoring', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
+      { type: 'notes', collapsed: false, content: '' },
+      { type: 'rx', collapsed: false, notes: '', items: [{ id: 'tpl-frx1', medication: '', dosage: '', frequency: '', duration: '' }] },
+      { type: 'next-appointment', collapsed: false, date: '', time: '', procedure: 'Follow-up check', instructions: '' },
     ],
   },
 ];

@@ -1,0 +1,327 @@
+/**
+ * Design System Theme — CSS Custom Properties
+ *
+ * Architecture:
+ *   Primitive tokens (--ds-raw-*) → raw palette, never used in components
+ *   Semantic tokens (--ds-*)      → what components consume, swap on theme change
+ *
+ * Light mode = :root
+ * Dark mode  = .dark (class on <html>)
+ *
+ * Contrast ratios documented inline (text-on-surface pairings).
+ */
+
+/* ─── Light Theme (default) ─────────────────────────────────────────────────── */
+:root {
+  /* ── Primitives (raw palette — do NOT use directly in components) ───── */
+  --ds-raw-blue-500: #009ACE;
+  --ds-raw-blue-600: #0088B8;
+  --ds-raw-blue-700: #007A9E;
+  --ds-raw-blue-100: #E0F2FE;
+  --ds-raw-blue-50:  #F0F9FF;
+
+  --ds-raw-red-500:  #D43F58;
+  --ds-raw-red-600:  #C23850;
+  --ds-raw-red-700:  #A82D40;
+  --ds-raw-red-100:  #FEE2E2;
+  --ds-raw-red-50:   #FEF2F2;
+
+  --ds-raw-green-600: #00964E;
+  --ds-raw-green-100: #DCFCE8;
+  --ds-raw-green-50:  #F0FDF4;
+  --ds-raw-green-border: #C6F5D6;
+  --ds-raw-green-text: #006130;
+
+  --ds-raw-amber-500: #F59E0B;
+  --ds-raw-amber-100: #FEF3C7;
+  --ds-raw-amber-50:  #FFFBEB;
+  --ds-raw-amber-border: #FDE68A;
+  --ds-raw-amber-text: #92400E;
+
+  --ds-raw-info-500:  #3B82F6;
+  --ds-raw-info-100:  #DBEAFE;
+  --ds-raw-info-50:   #EFF6FF;
+  --ds-raw-info-border: #BFDBFE;
+  --ds-raw-info-text: #1E40AF;
+
+  --ds-raw-gray-950: #0f172a;
+  --ds-raw-gray-900: #1e293b;
+  --ds-raw-gray-800: #374151;
+  --ds-raw-gray-700: #475569;
+  --ds-raw-gray-600: #64748b;
+  --ds-raw-gray-500: #6b7280;
+  --ds-raw-gray-400: #94a3b8;
+  --ds-raw-gray-350: #9ca3af;
+  --ds-raw-gray-300: #d1d5db;
+  --ds-raw-gray-250: #e2e8f0;
+  --ds-raw-gray-200: #e5e7eb;
+  --ds-raw-gray-150: #f1f5f9;
+  --ds-raw-gray-100: #f3f4f6;
+  --ds-raw-gray-50:  #f9fafb;
+  --ds-raw-gray-25:  #f8fafc;
+  --ds-raw-white:    #ffffff;
+
+  /* ── Semantic: Accent / Brand ───────────────────────────────────────── */
+  --ds-color-primary:         var(--ds-raw-blue-500);
+  --ds-color-primary-hover:   var(--ds-raw-blue-600);
+  --ds-color-primary-pressed: var(--ds-raw-blue-700);
+  --ds-color-primary-subtle:  var(--ds-raw-blue-50);
+  --ds-color-primary-on:      var(--ds-raw-white);      /* text on filled primary — 4.6:1 on #009ACE */
+  --ds-color-primary-ring:    rgba(0, 155, 206, 0.35);
+
+  /* ── Semantic: Danger / Destructive ─────────────────────────────────── */
+  --ds-color-danger:          var(--ds-raw-red-500);
+  --ds-color-danger-hover:    var(--ds-raw-red-600);
+  --ds-color-danger-pressed:  var(--ds-raw-red-700);
+  --ds-color-danger-subtle:   var(--ds-raw-red-50);
+  --ds-color-danger-on:       var(--ds-raw-white);       /* 4.5:1 on #D43F58 */
+  --ds-color-danger-border:   var(--ds-raw-red-100);
+  --ds-color-danger-ring:     rgba(212, 63, 88, 0.35);
+
+  /* ── Semantic: Success ──────────────────────────────────────────────── */
+  --ds-color-success:         var(--ds-raw-green-600);
+  --ds-color-success-subtle:  var(--ds-raw-green-100);
+  --ds-color-success-on:      var(--ds-raw-green-text);  /* 7.1:1 on #DCFCE8 */
+  --ds-color-success-border:  var(--ds-raw-green-border);
+
+  /* ── Semantic: Warning ──────────────────────────────────────────────── */
+  --ds-color-warning:         var(--ds-raw-amber-500);
+  --ds-color-warning-subtle:  var(--ds-raw-amber-50);
+  --ds-color-warning-on:      var(--ds-raw-amber-text);  /* 7.3:1 on #FFFBEB */
+  --ds-color-warning-border:  var(--ds-raw-amber-border);
+
+  /* ── Semantic: Info ─────────────────────────────────────────────────── */
+  --ds-color-info:            var(--ds-raw-info-500);
+  --ds-color-info-subtle:     var(--ds-raw-info-50);
+  --ds-color-info-on:         var(--ds-raw-info-text);   /* 8.6:1 on #EFF6FF */
+  --ds-color-info-border:     var(--ds-raw-info-border);
+
+  /* ── Semantic: Surface ──────────────────────────────────────────────── */
+  --ds-surface-base:          var(--ds-raw-white);
+  --ds-surface-raised:        var(--ds-raw-white);
+  --ds-surface-sunken:        var(--ds-raw-gray-25);
+  --ds-surface-overlay:       var(--ds-raw-white);
+  --ds-surface-inverse:       var(--ds-raw-gray-900);
+  --ds-surface-hover:         var(--ds-raw-gray-50);
+  --ds-surface-active:        var(--ds-raw-gray-100);
+  --ds-surface-disabled:      var(--ds-raw-gray-50);
+  --ds-surface-input:         var(--ds-raw-white);
+  --ds-surface-input-grey:    #f4f4f4;
+
+  /* ── Semantic: Text ─────────────────────────────────────────────────── */
+  --ds-text-primary:          var(--ds-raw-gray-800);    /* 10.7:1 on white */
+  --ds-text-secondary:        var(--ds-raw-gray-600);    /* 5.0:1 on white */
+  --ds-text-tertiary:         var(--ds-raw-gray-400);    /* 2.8:1 on white (decorative only) */
+  --ds-text-disabled:         var(--ds-raw-gray-300);
+  --ds-text-inverse:          var(--ds-raw-white);
+  --ds-text-link:             var(--ds-raw-blue-500);
+  --ds-text-on-accent:        var(--ds-raw-white);
+  --ds-text-heading:          var(--ds-raw-gray-950);    /* 15.4:1 on white */
+  --ds-text-label:            var(--ds-raw-gray-700);    /* 6.9:1 on white */
+  --ds-text-placeholder:      var(--ds-raw-gray-400);
+
+  /* ── Semantic: Border ───────────────────────────────────────────────── */
+  --ds-border-subtle:         var(--ds-raw-gray-200);
+  --ds-border-default:        var(--ds-raw-gray-200);
+  --ds-border-strong:         var(--ds-raw-gray-300);
+  --ds-border-hover:          var(--ds-raw-gray-350);
+  --ds-border-focus:          var(--ds-raw-blue-500);
+
+  /* ── Semantic: Focus ────────────────────────────────────────────────── */
+  --ds-focus-ring:            0 0 0 3px rgba(0, 154, 206, 0.35);
+  --ds-focus-ring-light:      0 0 0 3px rgba(0, 154, 206, 0.20);
+  --ds-focus-ring-danger:     0 0 0 3px rgba(212, 63, 88, 0.35);
+
+  /* ── Semantic: Shadow ───────────────────────────────────────────────── */
+  --ds-shadow-sm:             0 1px 2px rgba(0, 0, 0, 0.05);
+  --ds-shadow-md:             0 2px 8px rgba(0, 0, 0, 0.08);
+  --ds-shadow-lg:             0 4px 16px rgba(0, 0, 0, 0.10);
+  --ds-shadow-overlay:        0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* ── Backdrop ───────────────────────────────────────────────────────── */
+  --ds-backdrop:              rgba(0, 0, 0, 0.4);
+
+  /* ── Semantic: Tag palette ──────────────────────────────────────────── */
+  --ds-tag-red-bg:       #FFF0F3;
+  --ds-tag-red-border:   #FFE0E7;
+  --ds-tag-red-text:     #A30F34;
+  --ds-tag-orange-bg:    #FFF2E3;
+  --ds-tag-orange-border:#FFE5D6;
+  --ds-tag-orange-text:  #8A4300;
+  --ds-tag-magenta-bg:   #FFF0F9;
+  --ds-tag-magenta-border:#FFE3F4;
+  --ds-tag-magenta-text: #A30463;
+  --ds-tag-purple-bg:    #F8F2FF;
+  --ds-tag-purple-border:#F2E6FF;
+  --ds-tag-purple-text:  #6C37A1;
+  --ds-tag-blue-bg:      #E6F7FF;
+  --ds-tag-blue-border:  #D1F1FF;
+  --ds-tag-blue-text:    #005780;
+  --ds-tag-green-bg:     #DCFCE8;
+  --ds-tag-green-border: #C6F5D6;
+  --ds-tag-green-text:   #006130;
+
+  /* ── Notification palette ───────────────────────────────────────────── */
+  --ds-notif-info-bg:        #EFF6FF;
+  --ds-notif-info-border:    #BFDBFE;
+  --ds-notif-info-icon:      #3B82F6;
+  --ds-notif-success-bg:     #F0FDF4;
+  --ds-notif-success-border: #BBF7D0;
+  --ds-notif-success-icon:   #16A34A;
+  --ds-notif-warning-bg:     #FFFBEB;
+  --ds-notif-warning-border: #FDE68A;
+  --ds-notif-warning-icon:   #F59E0B;
+  --ds-notif-error-bg:       #FEF2F2;
+  --ds-notif-error-border:   #FECACA;
+  --ds-notif-error-icon:     #EF4444;
+
+  /* ── Tooltip ────────────────────────────────────────────────────────── */
+  --ds-tooltip-bg:           var(--ds-raw-gray-900);
+  --ds-tooltip-text:         var(--ds-raw-gray-25);
+
+  /* ── Toggle / Switch ────────────────────────────────────────────────── */
+  --ds-toggle-off-bg:        #C5C5C5;
+  --ds-toggle-off-hover:     #B0B0B0;
+  --ds-toggle-on-bg:         var(--ds-raw-blue-500);
+  --ds-toggle-on-hover:      var(--ds-raw-blue-600);
+  --ds-toggle-knob:          var(--ds-raw-white);
+  --ds-toggle-disabled-bg:   #DFDFDF;
+}
+
+/* ─── Dark Theme ────────────────────────────────────────────────────────────── */
+.dark {
+  /* ── Semantic: Accent / Brand ───────────────────────────────────────── */
+  --ds-color-primary:         #38BDF8;
+  --ds-color-primary-hover:   #7DD3FC;
+  --ds-color-primary-pressed: #BAE6FD;
+  --ds-color-primary-subtle:  rgba(56, 189, 248, 0.12);
+  --ds-color-primary-on:      #0c1929;                   /* dark text on bright primary — 12:1 */
+  --ds-color-primary-ring:    rgba(56, 189, 248, 0.40);
+
+  /* ── Semantic: Danger / Destructive ─────────────────────────────────── */
+  --ds-color-danger:          #F87171;
+  --ds-color-danger-hover:    #FCA5A5;
+  --ds-color-danger-pressed:  #FECACA;
+  --ds-color-danger-subtle:   rgba(248, 113, 113, 0.12);
+  --ds-color-danger-on:       #1c0a0a;                   /* 13:1 on #F87171 */
+  --ds-color-danger-border:   rgba(248, 113, 113, 0.25);
+  --ds-color-danger-ring:     rgba(248, 113, 113, 0.40);
+
+  /* ── Semantic: Success ──────────────────────────────────────────────── */
+  --ds-color-success:         #4ADE80;
+  --ds-color-success-subtle:  rgba(74, 222, 128, 0.12);
+  --ds-color-success-on:      #BBF7D0;
+  --ds-color-success-border:  rgba(74, 222, 128, 0.25);
+
+  /* ── Semantic: Warning ──────────────────────────────────────────────── */
+  --ds-color-warning:         #FBBF24;
+  --ds-color-warning-subtle:  rgba(251, 191, 36, 0.12);
+  --ds-color-warning-on:      #FEF3C7;
+  --ds-color-warning-border:  rgba(251, 191, 36, 0.25);
+
+  /* ── Semantic: Info ─────────────────────────────────────────────────── */
+  --ds-color-info:            #60A5FA;
+  --ds-color-info-subtle:     rgba(96, 165, 250, 0.12);
+  --ds-color-info-on:         #DBEAFE;
+  --ds-color-info-border:     rgba(96, 165, 250, 0.25);
+
+  /* ── Semantic: Surface ──────────────────────────────────────────────── */
+  --ds-surface-base:          #1a1a2e;
+  --ds-surface-raised:        #242438;
+  --ds-surface-sunken:        #12121f;
+  --ds-surface-overlay:       #242438;
+  --ds-surface-inverse:       #f1f5f9;
+  --ds-surface-hover:         #2a2a42;
+  --ds-surface-active:        #32324e;
+  --ds-surface-disabled:      #1e1e34;
+  --ds-surface-input:         #1e1e34;
+  --ds-surface-input-grey:    #242438;
+
+  /* ── Semantic: Text ─────────────────────────────────────────────────── */
+  --ds-text-primary:          #e2e8f0;                   /* 12.5:1 on #1a1a2e */
+  --ds-text-secondary:        #94a3b8;                   /* 6.1:1 on #1a1a2e */
+  --ds-text-tertiary:         #64748b;                   /* 3.2:1 on #1a1a2e */
+  --ds-text-disabled:         #475569;
+  --ds-text-inverse:          #0f172a;
+  --ds-text-link:             #38BDF8;
+  --ds-text-on-accent:        #0c1929;
+  --ds-text-heading:          #f8fafc;                   /* 15.8:1 on #1a1a2e */
+  --ds-text-label:            #cbd5e1;                   /* 9.5:1 on #1a1a2e */
+  --ds-text-placeholder:      #64748b;
+
+  /* ── Semantic: Border ───────────────────────────────────────────────── */
+  --ds-border-subtle:         rgba(255, 255, 255, 0.08);
+  --ds-border-default:        rgba(255, 255, 255, 0.12);
+  --ds-border-strong:         rgba(255, 255, 255, 0.20);
+  --ds-border-hover:          rgba(255, 255, 255, 0.30);
+  --ds-border-focus:          #38BDF8;
+
+  /* ── Semantic: Focus ────────────────────────────────────────────────── */
+  --ds-focus-ring:            0 0 0 3px rgba(56, 189, 248, 0.40);
+  --ds-focus-ring-light:      0 0 0 3px rgba(56, 189, 248, 0.25);
+  --ds-focus-ring-danger:     0 0 0 3px rgba(248, 113, 113, 0.40);
+
+  /* ── Semantic: Shadow (dark mode uses lighter glows or borders) ──── */
+  --ds-shadow-sm:             0 1px 2px rgba(0, 0, 0, 0.3);
+  --ds-shadow-md:             0 2px 8px rgba(0, 0, 0, 0.4);
+  --ds-shadow-lg:             0 4px 16px rgba(0, 0, 0, 0.5);
+  --ds-shadow-overlay:        0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* ── Backdrop ───────────────────────────────────────────────────────── */
+  --ds-backdrop:              rgba(0, 0, 0, 0.65);
+
+  /* ── Semantic: Tag palette (dark) ───────────────────────────────────── */
+  --ds-tag-red-bg:       rgba(248, 113, 113, 0.12);
+  --ds-tag-red-border:   rgba(248, 113, 113, 0.25);
+  --ds-tag-red-text:     #FCA5A5;
+  --ds-tag-orange-bg:    rgba(251, 191, 36, 0.12);
+  --ds-tag-orange-border:rgba(251, 191, 36, 0.25);
+  --ds-tag-orange-text:  #FDE68A;
+  --ds-tag-magenta-bg:   rgba(232, 121, 249, 0.12);
+  --ds-tag-magenta-border:rgba(232, 121, 249, 0.25);
+  --ds-tag-magenta-text: #F0ABFC;
+  --ds-tag-purple-bg:    rgba(167, 139, 250, 0.12);
+  --ds-tag-purple-border:rgba(167, 139, 250, 0.25);
+  --ds-tag-purple-text:  #C4B5FD;
+  --ds-tag-blue-bg:      rgba(56, 189, 248, 0.12);
+  --ds-tag-blue-border:  rgba(56, 189, 248, 0.25);
+  --ds-tag-blue-text:    #7DD3FC;
+  --ds-tag-green-bg:     rgba(74, 222, 128, 0.12);
+  --ds-tag-green-border: rgba(74, 222, 128, 0.25);
+  --ds-tag-green-text:   #86EFAC;
+
+  /* ── Notification palette (dark) ────────────────────────────────────── */
+  --ds-notif-info-bg:        rgba(96, 165, 250, 0.10);
+  --ds-notif-info-border:    rgba(96, 165, 250, 0.25);
+  --ds-notif-info-icon:      #60A5FA;
+  --ds-notif-success-bg:     rgba(74, 222, 128, 0.10);
+  --ds-notif-success-border: rgba(74, 222, 128, 0.25);
+  --ds-notif-success-icon:   #4ADE80;
+  --ds-notif-warning-bg:     rgba(251, 191, 36, 0.10);
+  --ds-notif-warning-border: rgba(251, 191, 36, 0.25);
+  --ds-notif-warning-icon:   #FBBF24;
+  --ds-notif-error-bg:       rgba(248, 113, 113, 0.10);
+  --ds-notif-error-border:   rgba(248, 113, 113, 0.25);
+  --ds-notif-error-icon:     #F87171;
+
+  /* ── Tooltip (dark) ─────────────────────────────────────────────────── */
+  --ds-tooltip-bg:           #e2e8f0;
+  --ds-tooltip-text:         #0f172a;
+
+  /* ── Toggle / Switch (dark) ─────────────────────────────────────────── */
+  --ds-toggle-off-bg:        #475569;
+  --ds-toggle-off-hover:     #64748b;
+  --ds-toggle-on-bg:         #38BDF8;
+  --ds-toggle-on-hover:      #7DD3FC;
+  --ds-toggle-knob:          #ffffff;
+  --ds-toggle-disabled-bg:   #334155;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-duration-fast: 0s;
+    --ds-duration-base: 0s;
+    --ds-duration-slow: 0s;
+  }
+}

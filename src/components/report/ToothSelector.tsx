@@ -34,6 +34,7 @@ function ToothShape({
 
   return (
     <g
+      data-demo={`tooth-${num}`}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -109,6 +110,7 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
         ))}
         <button
           type="button"
+          data-demo="tooth-add"
           onClick={() => setIsOpen(true)}
           style={{
             height: '24px',

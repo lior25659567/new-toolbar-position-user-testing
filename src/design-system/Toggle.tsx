@@ -57,15 +57,15 @@ export function Toggle({
   // Track background
   let trackBg: string;
   if (disabled) {
-    trackBg = "rgba(0,0,0,0.12)";
+    trackBg = "var(--ds-toggle-disabled-bg)";
   } else if (checked) {
     trackBg = isActive
-      ? "#0080B2"
+      ? "var(--ds-color-primary-pressed)"
       : isHovered
-      ? "#008EC2"
-      : "#009ACE";
+      ? "var(--ds-toggle-on-hover)"
+      : "var(--ds-toggle-on-bg)";
   } else {
-    trackBg = isActive ? "#C5C5C5" : isHovered ? "#D2D2D2" : "#DFDFDF";
+    trackBg = isActive ? "var(--ds-toggle-off-hover)" : isHovered ? "var(--ds-toggle-off-hover)" : "var(--ds-toggle-off-bg)";
   }
 
   const trackStyle: React.CSSProperties = {
@@ -91,8 +91,8 @@ export function Toggle({
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
     borderRadius: "50%",
-    backgroundColor: disabled ? "rgba(0,0,0,0.26)" : "#ffffff",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+    backgroundColor: disabled ? color.textPlaceholder : "var(--ds-toggle-knob)",
+    boxShadow: "var(--ds-shadow-sm)",
     transition: `left 0.2s ease, background-color 0.15s ease`,
     pointerEvents: "none",
   };
@@ -110,7 +110,7 @@ export function Toggle({
   const labelStyle: React.CSSProperties = {
     fontFamily: font.family,
     fontSize: font.size.base,
-    color: disabled ? "rgba(0,0,0,0.38)" : color.textDefault,
+    color: disabled ? color.textPlaceholder : color.textDefault,
     lineHeight: "1.5",
   };
 

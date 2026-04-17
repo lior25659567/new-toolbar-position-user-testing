@@ -1,6 +1,6 @@
 import React from 'react';
 import { color, font, space, radius, shadow } from '../../design-system/tokens';
-import type { PatientInfo, ReportSettings, ImageBlock, ComparisonBlock, CostSummaryBlock } from './types';
+import type { PatientInfo, ReportSettings, ImageBlock, ComparisonBlock, CostSummaryBlock, NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock } from './types';
 
 // iTero logo (used only in the "Powered by" footer)
 function IteroLogoSvg() {
@@ -79,7 +79,7 @@ function DentalFlowerLogo() {
   );
 }
 
-type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
+type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlock | RxBlock | NextAppointmentBlock | PatientInstructionsBlock;
 
 // ─── Preview sub-components ──────────────────────────────────────────────────
 
@@ -138,7 +138,7 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           alt={block.title || 'Clinical image'}
           style={{
             width: '100%',
-            height: '200px',
+            height: '300px',
             objectFit: 'contain',
             display: 'block',
             backgroundColor: color.neutral50,
@@ -152,19 +152,15 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
           height: '200px',
           backgroundColor: color.neutral50,
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '6px',
-          color: color.textPlaceholder,
-          fontSize: '10px',
+          color: color.neutral300,
         }}>
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="3" />
             <circle cx="8.5" cy="10.5" r="2" />
             <path d="M5 20l5-6 3 3 4-5 4 4" />
           </svg>
-          <span>No image uploaded</span>
         </div>
       )}
 
@@ -209,16 +205,15 @@ function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
       ) : (
         <div style={{
           width: '100%', height: '100px', backgroundColor: color.neutral50,
-          borderRadius: '8px', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: '4px',
-          color: color.textPlaceholder, fontSize: '10px',
+          borderRadius: '8px', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          color: color.neutral300,
         }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="3" />
             <circle cx="8.5" cy="10.5" r="2" />
             <path d="M5 20l5-6 3 3 4-5 4 4" />
           </svg>
-          <span>No image</span>
         </div>
       )}
     </div>
@@ -280,6 +275,132 @@ function CostSummaryBlockPreview({ block }: { block: CostSummaryBlock }) {
           </tr>
         </tfoot>
       </table>
+    </div>
+  );
+}
+
+function NotesBlockPreview({ block }: { block: NotesBlock }) {
+  if (!block.content) return null;
+  return (
+    <div style={{
+      marginBottom: space[4],
+      padding: `${space[4]} ${space[4]}`,
+      backgroundColor: color.neutral50,
+      borderRadius: '8px',
+      borderLeft: `3px solid ${color.borderStrong}`,
+    }}>
+      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+        Clinical Notes
+      </div>
+      <div style={{ fontSize: '12px', color: color.textDefault, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+        {block.content}
+      </div>
+    </div>
+  );
+}
+
+function RxBlockPreview({ block }: { block: RxBlock }) {
+  const hasContent = block.items.some((it) => it.medication);
+  if (!hasContent) return null;
+
+  return (
+    <div style={{ marginBottom: space[4] }}>
+      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+        Prescription (Rx)
+      </div>
+      <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse', color: color.textDefault }}>
+        <thead>
+          <tr style={{ borderBottom: `1px solid ${color.borderDefault}` }}>
+            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel }}>Medication</th>
+            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '80px' }}>Dosage</th>
+            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '100px' }}>Frequency</th>
+            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '80px' }}>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          {block.items.filter((it) => it.medication).map((item) => (
+            <tr key={item.id} style={{ borderBottom: `1px solid ${color.neutral100}` }}>
+              <td style={{ padding: '4px 0', fontWeight: 500 }}>{item.medication}</td>
+              <td style={{ padding: '4px 0' }}>{item.dosage || '---'}</td>
+              <td style={{ padding: '4px 0' }}>{item.frequency || '---'}</td>
+              <td style={{ padding: '4px 0' }}>{item.duration || '---'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {block.notes && (
+        <div style={{ fontSize: '11px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
+          {block.notes}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NextAppointmentBlockPreview({ block }: { block: NextAppointmentBlock }) {
+  const hasContent = block.date || block.procedure;
+  if (!hasContent) return null;
+
+  return (
+    <div style={{
+      marginBottom: space[4],
+      padding: `${space[4]} ${space[4]}`,
+      backgroundColor: color.neutral50,
+      borderRadius: '8px',
+      border: `1px solid ${color.borderDefault}`,
+    }}>
+      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+        Next Appointment
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2], fontSize: '12px' }}>
+        {block.date && (
+          <div>
+            <span style={{ color: color.textSubtle, fontWeight: 500 }}>Date: </span>
+            <span style={{ color: color.textDefault, fontWeight: 600 }}>{block.date}</span>
+          </div>
+        )}
+        {block.time && (
+          <div>
+            <span style={{ color: color.textSubtle, fontWeight: 500 }}>Time: </span>
+            <span style={{ color: color.textDefault, fontWeight: 600 }}>{block.time}</span>
+          </div>
+        )}
+      </div>
+      {block.procedure && (
+        <div style={{ fontSize: '12px', marginTop: space[1] }}>
+          <span style={{ color: color.textSubtle, fontWeight: 500 }}>Procedure: </span>
+          <span style={{ color: color.textDefault }}>{block.procedure}</span>
+        </div>
+      )}
+      {block.instructions && (
+        <div style={{ fontSize: '11px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
+          {block.instructions}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PatientInstructionsBlockPreview({ block }: { block: PatientInstructionsBlock }) {
+  const hasContent = block.items.some((it) => it.text);
+  if (!hasContent) return null;
+
+  return (
+    <div style={{
+      marginBottom: space[4],
+      padding: `${space[4]} ${space[4]}`,
+      backgroundColor: color.neutral50,
+      borderRadius: '8px',
+      border: `1px solid ${color.borderDefault}`,
+    }}>
+      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+        {block.title || 'Patient Instructions'}
+      </div>
+      <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: color.textDefault, lineHeight: '1.9' }}>
+        {block.items.filter((it) => it.text).map((item) => (
+          <li key={item.id}>{item.text}</li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -378,16 +499,51 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         gridTemplateColumns: '1fr 1fr 1fr',
         gap: space[4],
       }}>
-        <div>
-          <div style={{ fontSize: '10px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Doctor photo */}
+          {settings.doctorImageUrl ? (
+            <img
+              src={settings.doctorImageUrl}
+              alt={settings.doctorName}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
+                border: `1px solid ${color.borderDefault}`,
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: color.neutral100,
+              border: `1.5px dashed ${color.neutral200}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              color: color.neutral300,
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+          )}
+          <div>
+            <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
+          </div>
         </div>
         <div>
-          <div style={{ fontSize: '10px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 500 }}>Clinic</div>
+          <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Clinic</div>
           <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.clinicName || '---'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '10px', color: color.textPlaceholder, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 500 }}>Patient</div>
+          <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Patient</div>
           <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{patient.patientName || '---'}</div>
         </div>
       </div>
@@ -409,7 +565,7 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         return (
           <>
             {imageBlocks.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[3], marginBottom: otherBlocks.length > 0 ? space[4] : 0 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: imageBlocks.length === 1 ? '1fr' : '1fr 1fr', gap: space[3], marginBottom: otherBlocks.length > 0 ? space[4] : 0 }}>
                 {imageBlocks.map((block) => (
                   <ImageBlockPreview key={block.id} block={block} />
                 ))}
@@ -421,6 +577,14 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
                   return <ComparisonBlockPreview key={block.id} block={block as ComparisonBlock} />;
                 case 'cost-summary':
                   return <CostSummaryBlockPreview key={block.id} block={block as CostSummaryBlock} />;
+                case 'notes':
+                  return <NotesBlockPreview key={block.id} block={block as NotesBlock} />;
+                case 'rx':
+                  return <RxBlockPreview key={block.id} block={block as RxBlock} />;
+                case 'next-appointment':
+                  return <NextAppointmentBlockPreview key={block.id} block={block as NextAppointmentBlock} />;
+                case 'patient-instructions':
+                  return <PatientInstructionsBlockPreview key={block.id} block={block as PatientInstructionsBlock} />;
                 default:
                   return null;
               }

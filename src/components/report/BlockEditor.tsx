@@ -6,6 +6,7 @@ import { PrimaryButton } from '../../design-system/PrimaryButton';
 import ToothSelector from './ToothSelector';
 import type {
   ReportBlock, ImageBlock, ComparisonBlock, CostSummaryBlock, BlockType,
+  NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock,
 } from './types';
 
 // ─── Shared field components ─────────────────────────────────────────────────
@@ -413,6 +414,7 @@ function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate
 function UploadRow({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
     <div
+      data-demo={label.toLowerCase().replace(/\s+/g, '-')}
       onClick={onClick}
       style={{
         width: '100%',
@@ -437,6 +439,7 @@ function OverlayButton({ label, onClick, icon }: { label: string; onClick: () =>
   return (
     <button
       type="button"
+      data-demo={label.toLowerCase().replace(/\s+/g, '-')}
       onClick={onClick}
       style={{
         padding: `${space[1]} ${space[3]}`,
@@ -703,6 +706,34 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
             ))}
           </div>
 
+          {/* Spacer + Close */}
+          <div style={{ flex: 1 }} />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              borderRadius: radius.sm,
+              backgroundColor: 'transparent',
+              color: color.textSubtle,
+              cursor: 'pointer',
+              padding: 0,
+              transition: `background-color ${transition.fast}`,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = color.bgHover; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="4" y1="4" x2="12" y2="12" /><line x1="12" y1="4" x2="4" y2="12" />
+            </svg>
+          </button>
+
         </div>
 
         {/* Canvas */}
@@ -751,7 +782,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
             <SecondaryButton size={36} onClick={onClose}>
               Cancel
             </SecondaryButton>
-            <PrimaryButton size={36} onClick={handleSave}>
+            <PrimaryButton size={36} data-demo="annotation-save" onClick={handleSave}>
               Save
             </PrimaryButton>
           </div>
@@ -979,6 +1010,7 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
           <PrimaryButton
             size={36}
             disabled={selected.length === 0}
+            data-demo="gallery-add-btn"
             onClick={() => {
               if (multiSelect && onMultiSelect) {
                 onMultiSelect(selected);
@@ -1007,6 +1039,7 @@ function GalleryThumbnail({ url, label, onClick, isSelected, showCheckbox }: {
   return (
     <button
       type="button"
+      data-demo={`gallery-${label.toLowerCase().replace(/[\s()]/g, '-')}`}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -1313,12 +1346,202 @@ function SummaryCardEditor({ block, onUpdate }: {
   );
 }
 
+function NotesCardEditor({ block, onUpdate }: {
+  block: NotesBlock;
+  onUpdate: (updates: Partial<NotesBlock>) => void;
+}) {
+  return (
+    <div>
+      <FieldLabel>Clinical Notes</FieldLabel>
+      <TextArea
+        value={block.content}
+        onChange={(v) => onUpdate({ content: v })}
+        placeholder="Write clinical notes, observations, or additional comments..."
+        rows={4}
+      />
+    </div>
+  );
+}
+
+function RxCardEditor({ block, onUpdate }: {
+  block: RxBlock;
+  onUpdate: (updates: Partial<RxBlock>) => void;
+}) {
+  const updateItem = (id: string, field: keyof RxBlock['items'][0], value: string) => {
+    onUpdate({ items: block.items.map((it) => it.id === id ? { ...it, [field]: value } : it) });
+  };
+
+  const addItem = () => {
+    onUpdate({ items: [...block.items, { id: `rx-${Date.now()}`, medication: '', dosage: '', frequency: '', duration: '' }] });
+  };
+
+  const removeItem = (id: string) => {
+    if (block.items.length <= 1) return;
+    onUpdate({ items: block.items.filter((it) => it.id !== id) });
+  };
+
+  return (
+    <>
+      {block.items.map((item, i) => (
+        <div key={item.id} style={{ display: 'flex', gap: space[2], alignItems: 'flex-start' }}>
+          <div style={{ flex: 2 }}>
+            {i === 0 && <FieldLabel>Medication</FieldLabel>}
+            <TextInput value={item.medication} onChange={(v) => updateItem(item.id, 'medication', v)} placeholder="Medication name" />
+          </div>
+          <div style={{ flex: 1 }}>
+            {i === 0 && <FieldLabel>Dosage</FieldLabel>}
+            <TextInput value={item.dosage} onChange={(v) => updateItem(item.id, 'dosage', v)} placeholder="e.g. 500mg" />
+          </div>
+          <div style={{ flex: 1 }}>
+            {i === 0 && <FieldLabel>Frequency</FieldLabel>}
+            <TextInput value={item.frequency} onChange={(v) => updateItem(item.id, 'frequency', v)} placeholder="e.g. 3x daily" />
+          </div>
+          <div style={{ flex: 1 }}>
+            {i === 0 && <FieldLabel>Duration</FieldLabel>}
+            <TextInput value={item.duration} onChange={(v) => updateItem(item.id, 'duration', v)} placeholder="e.g. 7 days" />
+          </div>
+          <button
+            type="button"
+            onClick={() => removeItem(item.id)}
+            style={{
+              width: '28px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: 'none', backgroundColor: 'transparent',
+              color: block.items.length <= 1 ? color.neutral200 : color.neutral400,
+              cursor: block.items.length <= 1 ? 'not-allowed' : 'pointer',
+              marginTop: i === 0 ? '20px' : 0, padding: 0,
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="3" y1="3" x2="11" y2="11" /><line x1="11" y1="3" x2="3" y2="11" />
+            </svg>
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={addItem}
+        style={{
+          fontSize: font.size.xs, fontWeight: font.weight.medium, color: color.primary,
+          backgroundColor: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', gap: space[1],
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
+        </svg>
+        Add medication
+      </button>
+      <div>
+        <FieldLabel>Additional Notes</FieldLabel>
+        <TextArea value={block.notes} onChange={(v) => onUpdate({ notes: v })} placeholder="Allergies, warnings, or special instructions..." rows={2} />
+      </div>
+    </>
+  );
+}
+
+function NextAppointmentCardEditor({ block, onUpdate }: {
+  block: NextAppointmentBlock;
+  onUpdate: (updates: Partial<NextAppointmentBlock>) => void;
+}) {
+  return (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[3] }}>
+        <div>
+          <FieldLabel>Date</FieldLabel>
+          <TextInput value={block.date} onChange={(v) => onUpdate({ date: v })} placeholder="e.g. 2026-05-01" />
+        </div>
+        <div>
+          <FieldLabel>Time</FieldLabel>
+          <TextInput value={block.time} onChange={(v) => onUpdate({ time: v })} placeholder="e.g. 10:00 AM" />
+        </div>
+      </div>
+      <div>
+        <FieldLabel>Procedure</FieldLabel>
+        <TextInput value={block.procedure} onChange={(v) => onUpdate({ procedure: v })} placeholder="e.g. Post-op check, Crown cementation" />
+      </div>
+      <div>
+        <FieldLabel>Pre-Visit Instructions</FieldLabel>
+        <TextArea value={block.instructions} onChange={(v) => onUpdate({ instructions: v })} placeholder="Any preparations the patient should do before the visit..." rows={2} />
+      </div>
+    </>
+  );
+}
+
+function PatientInstructionsCardEditor({ block, onUpdate }: {
+  block: PatientInstructionsBlock;
+  onUpdate: (updates: Partial<PatientInstructionsBlock>) => void;
+}) {
+  const updateItem = (id: string, text: string) => {
+    onUpdate({ items: block.items.map((it) => it.id === id ? { ...it, text } : it) });
+  };
+
+  const addItem = () => {
+    onUpdate({ items: [...block.items, { id: `instr-${Date.now()}`, text: '' }] });
+  };
+
+  const removeItem = (id: string) => {
+    if (block.items.length <= 1) return;
+    onUpdate({ items: block.items.filter((it) => it.id !== id) });
+  };
+
+  return (
+    <>
+      <div>
+        <FieldLabel>Section Title</FieldLabel>
+        <TextInput value={block.title} onChange={(v) => onUpdate({ title: v })} placeholder="e.g. Post-Treatment Instructions" />
+      </div>
+      {block.items.map((item, i) => (
+        <div key={item.id} style={{ display: 'flex', gap: space[2], alignItems: 'center' }}>
+          <span style={{ fontSize: font.size.sm, color: color.textSubtle, fontWeight: font.weight.medium, minWidth: '20px' }}>
+            {i + 1}.
+          </span>
+          <div style={{ flex: 1 }}>
+            <TextInput value={item.text} onChange={(v) => updateItem(item.id, v)} placeholder="Instruction step..." />
+          </div>
+          <button
+            type="button"
+            onClick={() => removeItem(item.id)}
+            style={{
+              width: '28px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: 'none', backgroundColor: 'transparent',
+              color: block.items.length <= 1 ? color.neutral200 : color.neutral400,
+              cursor: block.items.length <= 1 ? 'not-allowed' : 'pointer', padding: 0,
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="3" y1="3" x2="11" y2="11" /><line x1="11" y1="3" x2="3" y2="11" />
+            </svg>
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={addItem}
+        style={{
+          fontSize: font.size.xs, fontWeight: font.weight.medium, color: color.primary,
+          backgroundColor: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', gap: space[1],
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
+        </svg>
+        Add instruction
+      </button>
+    </>
+  );
+}
+
 // ─── Block type labels ──────────────────────────────────────────────────────
 
 const BLOCK_LABELS: Record<string, string> = {
   'image': 'Image',
   'comparison': 'Before / After',
   'cost-summary': 'Summary',
+  'notes': 'Notes',
+  'rx': 'Prescription',
+  'next-appointment': 'Next Appointment',
+  'patient-instructions': 'Patient Instructions',
 };
 
 // ─── Add Block Menu ─────────────────────────────────────────────────────────
@@ -1327,17 +1550,34 @@ const ADDABLE_BLOCKS: { type: BlockType; label: string; description: string }[] 
   { type: 'image',         label: 'Image',          description: 'Clinical photo with notes' },
   { type: 'comparison',    label: 'Before / After',  description: 'Side-by-side comparison' },
   { type: 'cost-summary',  label: 'Summary',         description: 'Itemized cost table' },
+  { type: 'notes',         label: 'Notes',           description: 'Free-form clinical notes' },
+  { type: 'rx',            label: 'Prescription',    description: 'Medication & dosage details' },
+  { type: 'next-appointment', label: 'Next Appointment', description: 'Schedule follow-up visit' },
+  { type: 'patient-instructions', label: 'Patient Instructions', description: 'Post-treatment care checklist' },
 ];
 
 function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [openUp, setOpenUp] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const handleOpen = () => {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // Menu is roughly 7 items * 48px + padding ≈ 370px
+      setOpenUp(spaceBelow < 380);
+    }
+    setOpen(!open);
+  };
 
   return (
     <div style={{ position: 'relative' }}>
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={handleOpen}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
@@ -1368,10 +1608,11 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
           <div style={{ position: 'fixed', inset: 0, zIndex: 9 }} onClick={() => setOpen(false)} />
           <div style={{
             position: 'absolute',
-            bottom: '100%',
+            ...(openUp
+              ? { bottom: '100%', marginBottom: space[1] }
+              : { top: '100%', marginTop: space[1] }),
             left: 0,
             right: 0,
-            marginBottom: space[1],
             backgroundColor: color.bgSurface,
             border: `1px solid ${color.borderDefault}`,
             borderRadius: radius.lg,
@@ -1446,7 +1687,7 @@ function MenuRow({ label, description, onClick }: {
 
 // ─── Exported Block Editor ──────────────────────────────────────────────────
 
-type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
+type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlock | RxBlock | NextAppointmentBlock | PatientInstructionsBlock;
 
 interface BlockEditorProps {
   blocks: SupportedBlock[];
@@ -1494,6 +1735,24 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
         return {
           id, type: 'cost-summary', collapsed: false,
           items: [{ id: `cost-${Date.now()}`, description: '', amount: '' }],
+        };
+      case 'notes':
+        return { id, type: 'notes', collapsed: false, content: '' };
+      case 'rx':
+        return {
+          id, type: 'rx', collapsed: false, notes: '',
+          items: [{ id: `rx-${Date.now()}`, medication: '', dosage: '', frequency: '', duration: '' }],
+        };
+      case 'next-appointment':
+        return {
+          id, type: 'next-appointment', collapsed: false,
+          date: '', time: '', procedure: '', instructions: '',
+        };
+      case 'patient-instructions':
+        return {
+          id, type: 'patient-instructions', collapsed: false,
+          title: 'Post-Treatment Instructions',
+          items: [{ id: `instr-${Date.now()}`, text: '' }],
         };
       default:
         return {
@@ -1572,6 +1831,7 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
 
   const getBlockLabel = (block: SupportedBlock, i: number) => {
     if (block.type === 'image') return (block as ImageBlock).title || `Image ${i + 1}`;
+    if (block.type === 'patient-instructions') return (block as PatientInstructionsBlock).title || 'Patient Instructions';
     return BLOCK_LABELS[block.type] || `Block ${i + 1}`;
   };
 
@@ -1589,6 +1849,14 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
         return <ComparisonCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
       case 'cost-summary':
         return <SummaryCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
+      case 'notes':
+        return <NotesCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
+      case 'rx':
+        return <RxCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
+      case 'next-appointment':
+        return <NextAppointmentCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
+      case 'patient-instructions':
+        return <PatientInstructionsCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
       default:
         return null;
     }

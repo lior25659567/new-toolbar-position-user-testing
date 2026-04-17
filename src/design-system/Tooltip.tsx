@@ -22,8 +22,8 @@ export interface TooltipProps {
   children: React.ReactElement;
 }
 
-const BG = "#1e293b";
-const TEXT = "#f8fafc";
+const BG = "var(--ds-tooltip-bg)";
+const TEXT = "var(--ds-tooltip-text)";
 const ARROW = 6; // arrow size px
 
 function getTooltipPosition(

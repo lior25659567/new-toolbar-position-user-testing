@@ -1,5 +1,6 @@
 // Tokens – import these in all components instead of raw values
-export { color, space, radius, font, shadow, transition } from "./tokens";
+export { color, space, radius, font, shadow, transition, zIndex } from "./tokens";
+export { ThemeProvider, useTheme } from "./ThemeProvider";
 
 // ─── Controls ────────────────────────────────────────────────────────────────
 export { PrimaryButton } from "./PrimaryButton";

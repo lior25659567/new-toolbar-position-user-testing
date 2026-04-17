@@ -56,8 +56,8 @@ export function LinkButton({
     ...(disabled
       ? { opacity: 0.5, cursor: "not-allowed" }
       : {
-          ...(isHovered && { backgroundColor: "rgba(0,0,0,0.05)" }),
-          ...(isActive && { backgroundColor: "rgba(0,0,0,0.09)" }),
+          ...(isHovered && { backgroundColor: color.bgHover }),
+          ...(isActive && { backgroundColor: color.bgActive }),
           ...(isFocused && { borderWidth: 1, borderStyle: "solid", borderColor: color.primary }),
         }),
     ...style,
@@ -114,8 +114,8 @@ export function GhostButton({
     ...(disabled
       ? { opacity: 0.5, cursor: "not-allowed" }
       : {
-          ...(isHovered && { backgroundColor: "rgba(0,0,0,0.05)" }),
-          ...(isActive && { backgroundColor: "rgba(0,0,0,0.09)", transform: "scale(0.98)" }),
+          ...(isHovered && { backgroundColor: color.bgHover }),
+          ...(isActive && { backgroundColor: color.bgActive, transform: "scale(0.98)" }),
           ...(isFocused && { outline: `2px solid ${color.primary}`, outlineOffset: "2px" }),
         }),
     ...style,

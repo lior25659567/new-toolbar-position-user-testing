@@ -1,16 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { color, font, space, radius, shadow, transition } from '../design-system/tokens';
 import { SecondaryButton } from '../design-system/SecondaryButton';
 import { PrimaryButton } from '../design-system/PrimaryButton';
 import BlockEditor from './report/BlockEditor';
 import ReportPreview from './report/ReportPreview';
 import SignaturePanel from './report/SignaturePanel';
-import type { ImageBlock, ComparisonBlock, CostSummaryBlock, PatientInfo, ReportSettings } from './report/types';
+import type { ImageBlock, ComparisonBlock, CostSummaryBlock, NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock, PatientInfo, ReportSettings } from './report/types';
 import { createImageBlock, REPORT_TEMPLATES } from './report/types';
 import ShareModal from './report/ShareModal';
 import PatientReportDemoPage from './report/PatientReportDemoPage';
+import ReactDOM from 'react-dom';
 
-type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock;
+type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlock | RxBlock | NextAppointmentBlock | PatientInstructionsBlock;
 
 // ─── Inline text input (for header) ─────────────────────────────────────────
 
@@ -65,11 +66,11 @@ function MetaChip({ label, value, onChange, placeholder }: {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: space[1],
-        padding: `${space[1]} ${space[3]}`,
+        gap: space[2],
+        padding: `6px ${space[4]}`,
         backgroundColor: color.neutral50,
         borderRadius: radius.md,
-        fontSize: font.size.xs,
+        fontSize: font.size.sm,
         lineHeight: '1',
         border: `1px solid ${focused ? color.primary : 'transparent'}`,
         transition: `border-color ${transition.fast}`,
@@ -86,7 +87,7 @@ function MetaChip({ label, value, onChange, placeholder }: {
           style={{
             color: color.textDefault,
             fontWeight: font.weight.medium,
-            fontSize: font.size.xs,
+            fontSize: font.size.sm,
             fontFamily: font.family,
             background: 'transparent',
             border: 'none',
@@ -355,16 +356,164 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
   );
 }
 
+// ─── Preview Modal ──────────────────────────────────────────────────────────
+
+function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExport }: {
+  settings: ReportSettings;
+  patient: PatientInfo;
+  blocks: SupportedBlock[];
+  onClose: () => void;
+  onShare: () => void;
+  onExport: () => void;
+}) {
+  // Close on Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 200 }}
+      />
+
+      {/* Modal */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 201,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
+        {/* Header bar */}
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: `${space[3]} ${space[5]}`,
+          backgroundColor: '#323639',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space[3] }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: 'none', borderRadius: radius.md, backgroundColor: 'rgba(255,255,255,0.08)',
+                color: '#fff', cursor: 'pointer', padding: 0,
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="4" y1="4" x2="12" y2="12" /><line x1="12" y1="4" x2="4" y2="12" />
+              </svg>
+            </button>
+            <span style={{ fontSize: font.size.base, fontWeight: font.weight.semibold, color: '#fff' }}>
+              {settings.reportName || 'Untitled Report'}.pdf
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space[2] }}>
+            <button
+              type="button"
+              onClick={onShare}
+              style={{
+                height: '34px', padding: `0 ${space[4]}`, display: 'flex', alignItems: 'center', gap: space[2],
+                border: '1px solid rgba(255,255,255,0.15)', borderRadius: radius.md,
+                backgroundColor: 'rgba(255,255,255,0.06)', color: '#fff',
+                fontSize: font.size.sm, fontWeight: font.weight.medium, cursor: 'pointer',
+                fontFamily: font.family,
+              }}
+            >
+              Share
+            </button>
+            <button
+              type="button"
+              onClick={onExport}
+              style={{
+                height: '34px', padding: `0 ${space[4]}`, display: 'flex', alignItems: 'center', gap: space[2],
+                border: 'none', borderRadius: radius.md,
+                backgroundColor: color.primary, color: '#fff',
+                fontSize: font.size.sm, fontWeight: font.weight.medium, cursor: 'pointer',
+                fontFamily: font.family,
+              }}
+            >
+              Export PDF
+            </button>
+          </div>
+        </div>
+
+        {/* PDF page area — dark background like a real PDF viewer */}
+        <div style={{
+          flex: 1,
+          width: '100%',
+          overflowY: 'auto',
+          backgroundColor: '#525659',
+          display: 'flex',
+          justifyContent: 'center',
+          padding: `${space[8]} ${space[4]}`,
+        }}>
+          {/* A4 paper page */}
+          <div style={{
+            width: '794px',
+            minHeight: '1123px',
+            maxWidth: '95vw',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px 2px rgba(0,0,0,0.3)',
+            flexShrink: 0,
+            alignSelf: 'flex-start',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            <ReportPreview settings={settings} patient={patient} blocks={blocks} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function PatientReportPage({
-  onBackToHome,
-}: {
+export interface PatientReportPageHandle {
+  setSettings: (s: ReportSettings) => void;
+  setPatient: (p: PatientInfo) => void;
+  setBlocks: (b: SupportedBlock[]) => void;
+  setActiveTab: (t: 'blocks' | 'settings') => void;
+  scrollEditorTo: (selector: string) => void;
+  scrollEditorToBottom: () => void;
+  scrollPreviewToBottom: () => void;
+  getEditorEl: () => HTMLDivElement | null;
+  /** Programmatically click a DOM element inside the editor by CSS selector */
+  clickInEditor: (selector: string) => void;
+  /** Programmatically click a DOM element anywhere in the page (including portals) by CSS selector */
+  clickInPage: (selector: string) => void;
+}
+
+export interface PatientReportPageProps {
   onBackToHome: () => void;
-}) {
-  const [settings, setSettings] = useState<ReportSettings>({
+  /** Pre-populated demo data. When provided, the report starts fully filled. */
+  initialData?: {
+    settings: ReportSettings;
+    patient: PatientInfo;
+    blocks: SupportedBlock[];
+  };
+}
+
+const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageProps>(function PatientReportPage({
+  onBackToHome,
+  initialData,
+}, ref) {
+  const [settings, setSettings] = useState<ReportSettings>(initialData?.settings ?? {
     reportName: 'Patient Report',
     doctorName: 'Dr. Smith',
+    doctorImageUrl: '',
     clinicName: 'Bright Smile Clinic',
     clinicLogoUrl: '',
     pinEnabled: false,
@@ -373,13 +522,13 @@ export default function PatientReportPage({
     signatureMethod: '',
   });
 
-  const [patient, setPatient] = useState<PatientInfo>({
+  const [patient, setPatient] = useState<PatientInfo>(initialData?.patient ?? {
     patientName: 'John Doe',
     birthDate: '03/15/1985',
     chartNumber: '10042',
   });
 
-  const [blocks, setBlocks] = useState<SupportedBlock[]>([
+  const [blocks, setBlocks] = useState<SupportedBlock[]>(initialData?.blocks ?? [
     { ...createImageBlock(), id: 'init-img' },
   ]);
 
@@ -392,6 +541,37 @@ export default function PatientReportPage({
   const [templatesOpen, setTemplatesOpen] = useState(true);
   const [demoOpen, setDemoOpen] = useState(false);
   const signatureRef = useRef<HTMLDivElement>(null);
+  const editorScrollRef = useRef<HTMLDivElement>(null);
+  const editorContentRef = useRef<HTMLDivElement>(null);
+  const previewScrollRef = useRef<HTMLDivElement>(null);
+
+  // Expose imperative handle for demo automation
+  useImperativeHandle(ref, () => ({
+    setSettings: (s: ReportSettings) => { setSettings(s); setSaved(false); setTimeout(() => setSaved(true), 800); },
+    setPatient: (p: PatientInfo) => { setPatient(p); setSaved(false); setTimeout(() => setSaved(true), 800); },
+    setBlocks: (b: SupportedBlock[]) => { setBlocks(b); setSaved(false); setTimeout(() => setSaved(true), 800); },
+    setActiveTab,
+    scrollEditorTo: (selector: string) => {
+      const el = editorContentRef.current?.querySelector(selector);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+    scrollEditorToBottom: () => {
+      const el = editorContentRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    },
+    scrollPreviewToBottom: () => {
+      previewScrollRef.current?.scrollTo({ top: previewScrollRef.current.scrollHeight, behavior: 'smooth' });
+    },
+    getEditorEl: () => editorContentRef.current,
+    clickInEditor: (selector: string) => {
+      const el = editorContentRef.current?.querySelector<HTMLElement>(selector);
+      if (el) el.click();
+    },
+    clickInPage: (selector: string) => {
+      const el = document.querySelector<HTMLElement>(selector);
+      if (el) el.click();
+    },
+  }));
 
   // Clear warning when signature is added
   useEffect(() => {
@@ -399,6 +579,7 @@ export default function PatientReportPage({
   }, [settings.signatureUrl, signatureWarning]);
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const handleExportOrShare = (action: 'share' | 'export') => {
     if (!settings.signatureUrl) {
@@ -544,6 +725,11 @@ export default function PatientReportPage({
             )}
           </span>
 
+          {/* Preview */}
+          <SecondaryButton size={36} onClick={() => setPreviewOpen(true)}>
+            Preview
+          </SecondaryButton>
+
           {/* Share */}
           <SecondaryButton size={36} onClick={() => handleExportOrShare('share')}>
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -569,7 +755,7 @@ export default function PatientReportPage({
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
         {/* ── Left: Editor Panel ── */}
-        <div style={{
+        <div ref={editorScrollRef} style={{
           width: '480px',
           minWidth: '420px',
           maxWidth: '560px',
@@ -601,8 +787,7 @@ export default function PatientReportPage({
                   border: 'none',
                   borderBottom: `2px solid ${activeTab === tab ? color.primary : 'transparent'}`,
                   cursor: 'pointer',
-                  textTransform: 'uppercase',
-                  letterSpacing: font.tracking.wide,
+                  letterSpacing: font.tracking.tight,
                   transition: `color ${transition.fast}, border-color ${transition.fast}`,
                   position: 'relative',
                   display: 'inline-flex',
@@ -611,7 +796,7 @@ export default function PatientReportPage({
                   gap: space[1],
                 }}
               >
-                {tab === 'blocks' ? 'Report' : 'Settings'}
+                {tab === 'blocks' ? 'Report' : 'Details'}
                 {tab === 'settings' && signatureWarning && !settings.signatureUrl && (
                   <span style={{
                     width: '7px',
@@ -628,7 +813,7 @@ export default function PatientReportPage({
           </div>
 
           {/* Tab content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: space[4] }}>
+          <div ref={editorContentRef} style={{ flex: 1, overflowY: 'auto', padding: space[4] }}>
             {activeTab === 'blocks' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: space[4] }}>
                 {/* Templates */}
@@ -695,6 +880,103 @@ export default function PatientReportPage({
                     onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
                     placeholder="Doctor name"
                   />
+                  <div>
+                    {settings.doctorImageUrl ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: space[3],
+                        padding: space[3],
+                        backgroundColor: color.neutral50,
+                        borderRadius: radius.md,
+                        border: `1px solid ${color.borderDefault}`,
+                      }}>
+                        <img
+                          src={settings.doctorImageUrl}
+                          alt="Doctor"
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            border: `1px solid ${color.borderDefault}`,
+                          }}
+                        />
+                        <span style={{ flex: 1, fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>
+                          Doctor photo
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => { setSettings((s) => ({ ...s, doctorImageUrl: '' })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
+                          style={{
+                            fontSize: font.size.xs,
+                            color: color.error,
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: `${space[1]} ${space[2]}`,
+                            borderRadius: radius.sm,
+                            fontWeight: font.weight.medium,
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <label style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: space[3],
+                        padding: `${space[3]} ${space[3]}`,
+                        backgroundColor: color.neutral50,
+                        borderRadius: radius.md,
+                        border: `1.5px dashed ${color.neutral300}`,
+                        cursor: 'pointer',
+                        transition: `border-color ${transition.fast}, background-color ${transition.fast}`,
+                      }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.backgroundColor = '#F0F9FF'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.neutral300; e.currentTarget.style.backgroundColor = color.neutral50; }}
+                      >
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          backgroundColor: color.neutral100,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: font.size.xs, fontWeight: font.weight.medium, color: color.textSubtle }}>
+                            Upload doctor photo
+                          </div>
+                          <div style={{ fontSize: '10px', color: color.textPlaceholder }}>
+                            PNG or JPG
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = URL.createObjectURL(file);
+                              setSettings((s) => ({ ...s, doctorImageUrl: url }));
+                              setSaved(false);
+                              setTimeout(() => setSaved(true), 1500);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </SidebarSection>
 
                 <SidebarSection title="Clinic">
@@ -888,7 +1170,7 @@ export default function PatientReportPage({
         </div>
 
         {/* ── Right: Live Preview ── */}
-        <div style={{
+        <div ref={previewScrollRef} style={{
           flex: 1,
           overflowY: 'auto',
           padding: space[6],
@@ -911,7 +1193,22 @@ export default function PatientReportPage({
         patientName={patient.patientName}
       />
 
+      {/* Preview Modal */}
+      {previewOpen && ReactDOM.createPortal(
+        <ReportPreviewModal
+          settings={settings}
+          patient={patient}
+          blocks={blocks}
+          onClose={() => setPreviewOpen(false)}
+          onShare={() => { setPreviewOpen(false); handleExportOrShare('share'); }}
+          onExport={() => { setPreviewOpen(false); handleExportOrShare('export'); }}
+        />,
+        document.body
+      )}
+
       {demoOpen && <PatientReportDemoPage onClose={() => setDemoOpen(false)} />}
     </div>
   );
-}
+});
+
+export default PatientReportPage;

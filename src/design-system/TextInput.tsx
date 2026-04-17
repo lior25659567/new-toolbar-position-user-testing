@@ -97,7 +97,7 @@ export function TextInput({
   const [isFocused, setIsFocused] = React.useState(false);
   const hasError = Boolean(error);
 
-  const fieldBg = layerSet === "white" ? color.bgSurface : "#F4F4F4";
+  const fieldBg = layerSet === "white" ? color.bgSurface : "var(--ds-surface-input-grey)";
 
   const fieldStyle: React.CSSProperties = {
     fontFamily: font.family,
@@ -181,7 +181,7 @@ export function TextArea({
   });
 
   const hasError = Boolean(error);
-  const fieldBg = layerSet === "white" ? color.bgSurface : "#F4F4F4";
+  const fieldBg = layerSet === "white" ? color.bgSurface : "var(--ds-surface-input-grey)";
 
   const fieldStyle: React.CSSProperties = {
     fontFamily: font.family,

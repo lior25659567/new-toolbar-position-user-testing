@@ -30,7 +30,7 @@ const baseStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: space[2],
-  color: "rgba(0, 0, 0, 0.93)",
+  color: color.textDefault,
   backgroundColor: color.bgSurface,
   borderRadius: radius.md,
 };
@@ -47,7 +47,7 @@ const toolbarBaseStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: space[2],
-  color: "rgba(0, 0, 0, 0.93)",
+  color: color.textDefault,
   backgroundColor: "transparent",
   borderRadius: radius.md,
 };
@@ -82,12 +82,12 @@ export function SecondaryButton({
       ? { opacity: 0.5, cursor: "not-allowed" }
       : isToolbar
         ? {
-            backgroundColor: isActive ? "#E0F2FE" : isHovered ? "#f5f5f5" : undefined,
+            backgroundColor: isActive ? 'var(--ds-color-primary-subtle)' : isHovered ? color.bgHover : undefined,
           }
         : {
-            ...(isHovered && { borderColor: "#9CA3AF" }),
-            ...(isActive && { transform: "scale(0.98)", borderColor: "#9CA3AF" }),
-            ...(isFocused && { borderColor: "#9CA3AF" }),
+            ...(isHovered && { borderColor: color.borderHover }),
+            ...(isActive && { transform: "scale(0.98)", borderColor: color.borderHover }),
+            ...(isFocused && { borderColor: color.borderHover }),
           }),
     ...style,
   };

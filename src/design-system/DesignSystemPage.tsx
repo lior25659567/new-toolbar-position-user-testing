@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { color, font, space, radius, shadow, transition } from "./tokens";
+import { useTheme } from "./ThemeProvider";
 import { PrimaryButton } from "./PrimaryButton";
 import { SecondaryButton } from "./SecondaryButton";
 import { WarningButton } from "./WarningButton";
@@ -131,6 +132,45 @@ const NAV = [
 
 export interface DesignSystemPageProps {
   onBack?: () => void;
+}
+
+function ThemeToggleButton() {
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      style={{
+        width: '36px',
+        height: '36px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: `1px solid ${color.borderDefault}`,
+        borderRadius: radius.md,
+        backgroundColor: color.bgSurface,
+        color: color.textLabel,
+        cursor: 'pointer',
+        transition: transition.border,
+      }}
+    >
+      {isDark ? (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+      )}
+    </button>
+  );
 }
 
 function SectionHeading({
@@ -1271,7 +1311,9 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
             Figma: nswYX2pzgi7ToSzWuRkyd8 · Component / Variant / State
           </p>
         </div>
-        {onBack && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: space[2] }}>
+          <ThemeToggleButton />
+          {onBack && (
           <button
             type="button"
             onClick={onBack}
@@ -1292,6 +1334,7 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
             ← Back
           </button>
         )}
+        </div>
       </header>
 
       {/* ── Body ── */}

@@ -2,72 +2,79 @@
  * Design tokens – single source of truth for all visual properties.
  * Import named groups instead of using raw values in component styles.
  *
+ * Colors resolve to CSS custom properties defined in theme.css,
+ * enabling runtime dark-mode switching without component changes.
+ *
  * Usage:
- *   import { color, font, space, radius, shadow, transition } from './tokens';
+ *   import { color, font, space, radius, shadow, transition, zIndex } from './tokens';
  */
 
 // ─── Color ───────────────────────────────────────────────────────────────────
 export const color = {
-  // Primary brand – Figma: Primary 9-157
-  primary:           '#009ACE',
-  primaryHover:      '#0088B8',
-  primaryPressed:    '#007A9E',
-  primaryRing:       'rgb(0, 155, 206)',
-  primaryRingLight:  'rgb(0, 155, 206)',
+  // Primary brand
+  primary:           'var(--ds-color-primary)',
+  primaryHover:      'var(--ds-color-primary-hover)',
+  primaryPressed:    'var(--ds-color-primary-pressed)',
+  primaryRing:       'var(--ds-color-primary)',
+  primaryRingLight:  'var(--ds-color-primary)',
 
-  // Danger / destructive – Figma: Warning 5-6738
-  danger:            '#D43F58',
-  dangerHover:       '#C23850',
-  dangerPressed:     '#A82D40',
-  dangerRing:        'rgba(212, 63, 88, 0.35)',
+  // Danger / destructive
+  danger:            'var(--ds-color-danger)',
+  dangerHover:       'var(--ds-color-danger-hover)',
+  dangerPressed:     'var(--ds-color-danger-pressed)',
+  dangerRing:        'var(--ds-color-danger-ring)',
 
-  // Neutral scale (Slate palette)
-  neutral950:        '#0f172a',
-  neutral900:        '#1e293b',
-  neutral800:        '#374151',
-  neutral700:        '#475569',
-  neutral600:        '#64748b',
-  neutral400:        '#94a3b8',
-  neutral300:        '#d1d5db',
-  neutral200:        '#e5e7eb',
-  neutral150:        '#e2e8f0',
-  neutral100:        '#f1f5f9',
-  neutral50:         '#f9fafb',
-  neutral25:         '#f8fafc',
-  white:             '#ffffff',
+  // Neutral scale — mapped to semantic surface/text tokens where possible,
+  // raw palette kept for backwards compatibility with existing component refs
+  neutral950:        'var(--ds-text-heading)',
+  neutral900:        'var(--ds-surface-inverse)',
+  neutral800:        'var(--ds-text-primary)',
+  neutral700:        'var(--ds-text-label)',
+  neutral600:        'var(--ds-text-secondary)',
+  neutral400:        'var(--ds-text-tertiary)',
+  neutral300:        'var(--ds-border-strong)',
+  neutral200:        'var(--ds-border-default)',
+  neutral150:        'var(--ds-border-subtle)',
+  neutral100:        'var(--ds-surface-active)',
+  neutral50:         'var(--ds-surface-hover)',
+  neutral25:         'var(--ds-surface-sunken)',
+  white:             'var(--ds-surface-base)',
 
   // Semantic text aliases
-  textDefault:       '#374151',  // body copy
-  textSubtle:        '#64748b',  // descriptions, secondary
-  textPlaceholder:   '#94a3b8',  // hints, captions
-  textHeading:       '#0f172a',  // page / section titles
-  textLabel:         '#475569',  // form labels, subsection labels
-  textOnPrimary:     '#ffffff',  // text on filled primary/danger
+  textDefault:       'var(--ds-text-primary)',
+  textSubtle:        'var(--ds-text-secondary)',
+  textPlaceholder:   'var(--ds-text-placeholder)',
+  textHeading:       'var(--ds-text-heading)',
+  textLabel:         'var(--ds-text-label)',
+  textOnPrimary:     'var(--ds-text-on-accent)',
 
   // Semantic border aliases
-  borderDefault:     '#e5e7eb',  // normal dividers
-  borderStrong:      '#d1d5db',  // prominent borders
-  borderHover:       '#9ca3af',  // hover borders
+  borderDefault:     'var(--ds-border-default)',
+  borderStrong:      'var(--ds-border-strong)',
+  borderHover:       'var(--ds-border-hover)',
 
   // Semantic background aliases
-  bgPage:            '#f8fafc',  // page / canvas
-  bgSurface:         '#ffffff',  // card / panel
-  bgHover:           '#f9fafb',  // subtle hover fill
-  bgActive:          '#f3f4f6',  // pressed fill
+  bgPage:            'var(--ds-surface-sunken)',
+  bgSurface:         'var(--ds-surface-base)',
+  bgHover:           'var(--ds-surface-hover)',
+  bgActive:          'var(--ds-surface-active)',
 
   // Success
-  success:           '#00964E',
-  successLight:      '#DCFCE8',
-  successBorder:     '#C6F5D6',
-  successText:       '#006130',
+  success:           'var(--ds-color-success)',
+  successLight:      'var(--ds-color-success-subtle)',
+  successBorder:     'var(--ds-color-success-border)',
+  successText:       'var(--ds-color-success-on)',
 
-  // Tag palette – Figma Tags node 5:1033
-  tagRed:       { bg: '#FFF0F3', border: '#FFE0E7', text: '#A30F34' },
-  tagOrange:    { bg: '#FFF2E3', border: '#FFE5D6', text: '#8A4300' },
-  tagMagenta:   { bg: '#FFF0F9', border: '#FFE3F4', text: '#A30463' },
-  tagPurple:    { bg: '#F8F2FF', border: '#F2E6FF', text: '#6C37A1' },
-  tagBlue:      { bg: '#E6F7FF', border: '#D1F1FF', text: '#005780' },
-  tagGreen:     { bg: '#DCFCE8', border: '#C6F5D6', text: '#006130' },
+  // Error (alias for danger used in form states)
+  error:             'var(--ds-color-danger)',
+
+  // Tag palette
+  tagRed:       { bg: 'var(--ds-tag-red-bg)',       border: 'var(--ds-tag-red-border)',       text: 'var(--ds-tag-red-text)' },
+  tagOrange:    { bg: 'var(--ds-tag-orange-bg)',     border: 'var(--ds-tag-orange-border)',     text: 'var(--ds-tag-orange-text)' },
+  tagMagenta:   { bg: 'var(--ds-tag-magenta-bg)',    border: 'var(--ds-tag-magenta-border)',    text: 'var(--ds-tag-magenta-text)' },
+  tagPurple:    { bg: 'var(--ds-tag-purple-bg)',     border: 'var(--ds-tag-purple-border)',     text: 'var(--ds-tag-purple-text)' },
+  tagBlue:      { bg: 'var(--ds-tag-blue-bg)',       border: 'var(--ds-tag-blue-border)',       text: 'var(--ds-tag-blue-text)' },
+  tagGreen:     { bg: 'var(--ds-tag-green-bg)',      border: 'var(--ds-tag-green-border)',      text: 'var(--ds-tag-green-text)' },
 } as const;
 
 // ─── Spacing ─────────────────────────────────────────────────────────────────
@@ -138,12 +145,12 @@ export const font = {
 
 // ─── Shadows & Focus Rings ────────────────────────────────────────────────────
 export const shadow = {
-  focusPrimary:      '0 0 0 3px rgba(0, 154, 206, 0.35)',
-  focusPrimaryLight: '0 0 0 3px rgba(0, 154, 206, 0.20)',
-  focusDanger:       '0 0 0 3px rgba(212, 63, 88, 0.35)',
-  sm:                '0 1px 2px rgba(0, 0, 0, 0.05)',
-  md:                '0 2px 8px rgba(0, 0, 0, 0.08)',
-  lg:                '0 4px 16px rgba(0, 0, 0, 0.10)',
+  focusPrimary:      'var(--ds-focus-ring)',
+  focusPrimaryLight: 'var(--ds-focus-ring-light)',
+  focusDanger:       'var(--ds-focus-ring-danger)',
+  sm:                'var(--ds-shadow-sm)',
+  md:                'var(--ds-shadow-md)',
+  lg:                'var(--ds-shadow-lg)',
 } as const;
 
 // ─── Motion / Transition ──────────────────────────────────────────────────────
@@ -154,4 +161,17 @@ export const transition = {
   button: 'background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease, opacity 0.2s ease',
   border: 'border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease, opacity 0.2s ease',
   input:  'border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
+} as const;
+
+// ─── Z-Index ──────────────────────────────────────────────────────────────────
+export const zIndex = {
+  hide:      -1,
+  base:      0,
+  dropdown:  1000,
+  sticky:    1020,
+  fixed:     1030,
+  backdrop:  1040,
+  modal:     1050,
+  popover:   1060,
+  tooltip:   1070,
 } as const;
