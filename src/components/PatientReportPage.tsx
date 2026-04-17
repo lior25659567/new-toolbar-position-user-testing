@@ -880,103 +880,6 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
                     onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
                     placeholder="Doctor name"
                   />
-                  <div>
-                    {settings.doctorImageUrl ? (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: space[3],
-                        padding: space[3],
-                        backgroundColor: color.neutral50,
-                        borderRadius: radius.md,
-                        border: `1px solid ${color.borderDefault}`,
-                      }}>
-                        <img
-                          src={settings.doctorImageUrl}
-                          alt="Doctor"
-                          style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            border: `1px solid ${color.borderDefault}`,
-                          }}
-                        />
-                        <span style={{ flex: 1, fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>
-                          Doctor photo
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => { setSettings((s) => ({ ...s, doctorImageUrl: '' })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
-                          style={{
-                            fontSize: font.size.xs,
-                            color: color.error,
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: `${space[1]} ${space[2]}`,
-                            borderRadius: radius.sm,
-                            fontWeight: font.weight.medium,
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ) : (
-                      <label style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: space[3],
-                        padding: `${space[3]} ${space[3]}`,
-                        backgroundColor: color.neutral50,
-                        borderRadius: radius.md,
-                        border: `1.5px dashed ${color.neutral300}`,
-                        cursor: 'pointer',
-                        transition: `border-color ${transition.fast}, background-color ${transition.fast}`,
-                      }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.backgroundColor = '#F0F9FF'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.neutral300; e.currentTarget.style.backgroundColor = color.neutral50; }}
-                      >
-                        <div style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '50%',
-                          backgroundColor: color.neutral100,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                        }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div style={{ fontSize: font.size.xs, fontWeight: font.weight.medium, color: color.textSubtle }}>
-                            Upload doctor photo
-                          </div>
-                          <div style={{ fontSize: '10px', color: color.textPlaceholder }}>
-                            PNG or JPG
-                          </div>
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg"
-                          style={{ display: 'none' }}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const url = URL.createObjectURL(file);
-                              setSettings((s) => ({ ...s, doctorImageUrl: url }));
-                              setSaved(false);
-                              setTimeout(() => setSaved(true), 1500);
-                            }
-                          }}
-                        />
-                      </label>
-                    )}
-                  </div>
                 </SidebarSection>
 
                 <SidebarSection title="Clinic">
@@ -1182,6 +1085,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
             settings={settings}
             patient={patient}
             blocks={blocks}
+            onClinicLogoUpload={(url) => { setSettings((s) => ({ ...s, clinicLogoUrl: url })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
           />
         </div>
       </div>

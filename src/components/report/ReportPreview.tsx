@@ -411,9 +411,10 @@ interface ReportPreviewProps {
   settings: ReportSettings;
   patient: PatientInfo;
   blocks: SupportedBlock[];
+  onClinicLogoUpload?: (url: string) => void;
 }
 
-export default function ReportPreview({ settings, patient, blocks }: ReportPreviewProps) {
+export default function ReportPreview({ settings, patient, blocks, onClinicLogoUpload }: ReportPreviewProps) {
   return (
     <div style={{
       backgroundColor: color.white,
@@ -447,6 +448,39 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
               objectFit: 'contain',
             }}
           />
+        ) : onClinicLogoUpload ? (
+          <label style={{
+            height: '36px',
+            padding: '0 12px',
+            borderRadius: radius.md,
+            border: `1.5px dashed ${color.neutral200}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: color.neutral300,
+            backgroundColor: color.neutral50,
+            cursor: 'pointer',
+            transition: `border-color 0.15s, background-color 0.15s`,
+          }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.backgroundColor = 'var(--ds-color-primary-subtle)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.neutral200; e.currentTarget.style.backgroundColor = color.neutral50; }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="3" />
+              <circle cx="8.5" cy="10.5" r="2" />
+              <path d="M5 20l5-6 3 3 4-5 4 4" />
+            </svg>
+            <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onClinicLogoUpload(URL.createObjectURL(file));
+              }}
+            />
+          </label>
         ) : (
           <div style={{
             height: '36px',
@@ -499,44 +533,9 @@ export default function ReportPreview({ settings, patient, blocks }: ReportPrevi
         gridTemplateColumns: '1fr 1fr 1fr',
         gap: space[4],
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Doctor photo */}
-          {settings.doctorImageUrl ? (
-            <img
-              src={settings.doctorImageUrl}
-              alt={settings.doctorName}
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                flexShrink: 0,
-                border: `1px solid ${color.borderDefault}`,
-              }}
-            />
-          ) : (
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              backgroundColor: color.neutral100,
-              border: `1.5px dashed ${color.neutral200}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              color: color.neutral300,
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
-          )}
-          <div>
-            <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
-          </div>
+        <div>
+          <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
         </div>
         <div>
           <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Clinic</div>
