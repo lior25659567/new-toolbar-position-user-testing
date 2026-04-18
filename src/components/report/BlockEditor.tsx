@@ -1247,6 +1247,7 @@ function ImageCardEditor({ block, onUpdate }: {
               value={block.diagnosis}
               onChange={(v) => onUpdate({ diagnosis: v })}
               fullWidth
+              menuPlacement="top"
             />
             <DropdownList
               placeholder="Treatment"
@@ -1254,6 +1255,7 @@ function ImageCardEditor({ block, onUpdate }: {
               value={block.treatment}
               onChange={(v) => onUpdate({ treatment: v })}
               fullWidth
+              menuPlacement="top"
             />
             <div>
               <input
