@@ -87,13 +87,13 @@ function PreviewTeethTags({ teeth }: { teeth: number[] }) {
   if (teeth.length === 0) return null;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: space[2] }}>
-      <span style={{ fontSize: '12px', color: color.textSubtle, marginRight: '4px', lineHeight: '20px' }}>Teeth:</span>
+      <span style={{ fontSize: '14px', color: color.textSubtle, marginRight: '4px', lineHeight: '20px' }}>Teeth:</span>
       {teeth.map((t) => (
         <span key={t} style={{
           display: 'inline-flex',
           alignItems: 'center',
           padding: `2px 9px`,
-          fontSize: '12px',
+          fontSize: '14px',
           fontWeight: 500,
           color: '#374151',
           backgroundColor: '#F9FAFB',
@@ -110,7 +110,7 @@ function PreviewTeethTags({ teeth }: { teeth: number[] }) {
 function PreviewClinicalRow({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
-    <div style={{ display: 'flex', gap: space[2], fontSize: '12px', lineHeight: '1.6' }}>
+    <div style={{ display: 'flex', gap: space[2], fontSize: '14px', lineHeight: '1.6' }}>
       <span style={{ color: color.textSubtle, fontWeight: 500, minWidth: '80px' }}>{label}:</span>
       <span style={{ color: color.textDefault }}>{value}</span>
     </div>
@@ -167,12 +167,12 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
       {hasMeta && (
         <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
           {block.title && (
-            <div style={{ fontSize: '12px', fontWeight: 600, color: color.textHeading }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: color.textHeading }}>
               {block.title}
             </div>
           )}
           {hasNotes && (
-            <div style={{ fontSize: '12px', color: color.textSubtle, lineHeight: '1.45' }}>
+            <div style={{ fontSize: '14px', color: color.textSubtle, lineHeight: '1.45' }}>
               {block.notes}
             </div>
           )}
@@ -194,7 +194,7 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
 function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
   const renderSide = (img: { previewUrl: string }, label: string) => (
     <div style={{ flex: 1 }}>
-      <div style={{ fontSize: '10px', fontWeight: 600, color: color.textLabel, textAlign: 'center', marginBottom: space[1] }}>
+      <div style={{ fontSize: '12px', fontWeight: 600, color: color.textLabel, textAlign: 'center', marginBottom: space[1] }}>
         {label}
       </div>
       {img.previewUrl ? (
@@ -227,7 +227,7 @@ function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
       </div>
       {block.notes && (
         <div style={{
-          fontSize: '10px', color: color.textDefault, lineHeight: '1.5',
+          fontSize: '12px', color: color.textDefault, lineHeight: '1.5',
           marginTop: space[2], paddingLeft: space[2], borderLeft: `2px solid ${color.neutral200}`,
         }}>
           {block.notes}
@@ -250,7 +250,7 @@ function CostSummaryBlockPreview({ block }: { block: CostSummaryBlock }) {
     <div style={{ marginBottom: space[4] }}>
       <table style={{
         width: '100%',
-        fontSize: '12px',
+        fontSize: '14px',
         borderCollapse: 'collapse',
         color: color.textDefault,
       }}>
@@ -289,10 +289,10 @@ function NotesBlockPreview({ block }: { block: NotesBlock }) {
       borderRadius: '8px',
       borderLeft: `3px solid ${color.borderStrong}`,
     }}>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
         Clinical Notes
       </div>
-      <div style={{ fontSize: '12px', color: color.textDefault, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+      <div style={{ fontSize: '14px', color: color.textDefault, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
         {block.content}
       </div>
     </div>
@@ -305,10 +305,10 @@ function RxBlockPreview({ block }: { block: RxBlock }) {
 
   return (
     <div style={{ marginBottom: space[4] }}>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
         Prescription (Rx)
       </div>
-      <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse', color: color.textDefault }}>
+      <table style={{ width: '100%', fontSize: '14px', borderCollapse: 'collapse', color: color.textDefault }}>
         <thead>
           <tr style={{ borderBottom: `1px solid ${color.borderDefault}` }}>
             <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel }}>Medication</th>
@@ -329,7 +329,7 @@ function RxBlockPreview({ block }: { block: RxBlock }) {
         </tbody>
       </table>
       {block.notes && (
-        <div style={{ fontSize: '11px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
+        <div style={{ fontSize: '13px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
           {block.notes}
         </div>
       )}
@@ -349,10 +349,10 @@ function NextAppointmentBlockPreview({ block }: { block: NextAppointmentBlock })
       borderRadius: '8px',
       border: `1px solid ${color.borderDefault}`,
     }}>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
         Next Appointment
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2], fontSize: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2], fontSize: '14px' }}>
         {block.date && (
           <div>
             <span style={{ color: color.textSubtle, fontWeight: 500 }}>Date: </span>
@@ -367,13 +367,13 @@ function NextAppointmentBlockPreview({ block }: { block: NextAppointmentBlock })
         )}
       </div>
       {block.procedure && (
-        <div style={{ fontSize: '12px', marginTop: space[1] }}>
+        <div style={{ fontSize: '14px', marginTop: space[1] }}>
           <span style={{ color: color.textSubtle, fontWeight: 500 }}>Procedure: </span>
           <span style={{ color: color.textDefault }}>{block.procedure}</span>
         </div>
       )}
       {block.instructions && (
-        <div style={{ fontSize: '11px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
+        <div style={{ fontSize: '13px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
           {block.instructions}
         </div>
       )}
@@ -393,10 +393,10 @@ function PatientInstructionsBlockPreview({ block }: { block: PatientInstructions
       borderRadius: '8px',
       border: `1px solid ${color.borderDefault}`,
     }}>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
         {block.title || 'Patient Instructions'}
       </div>
-      <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: color.textDefault, lineHeight: '1.9' }}>
+      <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '14px', color: color.textDefault, lineHeight: '1.9' }}>
         {block.items.filter((it) => it.text).map((item) => (
           <li key={item.id}>{item.text}</li>
         ))}
@@ -470,7 +470,7 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
               <circle cx="8.5" cy="10.5" r="2" />
               <path d="M5 20l5-6 3 3 4-5 4 4" />
             </svg>
-            <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
+            <span style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
             <input
               type="file"
               accept="image/png,image/jpeg,image/svg+xml"
@@ -498,7 +498,7 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
               <circle cx="8.5" cy="10.5" r="2" />
               <path d="M5 20l5-6 3 3 4-5 4 4" />
             </svg>
-            <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
+            <span style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
           </div>
         )}
 
@@ -534,16 +534,16 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
         gap: space[4],
       }}>
         <div>
-          <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
+          <div style={{ fontSize: '12px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Clinic</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{settings.clinicName || '---'}</div>
+          <div style={{ fontSize: '12px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Clinic</div>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: color.textDefault }}>{settings.clinicName || '---'}</div>
         </div>
         <div>
-          <div style={{ fontSize: '10px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Patient</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: color.textDefault }}>{patient.patientName || '---'}</div>
+          <div style={{ fontSize: '12px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Patient</div>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: color.textDefault }}>{patient.patientName || '---'}</div>
         </div>
       </div>
 
@@ -553,7 +553,7 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
           textAlign: 'center',
           padding: `${space[16]} 0`,
           color: color.textPlaceholder,
-          fontSize: '11px',
+          fontSize: '13px',
         }}>
           Add sections to see the report preview
         </div>
@@ -603,7 +603,7 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
           alignItems: 'flex-end',
         }}>
           <img src={settings.signatureUrl} alt="Doctor signature" style={{ maxHeight: '50px', objectFit: 'contain' }} />
-          <div style={{ fontSize: '10px', fontWeight: 500, color: color.textDefault, marginTop: '2px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 500, color: color.textDefault, marginTop: '2px' }}>
             {settings.doctorName}
           </div>
         </div>
@@ -622,7 +622,7 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
         alignItems: 'center',
         gap: space[2],
       }}>
-        <span style={{ fontSize: '10px', color: color.textPlaceholder, fontWeight: 500 }}>
+        <span style={{ fontSize: '12px', color: color.textPlaceholder, fontWeight: 500 }}>
           Powered by
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: space[5] }}>
