@@ -1967,10 +1967,10 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
       {/* Sticky footer: action buttons + add block menu pinned to the bottom of the scroll container */}
       <div style={{
         position: 'sticky',
-        bottom: 0,
-        marginTop: space[2],
-        paddingTop: space[3],
-        paddingBottom: space[2],
+        bottom: -16,
+        marginTop: space[4],
+        paddingTop: space[4],
+        paddingBottom: space[4],
         backgroundColor: color.bgSurface,
         borderTop: `1px solid ${color.borderDefault}`,
         zIndex: 1,

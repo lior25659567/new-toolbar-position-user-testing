@@ -156,13 +156,15 @@ function SidebarSection({ title, children, defaultOpen = true, isOpen: controlle
           userSelect: 'none',
         }}
       >
-        <span style={{
+        <div style={{
           fontSize: font.size.sm,
           fontWeight: font.weight.semibold,
           color: color.textHeading,
+          flex: 1,
+          minWidth: 0,
         }}>
           {title}
-        </span>
+        </div>
         <svg
           width="14" height="14" viewBox="0 0 16 16" fill="none"
           stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round"
@@ -204,7 +206,6 @@ function TemplatePicker({ onSelect, selectedId }: {
       />
       {REPORT_TEMPLATES.map((tpl) => {
         const supported = tpl.blocks
-          .filter((b) => b.type === 'image' || b.type === 'comparison' || b.type === 'cost-summary')
           .map((b, i) => ({
             ...b,
             id: `tpl-block-${Date.now()}-${i}`,
@@ -259,6 +260,18 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
   name: string; description: string; onClick: () => void; isSelected: boolean; icon?: React.ReactNode;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [justSelected, setJustSelected] = useState(false);
+  const prevSelected = useRef(isSelected);
+
+  useEffect(() => {
+    if (isSelected && !prevSelected.current) {
+      setJustSelected(true);
+      const t = setTimeout(() => setJustSelected(false), 300);
+      return () => clearTimeout(t);
+    }
+    prevSelected.current = isSelected;
+  }, [isSelected]);
+
   return (
     <button
       type="button"
@@ -276,8 +289,9 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
         borderRadius: radius.md,
         cursor: 'pointer',
         textAlign: 'left',
-        transition: `all ${transition.fast}`,
+        transition: `all 0.2s ease, transform 0.2s ease`,
         position: 'relative',
+        transform: justSelected ? 'scale(0.96)' : hovered ? 'scale(1.02)' : 'scale(1)',
       }}
     >
       {isSelected && (
@@ -292,17 +306,19 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          animation: justSelected ? 'checkPop 0.3s ease' : undefined,
         }}>
           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke={color.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 6.5L5 9.5l5-7" />
           </svg>
         </div>
       )}
-      {icon && <div style={{ color: isSelected ? color.primary : color.neutral400 }}>{icon}</div>}
+      {icon && <div style={{ color: isSelected ? color.primary : color.neutral400, transition: `color 0.2s ease` }}>{icon}</div>}
       <span style={{
         fontSize: font.size.xs,
         fontWeight: font.weight.semibold,
         color: isSelected ? color.primary : color.textDefault,
+        transition: `color 0.2s ease`,
       }}>
         {name}
       </span>
@@ -549,9 +565,9 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
     setAppliedTemplate(templateName);
     setSelectedTemplateId(templateId);
     setBlocks(templateBlocks);
-    setTemplatesOpen(false);
     setSaved(false);
     setTimeout(() => setSaved(true), 1500);
+    setTemplatesOpen(false);
   };
 
   const handleUndoTemplate = () => {
@@ -566,6 +582,14 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
   };
 
   return (
+    <>
+    <style>{`
+      @keyframes checkPop {
+        0% { transform: scale(0); opacity: 0; }
+        60% { transform: scale(1.3); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+    `}</style>
     <div style={{
       width: '100%',
       height: '100%',
@@ -695,24 +719,45 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
         {/* ── Left: Editor Panel ── */}
-        <div ref={editorScrollRef} style={{
+        <div ref={(el) => { (editorScrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el; (editorContentRef as React.MutableRefObject<HTMLDivElement | null>).current = el; }} style={{
           width: '480px',
           minWidth: '420px',
           maxWidth: '560px',
           overflowY: 'auto',
           borderRight: `1px solid ${color.borderDefault}`,
           backgroundColor: color.white,
+          padding: space[4],
           display: 'flex',
           flexDirection: 'column',
+          gap: space[4],
         }}>
-          {/* Editor content — blocks only, no tabs */}
-          <div ref={editorContentRef} style={{ flex: 1, overflowY: 'auto', padding: space[4] }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: space[4] }}>
-              {/* Templates */}
-              <SidebarSection
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: space[2], flex: 1 }}>
-                    <span>{appliedTemplate || 'Templates'}</span>
+              {/* Templates card — header is sticky, picker body inside the same card */}
+              <div style={{
+                backgroundColor: color.bgSurface,
+                borderRadius: radius.lg,
+                border: `1px solid ${color.borderDefault}`,
+              }}>
+                {/* Sticky header */}
+                <div
+                  onClick={() => setTemplatesOpen(!templatesOpen)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: `${space[3]} ${space[4]}`,
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    position: 'sticky',
+                    top: -16,
+                    backgroundColor: color.bgSurface,
+                    borderRadius: radius.lg,
+                    zIndex: 2,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: space[2], flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textHeading }}>
+                      {appliedTemplate || 'Templates'}
+                    </span>
                     {appliedTemplate && blocksBeforeTemplate && (
                       <button
                         type="button"
@@ -722,21 +767,38 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
                           color: color.primary, backgroundColor: 'transparent',
                           border: 'none', cursor: 'pointer', padding: `2px ${space[2]}`,
                           borderRadius: radius.sm, transition: `background-color ${transition.fast}`,
-                          marginLeft: 'auto',
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#E0F2FE')}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                       >
                         Undo
                       </button>
                     )}
                   </div>
-                }
-                isOpen={templatesOpen}
-                onToggle={setTemplatesOpen}
-              >
-                <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
-              </SidebarSection>
+                  <svg
+                    width="14" height="14" viewBox="0 0 16 16" fill="none"
+                    stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round"
+                    style={{ flexShrink: 0, transform: templatesOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: `transform ${transition.fast}` }}
+                  >
+                    <path d="M4 6l4 4 4-4" />
+                  </svg>
+                </div>
+
+                {/* Template picker body — animated collapse */}
+                <div style={{
+                  maxHeight: templatesOpen ? '500px' : '0px',
+                  opacity: templatesOpen ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'max-height 0.25s ease, opacity 0.2s ease',
+                }}>
+                  <div style={{
+                    padding: `0 ${space[4]} ${space[4]}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: space[3],
+                  }}>
+                    <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
+                  </div>
+                </div>
+              </div>
 
               {/* Content count */}
               <div style={{
@@ -754,8 +816,6 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
                 blocks={blocks}
                 onBlocksChange={handleBlocksChange}
               />
-            </div>
-          </div>
         </div>
 
         {/* ── Right: Live Preview ── */}
@@ -811,6 +871,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
 
       {demoOpen && <PatientReportDemoPage onClose={() => setDemoOpen(false)} />}
     </div>
+    </>
   );
 });
 
