@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Modal, PrimaryButton, SecondaryButton, TextInput, TextArea } from '../../design-system';
+import { Modal, TextInput } from '../../design-system';
 import { color, font, space, radius, transition, shadow } from '../../design-system/tokens';
 
 interface ShareModalProps {
@@ -7,343 +7,361 @@ interface ShareModalProps {
   onClose: () => void;
   reportName: string;
   patientName: string;
+  doctorName: string;
+  signatureUrl: string;
+  signatureMethod: string;
+  onSignatureChange: (url: string, method: string) => void;
+  pinEnabled: boolean;
+  pin: string;
+  onPinEnabledChange: (enabled: boolean) => void;
+  onPinChange: (pin: string) => void;
 }
 
-type ShareAction = 'link' | 'whatsapp' | 'wechat' | 'qr' | 'email' | null;
-
-// ─── Share method icon button ───────────────────────────────────────────────
-
-function ShareIcon({ icon, label, active, onClick }: {
-  icon: React.ReactNode; label: string; active?: boolean; onClick: () => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 6,
-        padding: 0,
-        border: 'none',
-        backgroundColor: 'transparent',
-        cursor: 'pointer',
-        outline: 'none',
-        minWidth: 56,
-      }}
-    >
-      <div style={{
-        width: 56,
-        height: 56,
-        borderRadius: radius.lg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: active ? color.primary : hovered ? color.neutral100 : color.neutral50,
-        color: active ? color.textOnPrimary : color.textDefault,
-        transition: `all ${transition.fast}`,
-        border: `1px solid ${active ? color.primary : hovered ? color.borderStrong : color.borderDefault}`,
-      }}>
-        {icon}
-      </div>
-      <span style={{
-        fontSize: font.size.xs,
-        fontWeight: 500,
-        color: active ? color.primary : color.textSubtle,
-        fontFamily: font.family,
-        transition: `color ${transition.fast}`,
-      }}>
-        {label}
-      </span>
-    </button>
-  );
-}
-
-// ─── QR Code (simple SVG placeholder) ───────────────────────────────────────
+// ─── QR Code ────────────────────────────────────────────────────────────────
 
 function QRCodePreview({ link }: { link: string }) {
-  // Generate a deterministic pattern from the link
-  const cells: boolean[][] = [];
-  let hash = 0;
-  for (let i = 0; i < link.length; i++) hash = ((hash << 5) - hash + link.charCodeAt(i)) | 0;
-  for (let r = 0; r < 21; r++) {
-    cells[r] = [];
-    for (let c = 0; c < 21; c++) {
-      // Corner finder patterns
-      if ((r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7)) {
-        const isOuter = r === 0 || r === 6 || c === 0 || c === 6 || (r >= 0 && r <= 6 && (c === 0 || c === 6)) || (c >= 0 && c <= 6 && (r === 0 || r === 6));
-        const isInner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
-        cells[r][c] = isOuter || isInner;
-      } else {
-        cells[r][c] = ((hash * (r * 21 + c + 1) * 2654435761) >>> 0) % 3 !== 0;
-      }
+  const N = 25;
+  const cells: boolean[][] = Array.from({ length: N }, () => Array(N).fill(false));
+  let h = 0;
+  for (let i = 0; i < link.length; i++) h = ((h << 5) - h + link.charCodeAt(i)) | 0;
+  const finder = (sr: number, sc: number) => {
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) {
+      cells[sr + r][sc + c] = r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4);
     }
+  };
+  finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+  for (let i = 8; i < N - 8; i++) { cells[6][i] = i % 2 === 0; cells[i][6] = i % 2 === 0; }
+  for (let r = -2; r <= 2; r++) for (let c = -2; c <= 2; c++) {
+    const ar = 18 + r, ac = 18 + c;
+    if (ar >= 0 && ar < N && ac >= 0 && ac < N) cells[ar][ac] = Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0);
   }
-
-  const size = 160;
-  const cellSize = size / 21;
-
+  for (let i = 0; i < 8; i++) {
+    if (i < N) { cells[7][i] = false; cells[i][7] = false; }
+    if (N - 8 + i < N) cells[7][N - 8 + i] = false;
+    if (i < N) cells[i][N - 8] = false;
+    if (N - 8 + i < N) cells[N - 8][i] = false;
+    if (i < N) cells[N - 8 + i][7] = false;
+  }
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    if ((r < 9 && c < 9) || (r < 9 && c >= N - 8) || (r >= N - 8 && c < 9)) continue;
+    if (r === 6 || c === 6) continue;
+    if (r >= 16 && r <= 20 && c >= 16 && c <= 20) continue;
+    cells[r][c] = ((h * (r * N + c + 1) * 2654435761) >>> 0) % 5 !== 0 && ((h * (r * N + c + 1) * 2654435761) >>> 0) % 3 !== 0;
+  }
+  const size = 160, cs = size / N;
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: space[4] }}>
-      <div style={{
-        padding: 12,
-        backgroundColor: '#fff',
-        borderRadius: radius.md,
-        border: `1px solid ${color.borderDefault}`,
-        display: 'inline-block',
-      }}>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: space[3] }}>
+      <div style={{ padding: 12, backgroundColor: '#fff', borderRadius: radius.md, border: `1px solid ${color.borderDefault}` }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {cells.map((row, r) =>
-            row.map((cell, c) =>
-              cell ? (
-                <rect
-                  key={`${r}-${c}`}
-                  x={c * cellSize}
-                  y={r * cellSize}
-                  width={cellSize}
-                  height={cellSize}
-                  fill="#1e293b"
-                />
-              ) : null
-            )
-          )}
+          {cells.map((row, r) => row.map((cell, c) => cell ? <rect key={`${r}-${c}`} x={c * cs} y={r * cs} width={cs + 0.5} height={cs + 0.5} fill="#1a1a2e" rx={0.4} /> : null))}
         </svg>
       </div>
     </div>
   );
 }
 
+// ─── Small icon button for bottom row ───────────────────────────────────────
+
+function SocialIcon({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      type="button"
+      title={label}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: 40, height: 40, borderRadius: radius.full, border: `1px solid ${color.borderDefault}`,
+        backgroundColor: hovered ? color.neutral100 : color.bgSurface,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer', color: color.textDefault, padding: 0,
+        transition: `all ${transition.fast}`,
+      }}
+    >
+      {icon}
+    </button>
+  );
+}
+
 // ─── Main Modal ─────────────────────────────────────────────────────────────
 
-export default function ShareModal({ open, onClose, reportName, patientName }: ShareModalProps) {
-  const [activeAction, setActiveAction] = useState<ShareAction>(null);
+export default function ShareModal({ open, onClose, reportName, patientName, doctorName, signatureUrl, signatureMethod, onSignatureChange, pinEnabled, pin, onPinEnabledChange, onPinChange }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState(`Here's the dental report for ${patientName}`);
+  const [showQR, setShowQR] = useState(false);
+  const [accessLevel, setAccessLevel] = useState<'invited' | 'anyone'>('invited');
+  const [accessDropdownOpen, setAccessDropdownOpen] = useState(false);
 
   const reportLink = `https://reports.itero.com/share/${Date.now().toString(36)}`;
 
   const handleCopyLink = useCallback(() => {
     navigator.clipboard?.writeText(reportLink).catch(() => {});
     setCopied(true);
-    setActiveAction('link');
     window.setTimeout(() => setCopied(false), 2000);
   }, [reportLink]);
 
-  const handleAction = (action: ShareAction) => {
-    if (action === 'link') {
-      handleCopyLink();
-      return;
-    }
-    setActiveAction(activeAction === action ? null : action);
-  };
-
-  // Build footer based on active action
-  const footer = (() => {
-    if (activeAction === 'email') {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: space[2] }}>
-          <SecondaryButton size={36} onClick={() => setActiveAction(null)}>Cancel</SecondaryButton>
-          <PrimaryButton size={36} onClick={onClose} disabled={!email}>Send email</PrimaryButton>
-        </div>
-      );
-    }
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <PrimaryButton size={36} fullWidth onClick={onClose}>Done</PrimaryButton>
-      </div>
-    );
-  })();
-
   return (
-    <Modal open={open} onClose={onClose} title="Share report" width={480} footer={footer}>
-      {/* Report preview card */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: space[3],
-        padding: space[3],
-        backgroundColor: color.neutral50,
-        borderRadius: radius.md,
-        border: `1px solid ${color.borderDefault}`,
-        marginBottom: space[5],
-      }}>
-        {/* Document icon */}
-        <div style={{
-          width: 40, height: 40, borderRadius: radius.sm,
-          backgroundColor: color.primary,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="16" y1="13" x2="8" y2="13" />
-            <line x1="16" y1="17" x2="8" y2="17" />
-          </svg>
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{
-            fontSize: font.size.sm, fontWeight: font.weight.semibold,
-            color: color.textHeading, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
-            {reportName || 'Patient Report'}
-          </div>
-          <div style={{ fontSize: font.size.xs, color: color.textSubtle }}>
-            {patientName || 'Patient'}
-          </div>
-        </div>
-      </div>
+    <Modal open={open} onClose={onClose} title="Share Report" width={480}>
 
-      {/* Share method icons row */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        marginBottom: space[5],
-      }}>
-        <ShareIcon
-          label={copied ? 'Copied!' : 'Copy Link'}
-          active={activeAction === 'link'}
-          onClick={() => handleAction('link')}
-          icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-            </svg>
-          }
-        />
-        <ShareIcon
-          label="WhatsApp"
-          active={activeAction === 'whatsapp'}
-          onClick={() => handleAction('whatsapp')}
-          icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-          }
-        />
-        <ShareIcon
-          label="WeChat"
-          active={activeAction === 'wechat'}
-          onClick={() => handleAction('wechat')}
-          icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.97 3.258c-1.637 0-3.116.475-4.28 1.318-1.466 1.06-2.387 2.765-2.387 4.504 0 .637.116 1.25.328 1.828.648 1.768 2.105 3.2 4.037 3.893.526.189 1.075.326 1.64.398a8.85 8.85 0 001.46.078 8.39 8.39 0 002.089-.263.65.65 0 01.54.073l1.44.844a.245.245 0 00.126.04.22.22 0 00.22-.224c0-.054-.022-.108-.036-.161l-.296-1.121a.445.445 0 01.161-.503C21.37 18.757 24 16.926 24 14.27c0-2.87-2.85-5.023-6.432-5.023zm-2.37 2.606c.484 0 .878.4.878.89a.884.884 0 01-.877.89.884.884 0 01-.878-.89c0-.49.394-.89.878-.89zm4.742 0c.485 0 .878.4.878.89a.884.884 0 01-.878.89.884.884 0 01-.877-.89c0-.49.393-.89.877-.89z" />
-            </svg>
-          }
-        />
-        <ShareIcon
-          label="QR Code"
-          active={activeAction === 'qr'}
-          onClick={() => handleAction('qr')}
-          icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-              <rect x="14" y="14" width="3" height="3" />
-              <line x1="21" y1="14" x2="21" y2="14.01" />
-              <line x1="21" y1="18" x2="21" y2="21" />
-              <line x1="17" y1="21" x2="17" y2="21.01" />
-            </svg>
-          }
-        />
-        <ShareIcon
-          label="Email"
-          active={activeAction === 'email'}
-          onClick={() => handleAction('email')}
-          icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2" />
-              <path d="M22 7l-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7" />
-            </svg>
-          }
+      {/* Email input */}
+      <div style={{ marginBottom: space[4] }}>
+        <TextInput
+          placeholder="Email, separated by commas"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          fullWidth
         />
       </div>
 
-      {/* Expanded content area based on active action */}
-      {activeAction === 'link' && (
-        <div style={{
-          padding: `${space[3]} ${space[4]}`,
-          backgroundColor: color.neutral50,
-          borderRadius: radius.md,
-          border: `1px solid ${color.borderDefault}`,
-          display: 'flex', alignItems: 'center', gap: space[2],
-          marginBottom: space[3],
-        }}>
-          <span style={{
-            flex: 1, fontSize: font.size.xs, color: color.textDefault,
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            fontFamily: font.mono,
-          }}>
-            {reportLink}
-          </span>
-          {copied && (
-            <span style={{ fontSize: font.size['2xs'], fontWeight: font.weight.semibold, color: color.success }}>
-              Copied!
+      {/* Who has access */}
+      <div style={{ marginBottom: space[3] }}>
+        <div style={{ fontSize: font.size.xs, color: color.textSubtle, marginBottom: space[2] }}>
+          Who has access
+        </div>
+
+        {/* Access level dropdown */}
+        <div style={{ position: 'relative', marginBottom: space[3] }}>
+          <button
+            type="button"
+            onClick={() => setAccessDropdownOpen(!accessDropdownOpen)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: space[2], width: '100%',
+              padding: `${space[2]} ${space[3]}`,
+              backgroundColor: color.bgSurface, borderRadius: radius.md,
+              border: `1px solid ${color.borderDefault}`, cursor: 'pointer',
+              fontFamily: font.family, textAlign: 'left',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color.textSubtle} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {accessLevel === 'invited' ? (
+                <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></>
+              ) : (
+                <><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></>
+              )}
+            </svg>
+            <span style={{ fontSize: font.size.sm, color: color.textDefault, fontWeight: font.weight.medium, flex: 1 }}>
+              {accessLevel === 'invited' ? 'Only those invited' : 'Anyone with the link'}
             </span>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={color.textSubtle} strokeWidth="1.5" strokeLinecap="round">
+              <path d="M4 6l4 4 4-4" />
+            </svg>
+          </button>
+          {accessDropdownOpen && (
+            <>
+              <div style={{ position: 'fixed', inset: 0, zIndex: 1 }} onClick={() => setAccessDropdownOpen(false)} />
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: space[1],
+                backgroundColor: color.bgSurface, border: `1px solid ${color.borderDefault}`,
+                borderRadius: radius.md, boxShadow: shadow.lg, zIndex: 2, overflow: 'hidden',
+              }}>
+                {([
+                  { value: 'invited' as const, label: 'Only those invited', icon: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></> },
+                  { value: 'anyone' as const, label: 'Anyone with the link', icon: <><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></> },
+                ]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => { setAccessLevel(opt.value); setAccessDropdownOpen(false); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: space[2], width: '100%',
+                      padding: `${space[2]} ${space[3]}`, border: 'none', backgroundColor: accessLevel === opt.value ? color.neutral50 : 'transparent',
+                      cursor: 'pointer', fontFamily: font.family, fontSize: font.size.sm,
+                      color: color.textDefault, textAlign: 'left',
+                      transition: `background-color ${transition.fast}`,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = color.bgHover; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = accessLevel === opt.value ? color.neutral50 : 'transparent'; }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color.textSubtle} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {opt.icon}
+                    </svg>
+                    <span style={{ flex: 1 }}>{opt.label}</span>
+                    {accessLevel === opt.value && (
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke={color.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 8.5L6.5 12 13 4" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
+        </div>
+
+        {/* Owner row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: space[3],
+          padding: `${space[2]} 0`,
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: radius.full,
+            backgroundColor: color.neutral200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textLabel,
+            flexShrink: 0,
+          }}>
+            {(doctorName || 'D').charAt(0).toUpperCase()}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: font.size.sm, fontWeight: font.weight.medium, color: color.textDefault }}>
+              {doctorName || 'Doctor'} <span style={{ color: color.textPlaceholder, fontWeight: font.weight.regular }}>(you)</span>
+            </div>
+          </div>
+          <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Owner</span>
+        </div>
+      </div>
+
+      {/* Warning box */}
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', gap: space[2],
+        padding: `${space[3]} ${space[4]}`,
+        backgroundColor: color.neutral50, borderRadius: radius.md,
+        border: `1px solid ${color.borderDefault}`,
+        marginTop: space[2], marginBottom: space[4],
+      }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color.textSubtle} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <div>
+          <div style={{ fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textDefault, marginBottom: 2 }}>
+            This report may include personal information
+          </div>
+          <div style={{ fontSize: font.size.xs, color: color.textSubtle, lineHeight: '1.45' }}>
+            All report contents are visible to recipients. Enable PIN protection for added security.
+          </div>
+        </div>
+      </div>
+
+      {/* PIN Protection — after warning */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: `${space[2]} 0`, marginBottom: pinEnabled ? space[2] : space[3],
+      }}>
+        <span style={{ fontSize: font.size.sm, color: color.textDefault, fontWeight: font.weight.medium }}>
+          PIN Protection
+        </span>
+        <button
+          type="button"
+          onClick={() => onPinEnabledChange(!pinEnabled)}
+          style={{
+            width: '36px', height: '20px', borderRadius: radius.full, border: 'none',
+            backgroundColor: pinEnabled ? color.primary : color.neutral300,
+            cursor: 'pointer', position: 'relative', transition: `background-color ${transition.fast}`, padding: 0,
+          }}
+        >
+          <div style={{
+            width: '16px', height: '16px', borderRadius: '50%', backgroundColor: color.white,
+            position: 'absolute', top: '2px', left: pinEnabled ? '18px' : '2px',
+            transition: `left ${transition.fast}`, boxShadow: shadow.sm,
+          }} />
+        </button>
+      </div>
+      {pinEnabled && (
+        <div style={{ marginBottom: space[3] }}>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={pin}
+            onChange={(e) => onPinChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+            placeholder="4-6 digit PIN"
+            style={{
+              width: '100%', height: '36px', padding: `0 ${space[3]}`,
+              fontSize: font.size.sm, fontFamily: font.family, color: color.textDefault,
+              backgroundColor: color.white, border: `1px solid ${color.borderDefault}`,
+              borderRadius: radius.md, outline: 'none', boxSizing: 'border-box' as const,
+              letterSpacing: '0.2em', textAlign: 'center',
+            }}
+          />
+          <span style={{ fontSize: font.size['2xs'], color: color.textPlaceholder, marginTop: space[1], display: 'block' }}>
+            Recipients will need this PIN to view
+          </span>
         </div>
       )}
 
-      {activeAction === 'qr' && (
+      {/* QR expanded */}
+      {showQR && (
         <div style={{ marginBottom: space[3] }}>
           <QRCodePreview link={reportLink} />
-          <div style={{ textAlign: 'center', fontSize: font.size.xs, color: color.textSubtle, marginTop: space[2] }}>
+          <div style={{ textAlign: 'center', fontSize: font.size.xs, color: color.textSubtle }}>
             Scan to open report
           </div>
         </div>
       )}
 
-      {activeAction === 'email' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: space[3], marginBottom: space[3] }}>
-          <TextInput
-            label="Recipient email"
-            type="email"
-            placeholder="doctor@clinic.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
+      {/* Bottom: social icons + Copy link */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderTop: `1px solid ${color.borderDefault}`, paddingTop: space[4],
+      }}>
+        <div style={{ display: 'flex', gap: space[2] }}>
+          {/* WhatsApp — cleaner icon */}
+          <SocialIcon
+            label="WhatsApp"
+            onClick={() => {}}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.72.44 3.34 1.21 4.75L2 22l5.37-1.17C8.72 21.56 10.32 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="1.8" fill="none" />
+                <path d="M16.5 14.38c-.25-.12-1.47-.72-1.7-.8-.23-.08-.39-.12-.56.12-.17.25-.64.8-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.38-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.44.12-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.42-.14 0-.31-.02-.48-.02s-.44.06-.67.31c-.23.25-.87.85-.87 2.08s.89 2.41 1.02 2.58c.12.17 1.76 2.68 4.26 3.76.6.26 1.06.41 1.42.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.17-.48-.29z" fill="currentColor" />
+              </svg>
+            }
           />
-          <TextArea
-            label="Message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={3}
-            fullWidth
+          {/* WeChat — cleaner icon */}
+          <SocialIcon
+            label="WeChat"
+            onClick={() => {}}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M9 4C5.13 4 2 6.58 2 9.8c0 1.76.95 3.35 2.46 4.44l-.62 1.87 2.2-1.1c.92.26 1.9.4 2.93.4.33 0 .66-.02.98-.05" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9.97 14.95c-.33.03-.66.05-1 .05" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M22 14.2c0-2.76-2.69-5-6-5s-6 2.24-6 5 2.69 5 6 5c.73 0 1.43-.1 2.08-.3l1.72.86-.49-1.46C20.88 17.6 22 16.02 22 14.2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="7" cy="8.5" r="0.8" fill="currentColor" /><circle cx="11" cy="8.5" r="0.8" fill="currentColor" />
+                <circle cx="14" cy="13.5" r="0.8" fill="currentColor" /><circle cx="18" cy="13.5" r="0.8" fill="currentColor" />
+              </svg>
+            }
+          />
+          {/* QR — cleaner icon */}
+          <SocialIcon
+            label="QR Code"
+            onClick={() => setShowQR(!showQR)}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="8" height="8" rx="1" /><rect x="13" y="3" width="8" height="8" rx="1" /><rect x="3" y="13" width="8" height="8" rx="1" />
+                <rect x="6" y="6" width="2" height="2" fill="currentColor" stroke="none" /><rect x="16" y="6" width="2" height="2" fill="currentColor" stroke="none" /><rect x="6" y="16" width="2" height="2" fill="currentColor" stroke="none" />
+                <path d="M13 13h2v2h-2zM17 13h2v2h-2zM13 17h2v2h-2zM17 17h4v4h-4z" strokeWidth="1.5" />
+              </svg>
+            }
           />
         </div>
-      )}
 
-      {activeAction === 'whatsapp' && (
-        <div style={{
-          padding: space[4], backgroundColor: color.neutral50,
-          borderRadius: radius.md, border: `1px solid ${color.borderDefault}`,
-          textAlign: 'center', marginBottom: space[3],
-        }}>
-          <div style={{ fontSize: font.size.sm, fontWeight: font.weight.medium, color: color.textDefault, marginBottom: space[1] }}>
-            Open in WhatsApp
-          </div>
-          <div style={{ fontSize: font.size.xs, color: color.textSubtle }}>
-            The report link will be pre-filled in a WhatsApp message
-          </div>
-        </div>
-      )}
-
-      {activeAction === 'wechat' && (
-        <div style={{ marginBottom: space[3] }}>
-          <QRCodePreview link={reportLink} />
-          <div style={{ textAlign: 'center', fontSize: font.size.xs, color: color.textSubtle, marginTop: space[2] }}>
-            Scan with WeChat to share
-          </div>
-        </div>
-      )}
-
+        {/* Copy link — primary color, design system radius */}
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          style={{
+            display: 'flex', alignItems: 'center', gap: space[2],
+            height: 40, padding: `0 ${space[5]}`,
+            borderRadius: radius.md,
+            border: 'none',
+            backgroundColor: color.primary,
+            color: color.textOnPrimary,
+            fontSize: font.size.sm,
+            fontWeight: font.weight.medium,
+            fontFamily: font.family,
+            cursor: 'pointer',
+            transition: `background-color ${transition.fast}`,
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--ds-color-primary-hover)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = color.primary; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+          </svg>
+          {copied ? 'Copied!' : 'Copy link'}
+        </button>
+      </div>
     </Modal>
   );
 }

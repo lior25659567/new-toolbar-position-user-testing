@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import { color, font, space, radius, shadow, transition } from '../../design-system/tokens';
 import { SecondaryButton } from '../../design-system/SecondaryButton';
 import { PrimaryButton } from '../../design-system/PrimaryButton';
+import { DropdownList } from '../../design-system/DropdownList';
+import { DatePicker } from '../../design-system/DatePicker';
 import ToothSelector from './ToothSelector';
 import type {
   ReportBlock, ImageBlock, ComparisonBlock, CostSummaryBlock, BlockType,
@@ -1108,6 +1110,29 @@ function GalleryThumbnail({ url, label, onClick, isSelected, showCheckbox }: {
   );
 }
 
+// ─── Clinical dropdown options ──────────────────────────────────────────────
+
+const DIAGNOSIS_ITEMS = [
+  { value: 'Caries', label: 'Caries' },
+  { value: 'Gingivitis', label: 'Gingivitis' },
+  { value: 'Periodontitis', label: 'Periodontitis' },
+  { value: 'Fractured tooth', label: 'Fractured tooth' },
+  { value: 'Missing tooth', label: 'Missing tooth' },
+  { value: 'Tooth sensitivity', label: 'Tooth sensitivity' },
+  { value: 'Other', label: 'Other' },
+];
+
+const TREATMENT_ITEMS = [
+  { value: 'Cleaning', label: 'Cleaning' },
+  { value: 'Filling', label: 'Filling' },
+  { value: 'Crown', label: 'Crown' },
+  { value: 'Root canal', label: 'Root canal' },
+  { value: 'Extraction', label: 'Extraction' },
+  { value: 'Implant', label: 'Implant' },
+  { value: 'Monitoring', label: 'Monitoring' },
+  { value: 'Other', label: 'Other' },
+];
+
 // ─── Block Editors ──────────────────────────────────────────────────────────
 
 function ImageCardEditor({ block, onUpdate }: {
@@ -1116,6 +1141,7 @@ function ImageCardEditor({ block, onUpdate }: {
 }) {
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [isAnnotated, setIsAnnotated] = useState(false);
+  const clinicalRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -1179,7 +1205,12 @@ function ImageCardEditor({ block, onUpdate }: {
       }}>
         <button
           type="button"
-          onClick={() => onUpdate({ showClinicalFields: !block.showClinicalFields })}
+          onClick={() => {
+            onUpdate({ showClinicalFields: !block.showClinicalFields });
+            if (!block.showClinicalFields) {
+              setTimeout(() => clinicalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -1204,16 +1235,55 @@ function ImageCardEditor({ block, onUpdate }: {
         </button>
 
         {block.showClinicalFields && (
-          <div style={{
+          <div ref={clinicalRef} style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: space[3],
             marginTop: space[3],
           }}>
-            <TextInput value={block.diagnosis} onChange={(v) => onUpdate({ diagnosis: v })} placeholder="Diagnosis" />
-            <TextInput value={block.treatment} onChange={(v) => onUpdate({ treatment: v })} placeholder="Treatment" />
-            <TextInput value={block.estimatedCost} onChange={(v) => onUpdate({ estimatedCost: v })} placeholder="Est. cost" />
-            <TextInput value={block.treatmentDate} onChange={(v) => onUpdate({ treatmentDate: v })} placeholder="Date" />
+            <DropdownList
+              placeholder="Diagnosis"
+              options={DIAGNOSIS_ITEMS}
+              value={block.diagnosis}
+              onChange={(v) => onUpdate({ diagnosis: v })}
+              fullWidth
+            />
+            <DropdownList
+              placeholder="Treatment"
+              options={TREATMENT_ITEMS}
+              value={block.treatment}
+              onChange={(v) => onUpdate({ treatment: v })}
+              fullWidth
+            />
+            <div>
+              <input
+                type="text"
+                value={block.estimatedCost}
+                onChange={(e) => onUpdate({ estimatedCost: e.target.value })}
+                placeholder="Est. cost"
+                style={{
+                  width: '100%',
+                  padding: `${space[3]} ${space[4]}`,
+                  fontFamily: font.family,
+                  fontSize: font.size.base,
+                  color: block.estimatedCost ? color.textDefault : color.textPlaceholder,
+                  backgroundColor: color.bgSurface,
+                  border: `1px solid ${color.borderDefault}`,
+                  borderRadius: radius.sm,
+                  outline: 'none',
+                  boxSizing: 'border-box' as const,
+                  transition: transition.input,
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.boxShadow = shadow.focusPrimaryLight; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = color.borderDefault; e.currentTarget.style.boxShadow = 'none'; }}
+              />
+            </div>
+            <DatePicker
+              placeholder="Date"
+              value={block.treatmentDate}
+              onChange={(v) => onUpdate({ treatmentDate: v })}
+              fullWidth
+            />
           </div>
         )}
       </div>

@@ -95,11 +95,19 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
     return today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === d;
   };
 
+  const calendarHeight = 320;
+  const spaceBelow = window.innerHeight - (anchorRect.top + anchorRect.height + 4);
+  const openAbove = spaceBelow < calendarHeight;
+  const calTop = openAbove
+    ? Math.max(4, anchorRect.top - calendarHeight - 4)
+    : anchorRect.top + anchorRect.height + 4;
+  const calLeft = Math.min(anchorRect.left, window.innerWidth - 290);
+
   const dropdown = (
     <div ref={ref} style={{
       position: "fixed",
-      top: anchorRect.top + anchorRect.height + 4,
-      left: anchorRect.left,
+      top: calTop,
+      left: calLeft,
       zIndex: 9999,
       backgroundColor: color.bgSurface, border: `1px solid ${color.borderDefault}`,
       borderRadius: "12px", boxShadow: "var(--ds-shadow-lg)",
@@ -242,7 +250,7 @@ export function DatePicker({
           onBlur={() => setIsFocused(false)}
           style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            gap: space[2], width: fullWidth ? "100%" : undefined, minWidth: 200,
+            gap: space[2], width: fullWidth ? "100%" : undefined, minWidth: fullWidth ? 0 : 200,
             padding: `${space[3]} ${space[4]}`, fontFamily: font.family,
             fontSize: font.size.base,
             color: hasValue ? color.textDefault : color.textPlaceholder,

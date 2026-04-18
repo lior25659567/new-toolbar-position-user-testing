@@ -110,8 +110,8 @@ function PreviewTeethTags({ teeth }: { teeth: number[] }) {
 function PreviewClinicalRow({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
-    <div style={{ display: 'flex', gap: space[2], fontSize: '10px', lineHeight: '1.5' }}>
-      <span style={{ color: color.textSubtle, fontWeight: 500, minWidth: '70px' }}>{label}:</span>
+    <div style={{ display: 'flex', gap: space[2], fontSize: '12px', lineHeight: '1.6' }}>
+      <span style={{ color: color.textSubtle, fontWeight: 500, minWidth: '80px' }}>{label}:</span>
       <span style={{ color: color.textDefault }}>{value}</span>
     </div>
   );
@@ -250,28 +250,28 @@ function CostSummaryBlockPreview({ block }: { block: CostSummaryBlock }) {
     <div style={{ marginBottom: space[4] }}>
       <table style={{
         width: '100%',
-        fontSize: '10px',
+        fontSize: '12px',
         borderCollapse: 'collapse',
         color: color.textDefault,
       }}>
         <thead>
           <tr style={{ borderBottom: `1px solid ${color.borderDefault}` }}>
-            <th style={{ textAlign: 'left', padding: '4px 0', fontWeight: 600, color: color.textLabel }}>Item</th>
-            <th style={{ textAlign: 'right', padding: '4px 0', fontWeight: 600, color: color.textLabel, width: '80px' }}>Amount</th>
+            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel }}>Item</th>
+            <th style={{ textAlign: 'right', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '90px' }}>Amount</th>
           </tr>
         </thead>
         <tbody>
           {block.items.filter((it) => it.description || it.amount).map((item) => (
             <tr key={item.id} style={{ borderBottom: `1px solid ${color.neutral100}` }}>
-              <td style={{ padding: '3px 0' }}>{item.description || '---'}</td>
-              <td style={{ padding: '3px 0', textAlign: 'right' }}>{item.amount || '---'}</td>
+              <td style={{ padding: '4px 0' }}>{item.description || '---'}</td>
+              <td style={{ padding: '4px 0', textAlign: 'right' }}>{item.amount || '---'}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
           <tr style={{ borderTop: `1.5px solid ${color.borderStrong}` }}>
-            <td style={{ padding: '4px 0', fontWeight: 600 }}>Total</td>
-            <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 600 }}>${total.toFixed(2)}</td>
+            <td style={{ padding: '5px 0', fontWeight: 600 }}>Total</td>
+            <td style={{ padding: '5px 0', textAlign: 'right', fontWeight: 600 }}>${total.toFixed(2)}</td>
           </tr>
         </tfoot>
       </table>

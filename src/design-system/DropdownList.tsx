@@ -74,11 +74,14 @@ export function DropdownList({
   const selectedOption = options.find((o) => o.value === selected);
   const hasError = Boolean(error);
 
-  // Update menu position when opening
+  // Update menu position when opening — auto-flip if not enough space below
   React.useEffect(() => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      if (menuPlacement === "top") {
+      const menuHeight = 220; // approximate max menu height
+      const spaceBelow = window.innerHeight - rect.bottom - 4;
+      const shouldFlip = menuPlacement === "top" || (menuPlacement === "bottom" && spaceBelow < menuHeight);
+      if (shouldFlip) {
         setMenuPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left, width: rect.width });
       } else {
         setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
@@ -120,7 +123,7 @@ export function DropdownList({
     justifyContent: "space-between",
     gap: space[2],
     width: fullWidth ? "100%" : undefined,
-    minWidth: 200,
+    minWidth: fullWidth ? 0 : 200,
     padding: `${space[3]} ${space[4]}`,
     fontFamily: font.family,
     fontSize: font.size.base,
@@ -142,7 +145,7 @@ export function DropdownList({
 
   const menuStyle: React.CSSProperties = {
     position: "fixed",
-    ...(menuPlacement === "top" ? { bottom: menuPos.bottom } : { top: menuPos.top }),
+    ...(menuPos.bottom != null ? { bottom: menuPos.bottom } : { top: menuPos.top }),
     left: menuPos.left,
     width: menuPos.width,
     zIndex: 9999,
