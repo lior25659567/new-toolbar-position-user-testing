@@ -1,7 +1,7 @@
 import React from 'react';
 import svgPaths from '@/imports/svg-tl25ixc7nv';
-import jawNavigationImage from '@/assets/jaw-selector-lower.png';
 import ViewLayersPanel from './ViewLayersPanel';
+import JawSelector from './JawSelector';
 import type { ScanTab } from './ScanTabs';
 
 // ============================================================================
@@ -21,6 +21,14 @@ interface HeaderNavigationProps {
   scanTabs?: ScanTab[];
   onModelOpacityChange?: (opacity: number) => void;
   onModelVisibilityChange?: (layerVisibility: Record<string, boolean>) => void;
+  /** Hide the chevron Info/Scan/View/Send strip — e.g. when the Info page
+   *  is running its own wizard variant and the strip becomes redundant. */
+  hideWizardTopbar?: boolean;
+  /** Optional replacement for the centre chevron strip. When provided the
+   *  default Info/Scan/View/Send tabs are not rendered, and this node sits
+   *  in the same centre slot instead. Used by the Info-page wizard variants
+   *  so their step indicator lives in the global top header. */
+  customCenterSlot?: React.ReactNode;
 }
 
 // ============================================================================
@@ -74,7 +82,7 @@ function LeftGroup({ patientName }: { patientName: string }) {
 
 function Dropdown({ patientName }: { patientName: string }) {
   return (
-    <div className="flex gap-[8px] items-center overflow-clip px-[16px] py-[12px] relative rounded-[4px] shrink-0" data-name="Dropdown">
+    <div className="flex gap-[8px] items-center overflow-clip px-[16px] py-[12px] relative rounded-[8px] shrink-0" data-name="Dropdown">
     </div>
   );
 }
@@ -95,7 +103,7 @@ function Frame({ patientName }: { patientName: string }) {
 function StepName({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative z-10 flex items-center justify-center shrink-0 flex-shrink-0 w-full" data-name="Name" style={{ width: '140px', minWidth: '140px', maxWidth: '140px', height: '48px', minHeight: '48px', flexShrink: 0 }}>
-      <p className="font-['Roboto:Medium',sans-serif] font-medium text-[14px] text-[rgba(0,0,0,0.93)] text-center leading-[20px] whitespace-nowrap w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
+      <p className="font-['Roboto:Medium',sans-serif] font-medium text-[14px] text-[var(--ads-text-primary)] text-center leading-[20px] whitespace-nowrap w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
         {children}
       </p>
     </div>
@@ -130,7 +138,7 @@ function CompleteStep({ label, onClick }: { label: string; onClick?: () => void 
     >
       <div className="absolute inset-0" data-name="back">
         <svg className="block w-full h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 180 72">
-          <path d={svgPaths.p2106e100} fill={isHovered ? "#E8E8E8" : "#F4F4F4"} stroke="white" strokeWidth="4" style={{ transition: 'fill 0.2s ease' }} />
+          <path d={svgPaths.p2106e100} fill={isHovered ? "var(--ads-background-subtle-active)" : "var(--ads-background-subtle-02)"} stroke="white" strokeWidth="4" style={{ transition: 'fill 0.2s ease' }} />
         </svg>
       </div>
       <StepName>{label}</StepName>
@@ -155,7 +163,7 @@ function CurrentStep({ label, onClick }: { label: string; onClick?: () => void }
     >
       <div className="absolute inset-0" data-name="back">
         <svg className="block w-full h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 180 72">
-          <path d={svgPaths.p2106e100} fill={isHovered ? "#0088B8" : "#009ACE"} stroke="white" strokeWidth="4" style={{ transition: 'fill 0.2s ease' }} />
+          <path d={svgPaths.p2106e100} fill={isHovered ? "var(--ads-background-interactive-hover)" : "var(--ads-background-interactive)"} stroke="white" strokeWidth="4" style={{ transition: 'fill 0.2s ease' }} />
         </svg>
       </div>
       <StepNameActive>{label}</StepNameActive>
@@ -180,7 +188,7 @@ function IncompleteStep({ label, onClick }: { label: string; onClick?: () => voi
     >
       <div className="absolute inset-0" data-name="back">
         <svg className="block w-full h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 180 72">
-          <path d={svgPaths.p2106e100} fill={isHovered ? "#FAFAFA" : "white"} stroke={isHovered ? "#C0C0C0" : "#E5E7EB"} strokeWidth="1" style={{ transition: 'all 0.2s ease' }} />
+          <path d={svgPaths.p2106e100} fill={isHovered ? "var(--ads-background-subtle-00)" : "white"} stroke={isHovered ? "var(--ads-border-accent)" : "var(--ads-border-subtle)"} strokeWidth="1" style={{ transition: 'all 0.2s ease' }} />
         </svg>
       </div>
       <StepName>{label}</StepName>
@@ -258,7 +266,7 @@ function Locked() {
 
 function Icon() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-[var(--ads-background-subtle-hover)] rounded-[8px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <Locked />
     </div>
   );
@@ -279,7 +287,7 @@ function BatteryFull() {
 
 function Icon1() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-[var(--ads-background-subtle-hover)] rounded-[8px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <BatteryFull />
     </div>
   );
@@ -297,7 +305,7 @@ function NotificationOutline() {
 
 function Icon2() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-[var(--ads-background-subtle-hover)] rounded-[8px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <NotificationOutline />
     </div>
   );
@@ -318,7 +326,7 @@ function Settings() {
 
 function Icon3() {
   return (
-    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-[4px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
+    <div className="flex items-center justify-center shrink-0 cursor-pointer hover:bg-[var(--ads-background-subtle-hover)] rounded-[8px] transition-colors" data-name="icon" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', maxWidth: '40px', maxHeight: '40px', flexShrink: 0 }}>
       <Settings />
     </div>
   );
@@ -368,7 +376,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
         style={{ 
           width: '1px', 
           height: '28px', 
-          backgroundColor: 'rgba(0, 0, 0, 0.15)' 
+          backgroundColor: 'var(--ads-border-subtle)' 
         }} 
       />
       
@@ -383,7 +391,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
             height: '36px',
             borderRadius: '50%',
             flexShrink: 0,
-            backgroundColor: '#E8F4F8',
+            backgroundColor: 'var(--ads-background-highlight-blue)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -391,7 +399,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
         >
           <span 
             style={{ 
-              color: '#007BA3',
+              color: 'var(--ads-text-on-highlight-blue)',
               fontSize: '15px',
               fontWeight: 600,
               fontFamily: "'Roboto', sans-serif",
@@ -405,9 +413,9 @@ function Dropdown1({ patientName }: { patientName: string }) {
         {/* Patient Name */}
         <div className="flex flex-col">
           <span 
-            className="text-[14px] font-medium group-hover:text-[#008EC2] transition-colors"
+            className="text-[14px] font-medium group-hover:text-[var(--ads-background-interactive-hover)] transition-colors"
             style={{ 
-              color: 'rgba(0, 0, 0, 0.88)',
+              color: 'var(--ads-text-primary)',
               fontFamily: "'Roboto', sans-serif",
               letterSpacing: '-0.01em'
             }}
@@ -417,7 +425,7 @@ function Dropdown1({ patientName }: { patientName: string }) {
           <span 
             className="text-[12px]"
             style={{ 
-              color: 'rgba(0, 0, 0, 0.45)',
+              color: 'var(--ads-text-tertiary)',
               fontFamily: "'Roboto', sans-serif",
             }}
           >
@@ -433,26 +441,34 @@ function Dropdown1({ patientName }: { patientName: string }) {
 // Main Header Navigation Component
 // ============================================================================
 
-export default function HeaderNavigation({ 
-  currentStep = 'scan', 
+export default function HeaderNavigation({
+  currentStep = 'scan',
   patientName = 'Patient: Mina Y.',
   onStepChange,
   jawImageOffset = 0,
   scanTabs,
   onModelOpacityChange,
   onModelVisibilityChange,
+  hideWizardTopbar = false,
+  customCenterSlot,
 }: HeaderNavigationProps) {
   const isViewMode = currentStep === 'view';
   const isInfoMode = currentStep === 'info';
 
   return (
     <div className="relative w-full">
-      <div className="bg-white flex items-center justify-between gap-[16px] px-[16px] py-[4px] relative w-full" data-name="Header Scan component" style={{ height: '56px', minHeight: '56px', maxHeight: '56px', borderBottom: '1px solid #E5E7EB' }}>
+      <div className="bg-[var(--ads-background-subtle-01)] flex items-center justify-between gap-[16px] px-[16px] py-[4px] relative w-full" data-name="Header Scan component" style={{ height: '56px', minHeight: '56px', maxHeight: '56px', borderBottom: '1px solid var(--ads-border-subtle)' }}>
         <div className="flex items-center shrink-0">
           <Dropdown1 patientName={patientName} />
         </div>
         <div className="flex items-center shrink-0">
-          <WizardTopbarSwitcher currentStep={currentStep} onStepChange={onStepChange} />
+          {customCenterSlot ? (
+            customCenterSlot
+          ) : (
+            !hideWizardTopbar && (
+              <WizardTopbarSwitcher currentStep={currentStep} onStepChange={onStepChange} />
+            )
+          )}
         </div>
         <div className="flex items-center shrink-0">
           <NavigatonIcons />
@@ -460,16 +476,14 @@ export default function HeaderNavigation({
       </div>
       {/* Left panel: Jaw image in scan mode, Layers panel in view mode, hidden in info mode */}
       {!isInfoMode && (
-        <div className="absolute left-[16px]" style={{ top: `${72 + jawImageOffset}px` }}>
+        <div
+          className="absolute left-[16px]"
+          style={{ top: `${72 + jawImageOffset}px`, zIndex: 20 }}
+        >
           {isViewMode && scanTabs ? (
             <ViewLayersPanel scanTabs={scanTabs} onOpacityChange={onModelOpacityChange} onVisibilityChange={onModelVisibilityChange} />
           ) : (
-            <img
-              src={jawNavigationImage}
-              alt="Jaw Navigation"
-              className="block"
-              style={{ width: '240px', height: '373px' }}
-            />
+            <JawSelector defaultValue="lower" />
           )}
         </div>
       )}

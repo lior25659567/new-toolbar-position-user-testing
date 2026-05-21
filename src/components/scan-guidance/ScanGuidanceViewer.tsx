@@ -259,12 +259,12 @@ function Scene({ onGuidanceUpdate, onReset, guidanceMode }: SceneProps) {
   return (
     <>
       <ambientLight intensity={0.15} />
-      <directionalLight position={[5, 8, 5]}   intensity={0.8}  castShadow color="#f5f0e8" />
-      <directionalLight position={[-5, 5, -5]}  intensity={0.35} color="#e8eef5" />
+      <directionalLight position={[5, 8, 5]}   intensity={0.8}  castShadow color="var(--ads-background-highlight-orange)" />
+      <directionalLight position={[-5, 5, -5]}  intensity={0.35} color="var(--ads-background-highlight-blue)" />
       <directionalLight position={[0, -3, 5]}   intensity={0.25} />
       <directionalLight position={[0, 5, -5]}   intensity={0.2}  />
-      <pointLight       position={[0, 10, 0]}   intensity={0.2}  color="#fff5e6" />
-      <pointLight       position={[3, 0, 3]}    intensity={0.15} color="#e6f0ff" />
+      <pointLight       position={[0, 10, 0]}   intensity={0.2}  color="var(--ads-background-highlight-orange)" />
+      <pointLight       position={[3, 0, 3]}    intensity={0.15} color="var(--ads-background-highlight-blue)" />
       <Environment preset="apartment" background={false} />
 
       <Center>
@@ -306,7 +306,7 @@ function LoadingSpinner() {
   return (
     <mesh>
       <sphereGeometry args={[0.5, 16, 16]} />
-      <meshBasicMaterial color="#009ACE" wireframe />
+      <meshBasicMaterial color="var(--ads-background-interactive)" wireframe />
     </mesh>
   );
 }

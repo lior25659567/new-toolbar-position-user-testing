@@ -1,88 +1,49 @@
 import * as React from "react";
-import { color, font, radius, shadow, transition, space } from "./tokens";
+import { Button } from "./Kit";
 
 /**
- * Primary button – design system component.
- * Figma: Enabled 5-6595, Hovered 5-6597, Pressed 5-6599, Focused 5-6601.
+ * Primary button — back-compat shim around the ADS <Button variant="primary">.
+ * States covered (per Figma "06. Web components 0.9.0", node 204:1183):
+ *   enabled, hovered, selected (via `selected` prop / aria-pressed),
+ *   pressed (:active), focused (:focus-visible), disabled.
  */
 export interface PrimaryButtonProps extends React.ComponentProps<"button"> {
   children?: React.ReactNode;
-  /** Size: 60 | 44 | 36 (height in px). Default 44. */
   size?: 60 | 44 | 36;
   fullWidth?: boolean;
+  /** Toggle / pressed-by-attribute selected state. Maps to aria-pressed. */
+  selected?: boolean;
 }
 
-const baseStyle: React.CSSProperties = {
-  fontFamily: font.family,
-  fontWeight: font.weight.medium,
-  border: "none",
-  cursor: "pointer",
-  outline: "none",
-  transition: transition.button,
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: space[2],
-  color: color.textOnPrimary,
-  borderRadius: radius.md,
-  backgroundColor: color.primary,
-};
+function adsSize(size: 60 | 44 | 36): "sm" | "md" {
+  return size === 36 ? "sm" : "md";
+}
 
-const sizeStyles: Record<60 | 44 | 36, React.CSSProperties> = {
-  60: { minHeight: "60px", padding: `0 ${space[6]}`, fontSize: "16px", lineHeight: "22px", letterSpacing: "-0.2px" },
-  44: { minHeight: "44px", padding: `0 ${space[4]}`, fontSize: font.size.base, lineHeight: "20px", letterSpacing: "-0.15px" },
-  36: { minHeight: "34px", padding: `0 ${space[4]}`, fontSize: font.size.xs, lineHeight: "18px", letterSpacing: "-0.1px" },
-};
+function sizeOverride(size: 60 | 44 | 36): React.CSSProperties | undefined {
+  if (size === 60) return { minHeight: 60, height: 60, padding: "0 24px", fontSize: 16, lineHeight: "22px" };
+  return undefined;
+}
 
 export function PrimaryButton({
   children = "Primary button",
   size = 44,
   fullWidth,
   style,
-  disabled,
+  selected,
+  "aria-pressed": ariaPressed,
   ...props
 }: PrimaryButtonProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isActive, setIsActive] = React.useState(false);
-  const [isFocused, setIsFocused] = React.useState(false);
-
-  const combinedStyle: React.CSSProperties = {
-    ...baseStyle,
-    ...sizeStyles[size],
-    ...(fullWidth ? { width: "100%" } : {}),
-    ...(disabled
-      ? { opacity: 0.5, cursor: "not-allowed" }
-      : {
-          ...(isActive && {
-            backgroundColor: color.primaryPressed,
-            transform: "scale(0.98)",
-          }),
-          ...(isHovered && !isActive && {
-            backgroundColor: color.primaryHover,
-          }),
-          ...(isFocused && {
-            outline: `2px solid ${color.primary}`,
-            outlineOffset: "2px",
-          }),
-        }),
-    ...style,
-  };
-
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      style={combinedStyle}
+    <Button
+      variant="primary"
+      size={adsSize(size)}
+      fullWidth={fullWidth}
+      style={{ ...sizeOverride(size), ...style }}
       data-design-system="primary-button"
-      onMouseEnter={() => !disabled && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onMouseDown={() => !disabled && setIsActive(true)}
-      onMouseUp={() => setIsActive(false)}
-      onFocus={(e) => { if (e.target === e.currentTarget) setIsFocused(true); }}
-      onBlur={() => setIsFocused(false)}
+      aria-pressed={selected ?? ariaPressed}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }

@@ -3,18 +3,18 @@
 export default function PrepQcScaleImage() {
   // Color segments from left to right (12 segments - same as Occlusalgram)
   const colorSegments = [
-    '#0066FF', // Bright Blue
-    '#0197EC', // Blue
-    '#3FBAFF', // Light Blue
+    'var(--ads-background-interactive)', // Bright Blue
+    'var(--ads-background-interactive)', // Blue
+    'var(--ads-text-link)', // Light Blue
     '#0FF4FC', // Cyan
     '#2CE9C6', // Cyan Green
-    '#54BF00', // Green
-    '#FFE600', // Yellow
-    '#FFD600', // Yellow Orange
-    '#FFA008', // Orange
-    '#F7771A', // Orange Red
-    '#FF0000', // Bright Red
-    '#C61313', // Red
+    'var(--ads-text-success)', // Green
+    'var(--ads-text-warning)', // Yellow
+    'var(--ads-text-warning)', // Yellow Orange
+    'var(--ads-text-warning)', // Orange
+    'var(--ads-text-warning)', // Orange Red
+    'var(--ads-text-error)', // Bright Red
+    'var(--ads-text-error)', // Red
   ];
 
   // All labels

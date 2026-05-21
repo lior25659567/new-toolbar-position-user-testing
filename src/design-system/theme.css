@@ -1,327 +1,1287 @@
-/**
- * Design System Theme — CSS Custom Properties
- *
- * Architecture:
- *   Primitive tokens (--ds-raw-*) → raw palette, never used in components
- *   Semantic tokens (--ds-*)      → what components consume, swap on theme change
- *
- * Light mode = :root
- * Dark mode  = .dark (class on <html>)
- *
- * Contrast ratios documented inline (text-on-surface pairings).
- */
+/* =========================================================
+   Align Design System (ADS) — adopted from
+   https://github.com/lior25659567/align-ds (v0.9.0)
 
-/* ─── Light Theme (default) ─────────────────────────────────────────────────── */
+   This file replaces the previous in-house token sheet. It contains:
+     1. ADS tokens (mode-invariant, light, dark, auto)
+     2. ADS size-mode (web vs scanner) tokens
+     3. ADS component styles ported from align-ds-react/src/styles/components.css
+     4. Legacy --ds-* aliases that point at --ads-* values, so the
+        existing in-house components keep working until they are migrated
+        off the old token names.
+
+   UNRESOLVED v2.0 TOKENS — design TBD
+   -----------------------------------
+   The DS v2.0 spec flags these tokens as unresolved (Figma vs doc disagree).
+   We use the v2.0 *doc* value pending design-team decision. When the design
+   team picks the final hex, update this file (search for "UNRESOLVED:"):
+     - --ads-text-warning   (light + dark)
+     - --ads-border-warning (light + dark)
+     - --ads-icon-warning   (light + dark)
+     - --ads-icon-inverse-secondary (dark, mostly unused — verify before edit)
+   See ../../Deisgn-system 2.0/Design-System 2.0.md Appendix F.
+   ========================================================= */
+
+/* ---------- Fonts ---------- */
+/* Align DS v2.0 — Roboto 300/400/500 + Roboto Mono 400. */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Roboto+Mono:wght@400&display=swap");
+
+/* ============================================================
+   1. ADS MODE-INVARIANT TOKENS
+   ============================================================ */
 :root {
-  /* ── Primitives (raw palette — do NOT use directly in components) ───── */
-  --ds-raw-blue-500: #009ACE;
-  --ds-raw-blue-600: #0088B8;
-  --ds-raw-blue-700: #007A9E;
-  --ds-raw-blue-100: #E0F2FE;
-  --ds-raw-blue-50:  #F0F9FF;
+  /* Note: brand blue, status, tag tints, and danger ladder are mode-scoped
+     in v2.0 (light = #009ACE link, dark = #41C1F0 link, etc.). They are
+     declared inside the LIGHT and DARK theme blocks below, with legacy
+     --ads-blue-*, --ads-tag-*, --ads-danger-*, --ads-error-*, --ads-success-*,
+     --ads-warning-*, --ads-info-* names forwarded to the v2.0 canonical
+     tokens (--ads-background-interactive, --ads-text-link, etc.). */
 
-  --ds-raw-red-500:  #D43F58;
-  --ds-raw-red-600:  #C23850;
-  --ds-raw-red-700:  #A82D40;
-  --ds-raw-red-100:  #FEE2E2;
-  --ds-raw-red-50:   #FEF2F2;
+  /* Radii / spacing / control heights */
+  --ads-radius-0:        0;
+  --ads-radius-xs:       2px;
+  --ads-radius-sm:       8px; /* v2.0 alignment — was 4px; bumped per user "no place with radius of 4" */
+  --ads-radius-md:       8px;
+  --ads-radius-pill:     28px;
+  --ads-radius-full:     9999px;
 
-  --ds-raw-green-600: #00964E;
-  --ds-raw-green-100: #DCFCE8;
-  --ds-raw-green-50:  #F0FDF4;
-  --ds-raw-green-border: #C6F5D6;
-  --ds-raw-green-text: #006130;
+  --ads-space-0:         0;
+  --ads-space-1:         4px;
+  --ads-space-2:         8px;
+  --ads-space-3:         12px;
+  --ads-space-4:         16px;
+  --ads-space-5:         20px;
+  --ads-space-6:         24px;
+  --ads-space-8:         32px;
+  --ads-space-10:        40px;
+  --ads-space-16:        64px;
 
-  --ds-raw-amber-500: #F59E0B;
-  --ds-raw-amber-100: #FEF3C7;
-  --ds-raw-amber-50:  #FFFBEB;
-  --ds-raw-amber-border: #FDE68A;
-  --ds-raw-amber-text: #92400E;
+  --ads-control-sm:      36px;
+  --ads-control-md:      44px;
 
-  --ds-raw-info-500:  #3B82F6;
-  --ds-raw-info-100:  #DBEAFE;
-  --ds-raw-info-50:   #EFF6FF;
-  --ds-raw-info-border: #BFDBFE;
-  --ds-raw-info-text: #1E40AF;
+  --ads-font-sans:       "Roboto", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --ads-font-mono:       "Roboto Mono", ui-monospace, Menlo, monospace;
 
-  --ds-raw-gray-950: #0f172a;
-  --ds-raw-gray-900: #1e293b;
-  --ds-raw-gray-800: #374151;
-  --ds-raw-gray-700: #475569;
-  --ds-raw-gray-600: #64748b;
-  --ds-raw-gray-500: #6b7280;
-  --ds-raw-gray-400: #94a3b8;
-  --ds-raw-gray-350: #9ca3af;
-  --ds-raw-gray-300: #d1d5db;
-  --ds-raw-gray-250: #e2e8f0;
-  --ds-raw-gray-200: #e5e7eb;
-  --ds-raw-gray-150: #f1f5f9;
-  --ds-raw-gray-100: #f3f4f6;
-  --ds-raw-gray-50:  #f9fafb;
-  --ds-raw-gray-25:  #f8fafc;
-  --ds-raw-white:    #ffffff;
+  --ads-text-xs:         12px;
+  --ads-text-sm:         14px;
+  --ads-text-md:         17px;
+  --ads-text-lg:         20px;
+  --ads-text-xl:         24px;
+  --ads-text-2xl:        28px;
+  --ads-text-display:    44px;
+  --ads-leading-xs:      16px;
+  --ads-leading-sm:      20px;
+  --ads-leading-btn:     18px;
+  --ads-leading-md:      24px;
+  --ads-leading-lg:      28px;
+  --ads-leading-xl:      32px;
+  --ads-leading-2xl:     36px;
+  --ads-leading-display: 52px;
 
-  /* ── Semantic: Accent / Brand ───────────────────────────────────────── */
-  --ds-color-primary:         var(--ds-raw-blue-500);
-  --ds-color-primary-hover:   var(--ds-raw-blue-600);
-  --ds-color-primary-pressed: var(--ds-raw-blue-700);
-  --ds-color-primary-subtle:  var(--ds-raw-blue-50);
-  --ds-color-primary-on:      var(--ds-raw-white);      /* text on filled primary — 4.6:1 on #009ACE */
-  --ds-color-primary-ring:    rgba(0, 155, 206, 0.35);
+  --ads-duration-fast:   120ms;
+  --ads-duration-base:   180ms;
+  --ads-ease-standard:   cubic-bezier(0.2, 0, 0, 1);
 
-  /* ── Semantic: Danger / Destructive ─────────────────────────────────── */
-  --ds-color-danger:          var(--ds-raw-red-500);
-  --ds-color-danger-hover:    var(--ds-raw-red-600);
-  --ds-color-danger-pressed:  var(--ds-raw-red-700);
-  --ds-color-danger-subtle:   var(--ds-raw-red-50);
-  --ds-color-danger-on:       var(--ds-raw-white);       /* 4.5:1 on #D43F58 */
-  --ds-color-danger-border:   var(--ds-raw-red-100);
-  --ds-color-danger-ring:     rgba(212, 63, 88, 0.35);
+  /* Focus ring — overridden in dark mode to use the brighter brand blue.
+     v2.0 light: border-focus #009ACE  | dark: border-focus #41C1F0. */
+  --ads-focus-ring:      rgb(0, 154, 206);
 
-  /* ── Semantic: Success ──────────────────────────────────────────────── */
-  --ds-color-success:         var(--ds-raw-green-600);
-  --ds-color-success-subtle:  var(--ds-raw-green-100);
-  --ds-color-success-on:      var(--ds-raw-green-text);  /* 7.1:1 on #DCFCE8 */
-  --ds-color-success-border:  var(--ds-raw-green-border);
-
-  /* ── Semantic: Warning ──────────────────────────────────────────────── */
-  --ds-color-warning:         var(--ds-raw-amber-500);
-  --ds-color-warning-subtle:  var(--ds-raw-amber-50);
-  --ds-color-warning-on:      var(--ds-raw-amber-text);  /* 7.3:1 on #FFFBEB */
-  --ds-color-warning-border:  var(--ds-raw-amber-border);
-
-  /* ── Semantic: Info ─────────────────────────────────────────────────── */
-  --ds-color-info:            var(--ds-raw-info-500);
-  --ds-color-info-subtle:     var(--ds-raw-info-50);
-  --ds-color-info-on:         var(--ds-raw-info-text);   /* 8.6:1 on #EFF6FF */
-  --ds-color-info-border:     var(--ds-raw-info-border);
-
-  /* ── Semantic: Surface ──────────────────────────────────────────────── */
-  --ds-surface-base:          var(--ds-raw-white);
-  --ds-surface-raised:        var(--ds-raw-white);
-  --ds-surface-sunken:        var(--ds-raw-gray-25);
-  --ds-surface-overlay:       var(--ds-raw-white);
-  --ds-surface-inverse:       var(--ds-raw-gray-900);
-  --ds-surface-hover:         var(--ds-raw-gray-50);
-  --ds-surface-active:        var(--ds-raw-gray-100);
-  --ds-surface-disabled:      var(--ds-raw-gray-50);
-  --ds-surface-input:         var(--ds-raw-white);
-  --ds-surface-input-grey:    #f4f4f4;
-
-  /* ── Semantic: Text ─────────────────────────────────────────────────── */
-  --ds-text-primary:          var(--ds-raw-gray-800);    /* 10.7:1 on white */
-  --ds-text-secondary:        var(--ds-raw-gray-600);    /* 5.0:1 on white */
-  --ds-text-tertiary:         var(--ds-raw-gray-400);    /* 2.8:1 on white (decorative only) */
-  --ds-text-disabled:         var(--ds-raw-gray-300);
-  --ds-text-inverse:          var(--ds-raw-white);
-  --ds-text-link:             var(--ds-raw-blue-500);
-  --ds-text-on-accent:        var(--ds-raw-white);
-  --ds-text-heading:          var(--ds-raw-gray-950);    /* 15.4:1 on white */
-  --ds-text-label:            var(--ds-raw-gray-700);    /* 6.9:1 on white */
-  --ds-text-placeholder:      var(--ds-raw-gray-400);
-
-  /* ── Semantic: Border ───────────────────────────────────────────────── */
-  --ds-border-subtle:         var(--ds-raw-gray-200);
-  --ds-border-default:        var(--ds-raw-gray-200);
-  --ds-border-strong:         var(--ds-raw-gray-300);
-  --ds-border-hover:          var(--ds-raw-gray-350);
-  --ds-border-focus:          var(--ds-raw-blue-500);
-
-  /* ── Semantic: Focus ────────────────────────────────────────────────── */
-  --ds-focus-ring:            0 0 0 3px rgba(0, 154, 206, 0.35);
-  --ds-focus-ring-light:      0 0 0 3px rgba(0, 154, 206, 0.20);
-  --ds-focus-ring-danger:     0 0 0 3px rgba(212, 63, 88, 0.35);
-
-  /* ── Semantic: Shadow ───────────────────────────────────────────────── */
-  --ds-shadow-sm:             0 1px 2px rgba(0, 0, 0, 0.05);
-  --ds-shadow-md:             0 2px 8px rgba(0, 0, 0, 0.08);
-  --ds-shadow-lg:             0 4px 16px rgba(0, 0, 0, 0.10);
-  --ds-shadow-overlay:        0 8px 32px rgba(0, 0, 0, 0.12);
-
-  /* ── Backdrop ───────────────────────────────────────────────────────── */
-  --ds-backdrop:              rgba(0, 0, 0, 0.4);
-
-  /* ── Semantic: Tag palette ──────────────────────────────────────────── */
-  --ds-tag-red-bg:       #FFF0F3;
-  --ds-tag-red-border:   #FFE0E7;
-  --ds-tag-red-text:     #A30F34;
-  --ds-tag-orange-bg:    #FFF2E3;
-  --ds-tag-orange-border:#FFE5D6;
-  --ds-tag-orange-text:  #8A4300;
-  --ds-tag-magenta-bg:   #FFF0F9;
-  --ds-tag-magenta-border:#FFE3F4;
-  --ds-tag-magenta-text: #A30463;
-  --ds-tag-purple-bg:    #F8F2FF;
-  --ds-tag-purple-border:#F2E6FF;
-  --ds-tag-purple-text:  #6C37A1;
-  --ds-tag-blue-bg:      #E6F7FF;
-  --ds-tag-blue-border:  #D1F1FF;
-  --ds-tag-blue-text:    #005780;
-  --ds-tag-green-bg:     #DCFCE8;
-  --ds-tag-green-border: #C6F5D6;
-  --ds-tag-green-text:   #006130;
-
-  /* ── Notification palette ───────────────────────────────────────────── */
-  --ds-notif-info-bg:        #EFF6FF;
-  --ds-notif-info-border:    #BFDBFE;
-  --ds-notif-info-icon:      #3B82F6;
-  --ds-notif-success-bg:     #F0FDF4;
-  --ds-notif-success-border: #BBF7D0;
-  --ds-notif-success-icon:   #16A34A;
-  --ds-notif-warning-bg:     #FFFBEB;
-  --ds-notif-warning-border: #FDE68A;
-  --ds-notif-warning-icon:   #F59E0B;
-  --ds-notif-error-bg:       #FEF2F2;
-  --ds-notif-error-border:   #FECACA;
-  --ds-notif-error-icon:     #EF4444;
-
-  /* ── Tooltip ────────────────────────────────────────────────────────── */
-  --ds-tooltip-bg:           var(--ds-raw-gray-900);
-  --ds-tooltip-text:         var(--ds-raw-gray-25);
-
-  /* ── Toggle / Switch ────────────────────────────────────────────────── */
-  --ds-toggle-off-bg:        #C5C5C5;
-  --ds-toggle-off-hover:     #B0B0B0;
-  --ds-toggle-on-bg:         var(--ds-raw-blue-500);
-  --ds-toggle-on-hover:      var(--ds-raw-blue-600);
-  --ds-toggle-knob:          var(--ds-raw-white);
-  --ds-toggle-disabled-bg:   #DFDFDF;
+  /* ===== v2.0 Typography tokens (Figma node 96:2) =================
+     Sizes + line heights are mode-invariant. Pair with the weight
+     declared per token group (see component classes below). */
+  --tp-heading-01-size: 14px;   --tp-heading-01-lh: 20px;
+  --tp-heading-02-size: 17px;   --tp-heading-02-lh: 24px;
+  --tp-heading-03-size: 20px;   --tp-heading-03-lh: 28px;
+  --tp-heading-04-size: 24px;   --tp-heading-04-lh: 32px;
+  --tp-heading-05-size: 28px;   --tp-heading-05-lh: 36px;
+  --tp-body-01-size:    14px;   --tp-body-01-lh:    20px;
+  --tp-body-02-size:    17px;   --tp-body-02-lh:    24px;
+  --tp-label-01-size:   12px;   --tp-label-01-lh:   16px;
+  --tp-link-01-size:    12px;   --tp-link-01-lh:    16px;
+  --tp-link-02-size:    14px;   --tp-link-02-lh:    20px;
+  --tp-link-03-size:    17px;   --tp-link-03-lh:    24px;
+  --tp-code-01-size:    12px;   --tp-code-01-lh:    16px;
+  --tp-code-02-size:    14px;   --tp-code-02-lh:    20px;
+  --tp-display-regular-01-size: 36px; --tp-display-regular-01-lh: 44px;
+  --tp-display-regular-02-size: 44px; --tp-display-regular-02-lh: 52px;
+  --tp-display-regular-03-size: 52px; --tp-display-regular-03-lh: 60px;
+  --tp-display-regular-04-size: 72px; --tp-display-regular-04-lh: 96px;
+  --tp-display-regular-05-size: 96px; --tp-display-regular-05-lh: 116px;
+  --tp-display-medium-01-size:  36px; --tp-display-medium-01-lh:  44px;
+  --tp-display-medium-02-size:  44px; --tp-display-medium-02-lh:  52px;
+  --tp-display-medium-03-size:  52px; --tp-display-medium-03-lh:  60px;
+  --tp-display-medium-04-size:  72px; --tp-display-medium-04-lh:  96px;
+  --tp-display-medium-05-size:  96px; --tp-display-medium-05-lh:  116px;
 }
 
-/* ─── Dark Theme ────────────────────────────────────────────────────────────── */
+/* ============================================================
+   2. ADS LIGHT THEME (default) — Align DS v2.0 (2026-04-01)
+   Token names follow v2.0 canonical convention
+   (background-*, text-*, border-*, icon-*). Legacy --ads-bg-*,
+   --ads-text-muted etc. are forwarded at the bottom of this block
+   so existing components keep working without code changes.
+   ============================================================ */
+:root,
+[data-theme="align-light"],
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* ── Background (v2.0 § Light Background, 27 tokens) ── */
+  --ads-background-subtle-00:          #F4F4F4;
+  --ads-background-subtle-01:          #FFFFFF;
+  --ads-background-subtle-02:          #F4F4F4;
+  --ads-background-accent:             #DFDFDF;
+  --ads-background-menu:               #FFFFFF;
+  --ads-background-overlay:            #000000A1; /* 63% */
+  --ads-background-on-color:           #FFFFFF;
+  --ads-background-inverse:            #262626;
+  --ads-background-interactive:        #009ACE;
+  --ads-background-destructive:        #D43F58;
+  --ads-background-highlight-red:      #FFF0F3;
+  --ads-background-highlight-magenta:  #FFF0F9;
+  --ads-background-highlight-purple:   #F8F2FF;
+  --ads-background-highlight-blue:     #E6F7FF;
+  --ads-background-highlight-green:    #DCFCE8;
+  --ads-background-highlight-orange:   #FFF2ED;
+  --ads-background-subtle-hover:       #0000000B; /* 4%  */
+  --ads-background-accent-hover:       #0000002C; /* 17.5% */
+  --ads-background-interactive-hover:  #008EC2;
+  --ads-background-destructive-hover:  #C42D49;
+  --ads-background-subtle-active:      #00000016; /* 9%  */
+  --ads-background-accent-active:      #0000003A; /* 22.75% */
+  --ads-background-interactive-active: #0080B2;
+  --ads-background-destructive-active: #B51F3F;
+  --ads-background-interactive-disabled: #0000000B;
+  --ads-background-destructive-disabled: #0000000B;
+  --ads-background-on-color-disabled:    #0000000B;
+
+  /* ── Background — extended v2.0 ── */
+  --ads-background-success:                  #00964E;
+  --ads-background-highlight-gray:           #0000000B;
+  --ads-background-inverse-hovered:          #303030;
+  --ads-background-layer-selected:           #0000000B;
+  --ads-background-layer-selected-hovered:   #00000016;
+  --ads-background-layer-selected-pressed:   #00000020;
+  --ads-background-success-hovered:          #008744;
+  --ads-background-success-pressed:          #007A3D;
+  --ads-background-success-disabled:         #0000000B;
+
+  /* ── Border (v2.0 § Light Border, 20 tokens) ── */
+  --ads-border-subtle:                #00000016;
+  --ads-border-accent:                #0000003A;
+  --ads-border-on-color-subtle:       #FFFFFF16;
+  --ads-border-inverse-subtle:        #FFFFFF16;
+  --ads-border-interactive:           #009ACE;
+  --ads-border-error:                 #D43F58;
+  --ads-border-warning:               #FA8E41; /* UNRESOLVED: v2.0 doc value; Figma shows #DE5637 */
+  --ads-border-success:               #00964E;
+  --ads-border-highlight-red:         #FFD4DC;
+  --ads-border-highlight-magenta:     #FFE3F4;
+  --ads-border-highlight-purple:      #F3E6FF;
+  --ads-border-highlight-blue:        #D1F1FF;
+  --ads-border-highlight-green:       #C6F5D6;
+  --ads-border-highlight-orange:      #FFE5D6;
+  --ads-border-subtle-hover:          #00000020;
+  --ads-border-accent-hover:          #00000057;
+  --ads-border-accent-active:         #0000007E;
+  --ads-border-focus:                 #009ACE;
+  --ads-border-on-color-focus:        #FFFFFF;
+  --ads-border-disabled:              #00000016;
+
+  /* ── Border — extended v2.0 ── */
+  --ads-border-strong:                #121212;
+  --ads-border-on-color-accent:       #FFFFFF3A;
+  --ads-border-on-color-strong:       #FFFFFF;
+  --ads-border-inverse-accent:        #FFFFFF3A;
+  --ads-border-inverse-strong:        #FFFFFF;
+  --ads-border-highlight-gray:        #0000000B;
+  --ads-border-inverse-subtle-hovered:  #FFFFFF20;
+  --ads-border-inverse-accent-hovered:  #FFFFFF52;
+  --ads-border-interactive-hovered:   #008EC2;
+  --ads-border-inverse-subtle-pressed:  #FFFFFF2C;
+  --ads-border-inverse-accent-pressed:  #FFFFFF86;
+  --ads-border-inverse-focus:         #41C1F0;
+  --ads-border-on-color-disabled:     #FFFFFF16;
+  --ads-border-inverse-disabled:      #FFFFFF16;
+  --ads-border-subtle-pressed:        #0000002C;
+
+  /* ── Text (v2.0 § Light Text, 20 tokens) ── */
+  --ads-text-primary:               #000000ED;
+  --ads-text-secondary:             #000000A1;
+  --ads-text-tertiary:              #00000071;
+  --ads-text-on-color-primary:      #FFFFFF;
+  --ads-text-on-color-secondary:    #FFFFFFA1;
+  --ads-text-on-color-tertiary:     #FFFFFF78;
+  --ads-text-inverse-primary:       #FFFFFF;
+  --ads-text-inverse-secondary:     #FFFFFFA1;
+  --ads-text-inverse-tertiary:      #FFFFFF78;
+  --ads-text-link:                  #009ACE;
+  --ads-text-error:                 #D43F58;
+  --ads-text-warning:               #FA8E41; /* UNRESOLVED: v2.0 doc value */
+  --ads-text-success:               #00964E;
+  --ads-text-on-highlight-red:      #A31035;
+  --ads-text-on-highlight-magenta:  #A30564;
+  --ads-text-on-highlight-purple:   #6C37A1;
+  --ads-text-on-highlight-blue:     #005780;
+  --ads-text-on-highlight-green:    #006131;
+  --ads-text-on-highlight-orange:   #9E2813;
+  --ads-text-disabled:              #00000039;
+
+  /* ── Text — extended v2.0 ── */
+  --ads-text-link-hovered:          #008EC2;
+  --ads-text-on-color-disabled:     #FFFFFF3A;
+  --ads-text-inverse-disabled:      #FFFFFF3A;
+
+  /* ── Icon (v2.0 § Light Icon, 20 tokens) ── */
+  --ads-icon-primary:               #000000ED;
+  --ads-icon-secondary:             #000000A1;
+  --ads-icon-tertiary:              #00000071;
+  --ads-icon-on-color-primary:      #FFFFFF;
+  --ads-icon-on-color-secondary:    #FFFFFFA1;
+  --ads-icon-on-color-tertiary:     #FFFFFF78;
+  --ads-icon-inverse-primary:       #FFFFFF;
+  --ads-icon-inverse-secondary:     #FFFFFFA1;
+  --ads-icon-inverse-tertiary:      #FFFFFF78;
+  --ads-icon-link:                  #009ACE;
+  --ads-icon-error:                 #D43F58;
+  --ads-icon-warning:               #FA8E41; /* UNRESOLVED: v2.0 doc value */
+  --ads-icon-success:               #00964E;
+  --ads-icon-on-highlight-red:      #A31035;
+  --ads-icon-on-highlight-magenta:  #A30564;
+  --ads-icon-on-highlight-purple:   #6C37A1;
+  --ads-icon-on-highlight-blue:     #005780;
+  --ads-icon-on-highlight-green:    #006131;
+  --ads-icon-on-highlight-orange:   #9E2813;
+  --ads-icon-disabled:              #00000039;
+
+  /* ── Icon — extended v2.0 ── */
+  --ads-icon-link-hovered:          #008EC2;
+  --ads-icon-on-color-disabled:     #0000003A;
+  --ads-icon-inverse-disabled:      #0000003A;
+
+  /* ── Gradient ── */
+  --ads-gradient-blue:              #009ACE;
+
+  /* Shadows (light) */
+  --ads-shadow-sm:        0 2px 12px 0 rgba(0, 0, 0, 0.125);
+  --ads-shadow-md:        0 4px 12px 0 rgba(0, 0, 0, 0.08);
+  --ads-shadow-lg:        0 8px 24px 0 rgba(0, 0, 0, 0.12);
+
+  /* Decorative / non-token surfaces still referenced by components. */
+  --ads-scrim:            var(--ads-background-overlay);
+  --ads-icon-muted:       var(--ads-icon-secondary);
+  --ads-avatar-bg:        linear-gradient(135deg, rgb(230, 247, 255), rgb(220, 252, 232));
+  --ads-avatar-fg:        rgb(0, 87, 128);
+  --ads-scan-gradient:    linear-gradient(135deg, rgb(12, 58, 82) 0%, rgb(26, 107, 140) 60%, rgb(230, 247, 255) 100%);
+
+  /* ── Button state tokens — map v2.0 background-interactive ladder ── */
+  --ads-btn-primary-bg:           var(--ads-background-interactive);
+  --ads-btn-primary-bg-hover:     var(--ads-background-interactive-hover);
+  --ads-btn-primary-bg-pressed:   var(--ads-background-interactive-active);
+  --ads-btn-primary-bg-disabled:  var(--ads-background-interactive-disabled);
+
+  --ads-btn-secondary-border:           var(--ads-border-accent);
+  --ads-btn-secondary-border-hover:     var(--ads-border-accent-hover);
+  --ads-btn-secondary-border-pressed:   var(--ads-border-accent-active);
+  --ads-btn-secondary-border-focus:     var(--ads-border-focus);
+  --ads-btn-secondary-border-disabled:  var(--ads-border-disabled);
+
+  /* ====================================================================
+     LEGACY --ads-* ALIASES — keep existing components working unchanged.
+     Maps the v1.0 token names to the v2.0 canonical token they replace.
+     ==================================================================== */
+  --ads-text-muted:       var(--ads-text-secondary);
+  --ads-text-subtle:      var(--ads-text-tertiary);
+  --ads-text-placeholder: var(--ads-text-tertiary);
+  --ads-text-label:       var(--ads-text-secondary);
+  --ads-text-strong:      var(--ads-text-primary);
+  --ads-text-on-primary:  var(--ads-text-on-color-primary);
+
+  --ads-bg-page:          var(--ads-background-subtle-00);
+  --ads-bg-surface:       var(--ads-background-subtle-01);
+  --ads-bg-muted:         var(--ads-background-subtle-02);
+  --ads-bg-subtle:        var(--ads-background-accent);
+  --ads-bg-inverse:       var(--ads-background-inverse);
+  --ads-bg-inverse-2:     var(--ads-background-inverse-hovered);
+
+  --ads-border-default:   var(--ads-border-subtle);
+  /* (--ads-border-subtle and --ads-border-strong already declared above with v2.0 values) */
+
+  /* Status colour aliases — keep the old --ads-error-500 etc. names
+     pointing at the v2.0 destructive / warning / success / link tokens. */
+  --ads-error-500:        var(--ads-text-error);
+  --ads-danger-500:       var(--ads-background-destructive);
+  --ads-danger-600:       var(--ads-background-destructive-hover);
+  --ads-danger-700:       var(--ads-background-destructive-active);
+  --ads-success-500:      var(--ads-text-success);
+  --ads-success-600:      var(--ads-text-success);
+  --ads-warning-500:      var(--ads-text-warning);
+  --ads-info-500:         var(--ads-text-link);
+
+  /* Brand-blue ladder aliases — v2.0 collapses to background-interactive
+     for the saturated brand and text-link / icon-link / border-interactive
+     for chrome usage. */
+  --ads-blue-500:         var(--ads-background-interactive);
+  --ads-blue-550:         var(--ads-background-interactive);
+  --ads-blue-600:         var(--ads-background-interactive-hover);
+  --ads-blue-700:         var(--ads-background-interactive-active);
+  --ads-blue-50:          var(--ads-background-highlight-blue);
+  --ads-blue-100:         var(--ads-border-highlight-blue);
+  --ads-blue-text:        var(--ads-text-on-highlight-blue);
+
+  /* Tag tints — forward to v2.0 highlight pairs. */
+  --ads-tag-blue-bg:      var(--ads-background-highlight-blue);
+  --ads-tag-blue-br:      var(--ads-border-highlight-blue);
+  --ads-tag-blue-fg:      var(--ads-text-on-highlight-blue);
+  --ads-tag-green-bg:     var(--ads-background-highlight-green);
+  --ads-tag-green-br:     var(--ads-border-highlight-green);
+  --ads-tag-green-fg:     var(--ads-text-on-highlight-green);
+  --ads-tag-red-bg:       var(--ads-background-highlight-red);
+  --ads-tag-red-br:       var(--ads-border-highlight-red);
+  --ads-tag-red-fg:       var(--ads-text-on-highlight-red);
+  --ads-tag-orange-bg:    var(--ads-background-highlight-orange);
+  --ads-tag-orange-br:    var(--ads-border-highlight-orange);
+  --ads-tag-orange-fg:    var(--ads-text-on-highlight-orange);
+  --ads-tag-purple-bg:    var(--ads-background-highlight-purple);
+  --ads-tag-purple-br:    var(--ads-border-highlight-purple);
+  --ads-tag-purple-fg:    var(--ads-text-on-highlight-purple);
+  --ads-tag-magenta-bg:   var(--ads-background-highlight-magenta);
+  --ads-tag-magenta-br:   var(--ads-border-highlight-magenta);
+  --ads-tag-magenta-fg:   var(--ads-text-on-highlight-magenta);
+  --ads-tag-gray-bg:      var(--ads-background-highlight-gray);
+  --ads-tag-gray-br:      var(--ads-border-highlight-gray);
+  --ads-tag-gray-fg:      var(--ads-text-primary);
+}
+
+/* ============================================================
+   3. ADS DARK THEME — Align DS v2.0 (2026-04-01)
+   ============================================================ */
+[data-theme="align-dark"],
+[data-theme="dark"],
 .dark {
-  /* ── Semantic: Accent / Brand ───────────────────────────────────────── */
-  --ds-color-primary:         #38BDF8;
-  --ds-color-primary-hover:   #7DD3FC;
-  --ds-color-primary-pressed: #BAE6FD;
-  --ds-color-primary-subtle:  rgba(56, 189, 248, 0.12);
-  --ds-color-primary-on:      #0c1929;                   /* dark text on bright primary — 12:1 */
-  --ds-color-primary-ring:    rgba(56, 189, 248, 0.40);
+  color-scheme: dark;
 
-  /* ── Semantic: Danger / Destructive ─────────────────────────────────── */
-  --ds-color-danger:          #F87171;
-  --ds-color-danger-hover:    #FCA5A5;
-  --ds-color-danger-pressed:  #FECACA;
-  --ds-color-danger-subtle:   rgba(248, 113, 113, 0.12);
-  --ds-color-danger-on:       #1c0a0a;                   /* 13:1 on #F87171 */
-  --ds-color-danger-border:   rgba(248, 113, 113, 0.25);
-  --ds-color-danger-ring:     rgba(248, 113, 113, 0.40);
+  /* ── Background (v2.0 § Dark Background, 27 tokens) ── */
+  --ads-background-subtle-00:          #121212;
+  --ads-background-subtle-01:          #1B1B1B;
+  --ads-background-subtle-02:          #262626;
+  --ads-background-accent:             #474747;
+  --ads-background-menu:               #262626;
+  --ads-background-overlay:            #000000A1;
+  --ads-background-on-color:           #FFFFFF;
+  --ads-background-inverse:            #FFFFFF;
+  --ads-background-interactive:        #009ACE;
+  --ads-background-destructive:        #D43F58;
+  --ads-background-highlight-red:      #380912;
+  --ads-background-highlight-magenta:  #330D23;
+  --ads-background-highlight-purple:   #261238;
+  --ads-background-highlight-blue:     #021E2E;
+  --ads-background-highlight-green:    #002111;
+  --ads-background-highlight-orange:   #360F02;
+  --ads-background-subtle-hover:       #FFFFFF0B;
+  --ads-background-accent-hover:       #FFFFFF2C;
+  --ads-background-interactive-hover:  #008EC2;
+  --ads-background-destructive-hover:  #C42D49;
+  --ads-background-subtle-active:      #FFFFFF16;
+  --ads-background-accent-active:      #FFFFFF39;
+  --ads-background-interactive-active: #0080B2;
+  --ads-background-destructive-active: #B51F3F;
+  --ads-background-interactive-disabled: #FFFFFF0B;
+  --ads-background-destructive-disabled: #FFFFFF0F;
+  --ads-background-on-color-disabled:    #FFFFFF0B;
 
-  /* ── Semantic: Success ──────────────────────────────────────────────── */
-  --ds-color-success:         #4ADE80;
-  --ds-color-success-subtle:  rgba(74, 222, 128, 0.12);
-  --ds-color-success-on:      #BBF7D0;
-  --ds-color-success-border:  rgba(74, 222, 128, 0.25);
+  /* ── Background — extended v2.0 ── */
+  --ads-background-success:                  #4DBD78;
+  --ads-background-highlight-gray:           #FFFFFF0A;
+  --ads-background-inverse-hovered:          #F4F4F4;
+  --ads-background-layer-selected:           #FFFFFF0A;
+  --ads-background-layer-selected-hovered:   #FFFFFF16;
+  --ads-background-layer-selected-pressed:   #FFFFFF1F;
+  --ads-background-success-hovered:          #008744;
+  --ads-background-success-pressed:          #007A3D;
+  --ads-background-success-disabled:         #FFFFFF0B;
 
-  /* ── Semantic: Warning ──────────────────────────────────────────────── */
-  --ds-color-warning:         #FBBF24;
-  --ds-color-warning-subtle:  rgba(251, 191, 36, 0.12);
-  --ds-color-warning-on:      #FEF3C7;
-  --ds-color-warning-border:  rgba(251, 191, 36, 0.25);
+  /* ── Border (v2.0 § Dark Border, 20 tokens) ── */
+  --ads-border-subtle:                #FFFFFF16;
+  --ads-border-accent:                #FFFFFF3B;
+  --ads-border-on-color-subtle:       #FFFFFF16;
+  --ads-border-inverse-subtle:        #00000016;
+  --ads-border-interactive:           #41C1F0;
+  --ads-border-error:                 #FC8397;
+  --ads-border-warning:               #FA8E41; /* UNRESOLVED: v2.0 doc value; Figma shows #F58D71 */
+  --ads-border-success:               #4DBD78;
+  --ads-border-highlight-red:         #630920;
+  --ads-border-highlight-magenta:     #5E0B3C;
+  --ads-border-highlight-purple:      #431B69;
+  --ads-border-highlight-blue:        #00334D;
+  --ads-border-highlight-green:       #00381C;
+  --ads-border-highlight-orange:      #5E1509;
+  --ads-border-subtle-hover:          #FFFFFF20;
+  --ads-border-accent-hover:          #FFFFFF52;
+  --ads-border-accent-active:         #FFFFFF86;
+  --ads-border-focus:                 #41C1F0;
+  --ads-border-on-color-focus:        #FFFFFF;
+  --ads-border-disabled:              #FFFFFF16;
 
-  /* ── Semantic: Info ─────────────────────────────────────────────────── */
-  --ds-color-info:            #60A5FA;
-  --ds-color-info-subtle:     rgba(96, 165, 250, 0.12);
-  --ds-color-info-on:         #DBEAFE;
-  --ds-color-info-border:     rgba(96, 165, 250, 0.25);
+  /* ── Border — extended v2.0 ── */
+  --ads-border-strong:                #FFFFFF;
+  --ads-border-on-color-accent:       #FFFFFF3A;
+  --ads-border-on-color-strong:       #FFFFFF;
+  --ads-border-inverse-accent:        #0000003A;
+  --ads-border-inverse-strong:        #121212;
+  --ads-border-highlight-gray:        #FFFFFF0A;
+  --ads-border-inverse-subtle-hovered:  #00000020;
+  --ads-border-inverse-accent-hovered:  #00000052;
+  --ads-border-interactive-hovered:   #5FCEFA;
+  --ads-border-inverse-subtle-pressed:  #0000002C;
+  --ads-border-inverse-accent-pressed:  #00000086;
+  --ads-border-inverse-focus:         #B687E8;
+  --ads-border-on-color-disabled:     #FFFFFF16;
+  --ads-border-inverse-disabled:      #FFFFFF16;
+  --ads-border-subtle-pressed:        #FFFFFF2C;
 
-  /* ── Semantic: Surface ──────────────────────────────────────────────── */
-  --ds-surface-base:          #1a1a2e;
-  --ds-surface-raised:        #242438;
-  --ds-surface-sunken:        #12121f;
-  --ds-surface-overlay:       #242438;
-  --ds-surface-inverse:       #f1f5f9;
-  --ds-surface-hover:         #2a2a42;
-  --ds-surface-active:        #32324e;
-  --ds-surface-disabled:      #1e1e34;
-  --ds-surface-input:         #1e1e34;
-  --ds-surface-input-grey:    #242438;
+  /* ── Text (v2.0 § Dark Text, 20 tokens) ── */
+  --ads-text-primary:               #FFFFFF;
+  --ads-text-secondary:             #FFFFFFA1;
+  --ads-text-tertiary:              #FFFFFF78;
+  --ads-text-on-color-primary:      #FFFFFF;
+  --ads-text-on-color-secondary:    #FFFFFFA1;
+  --ads-text-on-color-tertiary:     #FFFFFF78;
+  --ads-text-inverse-primary:       #121212;
+  --ads-text-inverse-secondary:     #000000A1;
+  --ads-text-inverse-tertiary:      #00000071;
+  --ads-text-link:                  #41C1F0;
+  --ads-text-error:                 #FC8397;
+  --ads-text-warning:               #FA8E41; /* UNRESOLVED: v2.0 doc value; Figma shows #F58D71 */
+  --ads-text-success:               #4DBD78;
+  --ads-text-on-highlight-red:      #FFC2CE;
+  --ads-text-on-highlight-magenta:  #FCC2E5;
+  --ads-text-on-highlight-purple:   #E2CAFA;
+  --ads-text-on-highlight-blue:     #8ADAFF;
+  --ads-text-on-highlight-green:    #9AE3B5;
+  --ads-text-on-highlight-orange:   #FCC6B1;
+  --ads-text-disabled:              #FFFFFF39;
 
-  /* ── Semantic: Text ─────────────────────────────────────────────────── */
-  --ds-text-primary:          #e2e8f0;                   /* 12.5:1 on #1a1a2e */
-  --ds-text-secondary:        #94a3b8;                   /* 6.1:1 on #1a1a2e */
-  --ds-text-tertiary:         #64748b;                   /* 3.2:1 on #1a1a2e */
-  --ds-text-disabled:         #475569;
-  --ds-text-inverse:          #0f172a;
-  --ds-text-link:             #38BDF8;
-  --ds-text-on-accent:        #0c1929;
-  --ds-text-heading:          #f8fafc;                   /* 15.8:1 on #1a1a2e */
-  --ds-text-label:            #cbd5e1;                   /* 9.5:1 on #1a1a2e */
-  --ds-text-placeholder:      #64748b;
+  /* ── Text — extended v2.0 ── */
+  --ads-text-link-hovered:          #5FCEFA;
+  --ads-text-on-color-disabled:     #FFFFFF3A;
+  --ads-text-inverse-disabled:      #FFFFFF3A;
 
-  /* ── Semantic: Border ───────────────────────────────────────────────── */
-  --ds-border-subtle:         rgba(255, 255, 255, 0.08);
-  --ds-border-default:        rgba(255, 255, 255, 0.12);
-  --ds-border-strong:         rgba(255, 255, 255, 0.20);
-  --ds-border-hover:          rgba(255, 255, 255, 0.30);
-  --ds-border-focus:          #38BDF8;
+  /* ── Icon (v2.0 § Dark Icon, 20 tokens) ── */
+  --ads-icon-primary:               #FFFFFF;
+  --ads-icon-secondary:             #FFFFFFA1;
+  --ads-icon-tertiary:              #FFFFFF78;
+  --ads-icon-on-color-primary:      #FFFFFF;
+  --ads-icon-on-color-secondary:    #FFFFFFA1;
+  --ads-icon-on-color-tertiary:     #FFFFFF78;
+  --ads-icon-inverse-primary:       #121212;
+  --ads-icon-inverse-secondary:     #FFFFFF; /* UNRESOLVED: v2.0 doc value; Figma shows #000000 63% */
+  --ads-icon-inverse-tertiary:      #00000071;
+  --ads-icon-link:                  #41C1F0;
+  --ads-icon-error:                 #FC8397;
+  --ads-icon-warning:               #FA8E41; /* UNRESOLVED: v2.0 doc value */
+  --ads-icon-success:               #4DBD78;
+  --ads-icon-on-highlight-red:      #FFC2CE;
+  --ads-icon-on-highlight-magenta:  #FCC2E5;
+  --ads-icon-on-highlight-purple:   #E2CAFA;
+  --ads-icon-on-highlight-blue:     #8ADAFF;
+  --ads-icon-on-highlight-green:    #9AE3B5;
+  --ads-icon-on-highlight-orange:   #FCC6B1;
+  --ads-icon-disabled:              #FFFFFF39;
 
-  /* ── Semantic: Focus ────────────────────────────────────────────────── */
-  --ds-focus-ring:            0 0 0 3px rgba(56, 189, 248, 0.40);
-  --ds-focus-ring-light:      0 0 0 3px rgba(56, 189, 248, 0.25);
-  --ds-focus-ring-danger:     0 0 0 3px rgba(248, 113, 113, 0.40);
+  /* ── Icon — extended v2.0 ── */
+  --ads-icon-link-hovered:          #5FCEFA;
+  --ads-icon-on-color-disabled:     #0000003A;
+  --ads-icon-inverse-disabled:      #0000003A;
 
-  /* ── Semantic: Shadow (dark mode uses lighter glows or borders) ──── */
-  --ds-shadow-sm:             0 1px 2px rgba(0, 0, 0, 0.3);
-  --ds-shadow-md:             0 2px 8px rgba(0, 0, 0, 0.4);
-  --ds-shadow-lg:             0 4px 16px rgba(0, 0, 0, 0.5);
-  --ds-shadow-overlay:        0 8px 32px rgba(0, 0, 0, 0.6);
+  /* ── Gradient ── */
+  --ads-gradient-blue:              #009ACE;
 
-  /* ── Backdrop ───────────────────────────────────────────────────────── */
-  --ds-backdrop:              rgba(0, 0, 0, 0.65);
+  /* Shadows (dark) */
+  --ads-shadow-sm:        0 2px 12px 0 rgba(0, 0, 0, 0.45);
+  --ads-shadow-md:        0 4px 12px 0 rgba(0, 0, 0, 0.40);
+  --ads-shadow-lg:        0 8px 24px 0 rgba(0, 0, 0, 0.55);
 
-  /* ── Semantic: Tag palette (dark) ───────────────────────────────────── */
-  --ds-tag-red-bg:       rgba(248, 113, 113, 0.12);
-  --ds-tag-red-border:   rgba(248, 113, 113, 0.25);
-  --ds-tag-red-text:     #FCA5A5;
-  --ds-tag-orange-bg:    rgba(251, 191, 36, 0.12);
-  --ds-tag-orange-border:rgba(251, 191, 36, 0.25);
-  --ds-tag-orange-text:  #FDE68A;
-  --ds-tag-magenta-bg:   rgba(232, 121, 249, 0.12);
-  --ds-tag-magenta-border:rgba(232, 121, 249, 0.25);
-  --ds-tag-magenta-text: #F0ABFC;
-  --ds-tag-purple-bg:    rgba(167, 139, 250, 0.12);
-  --ds-tag-purple-border:rgba(167, 139, 250, 0.25);
-  --ds-tag-purple-text:  #C4B5FD;
-  --ds-tag-blue-bg:      rgba(56, 189, 248, 0.12);
-  --ds-tag-blue-border:  rgba(56, 189, 248, 0.25);
-  --ds-tag-blue-text:    #7DD3FC;
-  --ds-tag-green-bg:     rgba(74, 222, 128, 0.12);
-  --ds-tag-green-border: rgba(74, 222, 128, 0.25);
-  --ds-tag-green-text:   #86EFAC;
+  /* Decorative / non-token surfaces */
+  --ads-scrim:            var(--ads-background-overlay);
+  --ads-icon-muted:       var(--ads-icon-secondary);
+  --ads-avatar-bg:        linear-gradient(135deg, rgb(0, 77, 113), rgb(18, 88, 49));
+  --ads-avatar-fg:        rgb(230, 247, 255);
+  --ads-scan-gradient:    linear-gradient(135deg, rgb(8, 32, 46) 0%, rgb(15, 61, 80) 60%, rgb(32, 110, 145) 100%);
 
-  /* ── Notification palette (dark) ────────────────────────────────────── */
-  --ds-notif-info-bg:        rgba(96, 165, 250, 0.10);
-  --ds-notif-info-border:    rgba(96, 165, 250, 0.25);
-  --ds-notif-info-icon:      #60A5FA;
-  --ds-notif-success-bg:     rgba(74, 222, 128, 0.10);
-  --ds-notif-success-border: rgba(74, 222, 128, 0.25);
-  --ds-notif-success-icon:   #4ADE80;
-  --ds-notif-warning-bg:     rgba(251, 191, 36, 0.10);
-  --ds-notif-warning-border: rgba(251, 191, 36, 0.25);
-  --ds-notif-warning-icon:   #FBBF24;
-  --ds-notif-error-bg:       rgba(248, 113, 113, 0.10);
-  --ds-notif-error-border:   rgba(248, 113, 113, 0.25);
-  --ds-notif-error-icon:     #F87171;
+  /* Focus ring — dark uses #41C1F0 per v2.0 border-focus. */
+  --ads-focus-ring:       var(--ads-border-focus);
 
-  /* ── Tooltip (dark) ─────────────────────────────────────────────────── */
-  --ds-tooltip-bg:           #e2e8f0;
-  --ds-tooltip-text:         #0f172a;
+  /* ── Button state tokens — alpha values flip from black-alpha to white-alpha. ── */
+  --ads-btn-primary-bg:           var(--ads-background-interactive);
+  --ads-btn-primary-bg-hover:     var(--ads-background-interactive-hover);
+  --ads-btn-primary-bg-pressed:   var(--ads-background-interactive-active);
+  --ads-btn-primary-bg-disabled:  var(--ads-background-interactive-disabled);
 
-  /* ── Toggle / Switch (dark) ─────────────────────────────────────────── */
-  --ds-toggle-off-bg:        #475569;
-  --ds-toggle-off-hover:     #64748b;
-  --ds-toggle-on-bg:         #38BDF8;
-  --ds-toggle-on-hover:      #7DD3FC;
-  --ds-toggle-knob:          #ffffff;
-  --ds-toggle-disabled-bg:   #334155;
+  --ads-btn-secondary-border:           var(--ads-border-accent);
+  --ads-btn-secondary-border-hover:     var(--ads-border-accent-hover);
+  --ads-btn-secondary-border-pressed:   var(--ads-border-accent-active);
+  --ads-btn-secondary-border-focus:     var(--ads-border-focus);
+  --ads-btn-secondary-border-disabled:  var(--ads-border-disabled);
+
+  /* ── Legacy --ads-* aliases (dark) ── */
+  --ads-text-muted:       var(--ads-text-secondary);
+  --ads-text-subtle:      var(--ads-text-tertiary);
+  --ads-text-placeholder: var(--ads-text-tertiary);
+  --ads-text-label:       var(--ads-text-secondary);
+  --ads-text-strong:      var(--ads-text-primary);
+  --ads-text-on-primary:  var(--ads-text-on-color-primary);
+
+  --ads-bg-page:          var(--ads-background-subtle-00);
+  --ads-bg-surface:       var(--ads-background-subtle-01);
+  --ads-bg-muted:         var(--ads-background-subtle-02);
+  --ads-bg-subtle:        var(--ads-background-accent);
+  --ads-bg-inverse:       var(--ads-background-inverse);
+  --ads-bg-inverse-2:     var(--ads-background-inverse-hovered);
+
+  --ads-border-default:   var(--ads-border-subtle);
+
+  --ads-error-500:        var(--ads-text-error);
+  --ads-danger-500:       var(--ads-background-destructive);
+  --ads-danger-600:       var(--ads-background-destructive-hover);
+  --ads-danger-700:       var(--ads-background-destructive-active);
+  --ads-success-500:      var(--ads-text-success);
+  --ads-success-600:      var(--ads-text-success);
+  --ads-warning-500:      var(--ads-text-warning);
+  --ads-info-500:         var(--ads-text-link);
+
+  --ads-blue-500:         var(--ads-background-interactive);     /* brand fill stays #009ACE */
+  --ads-blue-550:         var(--ads-text-link);                  /* chrome usage: #41C1F0 */
+  --ads-blue-600:         var(--ads-background-interactive-hover);
+  --ads-blue-700:         var(--ads-background-interactive-active);
+  --ads-blue-50:          var(--ads-background-highlight-blue);
+  --ads-blue-100:         var(--ads-border-highlight-blue);
+  --ads-blue-text:        var(--ads-text-on-highlight-blue);
+
+  --ads-tag-blue-bg:      var(--ads-background-highlight-blue);
+  --ads-tag-blue-br:      var(--ads-border-highlight-blue);
+  --ads-tag-blue-fg:      var(--ads-text-on-highlight-blue);
+  --ads-tag-green-bg:     var(--ads-background-highlight-green);
+  --ads-tag-green-br:     var(--ads-border-highlight-green);
+  --ads-tag-green-fg:     var(--ads-text-on-highlight-green);
+  --ads-tag-red-bg:       var(--ads-background-highlight-red);
+  --ads-tag-red-br:       var(--ads-border-highlight-red);
+  --ads-tag-red-fg:       var(--ads-text-on-highlight-red);
+  --ads-tag-orange-bg:    var(--ads-background-highlight-orange);
+  --ads-tag-orange-br:    var(--ads-border-highlight-orange);
+  --ads-tag-orange-fg:    var(--ads-text-on-highlight-orange);
+  --ads-tag-purple-bg:    var(--ads-background-highlight-purple);
+  --ads-tag-purple-br:    var(--ads-border-highlight-purple);
+  --ads-tag-purple-fg:    var(--ads-text-on-highlight-purple);
+  --ads-tag-magenta-bg:   var(--ads-background-highlight-magenta);
+  --ads-tag-magenta-br:   var(--ads-border-highlight-magenta);
+  --ads-tag-magenta-fg:   var(--ads-text-on-highlight-magenta);
+  --ads-tag-gray-bg:      var(--ads-background-highlight-gray);
+  --ads-tag-gray-br:      var(--ads-border-highlight-gray);
+  --ads-tag-gray-fg:      var(--ads-text-primary);
 }
 
-/* ── Reduced motion ───────────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --ds-duration-fast: 0s;
-    --ds-duration-base: 0s;
-    --ds-duration-slow: 0s;
-  }
+/* ============================================================
+   4. SIZE MODE: WEB (default)
+   ============================================================ */
+[data-size-mode="web"], :root {
+  --ads-size-font-body: 14px;
+  --ads-size-lh-body: 20px;
+  --ads-size-font-label: 12px;
+  --ads-size-lh-label: 16px;
+  --ads-size-font-h3: 17px;
+  --ads-size-lh-h3: 24px;
+  --ads-size-font-btn: 14px;
+  --ads-size-lh-btn: 18px;
+
+  --ads-size-btn-md-h: 44px;
+  --ads-size-btn-md-px: 16px;
+  --ads-size-btn-md-radius: 8px;
+  --ads-size-btn-sm-h: 36px;
+  --ads-size-btn-sm-px: 12px;
+  --ads-size-btn-sm-radius: 8px;
+
+  --ads-size-field-h: 44px;
+  --ads-size-field-px: 16px;
+  --ads-size-field-radius: 8px;
+  --ads-size-field-font: 14px;
+  --ads-size-field-lh: 18px;
+
+  --ads-size-cbx: 20px;
+  --ads-size-cbx-radius: 4px;
+  --ads-size-rad: 20px;
+  --ads-size-toggle-w: 44px;
+  --ads-size-toggle-h: 28px;
+  --ads-size-toggle-thumb: 24px;
+  --ads-size-control-gap: 10px;
+
+  --ads-size-tag-py: 4px;
+  --ads-size-tag-px: 10px;
+  --ads-size-tag-radius: 28px;
+  --ads-size-tag-font: 12px;
+  --ads-size-tag-lh: 16px;
+
+  --ads-size-tab-py: 12px;
+  --ads-size-tab-px: 16px;
+  --ads-size-tab-font: 14px;
+
+  --ads-size-avatar-xs: 24px;
+  --ads-size-avatar-sm: 32px;
+  --ads-size-avatar-md: 40px;
+  --ads-size-avatar-lg: 52px;
+  --ads-size-avatar-xs-font: 11px;
+  --ads-size-avatar-sm-font: 12px;
+  --ads-size-avatar-md-font: 14px;
+  --ads-size-avatar-lg-font: 20px;
+
+  --ads-size-toast-pad: 12px;
+  --ads-size-toast-radius: 8px;
+  --ads-size-toast-gap: 8px;
+
+  --ads-size-modal-radius: 8px;
+  --ads-size-modal-pad: 24px; /* Figma 13483:13690 — modal padding L/R/T/B */
+
+  --ads-size-acc-head-py: 16px;
+  --ads-size-acc-head-px: 20px;
+  --ads-size-acc-body-px: 20px;
+  --ads-size-acc-body-pb: 20px;
+  --ads-size-acc-radius: 8px;
+
+  --ads-size-topbar-h: 64px;
+  --ads-size-topbar-px: 24px;
+
+  --ads-size-search-h: 36px;
+  --ads-size-search-px: 12px;
+  --ads-size-search-radius: 8px;
+
+  --ads-size-card-radius: 8px;
+  --ads-size-card-head-px: 20px;
+  --ads-size-card-head-py: 16px;
+  --ads-size-card-body-pad: 20px;
+
+  --ads-size-nav-h: 40px;
+  --ads-size-nav-gap: 16px;
+  --ads-size-nav-font: 14px;
 }
+
+/* ============================================================
+   5. SIZE MODE: SCANNER (touch-optimized)
+   ============================================================ */
+[data-size-mode="scanner"] {
+  --ads-size-font-body: 18px;
+  --ads-size-lh-body: 28px;
+  --ads-size-font-label: 16px;
+  --ads-size-lh-label: 24px;
+  --ads-size-font-h3: 18px;
+  --ads-size-lh-h3: 28px;
+  --ads-size-font-btn: 18px;
+  --ads-size-lh-btn: 28px;
+
+  --ads-size-btn-md-h: 48px;
+  --ads-size-btn-md-px: 12px;
+  --ads-size-btn-md-radius: 8px;
+  --ads-size-btn-sm-h: 36px;
+  --ads-size-btn-sm-px: 8px;
+  --ads-size-btn-sm-radius: 8px;
+
+  --ads-size-field-h: 60px;
+  --ads-size-field-px: 16px;
+  --ads-size-field-radius: 8px;
+  --ads-size-field-font: 18px;
+  --ads-size-field-lh: 28px;
+
+  --ads-size-cbx: 24px;
+  --ads-size-cbx-radius: 4px;
+  --ads-size-rad: 20px;
+  --ads-size-toggle-w: 52px;
+  --ads-size-toggle-h: 32px;
+  --ads-size-toggle-thumb: 28px;
+  --ads-size-control-gap: 8px;
+
+  --ads-size-tag-py: 8px;
+  --ads-size-tag-px: 12px;
+  --ads-size-tag-radius: 28px;
+  --ads-size-tag-font: 16px;
+  --ads-size-tag-lh: 24px;
+
+  --ads-size-tab-py: 16px;
+  --ads-size-tab-px: 16px;
+  --ads-size-tab-font: 18px;
+
+  --ads-size-avatar-xs: 28px;
+  --ads-size-avatar-sm: 32px;
+  --ads-size-avatar-md: 40px;
+  --ads-size-avatar-lg: 52px;
+  --ads-size-avatar-xs-font: 12px;
+  --ads-size-avatar-sm-font: 14px;
+  --ads-size-avatar-md-font: 16px;
+  --ads-size-avatar-lg-font: 20px;
+
+  --ads-size-toast-pad: 16px;
+  --ads-size-toast-radius: 8px;
+  --ads-size-toast-gap: 16px;
+
+  --ads-size-modal-radius: 8px;
+  --ads-size-modal-pad: 24px;
+
+  --ads-size-acc-head-py: 16px;
+  --ads-size-acc-head-px: 16px;
+  --ads-size-acc-body-px: 16px;
+  --ads-size-acc-body-pb: 16px;
+  --ads-size-acc-radius: 8px;
+
+  --ads-size-topbar-h: 72px;
+  --ads-size-topbar-px: 16px;
+
+  --ads-size-search-h: 60px;
+  --ads-size-search-px: 16px;
+  --ads-size-search-radius: 8px;
+
+  --ads-size-card-radius: 8px;
+  --ads-size-card-head-px: 16px;
+  --ads-size-card-head-py: 16px;
+  --ads-size-card-body-pad: 16px;
+
+  --ads-size-nav-h: 48px;
+  --ads-size-nav-gap: 12px;
+  --ads-size-nav-font: 16px;
+}
+
+/* ============================================================
+   6. LEGACY --ds-* ALIASES (back-compat)
+   The previous in-house token sheet exposed --ds-color-primary,
+   --ds-text-primary, --ds-tag-*-bg, etc. We forward them to the
+   matching --ads-* values so any component still referencing the
+   old names keeps rendering.
+   ============================================================ */
+:root,
+[data-theme="align-light"],
+[data-theme="light"] {
+  /* Color */
+  --ds-color-primary:          var(--ads-blue-500);
+  --ds-color-primary-hover:    var(--ads-blue-600);
+  --ds-color-primary-pressed:  var(--ads-blue-700);
+  --ds-color-primary-subtle:   var(--ads-blue-50);
+  --ds-color-info:             var(--ads-info-500);
+  --ds-color-warning:          var(--ads-warning-500);
+  --ds-color-danger:           var(--ads-danger-500);
+  --ds-color-danger-hover:     var(--ads-danger-600);
+  --ds-color-danger-pressed:   var(--ads-danger-700);
+  --ds-color-danger-ring:      var(--ads-danger-500);
+  --ds-color-success:          var(--ads-success-600);
+  --ds-color-success-subtle:   var(--ads-tag-green-bg);
+  --ds-color-success-border:   var(--ads-tag-green-br);
+  --ds-color-success-on:       var(--ads-tag-green-fg);
+
+  /* Text */
+  --ds-text-primary:     var(--ads-text-primary);
+  --ds-text-secondary:   var(--ads-text-muted);
+  --ds-text-tertiary:    var(--ads-text-subtle);
+  --ds-text-placeholder: var(--ads-text-placeholder);
+  --ds-text-heading:     var(--ads-text-strong);
+  --ds-text-label:       var(--ads-text-label);
+  --ds-text-on-accent:   var(--ads-text-on-primary);
+
+  /* Surfaces */
+  --ds-surface-base:        var(--ads-bg-surface);
+  --ds-surface-hover:       var(--ads-bg-muted);
+  --ds-surface-active:      var(--ads-bg-subtle);
+  --ds-surface-sunken:      var(--ads-bg-page);
+  --ds-surface-inverse:     var(--ads-bg-inverse);
+  --ds-surface-input-grey:  var(--ads-bg-muted);
+
+  /* Notification surfaces (toasts use ADS .toast styling, but a couple of
+     legacy components still read these tokens directly). */
+  --ds-notif-info-bg:       var(--ads-blue-50);
+  --ds-notif-info-border:   var(--ads-blue-100);
+  --ds-notif-info-icon:     var(--ads-info-500);
+  --ds-notif-success-bg:    var(--ads-tag-green-bg);
+  --ds-notif-success-border: var(--ads-tag-green-br);
+  --ds-notif-success-icon:  var(--ads-success-600);
+  --ds-notif-warning-bg:    var(--ads-tag-orange-bg);
+  --ds-notif-warning-border: var(--ads-tag-orange-br);
+  --ds-notif-warning-icon:  var(--ads-warning-500);
+  --ds-notif-error-bg:      var(--ads-tag-red-bg);
+  --ds-notif-error-border:  var(--ads-tag-red-br);
+  --ds-notif-error-icon:    var(--ads-error-500);
+
+  /* Tooltip — ADS uses inverse surface */
+  --ds-tooltip-bg:   var(--ads-bg-inverse);
+  --ds-tooltip-text: var(--ads-text-on-primary);
+
+  /* Toggle legacy tokens — neutral ladder verified from Figma component 29:11.
+     Off track ladder: Enabled #DFDFDF → Hovered #D2D2D2 → Active #C5C5C5.
+     On track ladder: Enabled blue-500 → Hovered blue-600 → Active blue-700. */
+  --ds-toggle-on-bg:        var(--ads-blue-500);
+  --ds-toggle-on-hover:     var(--ads-blue-600);
+  --ds-toggle-on-active:    var(--ads-blue-700);
+  --ds-toggle-off-bg:       rgb(223, 223, 223);
+  --ds-toggle-off-hover:    rgb(210, 210, 210);
+  --ds-toggle-off-active:   rgb(197, 197, 197);
+  --ds-toggle-disabled-bg:  var(--ads-border-default);
+  --ds-toggle-knob:         var(--ads-bg-surface);
+
+  /* Borders */
+  --ds-border-subtle:  var(--ads-border-subtle);
+  --ds-border-default: var(--ads-border-default);
+  --ds-border-strong:  var(--ads-border-strong);
+  --ds-border-hover:   var(--ads-blue-500);
+
+  /* Focus rings */
+  --ds-focus-ring:        0 0 0 2px var(--ads-focus-ring);
+  --ds-focus-ring-light:  0 0 0 2px rgba(0, 154, 206, 0.35);
+  --ds-focus-ring-danger: 0 0 0 2px var(--ads-danger-500);
+
+  /* Shadows */
+  --ds-shadow-sm: var(--ads-shadow-sm);
+  --ds-shadow-md: var(--ads-shadow-md);
+  --ds-shadow-lg: var(--ads-shadow-lg);
+
+  /* Tag tints */
+  --ds-tag-blue-bg:    var(--ads-tag-blue-bg);
+  --ds-tag-blue-border: var(--ads-tag-blue-br);
+  --ds-tag-blue-text:  var(--ads-tag-blue-fg);
+  --ds-tag-green-bg:   var(--ads-tag-green-bg);
+  --ds-tag-green-border: var(--ads-tag-green-br);
+  --ds-tag-green-text: var(--ads-tag-green-fg);
+  --ds-tag-red-bg:     var(--ads-tag-red-bg);
+  --ds-tag-red-border: var(--ads-tag-red-br);
+  --ds-tag-red-text:   var(--ads-tag-red-fg);
+  --ds-tag-orange-bg:  var(--ads-tag-orange-bg);
+  --ds-tag-orange-border: var(--ads-tag-orange-br);
+  --ds-tag-orange-text: var(--ads-tag-orange-fg);
+  --ds-tag-purple-bg:  var(--ads-tag-purple-bg);
+  --ds-tag-purple-border: var(--ads-tag-purple-br);
+  --ds-tag-purple-text: var(--ads-tag-purple-fg);
+  --ds-tag-magenta-bg: var(--ads-tag-magenta-bg);
+  --ds-tag-magenta-border: var(--ads-tag-magenta-br);
+  --ds-tag-magenta-text: var(--ads-tag-magenta-fg);
+}
+
+/* ============================================================
+   6b. TAILWIND ARBITRARY-VALUE INTERCEPT
+   The project ships a precompiled Tailwind v4 stylesheet at src/index.css
+   and has no Tailwind plugin in vite.config.ts — so arbitrary-value
+   classes with `var(...)` introduced after that precompile (e.g.
+   `bg-[var(--ads-background-subtle-01)]`) have no CSS rule and would
+   render with no background, falling through to the page bg and
+   appearing "gray".
+   These attribute selectors match the literal class strings used in
+   JSX and route them to the right v2.0 token. Add new rows here when
+   you introduce new arbitrary-value classes referencing CSS vars.
+   ============================================================ */
+[class*="bg-[var(--ads-background-subtle-00)]"] { background-color: var(--ads-background-subtle-00); }
+[class*="bg-[var(--ads-background-subtle-01)]"] { background-color: var(--ads-background-subtle-01); }
+[class*="bg-[var(--ads-background-subtle-02)]"] { background-color: var(--ads-background-subtle-02); }
+[class*="bg-[var(--ads-background-menu)]"]      { background-color: var(--ads-background-menu); }
+[class*="bg-[var(--ads-background-highlight-red)]"]     { background-color: var(--ads-background-highlight-red); }
+[class*="bg-[var(--ads-background-highlight-blue)]"]    { background-color: var(--ads-background-highlight-blue); }
+[class*="bg-[var(--ads-background-highlight-green)]"]   { background-color: var(--ads-background-highlight-green); }
+[class*="bg-[var(--ads-background-highlight-orange)]"]  { background-color: var(--ads-background-highlight-orange); }
+[class*="bg-[var(--ads-background-highlight-purple)]"]  { background-color: var(--ads-background-highlight-purple); }
+[class*="bg-[var(--ads-background-highlight-magenta)]"] { background-color: var(--ads-background-highlight-magenta); }
+[class*="hover:bg-[var(--ads-background-subtle-hover)]"]:hover  { background-color: var(--ads-background-subtle-hover); }
+[class*="hover:bg-[var(--ads-background-subtle-active)]"]:hover { background-color: var(--ads-background-subtle-active); }
+
+/* ============================================================
+   7. ELEMENT DEFAULTS
+   ============================================================ */
+html, body {
+  font-family: var(--ads-font-sans);
+  color: var(--ads-text-primary);
+  background: var(--ads-bg-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--ads-duration-base) var(--ads-ease-standard),
+              color var(--ads-duration-base) var(--ads-ease-standard);
+}
+
+/* Legacy heading/body utility classes — kept for compatibility; values
+   now resolve to the v2.0 type ramp ($tp-heading-01..05 / $tp-body-01..02). */
+.ads-h1 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-05-size); line-height: var(--tp-heading-05-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-h2 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-03-size); line-height: var(--tp-heading-03-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-h3 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-02-size); line-height: var(--tp-heading-02-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-h4 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-01-size); line-height: var(--tp-heading-01-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-body { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-body-01-size); line-height: var(--tp-body-01-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-caption { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-label-01-size); line-height: var(--tp-label-01-lh); color: var(--ads-text-secondary); }
+.ads-display { font-family: var(--ads-font-sans); font-weight: 300; font-size: var(--tp-display-regular-02-size); line-height: var(--tp-display-regular-02-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-button-label { font-family: var(--ads-font-sans); font-size: 14px; line-height: 18px; font-weight: 400; text-align: center; }
+.ads-field-label { font-family: var(--ads-font-sans); font-size: var(--tp-label-01-size); line-height: var(--tp-label-01-lh); color: var(--ads-text-secondary); }
+.ads-helper { font-family: var(--ads-font-sans); font-size: var(--tp-label-01-size); line-height: var(--tp-label-01-lh); color: var(--ads-text-secondary); }
+/* Link — v2.0: Roboto 400, underline by default; uses text-link / text-link-hovered. */
+.ads-link { color: var(--ads-text-link); text-decoration: underline; transition: color var(--ads-duration-fast) var(--ads-ease-standard); }
+.ads-link:hover { color: var(--ads-text-link-hovered); }
+.ads-link:active { color: var(--ads-text-link-hovered); }
+
+/* ============================================================
+   v2.0 Typography utility classes ($tp-*)
+   Headings: Roboto 500 Medium | Body / Label / Link: Roboto 400
+   Code: Roboto Mono 400 | Display Regular: 400 (01), 300 (02–05)
+   Display Medium: 500
+   ============================================================ */
+.ads-tp-heading-01 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-01-size); line-height: var(--tp-heading-01-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-heading-02 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-02-size); line-height: var(--tp-heading-02-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-heading-03 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-03-size); line-height: var(--tp-heading-03-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-heading-04 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-04-size); line-height: var(--tp-heading-04-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-heading-05 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-heading-05-size); line-height: var(--tp-heading-05-lh); color: var(--ads-text-primary); margin: 0; }
+
+.ads-tp-body-01 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-body-01-size); line-height: var(--tp-body-01-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-body-02 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-body-02-size); line-height: var(--tp-body-02-lh); color: var(--ads-text-primary); margin: 0; }
+
+.ads-tp-label-01 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-label-01-size); line-height: var(--tp-label-01-lh); color: var(--ads-text-secondary); margin: 0; }
+
+.ads-tp-link-01 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-link-01-size); line-height: var(--tp-link-01-lh); color: var(--ads-text-link); text-decoration: underline; }
+.ads-tp-link-02 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-link-02-size); line-height: var(--tp-link-02-lh); color: var(--ads-text-link); text-decoration: underline; }
+.ads-tp-link-03 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-link-03-size); line-height: var(--tp-link-03-lh); color: var(--ads-text-link); text-decoration: underline; }
+.ads-tp-link-01:hover, .ads-tp-link-02:hover, .ads-tp-link-03:hover { color: var(--ads-text-link-hovered); }
+
+.ads-tp-code-01 { font-family: var(--ads-font-mono); font-weight: 400; font-size: var(--tp-code-01-size); line-height: var(--tp-code-01-lh); color: var(--ads-text-primary); }
+.ads-tp-code-02 { font-family: var(--ads-font-mono); font-weight: 400; font-size: var(--tp-code-02-size); line-height: var(--tp-code-02-lh); color: var(--ads-text-primary); }
+
+.ads-tp-display-regular-01 { font-family: var(--ads-font-sans); font-weight: 400; font-size: var(--tp-display-regular-01-size); line-height: var(--tp-display-regular-01-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-regular-02 { font-family: var(--ads-font-sans); font-weight: 300; font-size: var(--tp-display-regular-02-size); line-height: var(--tp-display-regular-02-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-regular-03 { font-family: var(--ads-font-sans); font-weight: 300; font-size: var(--tp-display-regular-03-size); line-height: var(--tp-display-regular-03-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-regular-04 { font-family: var(--ads-font-sans); font-weight: 300; font-size: var(--tp-display-regular-04-size); line-height: var(--tp-display-regular-04-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-regular-05 { font-family: var(--ads-font-sans); font-weight: 300; font-size: var(--tp-display-regular-05-size); line-height: var(--tp-display-regular-05-lh); color: var(--ads-text-primary); margin: 0; }
+
+.ads-tp-display-medium-01 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-display-medium-01-size); line-height: var(--tp-display-medium-01-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-medium-02 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-display-medium-02-size); line-height: var(--tp-display-medium-02-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-medium-03 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-display-medium-03-size); line-height: var(--tp-display-medium-03-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-medium-04 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-display-medium-04-size); line-height: var(--tp-display-medium-04-lh); color: var(--ads-text-primary); margin: 0; }
+.ads-tp-display-medium-05 { font-family: var(--ads-font-sans); font-weight: 500; font-size: var(--tp-display-medium-05-size); line-height: var(--tp-display-medium-05-lh); color: var(--ads-text-primary); margin: 0; }
+
+.ads-focusable:focus-visible {
+  outline: 1px solid var(--ads-focus-ring);
+  outline-offset: 1px;
+  box-shadow: inset 0 0 0 1px var(--ads-bg-surface);
+}
+
+/* ============================================================
+   8. ADS COMPONENT STYLES (ported from align-ds-react components.css)
+   ============================================================ */
+
+/* ---------- Buttons ----------
+   States, locked to ADS Figma "06. Web components 0.9.0":
+     - enabled  : default colors per variant
+     - hovered  : :hover (skipped while disabled / aria-pressed-disabled)
+     - selected : [aria-pressed="true"] — toggle / pressed-by-attribute
+     - pressed  : :active                — mouse/keyboard down
+     - focused  : :focus-visible         — keyboard focus only (no click ring)
+     - disabled : :disabled or .disabled — wins over every other state
+   The doubled focus ring (1px outer blue + 1px white gap, README spec) is
+   applied on the .btn root via outline + inset box-shadow.
+*/
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--ads-size-btn-md-radius);
+  cursor: pointer;
+  font-family: var(--ads-font-sans);
+  font-size: var(--ads-size-font-btn);
+  font-weight: 400;
+  line-height: var(--ads-size-lh-btn);
+  padding: 0 var(--ads-size-btn-md-px);
+  white-space: nowrap;
+  transition:
+    background-color var(--ads-duration-base) var(--ads-ease-standard),
+    color var(--ads-duration-base) var(--ads-ease-standard),
+    border-color var(--ads-duration-base) var(--ads-ease-standard),
+    box-shadow var(--ads-duration-fast) var(--ads-ease-standard);
+}
+.btn-md { height: var(--ads-size-btn-md-h); }
+.btn-sm { height: var(--ads-size-btn-sm-h); padding: 0 var(--ads-size-btn-sm-px); border-radius: var(--ads-size-btn-sm-radius); }
+.btn-full { width: 100%; }
+
+/* Primary — Figma "Variation=01 Primary, Size=01 Large, Content=01 Text only".
+   Variant tokens come from --ads-btn-primary-bg-* (Figma component set 204:1013). */
+.btn-primary               { background: var(--ads-btn-primary-bg); color: #fff; border-color: transparent; }
+.btn-primary:hover                                                 { background: var(--ads-btn-primary-bg-hover); }
+.btn-primary[aria-pressed="true"],
+.btn-primary:active                                                { background: var(--ads-btn-primary-bg-pressed); }
+
+/* Secondary — Figma "Variation=02 Secondary". Transparent fill, alpha-on-black
+   border that darkens through enabled → hovered → pressed. */
+.btn-secondary             { background: transparent; color: var(--ads-text-primary); border-color: var(--ads-btn-secondary-border); }
+.btn-secondary:hover                                               { background: transparent; border-color: var(--ads-btn-secondary-border-hover); }
+.btn-secondary[aria-pressed="true"],
+.btn-secondary:active                                              { background: transparent; border-color: var(--ads-btn-secondary-border-pressed); }
+
+/* Ghost — transparent, blue text, pale blue wash on hover */
+.btn-ghost                 { background: transparent; color: var(--ads-blue-550); border-color: transparent; }
+/* Secondary-ghost hover/pressed use the v2.0 neutral subtle hover/active layers,
+   not a blue tint — matches the Figma 06.-Web-components spec. */
+.btn-ghost:hover                                                   { background: var(--ads-background-subtle-hover); }
+.btn-ghost[aria-pressed="true"],
+.btn-ghost:active                                                  { background: var(--ads-background-subtle-active); }
+
+/* Link — text-only, underline on hover */
+.btn-link                  { background: transparent; color: var(--ads-blue-550); padding: 0; height: auto; border: 0; }
+.btn-link:hover                                                    { color: var(--ads-blue-600); text-decoration: underline; }
+.btn-link[aria-pressed="true"],
+.btn-link:active                                                   { color: var(--ads-blue-700); }
+
+/* Danger — destructive */
+.btn-danger                { background: var(--ads-danger-500); color: #fff; border-color: transparent; }
+.btn-danger:hover                                                  { background: var(--ads-danger-600); }
+.btn-danger[aria-pressed="true"],
+.btn-danger:active                                                 { background: var(--ads-danger-700); }
+
+/* Focused — keyboard only. Doubled ring: 1px outer blue + 1px white gap */
+.btn:focus-visible {
+  outline: 1px solid var(--ads-focus-ring);
+  outline-offset: 1px;
+  box-shadow: inset 0 0 0 1px var(--ads-bg-surface);
+}
+
+/* Disabled — wins over every other state.
+   Per Figma:
+     - Primary disabled  : fill rgba(0,0,0,0.045), label rgba(0,0,0,0.225), no border
+     - Secondary disabled: no fill, border rgba(0,0,0,0.085), label rgba(0,0,0,0.225)
+     - Ghost / Link      : transparent bg, label rgba(0,0,0,0.225) (no border)
+     - Danger disabled   : same as primary disabled (alpha fill, alpha label) */
+.btn:disabled, .btn.disabled {
+  cursor: not-allowed;
+  text-decoration: none;
+  color: var(--ads-text-disabled);
+}
+.btn-primary:disabled,   .btn-primary.disabled,
+.btn-danger:disabled,    .btn-danger.disabled {
+  background: var(--ads-btn-primary-bg-disabled);
+  color: var(--ads-text-disabled);
+  border-color: transparent;
+}
+.btn-secondary:disabled, .btn-secondary.disabled {
+  background: transparent;
+  color: var(--ads-text-disabled);
+  border-color: var(--ads-btn-secondary-border-disabled);
+}
+.btn-ghost:disabled, .btn-ghost.disabled,
+.btn-link:disabled,  .btn-link.disabled {
+  background: transparent;
+  color: var(--ads-text-disabled);
+  border-color: transparent;
+}
+/* Disabled buttons must not respond to hover/active/aria-pressed */
+.btn-primary:disabled:hover, .btn-primary.disabled:hover,
+.btn-primary:disabled:active, .btn-primary.disabled:active,
+.btn-primary:disabled[aria-pressed="true"], .btn-primary.disabled[aria-pressed="true"],
+.btn-danger:disabled:hover,  .btn-danger.disabled:hover,
+.btn-danger:disabled:active, .btn-danger.disabled:active,
+.btn-danger:disabled[aria-pressed="true"], .btn-danger.disabled[aria-pressed="true"] {
+  background: var(--ads-btn-primary-bg-disabled);
+  border-color: transparent;
+}
+.btn-secondary:disabled:hover, .btn-secondary.disabled:hover,
+.btn-secondary:disabled:active, .btn-secondary.disabled:active,
+.btn-secondary:disabled[aria-pressed="true"], .btn-secondary.disabled[aria-pressed="true"] {
+  background: transparent;
+  border-color: var(--ads-btn-secondary-border-disabled);
+}
+.btn-ghost:disabled:hover, .btn-ghost.disabled:hover,
+.btn-ghost:disabled:active, .btn-ghost.disabled:active,
+.btn-ghost:disabled[aria-pressed="true"], .btn-ghost.disabled[aria-pressed="true"],
+.btn-link:disabled:hover,  .btn-link.disabled:hover,
+.btn-link:disabled:active, .btn-link.disabled:active,
+.btn-link:disabled[aria-pressed="true"], .btn-link.disabled[aria-pressed="true"] {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: none;
+}
+.icon-btn { position: relative; width: var(--ads-size-btn-sm-h); height: var(--ads-size-btn-sm-h); padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; }
+.icon-btn .dot { position: absolute; top: 6px; right: 6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--ads-error-500); color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: 500; }
+.icon-btn-sm { background: transparent; border: 0; padding: 4px; border-radius: var(--ads-size-btn-sm-radius); cursor: pointer; display: inline-flex; }
+.icon-btn-sm:hover { background: var(--ads-bg-muted); }
+
+/* ---------- Fields ---------- */
+.field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.field-full { grid-column: 1 / -1; }
+.field-label { font-size: var(--ads-size-font-label); line-height: var(--ads-size-lh-label); color: var(--ads-text-label); }
+.field-label .req { color: var(--ads-error-500); margin-left: 2px; }
+/* Inputs / fields — Align DS v2.0
+   Default state: white surface (background-subtle-01) + subtle border (border-subtle).
+   Focus: keep white surface, swap subtle border for focus ring (border-focus).
+   Error: white surface + error border.
+   Previously the default was a gray fill (background-subtle-02); flipped to white
+   to match the DS spec and DatePicker / Select treatments. */
+.input-wrap { position: relative; display: flex; align-items: center; height: var(--ads-size-field-h); background: var(--ads-background-subtle-01); border: 1px solid var(--ads-border-subtle); border-radius: var(--ads-size-field-radius); transition: border-color var(--ads-duration-fast), box-shadow var(--ads-duration-fast); }
+.input-wrap textarea, .input-wrap:has(textarea) { height: auto; align-items: flex-start; }
+.input-wrap.has-icon .input-icon { display: inline-flex; padding-left: 12px; }
+.input-wrap input, .input-wrap textarea { flex: 1; height: 100%; border: 0; background: transparent; font-family: var(--ads-font-sans); font-size: var(--ads-size-field-font); line-height: var(--ads-size-field-lh); color: var(--ads-text-primary); padding: 0 var(--ads-size-field-px); outline: none; resize: vertical; }
+.input-wrap textarea { padding: 12px var(--ads-size-field-px); min-height: 96px; }
+.input-wrap input::placeholder, .input-wrap textarea::placeholder { color: var(--ads-text-placeholder); }
+.input-wrap:hover { border-color: var(--ads-border-subtle-hover); }
+.input-wrap:focus-within { border-color: var(--ads-border-focus); box-shadow: 0 0 0 1px var(--ads-border-focus); }
+.input-wrap.error { border-color: var(--ads-border-error); box-shadow: 0 0 0 1px var(--ads-border-error); }
+.field-helper { font-size: var(--ads-size-font-label); line-height: var(--ads-size-lh-label); color: var(--ads-text-label); }
+.field-helper.error { color: var(--ads-error-500); }
+.select { display: flex; align-items: center; justify-content: space-between; height: var(--ads-size-field-h); padding: 0 var(--ads-size-field-px); background: var(--ads-background-subtle-01); border: 1px solid var(--ads-border-subtle); border-radius: var(--ads-size-field-radius); font-size: var(--ads-size-font-body); cursor: pointer; transition: border-color var(--ads-duration-fast); }
+.select:hover { border-color: var(--ads-border-subtle-hover); }
+
+/* ---------- Checkbox / Radio / Toggle ---------- */
+.check, .radio, .toggle { display: inline-flex; align-items: center; gap: var(--ads-size-control-gap); font-size: var(--ads-size-font-body); line-height: var(--ads-size-lh-body); cursor: pointer; }
+/* Checkbox — SecondaryButton parity (border-only treatment).
+   Unchecked: transparent fill + subtle accent border.
+   Hover (via parent label or .ads-checkbox-row:hover): border darkens.
+   Checked / indeterminate: primary fill + primary border, white tick. */
+.cbx { width: var(--ads-size-cbx); height: var(--ads-size-cbx); border-radius: var(--ads-size-cbx-radius); border: 1.5px solid var(--ads-btn-secondary-border); background: transparent; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 var(--ads-size-cbx); transition: border-color var(--ads-duration-fast) var(--ads-ease-standard); }
+.cbx:hover { border-color: var(--ads-btn-secondary-border-hover); }
+*:hover > .cbx, button:hover .cbx { border-color: var(--ads-btn-secondary-border-hover); }
+.cbx.on { background: var(--ads-blue-550); border-color: var(--ads-blue-550); }
+.cbx.ind { background: var(--ads-blue-550); border-color: var(--ads-blue-550); position: relative; }
+.cbx .ind-bar { width: 10px; height: 2px; background: #fff; border-radius: 1px; }
+.rad { width: var(--ads-size-rad); height: var(--ads-size-rad); border-radius: 50%; border: 1.5px solid var(--ads-text-primary); background: var(--ads-bg-surface); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 var(--ads-size-rad); }
+.rad.on { border-color: var(--ads-blue-550); }
+.rad.on::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--ads-blue-550); }
+.tg { width: var(--ads-size-toggle-w); height: var(--ads-size-toggle-h); border-radius: var(--ads-size-toggle-h); background: var(--ds-toggle-off-bg); position: relative; transition: background var(--ads-duration-base) var(--ads-ease-standard); flex: 0 0 var(--ads-size-toggle-w); cursor: pointer; }
+.toggle:hover .tg:not(.on) { background: var(--ds-toggle-off-hover); }
+.toggle:active .tg:not(.on) { background: var(--ds-toggle-off-active); }
+.toggle:hover .tg.on { background: var(--ds-toggle-on-hover); }
+.toggle:active .tg.on { background: var(--ds-toggle-on-active); }
+.tg::after { content: ''; position: absolute; left: 2px; top: 2px; width: var(--ads-size-toggle-thumb); height: var(--ads-size-toggle-thumb); border-radius: 50%; background: var(--ads-bg-surface); transition: left var(--ads-duration-base) var(--ads-ease-standard); box-shadow: var(--ads-shadow-sm); }
+.tg.on { background: var(--ads-blue-500); }
+.tg.on::after { left: calc(var(--ads-size-toggle-w) - var(--ads-size-toggle-thumb) - 2px); }
+.check-lbl { font-size: var(--ads-size-font-body); line-height: var(--ads-size-lh-body); color: var(--ads-text-primary); }
+
+/* ---------- Tags ---------- */
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: var(--ads-size-tag-font); line-height: var(--ads-size-tag-lh); padding: var(--ads-size-tag-py) var(--ads-size-tag-px); border-radius: var(--ads-size-tag-radius); border: 1px solid; white-space: nowrap; }
+.tag-blue   { background: var(--ads-tag-blue-bg);   border-color: var(--ads-tag-blue-br);   color: var(--ads-tag-blue-fg); }
+.tag-green  { background: var(--ads-tag-green-bg);  border-color: var(--ads-tag-green-br);  color: var(--ads-tag-green-fg); }
+.tag-red    { background: var(--ads-tag-red-bg);    border-color: var(--ads-tag-red-br);    color: var(--ads-tag-red-fg); }
+.tag-orange { background: var(--ads-tag-orange-bg); border-color: var(--ads-tag-orange-br); color: var(--ads-tag-orange-fg); }
+.tag-purple { background: var(--ads-tag-purple-bg); border-color: var(--ads-tag-purple-br); color: var(--ads-tag-purple-fg); }
+.tag-magenta{ background: var(--ads-tag-magenta-bg);border-color: var(--ads-tag-magenta-br);color: var(--ads-tag-magenta-fg); }
+.tag-gray   { background: var(--ads-tag-gray-bg);   border-color: var(--ads-tag-gray-br);   color: var(--ads-tag-gray-fg); }
+.tag-x { background: transparent; border: 0; padding: 0 2px; cursor: pointer; display: inline-flex; color: inherit; }
+
+/* ---------- Avatar ---------- */
+.avatar { display: inline-flex; align-items: center; justify-content: center; font-weight: 500; color: var(--ads-avatar-fg); background: var(--ads-avatar-bg); border-radius: 50%; flex: 0 0 auto; }
+.avatar-xs { width: var(--ads-size-avatar-xs); height: var(--ads-size-avatar-xs); font-size: var(--ads-size-avatar-xs-font); }
+.avatar-sm { width: var(--ads-size-avatar-sm); height: var(--ads-size-avatar-sm); font-size: var(--ads-size-avatar-sm-font); }
+.avatar-md { width: var(--ads-size-avatar-md); height: var(--ads-size-avatar-md); font-size: var(--ads-size-avatar-md-font); }
+.avatar-lg { width: var(--ads-size-avatar-lg); height: var(--ads-size-avatar-lg); font-size: var(--ads-size-avatar-lg-font); }
+
+/* ---------- Card ---------- */
+.card { background: var(--ads-bg-surface); border-radius: var(--ads-size-card-radius); display: flex; flex-direction: column; }
+.card-head { padding: var(--ads-size-card-head-py) var(--ads-size-card-head-px); display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--ads-border-subtle); flex: 0 0 auto; }
+.card-head h3 { font-size: var(--ads-size-font-h3); font-weight: 500; line-height: var(--ads-size-lh-h3); margin: 0; white-space: nowrap; }
+.card-body { padding: var(--ads-size-card-body-pad); flex: 1 1 auto; }
+.card-body > p { margin: 0; }
+
+/* ---------- Tabs ---------- */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--ads-border-subtle); margin-bottom: 16px; }
+.tab { background: transparent; border: 0; padding: var(--ads-size-tab-py) var(--ads-size-tab-px); font-family: inherit; font-size: var(--ads-size-tab-font); line-height: var(--ads-size-lh-body); color: var(--ads-text-muted); cursor: pointer; position: relative; border-radius: 8px 8px 0 0; }
+.tab:hover { color: var(--ads-text-primary); }
+.tab.active { color: var(--ads-blue-600); font-weight: 500; }
+.tab.active::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--ads-blue-500); border-radius: 2px; }
+
+/* ---------- Accordion ---------- */
+.accordion { background: var(--ads-bg-surface); border-radius: var(--ads-size-acc-radius); }
+.acc-item { border-bottom: 1px solid var(--ads-border-subtle); }
+.acc-item:last-child { border-bottom: 0; }
+.acc-head { width: 100%; background: transparent; border: 0; padding: var(--ads-size-acc-head-py) var(--ads-size-acc-head-px); display: flex; align-items: center; justify-content: space-between; font: inherit; font-size: var(--ads-size-font-h3); font-weight: 500; color: var(--ads-text-primary); cursor: pointer; }
+.acc-head:hover { background: var(--ads-bg-muted); }
+.acc-chev { display: inline-flex; transition: transform var(--ads-duration-base) var(--ads-ease-standard); }
+.acc-chev.open { transform: rotate(180deg); }
+.acc-body { padding: 0 var(--ads-size-acc-body-px) var(--ads-size-acc-body-pb); color: var(--ads-text-muted); font-size: var(--ads-size-font-body); line-height: var(--ads-size-lh-body); }
+
+/* ---------- Progress ---------- */
+.progress { display: flex; flex-direction: column; gap: 6px; }
+.progress-lbl { font-size: 13px; color: var(--ads-text-primary); }
+.progress-track { height: 8px; border-radius: 8px; background: var(--ads-border-subtle); overflow: hidden; }
+.progress-track > i { display: block; height: 100%; background: var(--ads-blue-500); border-radius: 8px; transition: width var(--ads-duration-base) var(--ads-ease-standard); }
+.progress-track.tone-red > i { background: var(--ads-error-500); }
+.progress-track.tone-green > i { background: var(--ads-success-600); }
+.progress-track.tone-orange > i { background: var(--ads-warning-500); }
+.progress-hint { font-size: var(--ads-size-font-label); color: var(--ads-text-muted); }
+.progress-hint.tone-red { color: var(--ads-error-500); }
+
+/* ---------- Toast / Notification ---------- */
+.toast { position: relative; background: var(--ads-bg-surface); border-radius: var(--ads-size-toast-radius); box-shadow: var(--ads-shadow-md); padding: var(--ads-size-toast-pad) 40px var(--ads-size-toast-pad) 32px; font-size: var(--ads-size-font-body); line-height: var(--ads-size-lh-body); display: flex; gap: var(--ads-size-toast-gap); align-items: flex-start; min-width: 280px; }
+.toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: var(--ads-size-toast-radius) 0 0 var(--ads-size-toast-radius); }
+.toast-success::before { background: var(--ads-success-600); }
+.toast-error::before   { background: var(--ads-error-500); }
+.toast-warning::before { background: var(--ads-warning-500); }
+.toast-info::before    { background: var(--ads-info-500); }
+.toast-icon { flex: 0 0 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+.toast-success .toast-icon { background: var(--ads-success-600); }
+.toast-error   .toast-icon { background: var(--ads-error-500); }
+.toast-warning .toast-icon { background: var(--ads-warning-500); }
+.toast-info    .toast-icon { background: var(--ads-info-500); }
+.toast-title { font-weight: 500; }
+.toast-text { color: var(--ads-text-muted); }
+.toast-close { position: absolute; right: 8px; top: 8px; background: transparent; border: 0; padding: 4px; border-radius: var(--ads-size-btn-sm-radius); cursor: pointer; display: inline-flex; }
+.toast-close:hover { background: var(--ads-bg-muted); }
+
+/* ---------- Modal ---------- */
+.modal-root { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.modal-scrim { position: absolute; inset: 0; background: var(--ads-scrim); }
+.modal { position: relative; width: 480px; max-width: 100%; background: var(--ads-bg-surface); border-radius: var(--ads-size-modal-radius); box-shadow: var(--ads-shadow-lg); overflow: hidden; }
+.modal-head { padding: var(--ads-size-modal-pad) var(--ads-size-modal-pad) 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.modal-head h2 { font-size: 20px; font-weight: 500; line-height: 28px; margin: 0; }
+.modal-body { padding: 12px var(--ads-size-modal-pad) var(--ads-size-modal-pad); font-size: var(--ads-size-font-body); line-height: var(--ads-size-lh-body); color: var(--ads-text-muted); }
+.modal-foot { padding: 12px var(--ads-size-modal-pad); border-top: 1px solid var(--ads-border-subtle); display: flex; gap: 8px; justify-content: flex-end; }
+.modal-close { background: transparent; border: 0; padding: 6px; border-radius: var(--ads-size-btn-sm-radius); cursor: pointer; display: inline-flex; }
+.modal-close:hover { background: var(--ads-bg-muted); }
+
+/* ---------- Left rail / Topbar (Shell) ---------- */
+.left-rail { position: sticky; top: 0; height: 100vh; width: 240px; background: var(--ads-bg-surface); display: flex; flex-direction: column; padding: 20px 0; gap: 20px; transition: width var(--ads-duration-base) var(--ads-ease-standard); overflow: hidden; }
+.left-rail.collapsed { width: 64px; }
+.rail-logo { display: flex; align-items: center; justify-content: space-between; padding: 4px 20px 8px; min-height: 32px; color: var(--ads-text-primary); gap: 8px; }
+.left-rail.collapsed .rail-logo { padding: 4px 8px 8px; justify-content: center; flex-direction: column; gap: 8px; }
+.rail-logo svg { height: 22px; width: auto; display: block; color: var(--ads-text-primary); }
+.left-rail.collapsed .rail-logo svg { height: 20px; }
+.rail-collapse { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--ads-border-subtle); background: var(--ads-bg-surface); color: var(--ads-text-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 40px; padding: 0; transition: background var(--ads-duration-fast) var(--ads-ease-standard), color var(--ads-duration-fast) var(--ads-ease-standard); }
+.rail-collapse:hover { background: var(--ads-bg-muted); color: var(--ads-text-primary); }
+.rail-collapse:focus-visible { outline: 1px solid var(--ads-focus-ring); outline-offset: 1px; }
+.rail-nav { display: flex; flex-direction: column; gap: 0; padding: 0 0 12px; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.nav-item { display: flex; align-items: center; gap: var(--ads-size-nav-gap); width: calc(100% - 16px); margin: 2px 8px; height: var(--ads-size-nav-h); padding: 10px 12px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--ads-text-primary); cursor: pointer; font-family: inherit; font-size: var(--ads-size-nav-font); font-weight: 500; line-height: var(--ads-size-lh-body); text-align: left; transition: background var(--ads-duration-fast) var(--ads-ease-standard), color var(--ads-duration-fast) var(--ads-ease-standard), border-color var(--ads-duration-fast) var(--ads-ease-standard); }
+.nav-item:hover { background: color-mix(in srgb, currentColor 4.5%, transparent); }
+.nav-item:focus-visible { outline: none; border-color: var(--ads-focus-ring); }
+.nav-item.active { border-color: transparent; color: var(--ads-blue-550); background: color-mix(in srgb, var(--ads-blue-500) 8%, transparent); }
+.nav-item.active .nav-icon { color: var(--ads-blue-550); }
+.nav-item.collapsed { padding: 10px; justify-content: center; gap: 0; width: 40px; margin: 2px auto; }
+.left-rail.collapsed .nav-item { padding: 10px; justify-content: center; gap: 0; width: 40px; margin: 2px auto; }
+.nav-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; color: inherit; }
+.nav-icon svg { display: block; }
+.nav-label { font-size: var(--ads-size-nav-font); line-height: var(--ads-size-lh-body); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Grouped nav (LeftRail with `groups` prop) */
+.nav-group { display: flex; flex-direction: column; }
+.nav-group-head { display: flex; align-items: center; gap: 10px; width: calc(100% - 16px); margin: 4px 8px 2px; padding: 8px 12px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--ads-text-primary); font-family: inherit; font-size: var(--ads-size-nav-font); font-weight: 500; line-height: var(--ads-size-lh-body); text-align: left; cursor: pointer; transition: background var(--ads-duration-fast) var(--ads-ease-standard), border-color var(--ads-duration-fast) var(--ads-ease-standard); }
+.nav-group-head:hover { background: color-mix(in srgb, currentColor 4.5%, transparent); }
+.nav-group-head:focus-visible { outline: none; border-color: var(--ads-focus-ring); }
+.nav-group-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex: 0 0 18px; color: var(--ads-text-secondary); }
+.nav-group-icon svg { display: block; }
+.nav-group-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-group-chev { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 16px; color: var(--ads-text-tertiary); transform: rotate(-90deg); transition: transform var(--ads-duration-base) var(--ads-ease-standard); }
+.nav-group-chev.open { transform: rotate(0deg); }
+.nav-group-chev svg { display: block; }
+.nav-sub { display: flex; flex-direction: column; gap: 0; padding-bottom: 4px; }
+.left-rail.collapsed .nav-group-head { padding: 10px; justify-content: center; gap: 0; width: 40px; margin: 2px auto; }
+.left-rail.collapsed .nav-group-label,
+.left-rail.collapsed .nav-group-chev { display: none; }
+.nav-group-collapsed { display: flex; flex-direction: column; gap: 0; }
+
+.topbar { height: var(--ads-size-topbar-h); background: var(--ads-bg-surface); border-bottom: 1px solid var(--ads-border-subtle); display: flex; align-items: center; padding: 0 var(--ads-size-topbar-px); gap: 16px; position: sticky; top: 0; z-index: 10; }
+.topbar-search { flex: 1 1 320px; min-width: 200px; max-width: 520px; display: flex; align-items: center; gap: 8px; height: var(--ads-size-search-h); background: var(--ads-background-subtle-01); border: 1px solid var(--ads-border-subtle); border-radius: var(--ads-size-search-radius); padding: 0 var(--ads-size-search-px); }
+.topbar-search .ti { display: inline-flex; }
+.topbar-search input { flex: 1; border: 0; background: transparent; font-family: inherit; font-size: var(--ads-size-font-body); line-height: var(--ads-size-lh-body); color: var(--ads-text-primary); outline: none; }
+.topbar-search input::placeholder { color: var(--ads-text-placeholder); }
+.topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+
+/* ─── Thin scrollbars — global app-wide ───────────────────────────────────
+   Default OS scrollbars are 15–17px wide which feels heavy in dense UIs.
+   We override to a 6px track on WebKit and `thin` for Firefox.
+   Auto-hide thumb (subtle when idle, darker on hover). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ads-border-subtle) transparent;
+}
+*::-webkit-scrollbar               { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track         { background: transparent; }
+*::-webkit-scrollbar-thumb         { background: var(--ads-border-subtle); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover   { background: var(--ads-border-accent); }
+*::-webkit-scrollbar-corner        { background: transparent; }

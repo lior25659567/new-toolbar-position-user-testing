@@ -106,8 +106,8 @@ function Tooth() {
       <div className="absolute inset-[0_-0.16%_0_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 29.0188 31.2541">
           <g id="Tooth">
-            <path d={svgPaths.p7722180} fill="var(--fill-0, white)" id="Vector 1" stroke="var(--stroke-0, #8F8F8F)" />
-            <path clipRule="evenodd" d={svgPaths.pcf17a40} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 7" />
+            <path d={svgPaths.p7722180} fill="var(--fill-0, white)" id="Vector 1" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+            <path clipRule="evenodd" d={svgPaths.pcf17a40} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 7" />
           </g>
         </svg>
       </div>
@@ -120,8 +120,8 @@ function Tooth1() {
     <div className="relative size-full" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 33">
         <g id="Tooth">
-          <path clipRule="evenodd" d={svgPaths.p1a04c200} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 16" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p2abbb180} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 16" />
+          <path clipRule="evenodd" d={svgPaths.p1a04c200} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 16" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p2abbb180} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 16" />
         </g>
       </svg>
     </div>
@@ -134,8 +134,8 @@ function Tooth2() {
       <div className="absolute inset-[0_0_-0.27%_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32.7837 35.1614">
           <g id="Tooth">
-            <path clipRule="evenodd" d={svgPaths.p34874e70} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 15" stroke="var(--stroke-0, #8F8F8F)" />
-            <path clipRule="evenodd" d={svgPaths.p15218d00} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 15" />
+            <path clipRule="evenodd" d={svgPaths.p34874e70} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 15" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+            <path clipRule="evenodd" d={svgPaths.p15218d00} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 15" />
           </g>
         </svg>
       </div>
@@ -149,8 +149,8 @@ function Tooth3() {
       <div className="absolute inset-[0_0_-0.22%_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 35.8333 38.9635">
           <g id="Tooth">
-            <path clipRule="evenodd" d={svgPaths.p20dd4c00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 14" stroke="var(--stroke-0, #8F8F8F)" />
-            <path clipRule="evenodd" d={svgPaths.peb23980} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 14" />
+            <path clipRule="evenodd" d={svgPaths.p20dd4c00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 14" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+            <path clipRule="evenodd" d={svgPaths.peb23980} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 14" />
           </g>
         </svg>
       </div>
@@ -163,8 +163,8 @@ function Tooth4() {
     <div className="absolute inset-[4.51%_62.41%_78.69%_25.53%]" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 25.922 31.2541">
         <g id="Tooth">
-          <path clipRule="evenodd" d={svgPaths.pb4cf6f0} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 7" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p218b9580} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 7" />
+          <path clipRule="evenodd" d={svgPaths.pb4cf6f0} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 7" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p218b9580} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 7" />
         </g>
       </svg>
     </div>
@@ -176,8 +176,8 @@ function Tooth5() {
     <div className="absolute inset-[13.11%_68.09%_70.49%_18.79%]" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28.2092 30.4918">
         <g id="Tooth">
-          <path clipRule="evenodd" d={svgPaths.p35f99e80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 6" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p1ae4f900} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 6" />
+          <path clipRule="evenodd" d={svgPaths.p35f99e80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 6" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p1ae4f900} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 6" />
         </g>
       </svg>
     </div>
@@ -189,8 +189,8 @@ function Tooth6() {
     <div className="absolute inset-[23.77%_73.05%_61.89%_14.18%]" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 27.4468 26.6803">
         <g id="Tooth">
-          <path clipRule="evenodd" d={svgPaths.p32966e00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 5" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p29204b00} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 5" />
+          <path clipRule="evenodd" d={svgPaths.p32966e00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 5" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p29204b00} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 5" />
         </g>
       </svg>
     </div>
@@ -202,8 +202,8 @@ function Tooth7() {
     <div className="absolute inset-[35.25%_76.24%_51.23%_10.64%]" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28.2092 25.1557">
         <g id="Tooth">
-          <path clipRule="evenodd" d={svgPaths.p1b7f0e80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 4" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p39f40980} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 4" />
+          <path clipRule="evenodd" d={svgPaths.p1b7f0e80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 4" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p39f40980} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 4" />
         </g>
       </svg>
     </div>
@@ -215,8 +215,8 @@ function Tooth8() {
     <div className="relative size-full" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 29.734 31.2541">
         <g id="Tooth">
-          <path d={svgPaths.p7ff480} fill="var(--fill-0, white)" id="Vector 1" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p30f39700} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 7" />
+          <path d={svgPaths.p7ff480} fill="var(--fill-0, white)" id="Vector 1" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p30f39700} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 7" />
         </g>
       </svg>
     </div>
@@ -244,8 +244,8 @@ function Tooth10() {
       <div className="absolute inset-[0_0_-0.27%_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32.7837 35.1614">
           <g id="Tooth">
-            <path clipRule="evenodd" d={svgPaths.p36cc0d00} fill="var(--fill-0, #8ADAFF)" fillRule="evenodd" id="Border 15" stroke="var(--stroke-0, #0080B2)" />
-            <path clipRule="evenodd" d={svgPaths.p16460200} fill="var(--fill-0, #0080B2)" fillRule="evenodd" id="Fill 15" />
+            <path clipRule="evenodd" d={svgPaths.p36cc0d00} fill="var(--fill-0, var(--ads-background-highlight-blue))" fillRule="evenodd" id="Border 15" stroke="var(--stroke-0, var(--ads-background-interactive-active))" />
+            <path clipRule="evenodd" d={svgPaths.p16460200} fill="var(--fill-0, var(--ads-background-interactive-active))" fillRule="evenodd" id="Fill 15" />
           </g>
         </svg>
       </div>
@@ -273,8 +273,8 @@ function Tooth12() {
     <div className="relative size-full" data-name="Tooth">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 25.922 31.2541">
         <g id="Tooth">
-          <path clipRule="evenodd" d={svgPaths.p2eee880} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 7" stroke="var(--stroke-0, #8F8F8F)" />
-          <path clipRule="evenodd" d={svgPaths.p18314d80} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 7" />
+          <path clipRule="evenodd" d={svgPaths.p2eee880} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 7" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+          <path clipRule="evenodd" d={svgPaths.p18314d80} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 7" />
         </g>
       </svg>
     </div>
@@ -287,8 +287,8 @@ function Tooth13() {
       <div className="absolute inset-[0_-0.08%_0_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28.2327 30.4918">
           <g id="Tooth">
-            <path clipRule="evenodd" d={svgPaths.p336ece00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 6" stroke="var(--stroke-0, #8F8F8F)" />
-            <path clipRule="evenodd" d={svgPaths.p5bcff00} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 6" />
+            <path clipRule="evenodd" d={svgPaths.p336ece00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 6" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
+            <path clipRule="evenodd" d={svgPaths.p5bcff00} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 6" />
           </g>
         </svg>
       </div>
@@ -302,8 +302,8 @@ function Tooth14() {
       <div className="absolute inset-[0_-0.33%_0_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 27.5387 26.6803">
           <g id="Tooth">
-            <path clipRule="evenodd" d={svgPaths.p3eb0a700} fill="var(--fill-0, #8ADAFF)" fillRule="evenodd" id="Border 5" stroke="var(--stroke-0, #0080B2)" />
-            <path clipRule="evenodd" d={svgPaths.p1f95c770} fill="var(--fill-0, #0080B2)" fillRule="evenodd" id="Fill 5" />
+            <path clipRule="evenodd" d={svgPaths.p3eb0a700} fill="var(--fill-0, var(--ads-background-highlight-blue))" fillRule="evenodd" id="Border 5" stroke="var(--stroke-0, var(--ads-background-interactive-active))" />
+            <path clipRule="evenodd" d={svgPaths.p1f95c770} fill="var(--fill-0, var(--ads-background-interactive-active))" fillRule="evenodd" id="Fill 5" />
           </g>
         </svg>
       </div>
@@ -317,8 +317,8 @@ function Tooth15() {
       <div className="absolute inset-[0_-0.41%_0_0]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28.3244 25.1557">
           <g id="Tooth">
-            <path clipRule="evenodd" d={svgPaths.p1f7569f0} fill="var(--fill-0, #8ADAFF)" fillRule="evenodd" id="Border 4" stroke="var(--stroke-0, #0080B2)" />
-            <path clipRule="evenodd" d={svgPaths.p2475a00} fill="var(--fill-0, #0080B2)" fillRule="evenodd" id="Fill 4" />
+            <path clipRule="evenodd" d={svgPaths.p1f7569f0} fill="var(--fill-0, var(--ads-background-highlight-blue))" fillRule="evenodd" id="Border 4" stroke="var(--stroke-0, var(--ads-background-interactive-active))" />
+            <path clipRule="evenodd" d={svgPaths.p2475a00} fill="var(--fill-0, var(--ads-background-interactive-active))" fillRule="evenodd" id="Fill 4" />
           </g>
         </svg>
       </div>
@@ -375,7 +375,7 @@ function Container3() {
 
 function Bite() {
   return (
-    <div className="absolute bg-[#fff0f3] border border-[#8e8e8e] border-solid inset-[77.42%_33.95%_-15.05%_35.81%] rounded-[18px]" data-name="Bite">
+    <div className="absolute bg-[var(--ads-background-highlight-red)] border border-[#8e8e8e] border-solid inset-[77.42%_33.95%_-15.05%_35.81%] rounded-[18px]" data-name="Bite">
       <Container3 />
     </div>
   );
@@ -392,7 +392,7 @@ function UpperArch() {
       <div className="absolute inset-[7.79%_7.89%_0_7.8%]" data-name="Subtract">
         <div className="absolute inset-[-0.29%_-0.28%]" style={{ "--fill-0": "rgba(255, 240, 243, 1)", "--stroke-0": "rgba(143, 143, 143, 1)" } as React.CSSProperties}>
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 182.273 172.516">
-            <path d={svgPaths.p19759800} fill="var(--fill-0, #FFF0F3)" id="Subtract" stroke="var(--stroke-0, #8F8F8F)" />
+            <path d={svgPaths.p19759800} fill="var(--fill-0, var(--ads-background-highlight-red))" id="Subtract" stroke="var(--stroke-0, var(--ads-text-tertiary))" />
           </svg>
         </div>
       </div>
@@ -476,72 +476,72 @@ function LowerArch() {
                 <rect fill="white" height="183" width="217" y="5.96046e-08" />
                 <path clipRule="evenodd" d={svgPaths.p20f5ac00} fillRule="evenodd" />
               </mask>
-              <path clipRule="evenodd" d={svgPaths.p20f5ac00} fillRule="evenodd" mask="url(#path-1-outside-1_3_13910)" stroke="var(--stroke-0, #009ACE)" strokeMiterlimit="10" strokeWidth="6" />
+              <path clipRule="evenodd" d={svgPaths.p20f5ac00} fillRule="evenodd" mask="url(#path-1-outside-1_3_13910)" stroke="var(--stroke-0, var(--ads-background-interactive))" strokeMiterlimit="10" strokeWidth="6" />
             </g>
-            <path d={svgPaths.p2e657d00} fill="var(--fill-0, #FFF0F3)" id="Gingiva" />
+            <path d={svgPaths.p2e657d00} fill="var(--fill-0, var(--ads-background-highlight-red))" id="Gingiva" />
             <g id="Tooth">
-              <path clipRule="evenodd" d={svgPaths.p17b3d500} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 32" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p4ab8500} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 32" />
+              <path clipRule="evenodd" d={svgPaths.p17b3d500} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 32" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p4ab8500} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 32" />
             </g>
             <g id="Tooth_2">
-              <path clipRule="evenodd" d={svgPaths.p2d311440} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 32_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p1e656f80} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 32_2" />
+              <path clipRule="evenodd" d={svgPaths.p2d311440} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 32_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p1e656f80} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 32_2" />
             </g>
             <g id="Tooth_3">
-              <path clipRule="evenodd" d={svgPaths.p17fde600} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 31" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p3a8d9e80} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 19" />
+              <path clipRule="evenodd" d={svgPaths.p17fde600} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 31" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p3a8d9e80} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 19" />
             </g>
             <g id="Tooth_4">
-              <path clipRule="evenodd" d={svgPaths.p213e6c80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 31_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p1bbbd400} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 19_2" />
+              <path clipRule="evenodd" d={svgPaths.p213e6c80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 31_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p1bbbd400} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 19_2" />
             </g>
             <g id="Tooth_5">
-              <path clipRule="evenodd" d={svgPaths.p2f160f80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 30" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p2202c680} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 30" />
+              <path clipRule="evenodd" d={svgPaths.p2f160f80} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 30" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p2202c680} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 30" />
             </g>
             <g id="Tooth_6">
-              <path clipRule="evenodd" d={svgPaths.p2910a300} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 30_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p2fd92500} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 30_2" />
+              <path clipRule="evenodd" d={svgPaths.p2910a300} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 30_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p2fd92500} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 30_2" />
             </g>
             <g id="Tooth_7">
-              <path clipRule="evenodd" d={svgPaths.p1f594400} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 29" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p3e233540} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 29" />
+              <path clipRule="evenodd" d={svgPaths.p1f594400} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 29" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p3e233540} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 29" />
             </g>
             <g id="Tooth_8">
-              <path clipRule="evenodd" d={svgPaths.p3e21ea00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 29_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.pdf32080} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 29_2" />
+              <path clipRule="evenodd" d={svgPaths.p3e21ea00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 29_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.pdf32080} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 29_2" />
             </g>
             <g id="Tooth_9">
-              <path clipRule="evenodd" d={svgPaths.p3e61d280} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 28" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.pba2cb00} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 28" />
+              <path clipRule="evenodd" d={svgPaths.p3e61d280} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 28" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.pba2cb00} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 28" />
             </g>
             <g id="Tooth_10">
-              <path clipRule="evenodd" d={svgPaths.p36546800} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 28_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p936840} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 28_2" />
+              <path clipRule="evenodd" d={svgPaths.p36546800} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 28_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p936840} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 28_2" />
             </g>
             <g id="Tooth_11">
-              <path clipRule="evenodd" d={svgPaths.p1da87b00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 27" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.pbc55840} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 27" />
+              <path clipRule="evenodd" d={svgPaths.p1da87b00} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 27" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.pbc55840} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 27" />
             </g>
             <g id="Tooth_12">
-              <path clipRule="evenodd" d={svgPaths.p1e2e3700} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 27_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p37f32f00} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 27_2" />
+              <path clipRule="evenodd" d={svgPaths.p1e2e3700} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 27_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p37f32f00} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 27_2" />
             </g>
             <g id="Tooth_13">
-              <path clipRule="evenodd" d={svgPaths.pf52c580} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 26" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p3ba49700} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 26" />
+              <path clipRule="evenodd" d={svgPaths.pf52c580} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 26" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p3ba49700} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 26" />
             </g>
             <g id="Tooth_14">
-              <path clipRule="evenodd" d={svgPaths.p29ce0000} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 26_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p39eb4380} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 26_2" />
+              <path clipRule="evenodd" d={svgPaths.p29ce0000} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 26_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p39eb4380} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 26_2" />
             </g>
             <g id="Tooth_15">
-              <path clipRule="evenodd" d={svgPaths.p623e600} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 25" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p34222a80} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 25" />
+              <path clipRule="evenodd" d={svgPaths.p623e600} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 25" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p34222a80} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 25" />
             </g>
             <g id="Tooth_16">
-              <path clipRule="evenodd" d={svgPaths.p2a190b28} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 25_2" stroke="var(--stroke-0, #8F8F8F)" strokeWidth="0.744681" />
-              <path clipRule="evenodd" d={svgPaths.p2ee8500} fill="var(--fill-0, #8F8F8F)" fillRule="evenodd" id="Fill 25_2" />
+              <path clipRule="evenodd" d={svgPaths.p2a190b28} fill="var(--fill-0, white)" fillRule="evenodd" id="Border 25_2" stroke="var(--stroke-0, var(--ads-text-tertiary))" strokeWidth="0.744681" />
+              <path clipRule="evenodd" d={svgPaths.p2ee8500} fill="var(--fill-0, var(--ads-text-tertiary))" fillRule="evenodd" id="Fill 25_2" />
             </g>
           </g>
         </svg>

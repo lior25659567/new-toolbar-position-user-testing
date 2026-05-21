@@ -37,7 +37,9 @@ export function Stepper({ steps, activeStep, orientation = "horizontal", style }
                 display: "flex",
                 flexDirection: isVertical ? "row" : "column",
                 alignItems: "center",
-                gap: space[2],
+                // Very tight gap between the circle and the label — keeps
+                // the indicator visually compact in headers.
+                gap: 2,
                 flexShrink: 0,
               }}
             >

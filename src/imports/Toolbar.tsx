@@ -5,8 +5,8 @@ import { SecondaryButton } from "../design-system";
 
 // Monochrome Icon - Two overlapping squares
 function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
-  const fillColor = isActive ? "#008EC2" : "#5E646E";
-  const strokeColor = isActive ? "#008EC2" : "#5E646E";
+  const fillColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
+  const strokeColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Mono chomr new">
@@ -53,7 +53,7 @@ function AohsButton({ isActive, onClick, buttonIndex }: { isActive: boolean; onC
     <motion.div 
       className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
-        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'
       }}
       data-name="AOHS button"
       onClick={onClick}
@@ -85,7 +85,7 @@ function AohsButton({ isActive, onClick, buttonIndex }: { isActive: boolean; onC
         />
       )}
       <div className="relative flex items-center justify-center size-[60px]">
-        <MonoChomrNew isActive={isActive || isHovered} />
+        <MonoChomrNew isActive={isActive} />
       </div>
     </motion.div>
   );
@@ -98,9 +98,9 @@ function TrimArea1() {
       <div className="absolute bottom-0 left-0 right-0 top-[-2.65%]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 50 41">
           <g id="trim area">
-            <path d={svgPaths.p1f4faa00} fill="var(--fill-0, #FFD6D6)" id="Vector" />
-            <path d={svgPaths.p161588f0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, #3D3935)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.06414" />
-            <path d={svgPaths.p1031d180} fill="var(--fill-0, #008EC2)" id="Vector_3" stroke="var(--stroke-0, white)" strokeMiterlimit="10" strokeWidth="2.06414" />
+            <path d={svgPaths.p1f4faa00} fill="var(--fill-0, var(--ads-background-highlight-red))" id="Vector" />
+            <path d={svgPaths.p161588f0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, var(--ads-text-primary))" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.06414" />
+            <path d={svgPaths.p1031d180} fill="var(--fill-0, var(--ads-background-interactive-hover))" id="Vector_3" stroke="var(--stroke-0, white)" strokeMiterlimit="10" strokeWidth="2.06414" />
           </g>
         </svg>
       </div>
@@ -113,8 +113,8 @@ function Frame1() {
 }
 
 function FeedbackNew({ isActive = false }: { isActive?: boolean }) {
-  const strokeColor = isActive ? "#008EC2" : "#5E646E";
-  const fillColor = isActive ? "#008EC2" : "#5E646E";
+  const strokeColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
+  const fillColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Feedback new">
@@ -172,7 +172,7 @@ function AohsButton1({ isActive, onClick, buttonIndex }: { isActive: boolean; on
     <motion.div 
       className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
-        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'
       }}
       data-name="AOHS button"
       onClick={onClick}
@@ -204,7 +204,7 @@ function AohsButton1({ isActive, onClick, buttonIndex }: { isActive: boolean; on
         />
       )}
       <div className="relative flex items-center justify-center size-[60px]">
-        <FeedbackNew isActive={isActive || isHovered} />
+        <FeedbackNew isActive={isActive} />
       </div>
     </motion.div>
   );
@@ -230,11 +230,11 @@ function Frame2() {
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 44 33">
           <g id="Frame 1618872990">
             <g id="trim area">
-              <path d={svgPaths.p2b201d80} fill="var(--fill-0, #FFD6D6)" id="Vector" />
-              <path d={svgPaths.p16a0d0e0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, #3D3935)" strokeMiterlimit="10" strokeWidth="1.4" />
+              <path d={svgPaths.p2b201d80} fill="var(--fill-0, var(--ads-background-highlight-red))" id="Vector" />
+              <path d={svgPaths.p16a0d0e0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, var(--ads-text-primary))" strokeMiterlimit="10" strokeWidth="1.4" />
             </g>
             <g id="Shape">
-              <path d={svgPaths.pabd600} fill="var(--fill-0, #009ACE)" />
+              <path d={svgPaths.pabd600} fill="var(--fill-0, var(--ads-background-interactive))" />
               <path clipRule="evenodd" d={svgPaths.p21b85980} fill="white" fillRule="evenodd" />
               <path clipRule="evenodd" d={svgPaths.p1ba64c70} fill="white" fillRule="evenodd" />
               <path d={svgPaths.p34f3c300} stroke="var(--stroke-0, white)" strokeLinejoin="round" strokeWidth="0.8" />
@@ -256,7 +256,7 @@ function PrepQc() {
 }
 
 function PrepEditToTest({ isActive = false }: { isActive?: boolean }) {
-  const strokeColor = isActive ? "#008EC2" : "#5E646E";
+  const strokeColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Prep edit to test">
@@ -300,7 +300,7 @@ function AohsButton2({ isActive, onClick, buttonIndex }: { isActive: boolean; on
     <motion.div
       className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0 size-[60px] cursor-pointer overflow-hidden transition-colors duration-200"
       style={{
-        backgroundColor: isActive ? '#e0f2fe' : isHovered ? '#f5f5f5' : 'transparent'
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'
       }}
       data-name="AOHS button"
       onClick={onClick}
@@ -332,7 +332,7 @@ function AohsButton2({ isActive, onClick, buttonIndex }: { isActive: boolean; on
         />
       )}
       <div className="relative flex items-center justify-center size-[60px]">
-        <PrepEditToTest isActive={isActive || isHovered} />
+        <PrepEditToTest isActive={isActive} />
       </div>
     </motion.div>
   );
@@ -360,7 +360,7 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
       >
         <path 
           d="M6 9L12 15L18 9" 
-          stroke="#717182" 
+          stroke="var(--ads-text-secondary)" 
           strokeWidth="1" 
           strokeLinecap="round" 
           strokeLinejoin="round"
@@ -393,24 +393,24 @@ function ExpandedToolbar({
   microAnimations?: boolean;
 }) {
   return (
-    <div className="bg-white flex flex-col flex-1 gap-[8px] items-stretch p-[8px] relative rounded-[8px] font-['Roboto']">
+    <div className="bg-[var(--ads-background-subtle-01)] flex flex-col flex-1 gap-[8px] items-stretch p-[8px] relative rounded-[8px] font-['Roboto']">
       
       {/* Monochrome */}
       <div className="flex flex-row items-center justify-start gap-[8px] relative">
         <AohsButton isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} buttonIndex={0} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(0) ? '#008EC2' : '#000000' }}>Monochrome</p>
+        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(0) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Monochrome</p>
       </div>
 
       {/* Feedback */}
       <div className="flex flex-row items-center justify-start gap-[8px] relative">
         <AohsButton1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} buttonIndex={1} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(1) ? '#008EC2' : '#000000' }}>Scan assist</p>
+        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(1) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Scan assist</p>
       </div>
 
       {/* Prep Edit */}
       <div className="flex flex-row items-center justify-start gap-[8px] relative">
         <AohsButton2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} buttonIndex={2} />
-        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(2) ? '#008EC2' : '#000000' }}>Prep edit</p>
+        <p className="font-['Roboto'] font-normal whitespace-nowrap text-left text-[14px] leading-[16px]" style={{ color: activeButtons.has(2) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Prep edit</p>
       </div>
 
       {/* Collapse Button */}
@@ -422,7 +422,7 @@ function ExpandedToolbar({
 // Collapsed Toolbar - just icons stacked vertically
 function CollapsedToolbar({ activeButtons, onButtonClick }: { activeButtons: Set<number>; onButtonClick: (index: number) => void }) {
   return (
-    <div className="bg-white content-stretch flex flex-col gap-[8px] items-stretch p-[8px] relative w-[76px] rounded-[8px] font-['Roboto']">
+    <div className="bg-[var(--ads-background-subtle-01)] content-stretch flex flex-col gap-[8px] items-stretch p-[8px] relative w-[76px] rounded-[8px] font-['Roboto']">
       <AohsButton isActive={activeButtons.has(0)} onClick={() => onButtonClick(0)} buttonIndex={0} />
       <AohsButton1 isActive={activeButtons.has(1)} onClick={() => onButtonClick(1)} buttonIndex={1} />
       <AohsButton2 isActive={activeButtons.has(2)} onClick={() => onButtonClick(2)} buttonIndex={2} />

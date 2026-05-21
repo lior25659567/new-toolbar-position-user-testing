@@ -42,8 +42,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const applyTheme = useCallback((resolved: ResolvedTheme) => {
     const root = document.documentElement;
+    // Drive ADS via data-theme="align-light"/"align-dark"; keep .dark class
+    // around for any third-party utility classes that still rely on it.
     root.classList.toggle('dark', resolved === 'dark');
-    root.setAttribute('data-theme', resolved);
+    root.setAttribute('data-theme', resolved === 'dark' ? 'align-dark' : 'align-light');
     setResolvedTheme(resolved);
   }, []);
 
@@ -58,12 +60,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(next);
   }, [resolvedTheme, setTheme]);
 
-  // Apply on mount
   useEffect(() => {
     applyTheme(resolveTheme(theme));
   }, [theme, applyTheme]);
 
-  // Listen for system theme changes when theme === 'system'
   useEffect(() => {
     if (theme !== 'system') return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');

@@ -33,7 +33,7 @@ export default function LayoutSwitcher({
   };
 
   return (
-    <div className="inline-flex flex-col items-stretch bg-white rounded-[8px] shadow-lg border border-gray-200 shrink-0 w-fit">
+    <div className="inline-flex flex-col items-stretch bg-white rounded-[8px] border border-gray-200 shrink-0 w-fit" style={{ boxShadow: 'var(--ads-shadow-sm)' }}>
       {/* Tabs Navigation */}
       <div className="flex flex-row p-[4px] gap-[4px]" role="tablist">
         {layouts.map((layout) => {
@@ -64,7 +64,7 @@ export default function LayoutSwitcher({
               style={{
                 height: '36px',
                 borderRadius: '6px',
-                ...(isActive ? { backgroundColor: '#009ACE' } : {})
+                ...(isActive ? { backgroundColor: 'var(--ads-background-interactive)' } : {})
               }}
             >
               {layout.label}
@@ -95,7 +95,7 @@ export default function LayoutSwitcher({
             style={{
               height: '36px',
               borderRadius: '6px',
-              ...(combinedPanelMode ? { backgroundColor: '#009ACE' } : {})
+              ...(combinedPanelMode ? { backgroundColor: 'var(--ads-background-interactive)' } : {})
             }}
             aria-pressed={combinedPanelMode}
             aria-label="Toggle combined panel mode"

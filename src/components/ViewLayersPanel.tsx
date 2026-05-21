@@ -4,10 +4,14 @@ import type { ScanTab } from './ScanTabs';
 import { SecondaryButton } from '../design-system';
 
 type JawSelection = 'upper' | 'lower' | 'both';
+type Jaw = 'upper' | 'lower';
 
 interface LayerState {
-  visible: boolean;
-  opacity: number;
+  /** Per-arch visibility — each jaw's eye toggles independently. */
+  visibleUpper: boolean;
+  visibleLower: boolean;
+  opacityUpper: number;
+  opacityLower: number;
   selected: boolean;
 }
 
@@ -17,13 +21,23 @@ interface ViewLayersPanelProps {
   onVisibilityChange?: (layerVisibility: Record<string, boolean>) => void;
 }
 
+const makeInitialState = (): LayerState => ({
+  visibleUpper: true,
+  visibleLower: true,
+  opacityUpper: 100,
+  opacityLower: 100,
+  selected: false,
+});
+
+const isLayerVisible = (s: LayerState) => s.visibleUpper || s.visibleLower;
+
 export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilityChange }: ViewLayersPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [jawSelection, setJawSelection] = useState<JawSelection>('both');
   const [layerStates, setLayerStates] = useState<Record<string, LayerState>>(() => {
     const initial: Record<string, LayerState> = {};
     scanTabs.forEach((tab) => {
-      initial[tab.id] = { visible: true, opacity: 100, selected: false };
+      initial[tab.id] = makeInitialState();
     });
     return initial;
   });
@@ -32,44 +46,52 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
   // Sync layer states with scan tabs — add new, remove stale
   React.useEffect(() => {
     setLayerStates((prev) => {
-      const tabIds = new Set(scanTabs.map((t) => t.id));
       const next: Record<string, LayerState> = {};
-      // Keep existing states for current tabs
       scanTabs.forEach((tab) => {
-        next[tab.id] = prev[tab.id] || { visible: true, opacity: 100, selected: false };
+        next[tab.id] = prev[tab.id] || makeInitialState();
       });
       return next;
     });
   }, [scanTabs]);
 
-  const toggleVisibility = (id: string) => {
-    setLayerStates((prev) => {
-      const next = {
-        ...prev,
-        [id]: { ...prev[id], visible: !prev[id].visible },
-      };
-      return next;
-    });
+  const toggleJawVisibility = (id: string, jaw: Jaw) => {
+    setLayerStates((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        visibleUpper: jaw === 'upper' ? !prev[id].visibleUpper : prev[id].visibleUpper,
+        visibleLower: jaw === 'lower' ? !prev[id].visibleLower : prev[id].visibleLower,
+      },
+    }));
   };
 
-  // Report visibility changes to parent whenever layerStates change
+  // Report visibility changes to parent whenever layerStates change.
+  // Layer-level visible = either arch visible (preserves existing parent contract).
   const prevLayerStatesRef = React.useRef(layerStates);
   React.useEffect(() => {
     if (prevLayerStatesRef.current !== layerStates && onVisibilityChange) {
       const visMap: Record<string, boolean> = {};
-      // Only report for tabs that currently exist
       scanTabs.forEach((tab) => {
-        if (layerStates[tab.id]) visMap[tab.id] = layerStates[tab.id].visible;
+        if (layerStates[tab.id]) visMap[tab.id] = isLayerVisible(layerStates[tab.id]);
       });
       onVisibilityChange(visMap);
     }
     prevLayerStatesRef.current = layerStates;
   }, [layerStates, onVisibilityChange, scanTabs]);
 
-  const setOpacity = (id: string, value: number) => {
+  const setOpacity = (id: string, jaw: Jaw, value: number) => {
     setLayerStates((prev) => {
-      const next = { ...prev, [id]: { ...prev[id], opacity: value } };
-      // Find the selected/first visible layer's opacity to send to 3D model
+      const cur = prev[id];
+      const next = {
+        ...prev,
+        [id]: {
+          ...cur,
+          opacityUpper: jaw === 'upper' ? value : cur.opacityUpper,
+          opacityLower: jaw === 'lower' ? value : cur.opacityLower,
+        },
+      };
+      // For the parent 3D model, report a single global opacity. Use the just-changed
+      // value if this layer is the active one, so the user sees their drag on screen.
       const selectedId = Object.keys(next).find(k => next[k].selected) || Object.keys(next)[0];
       if (selectedId && id === selectedId) {
         onOpacityChange?.(value);
@@ -88,16 +110,23 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
     });
   };
 
+  // Bite layers (additional bites) are only relevant to the bite/both view —
+  // hide them when the panel is showing the upper or lower jaw on its own.
+  const visibleTabs =
+    jawSelection === 'both'
+      ? scanTabs
+      : scanTabs.filter((tab) => tab.layerType !== 'additional-bite');
+
   return (
     <div
       style={{
         width: '240px',
-        backgroundColor: '#FFFFFF',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)',
-        fontFamily: "'Roboto', system-ui, sans-serif",
+        backgroundColor: 'var(--ads-bg-surface)',
+        borderRadius: 'var(--ads-radius-sm)',
+        boxShadow: 'var(--ads-shadow-sm)',
+        fontFamily: 'var(--ads-font-sans)',
         overflow: 'hidden',
-        border: '1px solid rgba(0,0,0,0.06)',
+        border: '1px solid var(--ads-border-subtle)',
         transition: 'height 0.25s ease',
       }}
     >
@@ -108,7 +137,7 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
           alignItems: 'center',
           gap: '8px',
           padding: '6px',
-          borderBottom: isExpanded ? '1px solid #E5E7EB' : 'none',
+          borderBottom: isExpanded ? '1px solid var(--ads-border-subtle)' : 'none',
         }}
       >
         <JawButton
@@ -140,20 +169,20 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
               padding: '4px 0',
             }}
           >
-            {scanTabs.length === 0 ? (
+            {visibleTabs.length === 0 ? (
               <div
                 style={{
                   padding: '24px 16px',
                   textAlign: 'center',
                   fontSize: '13px',
-                  color: '#999999',
+                  color: 'var(--ads-text-muted)',
                 }}
               >
                 No scan layers added
               </div>
             ) : (
-              scanTabs.map((tab) => {
-                const state = layerStates[tab.id] || { visible: true, opacity: 100, selected: false };
+              visibleTabs.map((tab) => {
+                const state = layerStates[tab.id] || makeInitialState();
                 const isHovered = hoveredLayerId === tab.id;
 
                 return (
@@ -161,12 +190,13 @@ export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilit
                     key={tab.id}
                     tab={tab}
                     state={state}
+                    jawSelection={jawSelection}
                     isHovered={isHovered}
                     onMouseEnter={() => setHoveredLayerId(tab.id)}
                     onMouseLeave={() => setHoveredLayerId(null)}
                     onSelect={() => selectLayer(tab.id)}
-                    onToggleVisibility={() => toggleVisibility(tab.id)}
-                    onOpacityChange={(val) => setOpacity(tab.id, val)}
+                    onToggleJawVisibility={(jaw) => toggleJawVisibility(tab.id, jaw)}
+                    onOpacityChange={(jaw, val) => setOpacity(tab.id, jaw, val)}
                   />
                 );
               })
@@ -202,8 +232,8 @@ function PanelChevronIcon({ isExpanded }: { isExpanded: boolean }) {
       >
         <path
           d="M6 9L12 15L18 9"
-          stroke="#717182"
-          strokeWidth={1.5}
+          stroke="var(--ads-text-secondary)"
+          strokeWidth={1}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -216,8 +246,9 @@ function ExpandCollapseButton({ isExpanded, onClick }: { isExpanded: boolean; on
   return (
     <SecondaryButton
       size={36}
-      style={{ width: 36, padding: 0, minHeight: 36 }}
       onClick={onClick}
+      aria-label={isExpanded ? 'Collapse layers' : 'Expand layers'}
+      style={{ width: 36, height: 36, padding: 0, minWidth: 36 }}
     >
       <PanelChevronIcon isExpanded={isExpanded} />
     </SecondaryButton>
@@ -252,8 +283,12 @@ function JawButton({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: '8px',
-        backgroundColor: active ? '#E0F2FE' : hovered ? '#f5f5f5' : 'transparent',
+        borderRadius: 'var(--ads-radius-sm)',
+        backgroundColor: active
+          ? 'var(--ads-blue-50)'
+          : hovered
+          ? 'var(--ads-bg-muted)'
+          : 'transparent',
         cursor: 'pointer',
         flexShrink: 0,
       }}
@@ -264,7 +299,7 @@ function JawButton({
 }
 
 function JawIcon({ type, active }: { type: 'upper' | 'lower' | 'both'; active: boolean }) {
-  const color = active ? '#008EC2' : '#5E646E';
+  const color = active ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-secondary)';
   const sw = 1.5;
 
   if (type === 'upper') {
@@ -335,23 +370,25 @@ function JawIcon({ type, active }: { type: 'upper' | 'lower' | 'both'; active: b
 function LayerRow({
   tab,
   state,
+  jawSelection,
   isHovered,
   onMouseEnter,
   onMouseLeave,
   onSelect,
-  onToggleVisibility,
+  onToggleJawVisibility,
   onOpacityChange,
 }: {
   tab: ScanTab;
   state: LayerState;
+  jawSelection: JawSelection;
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onSelect: () => void;
-  onToggleVisibility: () => void;
-  onOpacityChange: (value: number) => void;
+  onToggleJawVisibility: (jaw: Jaw) => void;
+  onOpacityChange: (jaw: Jaw, value: number) => void;
 }) {
-  const isHidden = !state.visible;
+  const isHidden = !isLayerVisible(state);
 
   return (
     <div
@@ -364,90 +401,197 @@ function LayerRow({
     >
       <div
         style={{
-          borderRadius: '6px',
-          backgroundColor: state.selected ? '#F5F5F5' : isHovered ? '#FAFAFA' : 'transparent',
-          transition: 'all 0.12s ease',
-          padding: '8px 12px',
+          borderRadius: 'var(--ads-radius-md)',
+          // v2.0 layer-selected ladder: 4.25% black wash for selected, slight
+          // hover surface, transparent at rest. Plus a 2px brand-blue left
+          // accent stripe when selected, matching the unified card model.
+          backgroundColor: state.selected
+            ? 'var(--ads-background-layer-selected)'
+            : isHovered
+            ? 'var(--ads-background-subtle-hover)'
+            : 'transparent',
+          borderLeft: state.selected
+            ? '2px solid var(--ads-background-interactive)'
+            : '2px solid transparent',
+          transition: 'background-color var(--ads-duration-fast), border-color var(--ads-duration-fast)',
+          padding: '8px 4px',
         }}
       >
-        {/* Top row: name + eye icon */}
+        {/* Top row: layer name only — per-arch eye lives on each slider row below */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
             gap: '8px',
             cursor: 'pointer',
           }}
           onClick={onSelect}
         >
-          {/* Layer name */}
-          <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-            <span
-              style={{
-                fontSize: '13px',
-                lineHeight: '18px',
-                fontWeight: state.selected ? 600 : 400,
-                color: isHidden ? '#BBBBBB' : state.selected ? '#009ACE' : '#333333',
-                transition: 'color 0.15s ease',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {tab.label}
-            </span>
-          </div>
-
-          {/* Eye toggle */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleVisibility();
-            }}
+          <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '30px',
-              height: '30px',
-              borderRadius: '4px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              flexShrink: 0,
-              transition: 'background-color 0.12s ease',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.06)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+              fontSize: '13px',
+              lineHeight: '18px',
+              fontWeight: state.selected ? 500 : 400,
+              color: isHidden
+                ? 'var(--ads-text-disabled)'
+                : state.selected
+                ? 'var(--ads-blue-550)'
+                : 'var(--ads-text-primary)',
+              transition: 'color 0.15s ease',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              flex: 1,
+              minWidth: 0,
             }}
           >
-            {state.visible ? <EyeOpenIcon /> : <EyeClosedIcon />}
-          </button>
+            {tab.label}
+          </span>
         </div>
 
-        {/* Opacity slider row */}
+        {/* Opacity sliders — one per visible jaw.
+            When jawSelection==='both' we show two stacked sliders with U/L labels
+            so each jaw has independent opacity control. */}
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-            marginTop: '8px',
+            flexDirection: 'column',
+            gap: '2px',
+            marginTop: '12px',
             opacity: isHidden ? 0.4 : 1,
             transition: 'opacity 0.15s ease',
           }}
         >
-          <OpacitySlider
-            value={state.opacity}
-            disabled={isHidden}
-            onChange={(val) => onOpacityChange(val)}
-          />
+          {(jawSelection === 'upper' || jawSelection === 'both') && (
+            <JawSlider
+              jaw="upper"
+              showIcon={jawSelection === 'both'}
+              value={state.opacityUpper}
+              visible={state.visibleUpper}
+              disabled={!state.visibleUpper}
+              onChange={(val) => onOpacityChange('upper', val)}
+              onToggleVisibility={() => onToggleJawVisibility('upper')}
+            />
+          )}
+          {(jawSelection === 'lower' || jawSelection === 'both') && (
+            <JawSlider
+              jaw="lower"
+              showIcon={jawSelection === 'both'}
+              value={state.opacityLower}
+              visible={state.visibleLower}
+              disabled={!state.visibleLower}
+              onChange={(val) => onOpacityChange('lower', val)}
+              onToggleVisibility={() => onToggleJawVisibility('lower')}
+            />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+// JawSlider — opacity slider with the U/L jaw-arch icon on the left and a
+// per-jaw eye toggle on the right. The eye hides/shows that arch only.
+function JawSlider({
+  jaw,
+  showIcon,
+  value,
+  visible,
+  disabled,
+  onChange,
+  onToggleVisibility,
+}: {
+  jaw: Jaw;
+  showIcon: boolean;
+  value: number;
+  visible: boolean;
+  disabled: boolean;
+  onChange: (val: number) => void;
+  onToggleVisibility: () => void;
+}) {
+  const jawName = jaw === 'upper' ? 'Upper' : 'Lower';
+  const labelId = `${jaw}-jaw-opacity-label`;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Field label — matches the .label-01 typography token used elsewhere
+          for meta text (e.g. patient details). Value is already shown on
+          the slider thumb tooltip. */}
+      {showIcon && (
+        <span
+          id={labelId}
+          style={{
+            color: disabled ? 'var(--ads-text-disabled)' : 'var(--ads-text-secondary)',
+            fontFamily: 'var(--ads-font-sans)',
+            fontSize: 'var(--tp-label-01-size)',
+            lineHeight: 'var(--tp-label-01-lh)',
+          }}
+        >
+          {jawName} jaw
+        </span>
+      )}
+      {/* Slider row: slider + visibility toggle. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <OpacitySlider
+          value={value}
+          disabled={disabled}
+          onChange={onChange}
+          aria-labelledby={showIcon ? labelId : undefined}
+          aria-label={showIcon ? undefined : `${jawName} jaw opacity`}
+        />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleVisibility();
+          }}
+          aria-label={visible ? `Hide ${jawName.toLowerCase()} arch` : `Show ${jawName.toLowerCase()} arch`}
+          aria-pressed={!visible}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+            borderRadius: 'var(--ads-radius-sm)',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            flexShrink: 0,
+            transition: 'background-color 0.12s ease, color 0.12s ease',
+            color: visible ? 'var(--ads-text-secondary)' : 'var(--ads-text-tertiary)',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--ads-background-subtle-hover)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+          }}
+        >
+          {visible ? <EyeOpenIcon /> : <EyeClosedIcon />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Mini jaw-arch indicator — minimalist half-circle "smile".
+// Upper (∩) — arc opens downward, apex at top.
+// Lower (∪) — arc opens upward,   apex at bottom.
+function MiniJawIcon({ jaw }: { jaw: Jaw }) {
+  const d =
+    jaw === 'upper'
+      ? 'M4 16 A8 8 0 0 1 20 16'
+      : 'M4 8  A8 8 0 0 0 20 8';
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d={d}
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
   );
 }
 
@@ -462,12 +606,12 @@ function EyeOpenIcon() {
     <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
       <path
         d="M8 4C4.5 4 2 8 2 8C2 8 4.5 12 8 12C11.5 12 14 8 14 8C14 8 11.5 4 8 4Z"
-        stroke="#666666"
+        stroke="var(--ads-text-secondary)"
         strokeWidth={EYE_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="8" cy="8" r="2" stroke="#666666" strokeWidth={EYE_ICON_STROKE_WIDTH} />
+      <circle cx="8" cy="8" r="2" stroke="var(--ads-text-secondary)" strokeWidth={EYE_ICON_STROKE_WIDTH} />
     </svg>
   );
 }
@@ -477,25 +621,25 @@ function EyeClosedIcon() {
     <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
       <path
         d="M3 3L13 13"
-        stroke="#BBBBBB"
+        stroke="var(--ads-text-tertiary)"
         strokeWidth={EYE_ICON_STROKE_WIDTH}
         strokeLinecap="round"
       />
       <path
         d="M6.5 6.8C5.7 7.4 5.3 8.4 5.7 9.4C6.1 10.4 7 11 8 11C8.6 11 9.1 10.8 9.5 10.5"
-        stroke="#BBBBBB"
+        stroke="var(--ads-text-tertiary)"
         strokeWidth={EYE_ICON_STROKE_WIDTH}
         strokeLinecap="round"
       />
       <path
         d="M8 4C4.5 4 2 8 2 8C2 8 3 9.5 4.5 10.5"
-        stroke="#BBBBBB"
+        stroke="var(--ads-text-tertiary)"
         strokeWidth={EYE_ICON_STROKE_WIDTH}
         strokeLinecap="round"
       />
       <path
         d="M11 5.5C12.5 6.5 14 8 14 8C14 8 11.5 12 8 12"
-        stroke="#BBBBBB"
+        stroke="var(--ads-text-tertiary)"
         strokeWidth={EYE_ICON_STROKE_WIDTH}
         strokeLinecap="round"
       />
@@ -511,13 +655,18 @@ function OpacitySlider({
   value,
   disabled,
   onChange,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
 }: {
   value: number;
   disabled: boolean;
   onChange: (value: number) => void;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
 }) {
   const trackRef = React.useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
 
   const updateValue = (clientX: number) => {
     if (!trackRef.current || disabled) return;
@@ -541,10 +690,38 @@ function OpacitySlider({
   return (
     <div
       ref={trackRef}
+      role="slider"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={value}
+      aria-valuetext={`${value}%`}
+      aria-disabled={disabled || undefined}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      tabIndex={disabled ? -1 : 0}
       onMouseDown={(e) => {
         if (disabled) return;
         setDragging(true);
         updateValue(e.clientX);
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onKeyDown={(e) => {
+        if (disabled) return;
+        const step = e.shiftKey ? 10 : 1;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          onChange(Math.min(100, value + step));
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          onChange(Math.max(0, value - step));
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          onChange(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          onChange(100);
+        }
       }}
       style={{
         flex: 1,
@@ -553,39 +730,41 @@ function OpacitySlider({
         alignItems: 'center',
         cursor: disabled ? 'default' : 'pointer',
         position: 'relative',
+        outline: 'none',
       }}
     >
-      {/* Track background */}
+      {/* Track background — design-system slider track */}
       <div style={{
         position: 'absolute',
         left: 0,
         right: 0,
         height: '4px',
         borderRadius: '2px',
-        backgroundColor: '#E5E7EB',
+        backgroundColor: 'var(--ds-surface-active)',
+        opacity: disabled ? 0.5 : 1,
       }} />
-      {/* Track fill */}
+      {/* Track fill — design-system primary */}
       <div style={{
         position: 'absolute',
         left: 0,
         width: `${value}%`,
         height: '4px',
         borderRadius: '2px',
-        backgroundColor: disabled ? '#CCCCCC' : '#009ACE',
+        backgroundColor: disabled ? 'var(--ads-text-disabled)' : 'var(--ds-color-primary)',
         transition: dragging ? 'none' : 'width 0.1s ease',
       }} />
-      {/* Thumb */}
+      {/* Thumb — design-system 20px handle with hover/active scale */}
       <div style={{
         position: 'absolute',
         left: `${value}%`,
-        transform: 'translateX(-50%)',
-        width: '16px',
-        height: '16px',
+        transform: `translateX(-50%) scale(${dragging ? 1.15 : hovered ? 1.08 : 1})`,
+        width: '20px',
+        height: '20px',
         borderRadius: '50%',
-        backgroundColor: '#FFFFFF',
-        border: `2px solid ${disabled ? '#CCCCCC' : '#009ACE'}`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-        transition: dragging ? 'none' : 'left 0.1s ease',
+        backgroundColor: 'var(--ds-surface-base, #fff)',
+        border: `2px solid ${disabled ? 'var(--ads-text-disabled)' : 'var(--ds-color-primary)'}`,
+        boxShadow: dragging ? 'var(--ads-shadow-md)' : 'var(--ads-shadow-sm)',
+        transition: `transform 120ms cubic-bezier(0.2, 0, 0, 1)${dragging ? '' : ', left 0.1s ease'}`,
         cursor: disabled ? 'default' : 'grab',
       }}>
         {/* Floating toast */}
@@ -596,18 +775,17 @@ function OpacitySlider({
           transform: `translateX(-50%) scale(${dragging ? 1 : 0.8})`,
           opacity: dragging ? 1 : 0,
           pointerEvents: 'none',
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          color: '#374151',
-          fontSize: '11px',
-          fontWeight: 600,
-          fontFamily: "'Roboto', system-ui, sans-serif",
+          // Matches the toolbar button tooltip (dark surface, light text).
+          backgroundColor: 'var(--ds-tooltip-bg)',
+          color: 'var(--ds-tooltip-text)',
+          fontSize: '12px',
+          fontWeight: 400,
+          fontFamily: 'var(--ads-font-sans)',
           fontVariantNumeric: 'tabular-nums',
+          lineHeight: 1.5,
           padding: '4px 8px',
-          borderRadius: '6px',
+          borderRadius: 'var(--ads-radius-sm)',
           whiteSpace: 'nowrap',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          backdropFilter: 'blur(4px)',
           transition: 'opacity 0.15s ease, transform 0.15s ease',
         }}>
           {value}%
@@ -619,9 +797,7 @@ function OpacitySlider({
             transform: 'translateX(-50%) rotate(45deg)',
             width: '8px',
             height: '8px',
-            backgroundColor: 'rgba(255,255,255,0.95)',
-            borderRight: '1px solid #E5E7EB',
-            borderBottom: '1px solid #E5E7EB',
+            backgroundColor: 'var(--ds-tooltip-bg)',
           }} />
         </div>
       </div>

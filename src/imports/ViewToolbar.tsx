@@ -10,8 +10,8 @@ import TrimNew from "./TrimNew";
 
 // Monochrome Icon - Two overlapping squares
 function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
-  const fillColor = isActive ? "#008EC2" : "#5E646E";
-  const strokeColor = isActive ? "#008EC2" : "#5E646E";
+  const fillColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
+  const strokeColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
   
   return (
     <div className="relative shrink-0 size-[40px] flex items-center justify-center" data-name="Mono chomr new">
@@ -42,8 +42,8 @@ function MonoChomrNew({ isActive = false }: { isActive?: boolean }) {
 
 function AohsButton({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] shrink-0 size-[40px]" data-name="AOHS button">
+      <div aria-hidden="true" className="absolute border-0 border-[var(--ads-background-interactive)] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <MonoChomrNew isActive={isActive} />
     </div>
   );
@@ -67,8 +67,8 @@ function ToolbarTextLabel({ isActive, onClick, isExpanded, microAnimations = tru
     <motion.div 
       className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
-        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
-        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : (isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'),
+        border: isActive ? '1px solid var(--ads-background-interactive)' : (isHovered ? '1px solid var(--ads-border-accent)' : '1px solid transparent'),
       }}
       data-name="Toolbar Text label"
       onClick={onClick}
@@ -99,16 +99,16 @@ function ToolbarTextLabel({ isActive, onClick, isExpanded, microAnimations = tru
           }}
         />
       )}
-      <AohsButton isActive={isActive || isHovered} />
-      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive || isHovered) ? '#008EC2' : '#000000' }}>Monochrome</p>}
+      <AohsButton isActive={isActive} />
+      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Monochrome</p>}
     </motion.div>
   );
 }
 
 function AohsButton1({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] shrink-0 size-[40px]" data-name="AOHS button">
+      <div aria-hidden="true" className="absolute border-0 border-[var(--ads-background-interactive)] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <NiriIonNew isActive={isActive} />
     </div>
   );
@@ -132,8 +132,8 @@ function ToolbarTextLabel1({ isActive, onClick, isExpanded, buttonIndex }: { isA
     <motion.div 
       className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
-        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
-        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : (isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'),
+        border: isActive ? '1px solid var(--ads-background-interactive)' : (isHovered ? '1px solid var(--ads-border-accent)' : '1px solid transparent'),
       }}
       data-name="Toolbar Text label"
       onClick={onClick}
@@ -164,16 +164,16 @@ function ToolbarTextLabel1({ isActive, onClick, isExpanded, buttonIndex }: { isA
           }}
         />
       )}
-      <AohsButton1 isActive={isActive || isHovered} />
-      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive || isHovered) ? '#008EC2' : '#000000' }}>Review Tool</p>}
+      <AohsButton1 isActive={isActive} />
+      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Review Tool</p>}
     </motion.div>
   );
 }
 
 function AohsButton2({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] shrink-0 size-[40px]" data-name="AOHS button">
+      <div aria-hidden="true" className="absolute border-0 border-[var(--ads-background-interactive)] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <OcculsgramNew isActive={isActive} />
     </div>
   );
@@ -197,8 +197,8 @@ function ToolbarTextLabel2({ isActive, onClick, isExpanded, buttonIndex }: { isA
     <motion.div 
       className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
-        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
-        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : (isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'),
+        border: isActive ? '1px solid var(--ads-background-interactive)' : (isHovered ? '1px solid var(--ads-border-accent)' : '1px solid transparent'),
       }}
       data-name="Toolbar Text label"
       onClick={onClick}
@@ -229,16 +229,16 @@ function ToolbarTextLabel2({ isActive, onClick, isExpanded, buttonIndex }: { isA
           }}
         />
       )}
-      <AohsButton2 isActive={isActive || isHovered} />
-      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive || isHovered) ? '#008EC2' : '#000000' }}>Occulsgram</p>}
+      <AohsButton2 isActive={isActive} />
+      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Occulsgram</p>}
     </motion.div>
   );
 }
 
 function AohsButton3Margin({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] shrink-0 size-[40px]" data-name="AOHS button">
+      <div aria-hidden="true" className="absolute border-0 border-[var(--ads-background-interactive)] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <MarginLineNew isActive={isActive} />
     </div>
   );
@@ -262,8 +262,8 @@ function ToolbarTextLabel3({ isActive, onClick, isExpanded, buttonIndex }: { isA
     <motion.div 
       className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
-        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
-        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : (isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'),
+        border: isActive ? '1px solid var(--ads-background-interactive)' : (isHovered ? '1px solid var(--ads-border-accent)' : '1px solid transparent'),
       }}
       data-name="Toolbar Text label"
       onClick={onClick}
@@ -294,16 +294,16 @@ function ToolbarTextLabel3({ isActive, onClick, isExpanded, buttonIndex }: { isA
           }}
         />
       )}
-      <AohsButton3Margin isActive={isActive || isHovered} />
-      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive || isHovered) ? '#008EC2' : '#000000' }}>Margin line</p>}
+      <AohsButton3Margin isActive={isActive} />
+      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Margin line</p>}
     </motion.div>
   );
 }
 
 function AohsButton4PrepQc({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] shrink-0 size-[40px]" data-name="AOHS button">
+      <div aria-hidden="true" className="absolute border-0 border-[var(--ads-background-interactive)] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <PrepQcNew isActive={isActive} />
     </div>
   );
@@ -327,8 +327,8 @@ function ToolbarTextLabel4({ isActive, onClick, isExpanded, buttonIndex }: { isA
     <motion.div 
       className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
-        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
-        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : (isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'),
+        border: isActive ? '1px solid var(--ads-background-interactive)' : (isHovered ? '1px solid var(--ads-border-accent)' : '1px solid transparent'),
       }}
       data-name="Toolbar Text label"
       onClick={onClick}
@@ -359,16 +359,16 @@ function ToolbarTextLabel4({ isActive, onClick, isExpanded, buttonIndex }: { isA
           }}
         />
       )}
-      <AohsButton4PrepQc isActive={isActive || isHovered} />
-      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive || isHovered) ? '#008EC2' : '#000000' }}>Prep QC</p>}
+      <AohsButton4PrepQc isActive={isActive} />
+      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Prep QC</p>}
     </motion.div>
   );
 }
 
 function AohsButton5Trim({ isActive }: { isActive?: boolean }) {
   return (
-    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[10px] shrink-0 size-[40px]" data-name="AOHS button">
-      <div aria-hidden="true" className="absolute border-0 border-[#00adef] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div className="content-stretch flex flex-col items-center justify-between relative rounded-[8px] shrink-0 size-[40px]" data-name="AOHS button">
+      <div aria-hidden="true" className="absolute border-0 border-[var(--ads-background-interactive)] border-solid inset-0 pointer-events-none rounded-[8px]" />
       <TrimNew isActive={isActive} />
     </div>
   );
@@ -392,8 +392,8 @@ function ToolbarTextLabel5({ isActive, onClick, isExpanded, buttonIndex }: { isA
     <motion.div 
       className={`flex flex-row items-center ${isExpanded ? 'px-[8px]' : ''} py-0 gap-[4px] h-[40px] relative rounded-[8px] shrink-0 cursor-pointer self-stretch overflow-hidden transition-all duration-200`}
       style={{
-        backgroundColor: isActive ? '#E0F2FE' : (isHovered ? '#f5f5f5' : 'transparent'),
-        border: isActive ? '1px solid #009ACE' : (isHovered ? '1px solid #D1D5DB' : '1px solid transparent'),
+        backgroundColor: isActive ? 'var(--ads-background-highlight-blue)' : (isHovered ? 'var(--ads-background-subtle-02)' : 'transparent'),
+        border: isActive ? '1px solid var(--ads-background-interactive)' : (isHovered ? '1px solid var(--ads-border-accent)' : '1px solid transparent'),
       }}
       data-name="Toolbar Text label"
       onClick={onClick}
@@ -424,8 +424,8 @@ function ToolbarTextLabel5({ isActive, onClick, isExpanded, buttonIndex }: { isA
           }}
         />
       )}
-      <AohsButton5Trim isActive={isActive || isHovered} />
-      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive || isHovered) ? '#008EC2' : '#000000' }}>Trim</p>}
+      <AohsButton5Trim isActive={isActive} />
+      {isExpanded && <p className="font-['Roboto'] leading-[16px] not-italic relative shrink-0 text-[14px] text-nowrap text-center transition-all duration-200" style={{ color: (isActive) ? 'var(--ads-background-interactive-hover)' : 'var(--ads-text-primary)' }}>Trim</p>}
     </motion.div>
   );
 }
@@ -455,7 +455,7 @@ function ChevronIcon({ isExpanded }: { isExpanded: boolean }) {
       >
         <path 
           d="M6 9L12 15L18 9" 
-          stroke="#717182" 
+          stroke="var(--ads-text-secondary)" 
           strokeWidth="1" 
           strokeLinecap="round" 
           strokeLinejoin="round"
@@ -498,9 +498,9 @@ function Frame6({ activeButtons, onButtonClick, microAnimations = true }: { acti
 export default function ViewToolbar({ activeButtons, onButtonClick, microAnimations = true }: { activeButtons: Set<number>; onButtonClick: (index: number) => void; microAnimations?: boolean }) {
   return (
     <div 
-      className="bg-white box-border content-stretch flex flex-col gap-[4px] items-center justify-center px-0 py-[4px] relative rounded-[12px] w-full" 
+      className="bg-[var(--ads-background-subtle-01)] box-border content-stretch flex flex-col gap-[4px] items-center justify-center px-0 py-[4px] relative rounded-[12px] w-full" 
       data-name="Toolbar"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)' }}
+      style={{ boxShadow: 'var(--ads-shadow-sm)' }}
     >
       <Frame6 activeButtons={activeButtons} onButtonClick={onButtonClick} microAnimations={microAnimations} />
     </div>

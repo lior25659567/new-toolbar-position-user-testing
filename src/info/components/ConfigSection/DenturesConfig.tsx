@@ -11,29 +11,32 @@ import { NotesField } from "./shared/NotesField";
 interface Props {
   state: InfoState;
   dispatch: React.Dispatch<InfoAction>;
+  hideNotesAndAttachments?: boolean;
+  unified?: boolean;
 }
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: "white",
-  borderRadius: "12px",
-  border: "1px solid #E5E7EB",
+  borderRadius: "var(--ads-radius-md)",
+  border: "1px solid var(--ads-border-subtle)",
   padding: "24px",
 };
 
-export function DenturesConfig({ state, dispatch }: Props) {
+export function DenturesConfig({ state, dispatch, hideNotesAndAttachments, unified }: Props) {
+  const cs: React.CSSProperties = unified ? {} : cardStyle;
   const shadeOptions = state.dentureShadeSystem
     ? (SHADE_OPTIONS[state.dentureShadeSystem] || []).map((s) => ({ value: s, label: s }))
     : [];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <div style={{ ...cardStyle, overflow: "visible", position: "relative", zIndex: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: unified ? "24px" : "16px" }}>
+      <div style={{ ...cs, overflow: "visible", position: "relative", zIndex: 10 }}>
         <DueDateSendTo dueDate={state.dueDate} sendTo={state.sendTo} dispatch={dispatch} />
       </div>
 
-      <div style={cardStyle}>
+      <div style={cs}>
         <div style={{ marginBottom: "16px" }}>
-          <div style={{ fontSize: "12px", fontWeight: 400, color: "#6a7282", fontFamily: "Inter, sans-serif", marginBottom: "8px" }}>
+          <div style={{ fontSize: "12px", fontWeight: 400, color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", marginBottom: "8px" }}>
             Arch
           </div>
           <RadioGroup
@@ -107,20 +110,22 @@ export function DenturesConfig({ state, dispatch }: Props) {
         </div>
       </div>
 
-      <div style={cardStyle}>
+      <div style={cs}>
         <ScanOptionsCheckboxes procedure="dentures" scanOptions={state.scanOptions} dispatch={dispatch} />
       </div>
 
-      <div style={cardStyle}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-          <div style={{ borderRadius: "10px", border: "1px solid #E5E7EB", padding: "20px" }}>
-            <NotesField notes={state.notes} dispatch={dispatch} />
-          </div>
-          <div style={{ borderRadius: "10px", border: "1px solid #E5E7EB", padding: "20px" }}>
-            <AttachmentsUpload attachments={state.attachments} dispatch={dispatch} />
+      {!hideNotesAndAttachments && (
+        <div style={cs}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+            <div style={{ borderRadius: "var(--ads-radius-sm)", border: "1px solid var(--ads-border-subtle)", padding: "20px" }}>
+              <NotesField notes={state.notes} dispatch={dispatch} />
+            </div>
+            <div style={{ borderRadius: "var(--ads-radius-sm)", border: "1px solid var(--ads-border-subtle)", padding: "20px" }}>
+              <AttachmentsUpload attachments={state.attachments} dispatch={dispatch} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

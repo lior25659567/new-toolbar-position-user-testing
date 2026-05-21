@@ -22,6 +22,11 @@ export interface DropdownListProps {
   fullWidth?: boolean;
   /** When "top", the menu opens upward above the trigger. Default: "bottom". */
   menuPlacement?: "bottom" | "top";
+  /**
+   * Inline prefix shown inside the trigger before the selected value
+   * (e.g. "Sort by:"). Styled with the muted/secondary text token.
+   */
+  prefixLabel?: string;
 }
 
 const ChevronIcon = ({ open }: { open: boolean }) => (
@@ -59,6 +64,7 @@ export function DropdownList({
   required,
   fullWidth,
   menuPlacement = "bottom",
+  prefixLabel,
 }: DropdownListProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
@@ -197,8 +203,30 @@ export function DropdownList({
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {selectedOption ? selectedOption.label : placeholder}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "baseline",
+              gap: space[1],
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              minWidth: 0,
+            }}
+          >
+            {prefixLabel && (
+              <span style={{ color: color.textSubtle, fontWeight: font.weight.regular }}>
+                {prefixLabel}
+              </span>
+            )}
+            <span
+              style={{
+                color: selectedOption ? color.textDefault : color.textPlaceholder,
+                fontWeight: prefixLabel && selectedOption ? font.weight.medium : font.weight.regular,
+              }}
+            >
+              {selectedOption ? selectedOption.label : placeholder}
+            </span>
           </span>
           <ChevronIcon open={isOpen} />
         </button>

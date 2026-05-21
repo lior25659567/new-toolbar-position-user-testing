@@ -12,18 +12,27 @@ interface ConfigSectionProps {
   state: InfoState;
   toothColorMap: Record<number, string>;
   dispatch: React.Dispatch<InfoAction>;
+  /** When true, the per-procedure renderers skip Notes + Attachments
+   *  (used by wizard variants that surface these in a dedicated step). */
+  hideNotesAndAttachments?: boolean;
+  /** When true, sub-sections render flat (no inner card chrome) so they
+   *  can sit inside a single outer white card. Used by the wizard/rail
+   *  Configuration step. */
+  unified?: boolean;
 }
 
-export function ConfigSection({ state, toothColorMap, dispatch }: ConfigSectionProps) {
+export function ConfigSection({ state, toothColorMap, dispatch, hideNotesAndAttachments, unified }: ConfigSectionProps) {
   if (!state.selectedProcedure) return null;
+  const noNotes = !!hideNotesAndAttachments;
+  const flat = !!unified;
 
   const configMap: Record<string, React.ReactNode> = {
-    "fixed-restorative": <FixedRestorativeConfig state={state} toothColorMap={toothColorMap} dispatch={dispatch} />,
-    "study-model": <StudyModelConfig state={state} dispatch={dispatch} />,
-    "invisalign": <InvisalignConfig state={state} dispatch={dispatch} />,
-    "implant-planning": <ImplantPlanningConfig state={state} dispatch={dispatch} />,
-    "dentures": <DenturesConfig state={state} dispatch={dispatch} />,
-    "appliance": <ApplianceConfig state={state} dispatch={dispatch} />,
+    "fixed-restorative": <FixedRestorativeConfig state={state} toothColorMap={toothColorMap} dispatch={dispatch} hideNotesAndAttachments={noNotes} unified={flat} />,
+    "study-model": <StudyModelConfig state={state} dispatch={dispatch} hideNotesAndAttachments={noNotes} unified={flat} />,
+    "invisalign": <InvisalignConfig state={state} dispatch={dispatch} hideNotesAndAttachments={noNotes} unified={flat} />,
+    "implant-planning": <ImplantPlanningConfig state={state} dispatch={dispatch} hideNotesAndAttachments={noNotes} unified={flat} />,
+    "dentures": <DenturesConfig state={state} dispatch={dispatch} hideNotesAndAttachments={noNotes} unified={flat} />,
+    "appliance": <ApplianceConfig state={state} dispatch={dispatch} hideNotesAndAttachments={noNotes} unified={flat} />,
   };
 
   return (

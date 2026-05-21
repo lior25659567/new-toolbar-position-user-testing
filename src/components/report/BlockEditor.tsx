@@ -6,6 +6,7 @@ import { PrimaryButton } from '../../design-system/PrimaryButton';
 import { DropdownList } from '../../design-system/DropdownList';
 import { DatePicker } from '../../design-system/DatePicker';
 import ToothSelector from './ToothSelector';
+import { BlockTypeIcon } from './BlockNavList';
 import type {
   ReportBlock, ImageBlock, ComparisonBlock, CostSummaryBlock, BlockType,
   NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock,
@@ -93,11 +94,14 @@ function TextArea({ value, onChange, placeholder, rows = 3 }: {
 // ─── Block Card Shell ────────────────────────────────────────────────────────
 
 function BlockCardShell({
+  blockId,
   label,
   thumbnail,
+  blockType,
   collapsed,
   children,
   index,
+  isActive,
   onDelete,
   onDuplicate,
   onToggleCollapse,
@@ -105,12 +109,19 @@ function BlockCardShell({
   onDragOver,
   onDrop,
   isDragTarget,
+  hideDragHandle = false,
+  hideChrome = false,
 }: {
+  /** Stable id used by the parent to scroll to / highlight this card. */
+  blockId?: string;
   label: string;
   thumbnail?: string;
+  blockType?: BlockType;
   collapsed: boolean;
   children: React.ReactNode;
   index: number;
+  /** Highlights the card when the matching nav row is selected. */
+  isActive?: boolean;
   onDelete: () => void;
   onDuplicate: () => void;
   onToggleCollapse: () => void;
@@ -118,12 +129,70 @@ function BlockCardShell({
   onDragOver: (e: React.DragEvent, i: number) => void;
   onDrop: (i: number) => void;
   isDragTarget: boolean;
+  /** Hide the drag handle (used in single-block / minimal mode). */
+  hideDragHandle?: boolean;
+  /** Hide the card border, padding and shadow — render bare content. */
+  hideChrome?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
 
+  // Minimal mode: no card border/background/shadow — just a title row above the content.
+  if (hideChrome) {
+    return (
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ display: 'flex', flexDirection: 'column', gap: space[3] }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: space[3] }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: space[3], minWidth: 0, flex: 1 }}>
+            {thumbnail && (
+              <div style={{
+                width: '32px', height: '32px', borderRadius: radius.sm,
+                overflow: 'hidden', flexShrink: 0,
+                border: `1px solid ${color.borderDefault}`,
+              }}>
+                <img src={thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              </div>
+            )}
+            <span style={{
+              fontSize: font.size.lg,
+              fontWeight: font.weight.semibold,
+              color: color.textHeading,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              letterSpacing: font.tracking.tight,
+            }}>
+              {label}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: space[1], flexShrink: 0 }}>
+            <ActionButton title="Duplicate" onClick={onDuplicate}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="4" width="8" height="8" rx="1.5" />
+                <path d="M10 4V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5.5A1.5 1.5 0 003 10h1" />
+              </svg>
+            </ActionButton>
+            <ActionButton title="Delete" danger onClick={onDelete}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+                <line x1="3" y1="3" x2="11" y2="11" />
+                <line x1="11" y1="3" x2="3" y2="11" />
+              </svg>
+            </ActionButton>
+          </div>
+        </div>
+        {!collapsed && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space[3] }}>
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
-      draggable
+      data-block-id={blockId}
+      draggable={!hideDragHandle}
       onDragStart={() => onDragStart(index)}
       onDragOver={(e) => onDragOver(e, index)}
       onDrop={() => onDrop(index)}
@@ -131,80 +200,123 @@ function BlockCardShell({
       onMouseLeave={() => setHovered(false)}
       style={{
         backgroundColor: color.bgSurface,
+        // Right-side cards don't show "selected" state — only the left nav does.
+        // Cards still react to drag-target and hover.
         border: `1px solid ${isDragTarget ? color.primary : hovered ? color.borderHover : color.borderDefault}`,
         borderRadius: radius.lg,
-        transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
         overflow: 'hidden',
-        transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
-        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
+        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
       }}
     >
-      {/* Card header */}
+      {/* Card header — Wynde-style: drag · number · type chip · title · actions */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: space[3],
           padding: `${space[3]} ${space[4]}`,
           borderBottom: collapsed ? 'none' : `1px solid ${color.borderDefault}`,
-          backgroundColor: hovered ? color.bgHover : 'transparent',
-          cursor: 'pointer',
+          backgroundColor: 'transparent',
           userSelect: 'none',
-          transition: `background-color ${transition.fast}`,
         }}
-        onClick={onToggleCollapse}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: space[3], minWidth: 0, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: space[2], minWidth: 0, flex: 1 }}>
           {/* Drag handle */}
-          <div
-            style={{ cursor: 'grab', color: color.neutral400, display: 'flex', flexShrink: 0, opacity: hovered ? 1 : 0.4, transition: `opacity ${transition.fast}` }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <circle cx="5" cy="3" r="1.5" /><circle cx="11" cy="3" r="1.5" />
-              <circle cx="5" cy="8" r="1.5" /><circle cx="11" cy="8" r="1.5" />
-              <circle cx="5" cy="13" r="1.5" /><circle cx="11" cy="13" r="1.5" />
-            </svg>
-          </div>
+          {!hideDragHandle && (
+            <div
+              style={{ cursor: 'grab', color: color.neutral400, display: 'flex', flexShrink: 0, opacity: hovered ? 1 : 0.4, transition: `opacity ${transition.fast}` }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor">
+                <circle cx="3" cy="3" r="1.2" /><circle cx="9" cy="3" r="1.2" />
+                <circle cx="3" cy="7" r="1.2" /><circle cx="9" cy="7" r="1.2" />
+                <circle cx="3" cy="11" r="1.2" /><circle cx="9" cy="11" r="1.2" />
+              </svg>
+            </div>
+          )}
 
-          {/* Thumbnail preview */}
-          {thumbnail && (
+          {/* Number prefix */}
+          <span style={{
+            fontSize: font.size.base,
+            fontWeight: font.weight.medium,
+            color: color.textDefault,
+            minWidth: 20,
+            textAlign: 'right',
+            flexShrink: 0,
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {index + 1}.
+          </span>
+
+          {/* Type chip — thumbnail when the block has an image, otherwise a gray rounded box w/ type icon */}
+          {thumbnail ? (
             <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: radius.sm,
+              width: 28,
+              height: 28,
+              borderRadius: radius.md,
               overflow: 'hidden',
               flexShrink: 0,
               border: `1px solid ${color.borderDefault}`,
             }}>
               <img src={thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
             </div>
+          ) : (
+            <div style={{
+              width: 28,
+              height: 28,
+              borderRadius: radius.md,
+              flexShrink: 0,
+              background: color.neutral100,
+              color: color.textDefault,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {blockType ? <BlockTypeIcon type={blockType} /> : null}
+            </div>
           )}
 
-          {/* Label */}
+          {/* Title */}
           <span style={{
-            fontSize: font.size.sm,
-            fontWeight: font.weight.semibold,
+            fontSize: font.size.base,
+            fontWeight: font.weight.medium,
             color: color.textHeading,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0,
           }}>
             {label}
           </span>
 
           {/* Collapse chevron */}
-          <svg
-            width="14" height="14" viewBox="0 0 16 16" fill="none"
-            stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round"
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
+            aria-label={collapsed ? 'Expand section' : 'Collapse section'}
             style={{
               flexShrink: 0,
-              transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+              width: 24,
+              height: 24,
+              border: 'none',
+              background: 'transparent',
+              borderRadius: radius.sm,
+              cursor: 'pointer',
+              color: color.neutral400,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               transition: `transform ${transition.fast}`,
+              transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
             }}
           >
-            <path d="M4 6l4 4 4-4" />
-          </svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M4 6l4 4 4-4" />
+            </svg>
+          </button>
         </div>
 
         {/* Actions */}
@@ -370,7 +482,7 @@ function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate
         width: '100%',
         border: `2px dashed ${color.borderDefault}`,
         borderRadius: radius.md,
-        backgroundColor: color.neutral50,
+        backgroundColor: color.bgSurface,
         overflow: 'hidden',
       }}>
         <UploadRow
@@ -428,7 +540,7 @@ function UploadRow({ icon, label, onClick }: { icon: React.ReactNode; label: str
         cursor: 'pointer',
         transition: `background-color ${transition.fast}`,
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E0F2FE'; }}
+      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ads-background-highlight-blue)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
       {icon}
@@ -465,42 +577,85 @@ function OverlayButton({ label, onClick, icon }: { label: string; onClick: () =>
 
 // ─── Annotation Lightbox ────────────────────────────────────────────────────
 
-const ANNOTATION_COLORS = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF', '#5856D6', '#AF52DE', '#FFFFFF', '#000000'];
-const BRUSH_SIZES = [2, 4, 8, 12];
+const ANNOTATION_COLORS = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF', '#5856D6', '#AF52DE', 'var(--ads-background-subtle-01)', 'var(--ads-text-primary)'];
+const BRUSH_SIZES = [2, 6, 14, 28];
 
-type AnnotationTool = 'pen' | 'highlighter' | 'arrow' | 'circle' | 'text';
+// Persist last used brush size and color across annotation sessions
+let lastUsedBrushSize = BRUSH_SIZES[2]; // default to third size (14)
+let lastUsedBrushColor = '#FF3B30';
 
-function AnnotationLightbox({ imageUrl, onSave, onClose }: {
+type AnnotationTool = 'pen' | 'eraser' | 'text';
+
+// Build a circle cursor data URL for the given diameter
+function buildCircleCursor(diameter: number): string {
+  const size = Math.max(diameter, 4);
+  const half = size / 2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size + 2}" height="${size + 2}"><circle cx="${half + 1}" cy="${half + 1}" r="${half}" fill="none" stroke="white" stroke-width="1.5"/><circle cx="${half + 1}" cy="${half + 1}" r="${half}" fill="none" stroke="black" stroke-width="0.5"/></svg>`;
+  return `url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}') ${half + 1} ${half + 1}, crosshair`;
+}
+
+function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
   imageUrl: string;
+  originalImageUrl: string;
   onSave: (annotatedUrl: string) => void;
   onClose: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tool, setTool] = useState<AnnotationTool>('pen');
-  const [brushColor, setBrushColor] = useState('#FF3B30');
-  const [brushSize, setBrushSize] = useState(4);
+  const [brushColor, setBrushColorState] = useState(lastUsedBrushColor);
+  const [brushSize, setBrushSizeState] = useState(lastUsedBrushSize);
+  const setBrushColor = (c: string) => { setBrushColorState(c); lastUsedBrushColor = c; };
+  const setBrushSize = (s: number) => { setBrushSizeState(s); lastUsedBrushSize = s; };
   const isDrawing = useRef(false);
-  const imgRef = useRef<HTMLImageElement | null>(null);
+  const lastPos = useRef<{ x: number; y: number } | null>(null);
+  // Store the original clean image for clear & eraser
+  const cleanCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasScaleRef = useRef(1);
 
-  // Load image onto canvas
+  // Load image onto canvas + store clean original
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      imgRef.current = img;
-      // Scale canvas to image, max 800px wide
-      const scale = Math.min(1100 / img.width, 800 / img.height, 1);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    let cancelled = false;
+
+    // Load original clean image first, then the current image on top
+    const origImg = new Image();
+    origImg.crossOrigin = 'anonymous';
+    origImg.onload = () => {
+      if (cancelled) return;
+      const scale = Math.min(1100 / origImg.width, 800 / origImg.height, 1);
+      canvasScaleRef.current = scale;
+      canvas.width = origImg.width * scale;
+      canvas.height = origImg.height * scale;
+
+      // Store clean original
+      const offscreen = document.createElement('canvas');
+      offscreen.width = canvas.width;
+      offscreen.height = canvas.height;
+      const offCtx = offscreen.getContext('2d');
+      if (offCtx) offCtx.drawImage(origImg, 0, 0, canvas.width, canvas.height);
+      cleanCanvasRef.current = offscreen;
+
+      // Now load the current (possibly annotated) image to draw on canvas
+      if (imageUrl !== originalImageUrl) {
+        const curImg = new Image();
+        curImg.crossOrigin = 'anonymous';
+        curImg.onload = () => {
+          if (cancelled) return;
+          ctx.drawImage(curImg, 0, 0, canvas.width, canvas.height);
+        };
+        curImg.src = imageUrl;
+      } else {
+        ctx.drawImage(origImg, 0, 0, canvas.width, canvas.height);
+      }
     };
-    img.src = imageUrl;
-  }, [imageUrl]);
+    origImg.src = originalImageUrl;
+
+    return () => { cancelled = true; };
+  }, [imageUrl, originalImageUrl]);
 
   const getPos = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -514,6 +669,18 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
     };
   }, []);
 
+  const eraseAt = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
+    const clean = cleanCanvasRef.current;
+    if (!clean) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.clearRect(x - size, y - size, size * 2, size * 2);
+    ctx.drawImage(clean, 0, 0);
+    ctx.restore();
+  }, []);
+
   const onDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const canvas = canvasRef.current;
@@ -525,17 +692,23 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
 
     // Text tool: prompt for text and place it
     if (tool === 'text') {
-      const text = prompt('Enter text:');
-      if (text) {
-        ctx.font = `${Math.max(14, brushSize * 4)}px Inter, sans-serif`;
-        ctx.fillStyle = brushColor;
-        ctx.globalAlpha = 1;
-        ctx.fillText(text, x, y);
-      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.font = `${Math.max(14, brushSize * 4)}px Inter, sans-serif`;
+      ctx.fillStyle = brushColor;
+      ctx.globalAlpha = 1;
+      ctx.fillText(prompt('Enter text:') || '', x, y);
       return;
     }
 
     isDrawing.current = true;
+    lastPos.current = { x, y };
+
+    if (tool === 'eraser') {
+      eraseAt(ctx, x, y, brushSize);
+      return;
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = brushColor;
@@ -553,32 +726,60 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const { x, y } = getPos(e);
+
+    if (tool === 'eraser') {
+      const prev = lastPos.current || { x, y };
+      const dx = x - prev.x;
+      const dy = y - prev.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const step = Math.max(1, brushSize * 0.25);
+      const steps = Math.max(1, Math.ceil(dist / step));
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        eraseAt(ctx, prev.x + dx * t, prev.y + dy * t, brushSize);
+      }
+      lastPos.current = { x, y };
+      return;
+    }
+
     ctx.lineTo(x, y);
     ctx.stroke();
   };
 
   const onUp = () => {
     isDrawing.current = false;
+    lastPos.current = null;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    if (ctx) ctx.globalAlpha = 1;
+    if (ctx) {
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
   };
 
   const handleClear = () => {
     const canvas = canvasRef.current;
-    if (!canvas || !imgRef.current) return;
+    if (!canvas || !cleanCanvasRef.current) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(imgRef.current, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(cleanCanvasRef.current, 0, 0);
   };
 
   const handleSave = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const url = canvas.toDataURL('image/png');
-    onSave(url);
+    onSave(canvas.toDataURL('image/png'));
+  };
+
+  // Compute cursor size in screen pixels (canvas pixels / display scale)
+  const getCursorSize = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return brushSize;
+    const rect = canvas.getBoundingClientRect();
+    const displayScale = rect.width / canvas.width;
+    return Math.max(4, Math.round(brushSize * displayScale));
   };
 
   const TOOLS: { id: AnnotationTool; label: string; icon: React.ReactNode }[] = [
@@ -587,8 +788,12 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
       icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2.5l3.5 3.5L5 14.5H1.5V11L10 2.5z" /></svg>,
     },
     {
-      id: 'text' as AnnotationTool, label: 'Text',
+      id: 'text', label: 'Text',
       icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h10M8 3v10M5.5 13h5" /></svg>,
+    },
+    {
+      id: 'eraser', label: 'Eraser',
+      icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M14 13H6.5L2.85 9.35a1.4 1.4 0 010-2l5.5-5.5a1.4 1.4 0 012 0L14 5.5a1.4 1.4 0 010 2L9 12.5" /><line x1="2" y1="13" x2="14" y2="13" /></svg>,
     },
   ];
 
@@ -666,7 +871,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
                   height: '20px',
                   borderRadius: '50%',
                   backgroundColor: c,
-                  border: brushColor === c ? `2px solid ${color.primary}` : `1px solid ${c === '#FFFFFF' ? color.borderDefault : 'transparent'}`,
+                  border: brushColor === c ? `2px solid ${color.primary}` : `1px solid ${c === 'var(--ads-background-subtle-01)' ? color.borderDefault : 'transparent'}`,
                   cursor: 'pointer',
                   padding: 0,
                   boxShadow: brushColor === c ? `0 0 0 2px ${color.white}` : 'none',
@@ -693,7 +898,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
                   justifyContent: 'center',
                   border: brushSize === s ? `2px solid ${color.primary}` : `1px solid ${color.borderDefault}`,
                   borderRadius: radius.sm,
-                  backgroundColor: brushSize === s ? '#E0F2FE' : color.white,
+                  backgroundColor: brushSize === s ? 'var(--ads-background-highlight-blue)' : color.white,
                   cursor: 'pointer',
                   padding: 0,
                 }}
@@ -745,7 +950,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#F4F4F4',
+          backgroundColor: 'var(--ads-background-subtle-02)',
           overflow: 'auto',
         }}>
           <canvas
@@ -753,7 +958,7 @@ function AnnotationLightbox({ imageUrl, onSave, onClose }: {
             style={{
               maxWidth: '100%',
               maxHeight: '100%',
-              cursor: 'crosshair',
+              cursor: tool === 'text' ? 'text' : buildCircleCursor(getCursorSize()),
               borderRadius: radius.sm,
               touchAction: 'none',
             }}
@@ -1141,6 +1346,8 @@ function ImageCardEditor({ block, onUpdate }: {
 }) {
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [isAnnotated, setIsAnnotated] = useState(false);
+  // Track the original unannotated image for clear/eraser
+  const originalUrlRef = useRef<string>(block.previewUrl);
   const clinicalRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -1148,8 +1355,8 @@ function ImageCardEditor({ block, onUpdate }: {
       {/* Image upload */}
       <ImageUploadZone
         previewUrl={block.previewUrl}
-        onFileSelect={(file, url) => { onUpdate({ file, previewUrl: url }); setIsAnnotated(false); }}
-        onGallerySelect={(url) => { onUpdate({ file: null, previewUrl: url }); setIsAnnotated(false); }}
+        onFileSelect={(file, url) => { onUpdate({ file, previewUrl: url }); setIsAnnotated(false); originalUrlRef.current = url; }}
+        onGallerySelect={(url) => { onUpdate({ file: null, previewUrl: url }); setIsAnnotated(false); originalUrlRef.current = url; }}
         onAnnotate={block.previewUrl ? () => setShowAnnotation(true) : undefined}
         isAnnotated={isAnnotated}
       />
@@ -1157,6 +1364,7 @@ function ImageCardEditor({ block, onUpdate }: {
       {showAnnotation && block.previewUrl && ReactDOM.createPortal(
         <AnnotationLightbox
           imageUrl={block.previewUrl}
+          originalImageUrl={originalUrlRef.current}
           onSave={(annotatedUrl) => {
             onUpdate({ previewUrl: annotatedUrl, file: null });
             setIsAnnotated(true);
@@ -1628,7 +1836,11 @@ const ADDABLE_BLOCKS: { type: BlockType; label: string; description: string }[] 
   { type: 'patient-instructions', label: 'Patient Instructions', description: 'Post-treatment care checklist' },
 ];
 
-function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
+export function AddBlockMenu({ onAdd, renderTrigger }: {
+  onAdd: (type: BlockType) => void;
+  /** Custom trigger; receives helpers to control open state. Defaults to the dashed "+ Add Section" bar. */
+  renderTrigger?: (api: { open: boolean; toggle: () => void; ref: React.RefObject<HTMLButtonElement | null> }) => React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [openUp, setOpenUp] = useState(false);
@@ -1646,34 +1858,38 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
 
   return (
     <div style={{ position: 'relative' }}>
-      <button
-        ref={btnRef}
-        type="button"
-        onClick={handleOpen}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          width: '100%',
-          height: '36px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: space[2],
-          border: `1.5px dashed ${hovered || open ? color.primary : color.borderDefault}`,
-          borderRadius: radius.md,
-          backgroundColor: hovered || open ? '#E0F2FE' : 'transparent',
-          color: hovered || open ? color.primary : color.textSubtle,
-          fontSize: font.size.xs,
-          fontWeight: font.weight.medium,
-          cursor: 'pointer',
-          transition: `all ${transition.fast}`,
-        }}
-      >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-          <line x1="7" y1="3" x2="7" y2="11" /><line x1="3" y1="7" x2="11" y2="7" />
-        </svg>
-        Add Section
-      </button>
+      {renderTrigger ? (
+        renderTrigger({ open, toggle: handleOpen, ref: btnRef })
+      ) : (
+        <button
+          ref={btnRef}
+          type="button"
+          onClick={handleOpen}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            width: '100%',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: space[2],
+            border: `1.5px dashed ${hovered || open ? color.primary : color.borderDefault}`,
+            borderRadius: radius.md,
+            backgroundColor: hovered || open ? 'var(--ads-background-highlight-blue)' : 'transparent',
+            color: hovered || open ? color.primary : color.textSubtle,
+            fontSize: font.size.xs,
+            fontWeight: font.weight.medium,
+            cursor: 'pointer',
+            transition: `all ${transition.fast}`,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <line x1="7" y1="3" x2="7" y2="11" /><line x1="3" y1="7" x2="11" y2="7" />
+          </svg>
+          Add Section
+        </button>
+      )}
 
       {open && (
         <>
@@ -1757,6 +1973,77 @@ function MenuRow({ label, description, onClick }: {
   );
 }
 
+// ─── Insert-between-cards slot — Wynde-style "+" between sections ──────────
+
+function InsertBetweenSlot({ onInsert, isLast }: {
+  onInsert: (type: BlockType) => void;
+  isLast: boolean;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [open, setOpen] = useState(false);
+  const baseHeight = space[3]; // 12px — natural gap between cards
+  const expandedHeight = '32px';
+  const visible = hovered || open;
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        height: visible ? expandedHeight : baseHeight,
+        marginTop: isLast ? space[3] : 0,
+        marginBottom: isLast ? 0 : 0,
+        transition: `height ${transition.fast}`,
+      }}
+    >
+      {visible && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: space[2],
+          paddingLeft: space[1],
+          paddingRight: space[1],
+        }}>
+          <div style={{ flex: 1, height: 1, background: color.borderDefault }} />
+          <AddBlockMenu
+            onAdd={(type) => { onInsert(type); setOpen(false); }}
+            renderTrigger={({ open: o, toggle, ref }) => (
+              <button
+                ref={ref}
+                type="button"
+                aria-label="Insert section"
+                onClick={() => { setOpen(true); toggle(); }}
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: color.bgSurface,
+                  border: `1px solid ${o ? color.primary : color.borderDefault}`,
+                  color: o ? color.primary : color.textSubtle,
+                  cursor: 'pointer',
+                  padding: 0,
+                  transition: `border-color ${transition.fast}, color ${transition.fast}`,
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
+                </svg>
+              </button>
+            )}
+          />
+          <div style={{ flex: 1, height: 1, background: color.borderDefault }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Exported Block Editor ──────────────────────────────────────────────────
 
 type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlock | RxBlock | NextAppointmentBlock | PatientInstructionsBlock;
@@ -1764,9 +2051,23 @@ type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlo
 interface BlockEditorProps {
   blocks: SupportedBlock[];
   onBlocksChange: (blocks: SupportedBlock[]) => void;
+  /**
+   * When set, only the matching block is rendered. The full `blocks` array
+   * is still used internally for add/delete (which forward through to the
+   * parent). When unset (default), every block renders as before.
+   */
+  activeBlockId?: string | null;
+  /** Notify parent when a new block is added so it can update selection. */
+  onBlockAdded?: (id: string) => void;
+  /**
+   * If provided, an inline "+" insert affordance appears between cards
+   * (visible on hover). Called with the chosen section type and the
+   * insertion index in the blocks array.
+   */
+  onInsert?: (type: BlockType, atIndex: number) => void;
 }
 
-export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps) {
+export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onBlockAdded, onInsert }: BlockEditorProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [showGallery, setShowGallery] = useState(false);
@@ -1838,7 +2139,9 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
   };
 
   const addBlock = (type: BlockType) => {
-    onBlocksChange([...blocks, createBlock(type)]);
+    const created = createBlock(type);
+    onBlocksChange([...blocks, created]);
+    onBlockAdded?.(created.id);
   };
 
   const addImagesFromGallery = (urls: string[]) => {
@@ -1859,6 +2162,7 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
       showClinicalFields: false,
     }));
     onBlocksChange([...blocks, ...newBlocks]);
+    if (newBlocks[0]) onBlockAdded?.(newBlocks[0].id);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1881,6 +2185,7 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
       showClinicalFields: false,
     }));
     onBlocksChange([...blocks, ...newBlocks]);
+    if (newBlocks[0]) onBlockAdded?.(newBlocks[0].id);
     e.target.value = '';
   };
 
@@ -1934,26 +2239,44 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
     }
   };
 
+  // Inline-edit mode: every block always renders as its own card. activeBlockId
+  // is used only to highlight the currently focused card in the right pane.
+  const singleMode = false;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
-      {blocks.map((block, i) => (
-        <BlockCardShell
-          key={block.id}
-          label={getBlockLabel(block, i)}
-          thumbnail={getBlockThumbnail(block)}
-          collapsed={block.collapsed}
-          index={i}
-          onDelete={() => deleteBlock(block.id)}
-          onDuplicate={() => duplicateBlock(block.id)}
-          onToggleCollapse={() => toggleCollapse(block.id)}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          isDragTarget={dragOverIndex === i && dragIndex !== i}
-        >
-          {renderBlockContent(block)}
-        </BlockCardShell>
-      ))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {blocks.map((block, i) => {
+        return (
+          <React.Fragment key={block.id}>
+            <BlockCardShell
+              blockId={block.id}
+              label={getBlockLabel(block, i)}
+              thumbnail={getBlockThumbnail(block)}
+              blockType={block.type}
+              collapsed={singleMode ? false : block.collapsed}
+              index={i}
+              isActive={block.id === activeBlockId}
+              onDelete={() => deleteBlock(block.id)}
+              onDuplicate={() => duplicateBlock(block.id)}
+              onToggleCollapse={() => toggleCollapse(block.id)}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              isDragTarget={dragOverIndex === i && dragIndex !== i}
+              hideDragHandle={singleMode}
+              hideChrome={singleMode}
+            >
+              {renderBlockContent(block)}
+            </BlockCardShell>
+            {onInsert && (
+              <InsertBetweenSlot
+                isLast={i === blocks.length - 1}
+                onInsert={(type) => onInsert(type, i + 1)}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
 
       {/* Gallery overlay modal */}
       {showGallery && ReactDOM.createPortal(
@@ -1966,46 +2289,8 @@ export default function BlockEditor({ blocks, onBlocksChange }: BlockEditorProps
         document.body
       )}
 
-      {/* Sticky footer: action buttons + add block menu pinned to the bottom of the scroll container */}
-      <div style={{
-        position: 'sticky',
-        bottom: -16,
-        marginTop: space[4],
-        paddingTop: space[4],
-        paddingBottom: space[4],
-        backgroundColor: color.bgSurface,
-        borderTop: `1px solid ${color.borderDefault}`,
-        zIndex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: space[2],
-      }}>
-        <div style={{ display: 'flex', gap: space[2] }}>
-          <ActionBottomButton
-            label="Upload from Device"
-            icon={
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 9.5V4M4.5 6L7 3.5 9.5 6" />
-                <path d="M2 9.5v1.5a1 1 0 001 1h8a1 1 0 001-1V9.5" />
-              </svg>
-            }
-            onClick={() => fileRef.current?.click()}
-          />
-          <ActionBottomButton
-            label="Select from Gallery"
-            icon={
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="1" y="1" width="5" height="5" rx="1" />
-                <rect x="8" y="1" width="5" height="5" rx="1" />
-                <rect x="1" y="8" width="5" height="5" rx="1" />
-                <rect x="8" y="8" width="5" height="5" rx="1" />
-              </svg>
-            }
-            onClick={() => setShowGallery(true)}
-          />
-        </div>
-        <AddBlockMenu onAdd={addBlock} />
-      </div>
+      {/* Sticky footer removed — adding sections happens via the + button
+          in the left nav; image uploads happen via each ImageCardEditor. */}
 
       <input
         ref={fileRef}
@@ -2038,7 +2323,7 @@ function ActionBottomButton({ label, icon, onClick }: {
         gap: space[2],
         border: `1.5px dashed ${hovered ? color.primary : color.borderDefault}`,
         borderRadius: radius.md,
-        backgroundColor: hovered ? '#E0F2FE' : 'transparent',
+        backgroundColor: hovered ? 'var(--ads-background-highlight-blue)' : 'transparent',
         color: hovered ? color.primary : color.textSubtle,
         fontSize: font.size.xs,
         fontWeight: font.weight.medium,

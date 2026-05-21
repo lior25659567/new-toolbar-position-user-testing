@@ -38,7 +38,11 @@ export default function Scale() {
   const labels = preset.labels;
 
   return (
-    <div className="relative w-[802px] min-w-[320px] max-w-full flex items-start gap-4" data-name="Scale">
+    <div
+      className="relative flex items-start gap-4"
+      style={{ width: "fit-content", maxWidth: "100%" }}
+      data-name="Scale"
+    >
       {/* Prep QC panel: gradient + gap + numbers in one block */}
       <div className="flex flex-col flex-shrink-0" style={{ gap: "12px" }}>
         <div
@@ -47,7 +51,7 @@ export default function Scale() {
             height: "24px",
             borderRadius: radius.sm,
             background: GRADIENT,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            boxShadow: "var(--ads-shadow-sm)",
           }}
         />
         <div

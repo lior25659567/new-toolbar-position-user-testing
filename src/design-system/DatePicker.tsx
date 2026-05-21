@@ -177,7 +177,7 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
           style={{
             fontSize: "12px", fontWeight: 500, color: color.primary,
             backgroundColor: "transparent", border: "none", cursor: "pointer",
-            padding: "4px 12px", borderRadius: "6px",
+            padding: "4px 12px", borderRadius: "8px",
             transition: `background-color ${transition.fast}`,
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--ds-color-primary-subtle)")}
@@ -194,7 +194,7 @@ function CalendarDropdown({ value, min, max, onChange, onClose, anchorRect }: {
 
 const navBtnStyle: React.CSSProperties = {
   width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center",
-  border: "none", borderRadius: "6px", backgroundColor: "transparent",
+  border: "none", borderRadius: "8px", backgroundColor: "transparent",
   cursor: "pointer", color: color.textSubtle, transition: "background-color 0.1s",
 };
 
@@ -256,7 +256,7 @@ export function DatePicker({
             color: hasValue ? color.textDefault : color.textPlaceholder,
             backgroundColor: color.bgSurface,
             border: `1px solid ${hasError ? color.danger : isFocused || open ? color.primary : color.borderDefault}`,
-            borderRadius: radius.sm, cursor: disabled ? "not-allowed" : "pointer",
+            borderRadius: "var(--ads-size-field-radius)", cursor: disabled ? "not-allowed" : "pointer",
             opacity: disabled ? 0.5 : 1, outline: "none",
             transition: transition.input, boxSizing: "border-box" as const,
           }}

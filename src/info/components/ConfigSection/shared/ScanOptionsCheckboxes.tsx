@@ -21,8 +21,8 @@ export function ScanOptionsCheckboxes({ procedure, scanOptions, dispatch }: Scan
         style={{
           fontSize: "12px",
           fontWeight: 400,
-          color: "#6a7282",
-          fontFamily: "Inter, sans-serif",
+          color: "var(--ads-text-muted)",
+          fontFamily: "var(--ads-font-sans)",
           marginBottom: "8px",
         }}
       >

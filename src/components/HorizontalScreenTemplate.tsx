@@ -267,7 +267,7 @@ export default function HorizontalScreenTemplate({
       {/* Header - Simple version for horizontal layout */}
       <div className="absolute h-[76px] left-0 right-0 top-0 bg-white shadow-sm">
         <div className="flex items-center justify-center h-full px-6">
-          <h2 className="text-[#717182]">Horizontal Toolbar Layout - {currentPage === 'scan' ? 'Scan' : 'View'} Mode</h2>
+          <h2 className="text-[var(--ads-text-secondary)]">Horizontal Toolbar Layout - {currentPage === 'scan' ? 'Scan' : 'View'} Mode</h2>
         </div>
       </div>
 
@@ -378,10 +378,10 @@ export default function HorizontalScreenTemplate({
           <>
             {/* Add UI Jaw component here */}
             <div className="h-[430px] w-[232px]">
-              <div className="text-[#717182] text-center">Tooth Selection</div>
+              <div className="text-[var(--ads-text-secondary)] text-center">Tooth Selection</div>
             </div>
             {/* Add navigation zone */}
-            <div className="text-[#717182] text-center">Upper/Lower Navigation</div>
+            <div className="text-[var(--ads-text-secondary)] text-center">Upper/Lower Navigation</div>
           </>
         ) : (
           <div className="w-[316px] h-[345.97px]">

@@ -121,7 +121,7 @@ export default function UndercutMaterial({
             }
           }
           if (toothIdx >= 0) {
-            // Tint with primary blue #009ACE
+            // Tint with primary blue var(--ads-background-interactive)
             vec3 selectColor = vec3(0.0, 0.604, 0.808);
             gl_FragColor.rgb = mix(gl_FragColor.rgb, selectColor, 0.25);
           }

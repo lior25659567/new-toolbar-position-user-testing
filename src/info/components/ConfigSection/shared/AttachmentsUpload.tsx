@@ -33,7 +33,7 @@ export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadPr
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ fontSize: "16px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif", marginBottom: "16px" }}>
+      <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)", marginBottom: "16px" }}>
         Attachments
       </div>
 
@@ -48,13 +48,15 @@ export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadPr
           onDrop={handleDrop}
           style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            gap: "12px", padding: "40px 20px", cursor: "pointer",
-            borderRadius: "8px",
-            backgroundColor: dragOver ? "#E0F2FE" : "transparent",
+            gap: "12px", padding: "24px 20px", cursor: "pointer",
+            // Match the Notes empty-state box so both start/end at the same place.
+            minHeight: "100px", maxHeight: "180px", overflowY: "auto",
+            borderRadius: "var(--ads-radius-sm)",
+            backgroundColor: dragOver ? "var(--ads-background-highlight-blue)" : "transparent",
             transition: "background-color 0.15s",
           }}
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ads-text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
             <line x1="8" y1="12" x2="16" y2="12" />
             <line x1="8" y1="8" x2="16" y2="8" />
@@ -62,10 +64,10 @@ export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadPr
             <line x1="9" y1="3" x2="5" y2="8" />
             <line x1="15" y1="3" x2="19" y2="8" />
           </svg>
-          <div style={{ fontSize: "14px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif" }}>
+          <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)" }}>
             No Attachments
           </div>
-          <div style={{ fontSize: "13px", color: "#9CA3AF", fontFamily: "Inter, sans-serif", textAlign: "center", lineHeight: "1.5" }}>
+          <div style={{ fontSize: "13px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", textAlign: "center", lineHeight: "1.5" }}>
             You can share external-related files, including images, videos and X-rays, with your lab.
             <br />
             To upload files use MyiTero.com
@@ -79,26 +81,26 @@ export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadPr
               key={i}
               style={{
                 display: "flex", alignItems: "center", gap: "10px",
-                padding: "10px 14px", backgroundColor: "#F9FAFB",
-                borderRadius: "8px", border: "1px solid #E5E7EB",
+                padding: "10px 14px", backgroundColor: "var(--ads-bg-muted)",
+                borderRadius: "var(--ads-radius-sm)", border: "1px solid var(--ads-border-subtle)",
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--ads-text-muted)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5L9 1z" />
                 <path d="M9 1v4h4" />
               </svg>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "12px", fontWeight: 500, color: "#1e2939", fontFamily: "Inter, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "12px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {f.name}
                 </div>
-                <div style={{ fontSize: "11px", color: "#9CA3AF", fontFamily: "Inter, sans-serif" }}>
+                <div style={{ fontSize: "11px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)" }}>
                   {formatSize(f.size)}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => dispatch({ type: "REMOVE_ATTACHMENT", index: i })}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: "2px", display: "flex" }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ads-text-muted)", padding: "2px", display: "flex" }}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                   <path d="M10.5 3.5L3.5 10.5M3.5 3.5l7 7" />
@@ -110,9 +112,9 @@ export function AttachmentsUpload({ attachments, dispatch }: AttachmentsUploadPr
             onClick={() => inputRef.current?.click()}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
-              padding: "10px", fontSize: "13px", color: "#009ACE", fontWeight: 500,
-              fontFamily: "Inter, sans-serif", background: "none", border: "1px dashed #D1D5DB",
-              borderRadius: "8px", cursor: "pointer",
+              padding: "10px", fontSize: "13px", color: "var(--ads-background-interactive)", fontWeight: 500,
+              fontFamily: "var(--ads-font-sans)", background: "none", border: "1px dashed #D1D5DB",
+              borderRadius: "var(--ads-radius-sm)", cursor: "pointer",
             }}
           >
             + Add more files

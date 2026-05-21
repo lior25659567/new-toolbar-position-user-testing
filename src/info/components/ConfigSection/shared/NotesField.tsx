@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { InfoAction } from "../../../state/infoReducer";
+import { GhostButton } from "../../../../design-system";
 
 interface NotesFieldProps {
   notes: string;
@@ -21,11 +22,11 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "#F3F4F6" : "none",
+        background: hovered ? "var(--ads-bg-muted)" : "none",
         border: "none", cursor: "pointer", padding: "4px",
         borderRadius: "4px",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: hovered ? "#6a7282" : "#9CA3AF",
+        color: hovered ? "var(--ads-text-muted)" : "var(--ads-text-muted)",
         flexShrink: 0,
         transition: "all 0.15s ease",
       }}
@@ -69,7 +70,7 @@ export function NotesField({ notes, dispatch }: NotesFieldProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <style>{SCROLLBAR_STYLE}</style>
-      <div style={{ fontSize: "16px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif", marginBottom: "16px" }}>
+      <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)", marginBottom: "16px" }}>
         Note
       </div>
 
@@ -84,14 +85,14 @@ export function NotesField({ notes, dispatch }: NotesFieldProps) {
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             gap: "12px", padding: "24px 20px",
           }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ads-text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-            <div style={{ fontSize: "14px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif" }}>
+            <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)" }}>
               No notes yet
             </div>
-            <div style={{ fontSize: "13px", color: "#9CA3AF", fontFamily: "Inter, sans-serif" }}>
+            <div style={{ fontSize: "13px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)" }}>
               Type below to add your first note
             </div>
           </div>
@@ -103,15 +104,15 @@ export function NotesField({ notes, dispatch }: NotesFieldProps) {
                 style={{
                   display: "flex", alignItems: "flex-start", gap: "8px",
                   padding: "10px 12px",
-                  backgroundColor: "#F3F4F6",
-                  borderRadius: "8px",
+                  backgroundColor: "var(--ads-bg-muted)",
+                  borderRadius: "var(--ads-radius-sm)",
                   animation: "info-fade-in 0.35s ease-out both",
                 }}
               >
                 <div style={{
                   flex: 1,
-                  fontSize: "13px", fontFamily: "Inter, sans-serif",
-                  color: "#1e2939", lineHeight: "1.5",
+                  fontSize: "13px", fontFamily: "var(--ads-font-sans)",
+                  color: "var(--ads-text-primary)", lineHeight: "1.5",
                   whiteSpace: "pre-wrap", wordBreak: "break-word",
                 }}>
                   {note}
@@ -126,7 +127,7 @@ export function NotesField({ notes, dispatch }: NotesFieldProps) {
       {/* Input bar - always at the bottom */}
       <div style={{
         display: "flex", alignItems: "center", gap: "8px",
-        borderRadius: "8px", border: "1px solid #E5E7EB", padding: "10px 14px",
+        borderRadius: "var(--ads-radius-sm)", border: "1px solid var(--ads-border-subtle)", padding: "10px 14px",
         marginTop: "auto",
       }}>
         <input
@@ -137,23 +138,21 @@ export function NotesField({ notes, dispatch }: NotesFieldProps) {
           onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
           style={{
             flex: 1, border: "none", outline: "none", backgroundColor: "transparent",
-            fontSize: "13px", fontFamily: "Inter, sans-serif", color: "#1e2939",
+            fontSize: "13px", fontFamily: "var(--ads-font-sans)", color: "var(--ads-text-primary)",
           }}
         />
-        <button
+        <GhostButton
           onClick={handleSend}
-          style={{
-            background: "none", border: "none", cursor: "pointer", padding: "4px",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: inputValue.trim() ? "#3B7EBE" : "#9CA3AF",
-            transition: "color 0.15s ease",
-          }}
+          aria-label="Send note"
+          disabled={!inputValue.trim()}
+          size={36}
+          style={{ width: 36, height: 36, padding: 0, minWidth: 36, flexShrink: 0 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>
-        </button>
+        </GhostButton>
       </div>
     </div>
   );

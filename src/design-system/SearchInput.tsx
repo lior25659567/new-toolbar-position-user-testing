@@ -83,7 +83,8 @@ export function SearchInput({
     display: "flex",
     alignItems: "center",
     gap: space[2],
-    padding: `${space[2]} ${space[3]}`,
+    // Align height with the rest of the DS inputs (DropdownList/Select use space[3]/space[4]).
+    padding: `${space[3]} ${space[4]}`,
     backgroundColor: color.bgSurface,
     border: "1px solid",
     borderColor: isFocused ? color.primary : color.borderDefault,

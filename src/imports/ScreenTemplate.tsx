@@ -22,6 +22,8 @@ import { HorizontalBottomToolbarScan } from "../components/HorizontalBottomToolb
 import { HorizontalBottomToolbarView } from "../components/HorizontalBottomToolbarView";
 import ViewToolbar from "./ViewToolbar";
 import HeaderNavigation from "../components/HeaderNavigation";
+import { Stepper } from "../design-system";
+import type { InfoWizardTopbarState } from "../info/components/InfoPage";
 import JawSelector from "../components/JawSelector";
 import Panel from "./Panel";
 import CameraNiri from "./CameraNiri";
@@ -33,6 +35,7 @@ import LayoutSwitcher from "../components/LayoutSwitcher";
 import CombinedReviewMarginPanel from "../components/CombinedReviewMarginPanel";
 import ScanTabs from "../components/ScanTabs";
 import type { ScanTab } from "../components/ScanTabs";
+import SwapArchesModal from "../components/SwapArchesModal";
 import { InfoPage } from "../info/components/InfoPage";
 
 function Component3DModelMary({ activeButtons }: { activeButtons: Set<number> }) {
@@ -2473,8 +2476,54 @@ export default function ScreenTemplate({
   const activeButtons = externalActiveButtons !== undefined ? externalActiveButtons : localActiveButtons;
   const viewActiveButtons = externalViewActiveButtons !== undefined ? externalViewActiveButtons : localViewActiveButtons;
 
-  // Offset for scan tabs (64px when tabs are shown on scan page)
-  const tabsOffset = showScanTabs && currentPage === 'scan' ? 60 : 0;
+  // Offset for scan tabs — matches the ScanTabs strip min-height (44px).
+  const tabsOffset = showScanTabs && currentPage === 'scan' ? 44 : 0;
+
+  // Info-page layout variant lives here so we can hide the app-level
+  // chevron WizardTopbar whenever the user is in a non-classic variant
+  // (the inner UI already orients the user). Variant is switched via
+  // hidden keyboard shortcut (1/2/3/4) inside InfoPage.
+  const [infoVariant, setInfoVariant] = useState<'classic' | 'wizard' | 'rail' | 'accordion'>('classic');
+  const hideWizardTopbar = currentPage === 'info' && infoVariant === 'accordion';
+
+  // Wizard/rail variants publish their step state up here so we can
+  // render the design-system Stepper in the global top header instead
+  // of an in-page header. A row of invisible flex-1 buttons on top of
+  // the Stepper provides click navigation (the DS Stepper itself is
+  // presentational).
+  const [infoWizardTopbar, setInfoWizardTopbar] = useState<InfoWizardTopbarState | null>(null);
+  const customCenterSlot =
+    currentPage === 'info' && infoWizardTopbar
+      ? (
+          <div style={{ position: 'relative', width: 480, maxWidth: '100%' }}>
+            <Stepper
+              steps={infoWizardTopbar.steps.map((s) => s.label)}
+              activeStep={infoWizardTopbar.activeIdx}
+            />
+            <div
+              aria-hidden="true"
+              style={{ position: 'absolute', inset: 0, display: 'flex', pointerEvents: 'none' }}
+            >
+              {infoWizardTopbar.steps.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  aria-label={`Go to ${s.label}`}
+                  onClick={() => infoWizardTopbar.onJump(s.id)}
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    pointerEvents: 'auto',
+                    outline: 'none',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )
+      : undefined;
 
   const handleButtonClick = externalOnButtonClick || ((index: number) => {
     setLocalActiveButtons(prev => {
@@ -2487,6 +2536,14 @@ export default function ScreenTemplate({
       return newSet;
     });
   });
+
+  // "Swap arches" (scan tool index 5) is an action, not a toggle — open the
+  // Swap Arches modal instead of toggling the toolbar's active state.
+  const [swapOpen, setSwapOpen] = useState(false);
+  const handleScanToolClick = (index: number) => {
+    if (index === 5) { setSwapOpen(true); return; }
+    handleButtonClick(index);
+  };
 
   const handleViewButtonClick = externalOnViewButtonClick || ((index: number) => {
     setLocalViewActiveButtons(prev => {
@@ -2538,12 +2595,17 @@ export default function ScreenTemplate({
 
   return (
     <div className="relative size-full" data-name="Screen template" style={{ backgroundColor: '#F4F4F4' }}>
+      {/* Swap arches tool modal (opened from the scan toolbar) */}
+      <SwapArchesModal open={swapOpen} onClose={() => setSwapOpen(false)} />
       {/* Info page - full layout without 3D model */}
       {currentPage === 'info' && (
         <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, bottom: 0, zIndex: 10 }}>
           <InfoPage
             onContinue={() => handlePageChange('scan')}
             onPatientChange={(p) => setPatientName(p ? `${p.firstName} ${p.lastName.charAt(0)}.` : 'Select Patient')}
+            variant={infoVariant}
+            onVariantChange={setInfoVariant}
+            onWizardTopbarChange={setInfoWizardTopbar}
           />
         </div>
       )}
@@ -2579,6 +2641,8 @@ export default function ScreenTemplate({
         patientName={`Patient: ${patientName}`}
         onStepChange={(step) => handlePageChange(step)}
         jawImageOffset={tabsOffset}
+        hideWizardTopbar={hideWizardTopbar}
+        customCenterSlot={customCenterSlot}
         scanTabs={externalScanTabs}
         onModelOpacityChange={setModelOpacity}
         onModelVisibilityChange={(layerVis) => {
@@ -2603,13 +2667,13 @@ export default function ScreenTemplate({
           {activeButtons.has(3) ? (
             <>
               <div className="absolute top-[72px] right-[17px] w-[195px]">
-                <ExpandedToolbar activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
+                <ExpandedToolbar activeButtons={activeButtons} onButtonClick={handleScanToolClick} microAnimations={microAnimations} />
               </div>
             </>
           ) : (
             <>
               <div className="absolute top-[72px] right-[17px] w-[76px]">
-                <Toolbar activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
+                <Toolbar activeButtons={activeButtons} onButtonClick={handleScanToolClick} microAnimations={microAnimations} />
               </div>
             </>
           )}
@@ -2620,7 +2684,7 @@ export default function ScreenTemplate({
           <div className={`absolute bottom-[14px] left-1/2 translate-x-[-50%] ${activeButtons.has(3) ? 'w-[490px] h-[104px]' : 'w-[284px] h-[92px]'}`}>
             <HorizontalScanToolbar 
               activeButtons={activeButtons} 
-              onButtonClick={handleButtonClick} 
+              onButtonClick={handleScanToolClick} 
               microAnimations={microAnimations} 
             />
           </div>
@@ -2631,7 +2695,7 @@ export default function ScreenTemplate({
           <div className="absolute bottom-[14px] left-1/2 translate-x-[-50%] z-50">
             <HorizontalBottomToolbarScan 
               activeButtons={activeButtons} 
-              onButtonClick={handleButtonClick} 
+              onButtonClick={handleScanToolClick} 
               microAnimations={microAnimations}
             />
           </div>
@@ -2750,7 +2814,7 @@ export default function ScreenTemplate({
       {currentPage === 'scan' && layout === 'horizontal-top' && (
         <>
           <div className="absolute right-[17px] bottom-[16px]" style={{ top: `${72 + tabsOffset}px` }}>
-            <HorizontalTopToolbarScan activeButtons={activeButtons} onButtonClick={handleButtonClick} microAnimations={microAnimations} />
+            <HorizontalTopToolbarScan activeButtons={activeButtons} onButtonClick={handleScanToolClick} microAnimations={microAnimations} />
           </div>
         </>
       )}

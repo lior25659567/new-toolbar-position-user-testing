@@ -32,7 +32,7 @@ function InsertionArrow({ direction, position, onDrag, interactive, accentColor 
   const shaftR = 0.012;
   const headR = 0.032;
 
-  const baseColor = accentColor || '#009ACE';
+  const baseColor = accentColor || 'var(--ads-background-interactive)';
 
   const quaternion = useMemo(() => {
     const q = new THREE.Quaternion();
@@ -72,7 +72,7 @@ function InsertionArrow({ direction, position, onDrag, interactive, accentColor 
   const enter = () => { setHovered(true); if (interactive) document.body.style.cursor = 'grab'; };
   const leave = () => { setHovered(false); if (!dragging) document.body.style.cursor = 'default'; };
 
-  const col = dragging ? '#EAB308' : hovered ? '#00B8F0' : baseColor;
+  const col = dragging ? 'var(--ads-text-warning)' : hovered ? '#00B8F0' : baseColor;
   const opacity = dragging ? 1 : hovered ? 0.95 : 0.85;
 
   return (
@@ -140,7 +140,7 @@ function toothNormCenter(toothId: number, arch: ArchType): number {
 
 // Per-tooth arrow colors
 const TOOTH_COLORS = [
-  '#009ACE', '#E74C3C', '#27AE60', '#F39C12', '#8E44AD',
+  'var(--ads-background-interactive)', 'var(--ads-text-error)', '#27AE60', '#F39C12', '#8E44AD',
   '#16A085', '#D35400', '#2980B9', '#C0392B', '#1ABC9C',
   '#9B59B6', '#2ECC71', '#E67E22', '#3498DB', '#E91E63', '#00BCD4',
 ];
@@ -307,12 +307,12 @@ function Scene({
       })}
 
       <ambientLight intensity={0.15} />
-      <directionalLight position={[5, 8, 5]} intensity={0.8} color="#f5f0e8" castShadow />
-      <directionalLight position={[-5, 5, -5]} intensity={0.35} color="#e8eef5" />
+      <directionalLight position={[5, 8, 5]} intensity={0.8} color="var(--ads-background-highlight-orange)" castShadow />
+      <directionalLight position={[-5, 5, -5]} intensity={0.35} color="var(--ads-background-highlight-blue)" />
       <directionalLight position={[0, -3, 5]} intensity={0.25} />
       <directionalLight position={[0, 5, -5]} intensity={0.2} />
-      <pointLight position={[0, 10, 0]} intensity={0.2} color="#fff5e6" />
-      <pointLight position={[3, 0, 3]} intensity={0.15} color="#e6f0ff" />
+      <pointLight position={[0, 10, 0]} intensity={0.2} color="var(--ads-background-highlight-orange)" />
+      <pointLight position={[3, 0, 3]} intensity={0.15} color="var(--ads-background-highlight-blue)" />
       <Environment preset="apartment" background={false} />
 
       <OrbitControls

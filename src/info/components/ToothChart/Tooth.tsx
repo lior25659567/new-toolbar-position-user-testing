@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Tooth18Icon, Tooth17Icon, Tooth16Icon, Tooth15Icon, Tooth14Icon, Tooth13Icon, Tooth12Icon, Tooth11Icon, Tooth48Icon, Tooth47Icon, Tooth46Icon, Tooth45Icon, Tooth44Icon, Tooth43Icon, Tooth42Icon, Tooth41Icon } from "./ToothIcons";
+import { GhostButton } from "../../../design-system";
 
 interface ToothProps {
   number: number;
@@ -10,7 +11,15 @@ interface ToothProps {
   onClick: (e: React.MouseEvent) => void;
 }
 
-const CUSTOM_TOOTH_ICONS: Record<number, React.FC<{ color: string }>> = {
+// Upper teeth (11-28) render with the number above the tooth and the crown
+// aligned to the bottom of the cell (so it meets the occlusal divider).
+// Lower teeth (31-48) flip: tooth at top with crown to the divider, number
+// below.
+function isUpper(num: number) {
+  return num >= 11 && num <= 28;
+}
+
+const CUSTOM_TOOTH_ICONS: Record<number, React.FC<{ color: string; hovered?: boolean; strokeWidth?: number }>> = {
   18: Tooth18Icon, 17: Tooth17Icon, 16: Tooth16Icon, 15: Tooth15Icon,
   14: Tooth14Icon, 13: Tooth13Icon, 12: Tooth12Icon, 11: Tooth11Icon,
   48: Tooth48Icon, 47: Tooth47Icon, 46: Tooth46Icon, 45: Tooth45Icon,
@@ -24,16 +33,16 @@ const MIRROR_MAP: Record<number, number> = {
   31: 41, 32: 42, 33: 43, 34: 44, 35: 45, 36: 46, 37: 47, 38: 48,
 };
 
-function ToothIcon({ number, color: iconColor }: { number: number; color: string }) {
+function ToothIcon({ number, color: iconColor, hovered, strokeWidth }: { number: number; color: string; hovered: boolean; strokeWidth?: number }) {
   // Check direct match first
   const CustomIcon = CUSTOM_TOOTH_ICONS[number];
-  if (CustomIcon) return <CustomIcon color={iconColor} />;
+  if (CustomIcon) return <CustomIcon color={iconColor} hovered={hovered} strokeWidth={strokeWidth} />;
 
   // Check if this tooth is a mirrored version of a custom icon
   const mirrorOf = MIRROR_MAP[number];
   if (mirrorOf) {
     const MirrorIcon = CUSTOM_TOOTH_ICONS[mirrorOf];
-    if (MirrorIcon) return <div style={{ transform: "scaleX(-1)", display: "inline-flex" }}><MirrorIcon color={iconColor} /></div>;
+    if (MirrorIcon) return <div style={{ transform: "scaleX(-1)", display: "inline-flex" }}><MirrorIcon color={iconColor} hovered={hovered} strokeWidth={strokeWidth} /></div>;
   }
   const isUpper = number <= 28;
   return (
@@ -53,63 +62,99 @@ function ToothIcon({ number, color: iconColor }: { number: number; color: string
   );
 }
 
-export function Tooth({ number, selected, color, procedure, expanded, onClick }: ToothProps) {
+// Fixed visual envelope for the tooth SVG inside each cell. Keeping this
+// constant (rather than letting each SVG size the cell) is what makes the
+// number row land on a single baseline across all teeth in an arch — the
+// numbers always sit at the same offset from the top/bottom edge of the
+// button.
+const TOOTH_VIEWPORT_HEIGHT = 64;
+
+export function Tooth({ number, selected, color, procedure, onClick }: ToothProps) {
   const [hovered, setHovered] = useState(false);
 
   const isMissing = procedure === "missing";
   const hasProc = !!procedure;
+  const upper = isUpper(number);
 
-  const bgColor = selected ? "#F3F4F6"
-    : hovered ? "#F9FAFB"
-    : "white";
+  // The tooth icon always stays neutral — the assigned procedure is shown on
+  // the card border (below), not by recolouring the tooth.
+  const iconColor = "var(--ads-text-muted)";
+  const strokeWidth = undefined;
 
-  const borderColor = hasProc && color ? color
-    : selected ? "#9CA3AF"
-    : hovered ? "#9CA3AF"
-    : "#E5E7EB";
+  const label = (
+    <span
+      style={{
+        fontSize: 12,
+        fontWeight: 500,
+        color: "var(--ads-text-secondary)",
+        fontFamily: "var(--ads-font-sans)",
+        textDecoration: isMissing ? "line-through" : "none",
+        lineHeight: 1,
+      }}
+    >
+      {number}
+    </span>
+  );
 
-  const borderWidth = hasProc && color ? "2px" : "1px";
-
-  const textColor = selected ? "#1e2939" : "#374151";
-  const iconColor = selected ? "#374151" : "#9CA3AF";
+  const toothViewport = (
+    <div
+      style={{
+        height: TOOTH_VIEWPORT_HEIGHT,
+        display: "flex",
+        alignItems: upper ? "flex-end" : "flex-start",
+        justifyContent: "center",
+      }}
+    >
+      <ToothIcon number={number} color={iconColor} hovered={hovered} strokeWidth={strokeWidth} />
+    </div>
+  );
 
   return (
-    <div
+    <GhostButton
+      size={36}
+      selected={selected}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         flex: "1 1 0",
-        minWidth: "48px",
-        height: "84px",
-        borderRadius: "8px",
-        border: `${borderWidth} solid ${borderColor}`,
-        backgroundColor: bgColor,
+        minWidth: 51,
+        height: 104,
+        padding: "8px 4px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-        transition: "all 0.2s cubic-bezier(0.4,0,0.2,1)",
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        boxShadow: hovered ? "0 2px 8px rgba(0,0,0,0.06)" : "none",
-        gap: "2px",
-        position: "relative",
+        justifyContent: "space-between",
+        gap: 6,
+        // White card surface with the design-system small elevation.
+        backgroundColor: "var(--ads-background-subtle-01)",
+        boxShadow: "var(--ads-shadow-sm)",
+        borderRadius: "var(--ads-radius-sm)",
+        // The card border conveys state: an assigned procedure colours the
+        // border with that procedure's colour; otherwise selection shows the
+        // focus colour and hover a subtle border. Width is constant (1.5px)
+        // across states to avoid layout shift.
+        border:
+          hasProc && color
+            ? `1.5px solid ${color}`
+            : selected
+            ? "1.5px solid var(--ads-border-focus)"
+            : hovered
+            ? "1.5px solid var(--ads-border-subtle-hover)"
+            : "1.5px solid transparent",
       }}
     >
-      <ToothIcon number={number} color={iconColor} />
-      <span
-        style={{
-          fontSize: "12px",
-          fontWeight: selected || hasProc ? 600 : 500,
-          color: textColor,
-          fontFamily: "Inter, sans-serif",
-          textDecoration: isMissing ? "line-through" : "none",
-          lineHeight: 1,
-        }}
-      >
-        {number}
-      </span>
-    </div>
+      {upper ? (
+        <>
+          {label}
+          {toothViewport}
+        </>
+      ) : (
+        <>
+          {toothViewport}
+          {label}
+        </>
+      )}
+    </GhostButton>
   );
 }

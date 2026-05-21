@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { SecondaryButton, GhostButton } from '../design-system';
 
 export type ScanLayerType = 'treatment-scan' | 'pre-treatment' | 'additional-scan' | 'additional-bite';
 
@@ -17,27 +18,28 @@ interface ScanTabsProps {
   onTabSelect?: (tab: ScanTab) => void;
 }
 
-export default function ScanTabs({ 
-  tabs: externalTabs, 
+export default function ScanTabs({
+  tabs: externalTabs,
   onTabsChange,
-  onTabSelect 
+  onTabSelect,
 }: ScanTabsProps) {
   const [tabs, setTabs] = useState<ScanTab[]>(
-    externalTabs || [{ id: '1', label: 'Treatment Scan', layerType: 'treatment-scan' }]
+    externalTabs || [{ id: '1', label: 'Treatment Scan', layerType: 'treatment-scan' }],
   );
   const [activeTabId, setActiveTabId] = useState<string>(tabs[0]?.id || '1');
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
+  const [focusedTabId, setFocusedTabId] = useState<string | null>(tabs[0]?.id || null);
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [showBiteDropdown, setShowBiteDropdown] = useState(false);
-  const [plusHovered, setPlusHovered] = useState(false);
   const [selectedBites, setSelectedBites] = useState<Set<BiteType>>(new Set());
   const [newTabIds, setNewTabIds] = useState<Set<string>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (externalTabs) {
       setTabs(externalTabs);
-      if (externalTabs.length > 0 && !externalTabs.find(t => t.id === activeTabId)) {
+      if (externalTabs.length > 0 && !externalTabs.find((t) => t.id === activeTabId)) {
         setActiveTabId(externalTabs[0].id);
       }
     }
@@ -54,30 +56,61 @@ export default function ScanTabs({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const moveFocus = useCallback((id: string) => {
+    setFocusedTabId(id);
+    tabRefs.current[id]?.focus();
+  }, []);
+
   const handleTabClick = (tab: ScanTab) => {
     setActiveTabId(tab.id);
+    setFocusedTabId(tab.id);
     onTabSelect?.(tab);
   };
 
-  const handleTabClose = (e: React.MouseEvent, tabId: string) => {
-    e.stopPropagation();
-    const closedIndex = tabs.findIndex(t => t.id === tabId);
-    const newTabs = tabs.filter(t => t.id !== tabId);
-    if (newTabs.length === 0) return;
-    setTabs(newTabs);
-    onTabsChange?.(newTabs);
-    if (activeTabId === tabId) {
-      const prevTab = newTabs[Math.min(closedIndex, newTabs.length) - 1] || newTabs[0];
-      setActiveTabId(prevTab.id);
-      onTabSelect?.(prevTab);
+  const handleTabClose = useCallback(
+    (tabId: string) => {
+      const closedIndex = tabs.findIndex((t) => t.id === tabId);
+      const newTabs = tabs.filter((t) => t.id !== tabId);
+      if (newTabs.length === 0) return;
+      setTabs(newTabs);
+      onTabsChange?.(newTabs);
+      if (activeTabId === tabId) {
+        const prevTab = newTabs[Math.min(closedIndex, newTabs.length) - 1] || newTabs[0];
+        setActiveTabId(prevTab.id);
+        moveFocus(prevTab.id);
+        onTabSelect?.(prevTab);
+      }
+    },
+    [tabs, activeTabId, onTabsChange, onTabSelect, moveFocus],
+  );
+
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, tab: ScanTab) => {
+    const current = tabs.findIndex((t) => t.id === tab.id);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      moveFocus(tabs[(current + 1) % tabs.length].id);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      moveFocus(tabs[(current - 1 + tabs.length) % tabs.length].id);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      moveFocus(tabs[0].id);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      moveFocus(tabs[tabs.length - 1].id);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleTabClick(tab);
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && tabs.length > 1) {
+      e.preventDefault();
+      handleTabClose(tab.id);
     }
   };
 
   const handleAddLayer = (layerType: ScanLayerType) => {
     if (layerType === 'additional-bite') {
-      // Pre-populate with already-added bite types so they show as checked
       const existingBites = new Set<BiteType>(
-        tabs.filter(t => t.layerType === 'additional-bite' && t.biteType).map(t => t.biteType!)
+        tabs.filter((t) => t.layerType === 'additional-bite' && t.biteType).map((t) => t.biteType!),
       );
       setSelectedBites(existingBites);
       setShowBiteDropdown(!showBiteDropdown);
@@ -91,8 +124,17 @@ export default function ScanTabs({
     const newTabs = [...tabs, newTab];
     setTabs(newTabs);
     setActiveTabId(newTab.id);
-    setNewTabIds(prev => new Set(prev).add(newTab.id));
-    setTimeout(() => setNewTabIds(prev => { const n = new Set(prev); n.delete(newTab.id); return n; }), 400);
+    setFocusedTabId(newTab.id);
+    setNewTabIds((prev) => new Set(prev).add(newTab.id));
+    setTimeout(
+      () =>
+        setNewTabIds((prev) => {
+          const n = new Set(prev);
+          n.delete(newTab.id);
+          return n;
+        }),
+      400,
+    );
     setShowAddDropdown(false);
     setShowBiteDropdown(false);
     onTabsChange?.(newTabs);
@@ -103,12 +145,12 @@ export default function ScanTabs({
     'centric-occlusion': 'Centric Occlusion',
     'right-lateral': 'Right Lateral',
     'left-lateral': 'Left Lateral',
-    'protrusive': 'Protrusive',
-    'retrusive': 'Retrusive',
+    protrusive: 'Protrusive',
+    retrusive: 'Retrusive',
   };
 
   const toggleBiteSelection = (biteType: BiteType) => {
-    setSelectedBites(prev => {
+    setSelectedBites((prev) => {
       const next = new Set(prev);
       if (next.has(biteType)) {
         next.delete(biteType);
@@ -121,18 +163,16 @@ export default function ScanTabs({
 
   const handleAddSelectedBites = () => {
     const existingBiteTypes = new Set<BiteType>(
-      tabs.filter(t => t.layerType === 'additional-bite' && t.biteType).map(t => t.biteType!)
+      tabs.filter((t) => t.layerType === 'additional-bite' && t.biteType).map((t) => t.biteType!),
     );
 
-    // Remove bite tabs that were unchecked
-    let newTabs = tabs.filter(t => {
+    let newTabs = tabs.filter((t) => {
       if (t.layerType === 'additional-bite' && t.biteType) {
         return selectedBites.has(t.biteType);
       }
       return true;
     });
 
-    // Add new bite tabs that were checked but don't exist yet
     let lastTab: ScanTab | null = null;
     selectedBites.forEach((biteType) => {
       if (!existingBiteTypes.has(biteType)) {
@@ -144,16 +184,26 @@ export default function ScanTabs({
         };
         newTabs = [...newTabs, newTab];
         lastTab = newTab;
-        setNewTabIds(prev => new Set(prev).add(newTab.id));
-        setTimeout(() => setNewTabIds(prev => { const n = new Set(prev); n.delete(newTab.id); return n; }), 400);
+        setNewTabIds((prev) => new Set(prev).add(newTab.id));
+        setTimeout(
+          () =>
+            setNewTabIds((prev) => {
+              const n = new Set(prev);
+              n.delete(newTab.id);
+              return n;
+            }),
+          400,
+        );
       }
     });
 
     setTabs(newTabs);
     if (lastTab) {
-      setActiveTabId((lastTab as ScanTab).id);
-      onTabSelect?.(lastTab);
-    } else if (newTabs.length > 0 && !newTabs.find(t => t.id === activeTabId)) {
+      const last = lastTab as ScanTab;
+      setActiveTabId(last.id);
+      setFocusedTabId(last.id);
+      onTabSelect?.(last);
+    } else if (newTabs.length > 0 && !newTabs.find((t) => t.id === activeTabId)) {
       setActiveTabId(newTabs[0].id);
     }
     setShowBiteDropdown(false);
@@ -161,79 +211,148 @@ export default function ScanTabs({
     onTabsChange?.(newTabs);
   };
 
-  const tabHeight = 44;
-  const addButtonSize = 32;
-
   return (
     <div
       className="w-full"
-      style={{ 
-        minHeight: '60px',
+      style={{
+        // Strip is exactly the tab height — no vertical padding.
+        minHeight: '44px',
         height: '100%',
-        backgroundColor: '#FFFFFF',
-        fontFamily: "'Roboto', system-ui, sans-serif",
+        backgroundColor: 'var(--ads-bg-surface)',
+        fontFamily: "'Roboto', sans-serif",
         display: 'flex',
-        alignItems: 'flex-end',
-        paddingLeft: '14px',
-        paddingRight: '14px',
-        paddingTop: '16px',
+        alignItems: 'center',
+        paddingLeft: 0,
+        paddingRight: '12px',
+        paddingTop: 0,
         paddingBottom: 0,
-        gap: '4px',
-        borderBottom: '1px solid #E5E7EB',
+        gap: '8px', // separator gap between tablist group and add button
+        borderBottom: '1px solid var(--ads-border-subtle)',
       }}
     >
-      <style>{`@keyframes scan-tab-in { from { opacity: 0; transform: translateX(12px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }`}</style>
-      {/* Tabs */}
-      {tabs.map((tab) => {
+      <style>{`
+        @keyframes scan-tab-in {
+          from { opacity: 0; transform: translateY(4px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .scan-tab-enter { animation: none !important; }
+        }
+        .scan-tab-close::after {
+          content: ""; position: absolute; inset: -6px;
+        }
+      `}</style>
+
+      {/* Tablist — its own container, isolates tab keyboard nav and visual grouping */}
+      <div
+        role="tablist"
+        aria-label="Scan layers"
+        aria-orientation="horizontal"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          minWidth: 0,
+        }}
+      >
+        {tabs.length === 0 && (
+          <span
+            style={{
+              height: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--ads-text-tertiary)',
+              fontSize: '14px',
+              fontWeight: 400,
+              paddingLeft: '8px',
+              paddingRight: '8px',
+            }}
+          >
+            No layers — click + to add
+          </span>
+        )}
+
+        {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
         const isHovered = hoveredTabId === tab.id && !isActive;
+        const isFocusTarget = (focusedTabId ?? activeTabId) === tab.id;
         const isNew = newTabIds.has(tab.id);
+        const showClose = isActive || isHovered || focusedTabId === tab.id;
+        const canClose = tabs.length > 1;
+
+        // Container is white. Active state is signalled by the 1px
+        // primary top line + primary-color text. Inactive tabs get a
+        // subtle hover wash for affordance.
+        const baseBg = isHovered && !isActive
+          ? 'var(--ads-background-subtle-hover)'
+          : 'transparent';
 
         return (
           <div
             key={tab.id}
+            ref={(el) => {
+              tabRefs.current[tab.id] = el;
+            }}
+            role="tab"
+            id={`scan-tab-${tab.id}`}
+            aria-selected={isActive}
+            aria-controls={`scan-tabpanel-${tab.id}`}
+            tabIndex={isFocusTarget ? 0 : -1}
             onClick={() => handleTabClick(tab)}
             onMouseEnter={() => setHoveredTabId(tab.id)}
             onMouseLeave={() => setHoveredTabId(null)}
-            className="relative cursor-pointer flex items-center"
+            onFocus={() => setFocusedTabId(tab.id)}
+            onKeyDown={(e) => handleTabKeyDown(e, tab)}
+            className="relative cursor-pointer flex items-center scan-tab-enter"
             style={{
-              height: `${tabHeight}px`,
-              paddingLeft: '14px',
-              paddingRight: '10px',
-              borderRadius: '8px 8px 0 0',
-              backgroundColor: isActive ? '#FFFFFF' : isHovered ? '#F0F0F0' : '#F5F5F5',
+              height: '44px',
+              paddingLeft: '12px',
+              paddingRight: '6px',
+              backgroundColor: baseBg,
               transition: 'background-color 0.15s ease',
-              ...(isNew ? { animation: 'scan-tab-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both' } : {}),
-              minWidth: '140px',
-              maxWidth: '260px',
+              minWidth: '120px',
+              maxWidth: '240px',
               overflow: 'hidden',
-              borderTop: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
-              borderLeft: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
-              borderRight: isActive ? '1px solid #E5E7EB' : '1px solid transparent',
+              outline: 'none',
+              // Flat tabs — no radius, no top/bottom border. A single
+              // 1px right-border per tab acts as the divider between
+              // adjacent tabs (no doubling, no margin tricks). The 1px
+              // primary top line identifies the active tab.
+              borderRadius: 0,
+              borderTop: 'none',
               borderBottom: 'none',
-              marginBottom: isActive ? '-1px' : '0',
+              borderLeft: 'none',
+              borderRight: '1px solid var(--ads-border-subtle)',
+              boxShadow: 'none',
+              animation: isNew ? 'scan-tab-in 0.18s ease-out both' : undefined,
             }}
           >
-            {/* Active tab: teal underline - full width */}
+            {/* Active tab marker — single 1px line using the CTA
+                primary-button background token, so it always matches the
+                primary button color. */}
             {isActive && (
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '2px',
-                backgroundColor: '#009ACE',
-              }} />
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '1px',
+                  background: 'var(--ads-btn-primary-bg)',
+                  pointerEvents: 'none',
+                }}
+              />
             )}
-
-            {/* Label */}
             <span
               className="truncate select-none"
               style={{
-                fontSize: '14px',
-                lineHeight: '22px',
-                fontWeight: isActive ? 600 : 400,
-                color: isActive ? '#009ACE' : '#666666',
+                // body-01 token — 14px / 20px / 400.
+                fontFamily: 'var(--ads-font-sans)',
+                fontSize: 'var(--tp-body-01-size)',
+                lineHeight: 'var(--tp-body-01-lh)',
+                fontWeight: 400,
+                color: isActive ? 'var(--ads-text-primary)' : 'var(--ads-text-secondary)',
                 transition: 'color 0.15s ease',
                 flex: 1,
                 minWidth: 0,
@@ -242,79 +361,92 @@ export default function ScanTabs({
               {tab.label}
             </span>
 
-            {/* Close X - only on selected tab */}
-            {isActive && (
+
+            {/* Close — styled like our Ghost (secondary) button: transparent
+                fill, subtle hover wash, secondary text color. Visible on
+                active / hover / focus; can't close the last tab. */}
+            {canClose && showClose && (
               <button
-                onClick={(e) => handleTabClose(e, tab.id)}
-                className="flex items-center justify-center shrink-0"
+                type="button"
+                tabIndex={-1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleTabClose(tab.id);
+                }}
+                aria-label={`Close ${tab.label}`}
+                aria-controls={`scan-tab-${tab.id}`}
+                className="scan-tab-close btn btn-ghost btn-sm flex items-center justify-center shrink-0 relative"
+                data-design-system="ghost-button"
                 style={{
                   width: '20px',
                   height: '20px',
-                  marginLeft: '10px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.12s ease',
-                  borderRadius: '4px',
+                  minWidth: '20px',
+                  marginLeft: '8px',
+                  padding: 0,
+                  borderRadius: 'var(--ads-radius-sm)',
+                  color: 'var(--ads-text-secondary)',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.08)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; }}
               >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M1 1L9 9M9 1L1 9" stroke="#009ACE" strokeWidth="1.4" strokeLinecap="round" />
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path
+                    d="M2 2L10 10M10 2L2 10"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
             )}
           </div>
         );
-      })}
+        })}
+      </div>
 
-      {/* Add tab button (+) - centered to tab height with padding */}
+      {/* Add tab button (+) — separated from the tablist; gap from parent container */}
       <div
         className="relative"
         style={{
           display: 'flex',
           alignItems: 'center',
-          height: `${tabHeight}px`,
-          paddingLeft: '6px',
-          paddingRight: '6px',
-          paddingTop: '6px',
-          paddingBottom: '6px',
+          height: '44px',
         }}
         ref={dropdownRef}
       >
-        <button
-          onClick={() => { setShowAddDropdown(!showAddDropdown); setShowBiteDropdown(false); }}
-          onMouseEnter={() => setPlusHovered(true)}
-          onMouseLeave={() => setPlusHovered(false)}
-          className="flex items-center justify-center"
-          style={{
-            width: `${addButtonSize}px`,
-            height: `${addButtonSize}px`,
-            backgroundColor: plusHovered ? '#f3f4f6' : '#FFFFFF',
-            border: '1px solid #E5E7EB',
-            cursor: 'pointer',
-            borderRadius: '8px',
-            transition: 'background-color 0.15s ease',
-            flexShrink: 0,
+        <GhostButton
+          onClick={() => {
+            setShowAddDropdown(!showAddDropdown);
+            setShowBiteDropdown(false);
           }}
+          size={36}
+          aria-label="Add layer"
+          aria-haspopup="menu"
+          aria-expanded={showAddDropdown}
+          selected={showAddDropdown}
+          style={{ width: 32, height: 32, padding: 0, minWidth: 32 }}
         >
-          <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-            <path d="M8 3V13M3 8H13" stroke="#64748b" strokeWidth="1.4" strokeLinecap="round" />
+          <svg className="block" width="18" height="18" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 6V18M6 12H18"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
-        </button>
+        </GhostButton>
 
-        {/* Add Layer Dropdown */}
         {showAddDropdown && (
           <div
+            role="menu"
+            aria-label="Add layer"
             style={{
               position: 'absolute',
-              top: '50px',
+              top: '40px',
               left: '0',
-              backgroundColor: '#FFFFFF',
-              borderRadius: '10px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-              border: '1px solid rgba(0,0,0,0.08)',
+              backgroundColor: 'var(--ads-bg-surface)',
+              borderRadius: 'var(--ads-radius-sm)',
+              boxShadow: 'var(--ads-shadow-sm)',
+              border: '1px solid var(--ads-border-subtle)',
               zIndex: 100,
               minWidth: '240px',
               padding: '6px',
@@ -323,23 +455,21 @@ export default function ScanTabs({
           >
             <DropdownItem label="Pre Treatment" onClick={() => handleAddLayer('pre-treatment')} />
             <DropdownItem label="Additional Scan" onClick={() => handleAddLayer('additional-scan')} />
-            <DropdownItem 
-              label="Additional Bite" 
-              hasSubmenu 
-              onClick={() => handleAddLayer('additional-bite')}
-            />
-            
+            <DropdownItem label="Additional Bite" hasSubmenu onClick={() => handleAddLayer('additional-bite')} />
+
             {showBiteDropdown && (
               <div
+                role="menu"
+                aria-label="Bite types"
                 style={{
                   position: 'absolute',
                   top: '0',
                   left: '100%',
                   marginLeft: '6px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '10px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-                  border: '1px solid rgba(0,0,0,0.08)',
+                  backgroundColor: 'var(--ads-bg-surface)',
+                  borderRadius: 'var(--ads-radius-sm)',
+                  boxShadow: 'var(--ads-shadow-sm)',
+                  border: '1px solid var(--ads-border-subtle)',
                   zIndex: 101,
                   minWidth: '240px',
                   padding: '6px',
@@ -350,28 +480,17 @@ export default function ScanTabs({
                 <CheckboxItem label="Left Lateral" checked={selectedBites.has('left-lateral')} onClick={() => toggleBiteSelection('left-lateral')} />
                 <CheckboxItem label="Protrusive" checked={selectedBites.has('protrusive')} onClick={() => toggleBiteSelection('protrusive')} />
                 <CheckboxItem label="Retrusive" checked={selectedBites.has('retrusive')} onClick={() => toggleBiteSelection('retrusive')} />
-                
-                {/* Divider + Add button */}
-                <div style={{ height: '1px', backgroundColor: '#E0E0E0', margin: '6px 0' }} />
+
+                <div style={{ height: '1px', backgroundColor: 'var(--ads-border-subtle)', margin: '6px 0' }} />
                 <button
                   onClick={handleAddSelectedBites}
-                  style={{
-                    width: '100%',
-                    padding: '10px 16px',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    lineHeight: '20px',
-                    fontFamily: "'Roboto', sans-serif",
-                    fontWeight: 600,
-                    color: selectedBites.size > 0 ? '#FFFFFF' : '#999999',
-                    backgroundColor: selectedBites.size > 0 ? '#009ACE' : '#F0F0F0',
-                    border: 'none',
-                    cursor: selectedBites.size > 0 ? 'pointer' : 'default',
-                    transition: 'all 0.15s ease',
-                    textAlign: 'center',
-                  }}
+                  disabled={selectedBites.size === 0}
+                  className={`btn btn-md ${selectedBites.size > 0 ? 'btn-primary' : ''}`}
+                  style={{ width: '100%', fontWeight: 500 }}
                 >
-                  {tabs.some(t => t.layerType === 'additional-bite') ? 'Update' : 'Add Selected'} ({selectedBites.size})
+                  <span>
+                    {tabs.some((t) => t.layerType === 'additional-bite') ? 'Update' : 'Add Selected'} ({selectedBites.size})
+                  </span>
                 </button>
               </div>
             )}
@@ -382,32 +501,33 @@ export default function ScanTabs({
   );
 }
 
-function DropdownItem({ 
-  label, 
-  onClick, 
+function DropdownItem({
+  label,
+  onClick,
   hasSubmenu = false,
-}: { 
-  label: string; 
-  onClick: () => void; 
+}: {
+  label: string;
+  onClick: () => void;
   hasSubmenu?: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <button
+      role="menuitem"
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="w-full flex items-center justify-between"
       style={{
-        padding: '12px 16px',
-        borderRadius: '6px',
-        fontSize: '14px',
-        lineHeight: '20px',
-        color: '#1A1A1A',
-        fontFamily: "'Roboto', sans-serif",
+        padding: '10px 12px',
+        borderRadius: 'var(--ads-radius-sm)',
+        fontSize: 'var(--ads-size-font-body)',
+        lineHeight: 'var(--ads-size-lh-body)',
+        color: 'var(--ads-text-primary)',
+        fontFamily: 'var(--ads-font-sans)',
         fontWeight: 400,
-        backgroundColor: isHovered ? 'rgba(0,0,0,0.05)' : 'transparent',
+        backgroundColor: isHovered ? 'var(--ads-background-subtle-hover)' : 'transparent',
         transition: 'background-color 0.1s ease',
         textAlign: 'left',
         cursor: 'pointer',
@@ -416,68 +536,56 @@ function DropdownItem({
     >
       <span>{label}</span>
       {hasSubmenu && (
-        <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-          <path d="M4.5 3L7.5 6L4.5 9" stroke="#5F6368" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M4.5 3L7.5 6L4.5 9" stroke="var(--ads-icon-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )}
     </button>
   );
 }
 
-function CheckboxItem({ 
-  label, 
+function CheckboxItem({
+  label,
   checked,
   onClick,
-}: { 
-  label: string; 
+}: {
+  label: string;
   checked: boolean;
-  onClick: () => void; 
+  onClick: () => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <button
+      role="menuitemcheckbox"
+      aria-checked={checked}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="w-full flex items-center"
       style={{
-        gap: '12px',
-        padding: '12px 16px',
-        borderRadius: '6px',
-        fontSize: '14px',
-        lineHeight: '20px',
-        color: '#1A1A1A',
-        fontFamily: "'Roboto', sans-serif",
-        fontWeight: checked ? 500 : 400,
-        backgroundColor: isHovered ? 'rgba(0,0,0,0.05)' : 'transparent',
+        gap: 'var(--ads-size-control-gap)',
+        padding: '10px 12px',
+        borderRadius: 'var(--ads-radius-sm)',
+        fontSize: 'var(--ads-size-font-body)',
+        lineHeight: 'var(--ads-size-lh-body)',
+        color: 'var(--ads-text-primary)',
+        fontFamily: 'var(--ads-font-sans)',
+        fontWeight: 400,
+        backgroundColor: isHovered ? 'var(--ads-background-subtle-hover)' : 'transparent',
         transition: 'background-color 0.1s ease',
         textAlign: 'left',
         cursor: 'pointer',
         border: 'none',
       }}
     >
-      {/* Checkbox */}
-      <div
-        style={{
-          width: '18px',
-          height: '18px',
-          borderRadius: '4px',
-          border: checked ? 'none' : '2px solid #BBBBBB',
-          backgroundColor: checked ? '#009ACE' : 'transparent',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          transition: 'all 0.12s ease',
-        }}
-      >
+      <span className={`cbx ${checked ? 'on' : ''}`} aria-hidden>
         {checked && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4L3.5 6.5L9 1" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="var(--ads-icon-on-color-primary)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="4,11 9,16 16,5" />
           </svg>
         )}
-      </div>
+      </span>
       <span>{label}</span>
     </button>
   );

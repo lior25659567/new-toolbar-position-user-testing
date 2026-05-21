@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Modal, TextInput } from '../../design-system';
 import { color, font, space, radius, transition, shadow } from '../../design-system/tokens';
+import { QRCodePreview } from '../shared/QRCodePreview';
 
 interface ShareModalProps {
   open: boolean;
@@ -15,49 +16,6 @@ interface ShareModalProps {
   pin: string;
   onPinEnabledChange: (enabled: boolean) => void;
   onPinChange: (pin: string) => void;
-}
-
-// ─── QR Code ────────────────────────────────────────────────────────────────
-
-function QRCodePreview({ link }: { link: string }) {
-  const N = 25;
-  const cells: boolean[][] = Array.from({ length: N }, () => Array(N).fill(false));
-  let h = 0;
-  for (let i = 0; i < link.length; i++) h = ((h << 5) - h + link.charCodeAt(i)) | 0;
-  const finder = (sr: number, sc: number) => {
-    for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) {
-      cells[sr + r][sc + c] = r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4);
-    }
-  };
-  finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
-  for (let i = 8; i < N - 8; i++) { cells[6][i] = i % 2 === 0; cells[i][6] = i % 2 === 0; }
-  for (let r = -2; r <= 2; r++) for (let c = -2; c <= 2; c++) {
-    const ar = 18 + r, ac = 18 + c;
-    if (ar >= 0 && ar < N && ac >= 0 && ac < N) cells[ar][ac] = Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0);
-  }
-  for (let i = 0; i < 8; i++) {
-    if (i < N) { cells[7][i] = false; cells[i][7] = false; }
-    if (N - 8 + i < N) cells[7][N - 8 + i] = false;
-    if (i < N) cells[i][N - 8] = false;
-    if (N - 8 + i < N) cells[N - 8][i] = false;
-    if (i < N) cells[N - 8 + i][7] = false;
-  }
-  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
-    if ((r < 9 && c < 9) || (r < 9 && c >= N - 8) || (r >= N - 8 && c < 9)) continue;
-    if (r === 6 || c === 6) continue;
-    if (r >= 16 && r <= 20 && c >= 16 && c <= 20) continue;
-    cells[r][c] = ((h * (r * N + c + 1) * 2654435761) >>> 0) % 5 !== 0 && ((h * (r * N + c + 1) * 2654435761) >>> 0) % 3 !== 0;
-  }
-  const size = 160, cs = size / N;
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: space[3] }}>
-      <div style={{ padding: 12, backgroundColor: '#fff', borderRadius: radius.md, border: `1px solid ${color.borderDefault}` }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {cells.map((row, r) => row.map((cell, c) => cell ? <rect key={`${r}-${c}`} x={c * cs} y={r * cs} width={cs + 0.5} height={cs + 0.5} fill="#1a1a2e" rx={0.4} /> : null))}
-        </svg>
-      </div>
-    </div>
-  );
 }
 
 // ─── Small icon button for bottom row ───────────────────────────────────────
@@ -88,7 +46,9 @@ function SocialIcon({ icon, label, onClick }: { icon: React.ReactNode; label: st
 
 export default function ShareModal({ open, onClose, reportName, patientName, doctorName, signatureUrl, signatureMethod, onSignatureChange, pinEnabled, pin, onPinEnabledChange, onPinChange }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
-  const [email, setEmail] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [emails, setEmails] = useState<string[]>([]);
+  const [emailFocused, setEmailFocused] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [accessLevel, setAccessLevel] = useState<'invited' | 'anyone'>('invited');
   const [accessDropdownOpen, setAccessDropdownOpen] = useState(false);
@@ -104,13 +64,99 @@ export default function ShareModal({ open, onClose, reportName, patientName, doc
   return (
     <Modal open={open} onClose={onClose} title="Share Report" width={480}>
 
-      {/* Email input */}
-      <div style={{ marginBottom: space[4] }}>
-        <TextInput
-          placeholder="Email, separated by commas"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
+      {/* Email input with chips */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: '6px',
+          padding: `${space[2]} ${space[3]}`,
+          minHeight: '40px',
+          border: `1px solid ${emailFocused ? color.primary : color.borderDefault}`,
+          borderRadius: radius.md,
+          backgroundColor: color.white,
+          marginBottom: space[4],
+          cursor: 'text',
+          boxSizing: 'border-box' as const,
+          transition: `border-color ${transition.fast}`,
+        }}
+        onClick={() => {
+          const input = document.getElementById('share-email-input');
+          if (input) input.focus();
+        }}
+      >
+        {emails.map((em, i) => (
+          <span
+            key={i}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              backgroundColor: color.neutral100,
+              borderRadius: radius.sm,
+              fontSize: font.size.sm,
+              color: color.textDefault,
+              lineHeight: '1',
+            }}
+          >
+            {em}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setEmails(emails.filter((_, j) => j !== i)); }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: '14px', height: '14px', padding: 0, border: 'none',
+                backgroundColor: 'transparent', color: color.textSubtle,
+                cursor: 'pointer', borderRadius: '50%', fontSize: '12px', lineHeight: '1',
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <line x1="2.5" y1="2.5" x2="7.5" y2="7.5" /><line x1="7.5" y1="2.5" x2="2.5" y2="7.5" />
+              </svg>
+            </button>
+          </span>
+        ))}
+        <input
+          id="share-email-input"
+          type="text"
+          value={emailInput}
+          onChange={(e) => setEmailInput(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.key === 'Enter' || e.key === ',' || e.key === ' ') && emailInput.trim()) {
+              e.preventDefault();
+              const trimmed = emailInput.trim().replace(/,$/,'');
+              if (trimmed && trimmed.includes('@')) {
+                setEmails([...emails, trimmed]);
+                setEmailInput('');
+              }
+            }
+            if (e.key === 'Backspace' && !emailInput && emails.length > 0) {
+              setEmails(emails.slice(0, -1));
+            }
+          }}
+          onFocus={() => setEmailFocused(true)}
+          onBlur={() => {
+            setEmailFocused(false);
+            const trimmed = emailInput.trim().replace(/,$/,'');
+            if (trimmed && trimmed.includes('@')) {
+              setEmails([...emails, trimmed]);
+              setEmailInput('');
+            }
+          }}
+          placeholder={emails.length === 0 ? 'Add emails...' : ''}
+          style={{
+            flex: 1,
+            minWidth: '80px',
+            border: 'none',
+            outline: 'none',
+            fontSize: font.size.sm,
+            fontFamily: font.family,
+            color: color.textDefault,
+            backgroundColor: 'transparent',
+            padding: '2px 0',
+          }}
         />
       </div>
 

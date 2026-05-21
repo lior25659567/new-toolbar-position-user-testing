@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { PrimaryButton as DSPrimaryButton, SecondaryButton as DSSecondaryButton } from "../design-system";
 import niriImage from "../assets/button-images/review-tool/Niri.png";
 import colorImage from "../assets/button-images/review-tool/Color.png";
@@ -25,49 +25,39 @@ function DetectIcon() {
 // --- Margin Line Panel Components (Updated to match Figma design) ---
 function Container() {
   return (
-    <div className="border-[#f3f4f6] border-b border-solid h-[56px] relative shrink-0 w-full" data-name="Container" data-node-id="138:21992">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-between pb-px pt-0 px-[16px] relative size-full">
-        <div className="h-[30px] relative shrink-0 w-[123.633px]" data-name="Container" data-node-id="138:21993">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[12px] items-center relative size-full">
-            {/* Drag Handle */}
-            <div className="relative shrink-0 size-[11px]" data-name="Container" data-node-id="138:21994">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[3px] items-start relative size-full">
-                <div className="h-[4px] relative shrink-0 w-[11px]" data-name="Container" data-node-id="138:21995">
-                  <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[3px] items-start relative size-full">
-                    <div className="bg-[#99a1af] rounded-[16777200px] shrink-0 size-[4px]" data-name="Container" data-node-id="138:21996" />
-                    <div className="bg-[#99a1af] flex-[1_0_0] h-[4px] min-h-px min-w-px rounded-[16777200px]" data-name="Container" data-node-id="138:21997" />
-                  </div>
-                </div>
-                <div className="flex-[1_0_0] min-h-px min-w-px relative w-[11px]" data-name="Container" data-node-id="138:21998">
-                  <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[3px] items-start relative size-full">
-                    <div className="bg-[#99a1af] rounded-[16777200px] shrink-0 size-[4px]" data-name="Container" data-node-id="138:21999" />
-                    <div className="bg-[#99a1af] flex-[1_0_0] h-[4px] min-h-px min-w-px rounded-[16777200px]" data-name="Container" data-node-id="138:22000" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Title */}
-            <div className="flex-[1_0_0] h-[30px] min-h-px min-w-px relative" data-name="Heading 2" data-node-id="138:22001">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[30px] left-0 not-italic text-[#1e2939] text-[16px] top-0 tracking-[-0.4492px]" data-node-id="138:22002">
-                  Margin line
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Close Button */}
-        <div 
-          className="relative rounded-[10px] shrink-0 size-[32px] cursor-pointer transition-all duration-200 hover:bg-[#f3f4f6]" 
-          data-name="Button" 
-          data-node-id="138:22003"
-          style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+    <div
+      className="relative shrink-0 w-full"
+      data-name="Container"
+      style={{
+        height: '56px',
+        borderBottom: '1px solid var(--ads-border-subtle)',
+      }}
+    >
+      <div className="content-stretch flex items-center justify-between px-[16px] relative size-full">
+        <p
+          style={{
+            margin: 0,
+            fontFamily: 'var(--ads-font-sans)',
+            fontWeight: 500,
+            fontSize: '17px',
+            lineHeight: '24px',
+            color: 'var(--ads-text-primary)',
           }}
         >
-          <div className="relative shrink-0 size-[20px]" data-name="Icon" data-node-id="138:22004">
+          Margin line
+        </p>
+        {/* Close Button */}
+        <div
+          className="relative shrink-0 size-[32px] cursor-pointer transition-all duration-200"
+          data-name="Button"
+          style={{
+            borderRadius: 'var(--ads-radius-sm)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div className="relative shrink-0 size-[20px]" data-name="Icon">
             <img alt="" className="block max-w-none size-full" src={imgIcon} />
           </div>
         </div>
@@ -77,60 +67,34 @@ function Container() {
 }
 
 function ArrowButton({ direction, imgSrc }: { direction: 'left' | 'right'; imgSrc: string }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
   return (
-    <div 
-      className="border border-solid relative rounded-[8px] shrink-0 size-[44px] cursor-pointer transition-all duration-200"
-      data-name="Button"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        borderColor: isHovered ? '#009ACE' : '#e5e7eb',
-        backgroundColor: isHovered ? '#f0f9ff' : 'transparent',
-        transform: isHovered ? 'scale(1.05)' : 'scale(1)'
-      }}
+    <DSSecondaryButton
+      size={44}
+      style={{ width: 44, height: 44, padding: 0, minWidth: 44 }}
+      aria-label={direction === 'left' ? 'Previous tooth' : 'Next tooth'}
     >
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-center p-px relative size-full">
-        <div className="relative shrink-0 size-[20px]" data-name="Icon">
-          <img alt="" className="block max-w-none size-full" src={imgSrc} />
-        </div>
-      </div>
-    </div>
+      <img alt="" style={{ width: 20, height: 20, display: 'block' }} src={imgSrc} />
+    </DSSecondaryButton>
   );
 }
 
 function ListItem() {
   return (
-    <div className="h-[84px] relative shrink-0 w-full" data-name="Container" data-node-id="138:22007">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-center justify-between pl-0 pr-[0.008px] py-0 relative size-full">
+    <div className="relative shrink-0 w-full" data-name="Container" style={{ height: '84px' }}>
+      <div className="content-stretch flex items-center justify-between relative size-full">
         {/* Left Arrow Button */}
         <ArrowButton direction="left" imgSrc={imgIcon1} />
         {/* Tooth Info */}
-        <div className="h-[84px] relative shrink-0 w-[69.086px]" data-name="Container" data-node-id="138:22011">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[4px] items-center relative size-full">
-            <div className="h-[16px] relative shrink-0 w-[43.961px]" data-name="Paragraph" data-node-id="138:22012">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Medium',sans-serif] font-medium leading-[16px] left-0 not-italic text-[#6a7282] text-[11px] top-px tracking-[0.3px] uppercase" data-node-id="138:22013">
-                  TOOTH
-                </p>
-              </div>
-            </div>
-            <div className="flex-[1_0_0] min-h-px min-w-px relative w-[35.297px]" data-name="Paragraph" data-node-id="138:22014">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Bold',sans-serif] font-bold leading-[32px] left-0 not-italic text-[#101828] text-[28px] top-[0.5px] tracking-[0.3691px]" data-node-id="138:22015">
-                  11
-                </p>
-              </div>
-            </div>
-            <div className="h-[20px] relative shrink-0 w-[69.086px]" data-name="Paragraph" data-node-id="138:22016">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
-                <p className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[20px] left-0 not-italic text-[#6a7282] text-[12px] top-[0.5px] tracking-[-0.1504px]" data-node-id="138:22017">
-                  Upper Jaw
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-col items-center justify-center gap-[2px]">
+          <span style={{ fontSize: '11px', fontWeight: 500, color: 'var(--ads-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontFamily: 'var(--ads-font-sans)', lineHeight: '16px' }}>
+            TOOTH
+          </span>
+          <span style={{ fontSize: '28px', fontWeight: 500, color: 'var(--ads-text-primary)', lineHeight: '32px', fontFamily: 'var(--ads-font-sans)' }}>
+            11
+          </span>
+          <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--ads-text-muted)', lineHeight: '20px', fontFamily: 'var(--ads-font-sans)' }}>
+            Upper Jaw
+          </span>
         </div>
         {/* Right Arrow Button */}
         <ArrowButton direction="right" imgSrc={imgIcon2} />
@@ -152,7 +116,7 @@ function ActionButton({ icon, label }: { icon: string; label: string }) {
   return (
     <div style={{ flex: '1 0 0', minWidth: 0 }}>
       <DSSecondaryButton size={44} fullWidth>
-        <img alt="" style={{ width: 16, height: 16, display: 'block' }} src={icon} />
+        <img alt="" style={{ width: 20, height: 20, display: 'block' }} src={icon} />
         {label}
       </DSSecondaryButton>
     </div>
@@ -180,17 +144,29 @@ function Frame() {
 
 function ReviewToolHeader() {
   return (
-    <div className="bg-[#00adef] relative shrink-0 w-full" data-name="Review Tool Header">
-      <div aria-hidden="true" className="absolute border-[#0099d6] border-[0px_0px_1px] border-solid inset-0 pointer-events-none" />
+    <div
+      className="relative shrink-0 w-full"
+      data-name="Review Tool Header"
+      style={{
+        backgroundColor: 'var(--ads-blue-500)',
+        borderBottom: '1px solid var(--ads-blue-600)',
+      }}
+    >
       <div className="flex flex-row items-center size-full">
-        <div className="content-stretch flex items-center pb-[17px] pt-[16px] px-[16px] relative w-full">
-          <div className="h-[22.5px] relative shrink-0">
-            <div className="bg-clip-padding border-0 border-[transparent] border-solid h-[22.5px] relative">
-              <p className="absolute font-['Roboto:Medium',sans-serif] font-medium leading-[30px] left-0 text-[24px] text-nowrap text-white top-[-1px] whitespace-pre" style={{ fontVariationSettings: "'wdth' 100" }}>
-                Review Tool
-              </p>
-            </div>
-          </div>
+        <div className="content-stretch flex items-center px-[16px] py-[16px] relative w-full">
+          <p
+            style={{
+              margin: 0,
+              fontFamily: 'var(--ads-font-sans)',
+              fontWeight: 500,
+              fontSize: '20px',
+              lineHeight: '28px',
+              color: 'var(--ads-text-on-primary)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Review Tool
+          </p>
         </div>
       </div>
     </div>
@@ -200,17 +176,17 @@ function ReviewToolHeader() {
 // Review Tool Images Components - SVG Placeholders that STRETCH
 function ReviewToolImages() {
   return (
-    <div className="w-full h-full bg-white flex flex-col" data-name="Review Tool Images">
+    <div className="w-full h-full bg-[var(--ads-background-subtle-01)] flex flex-col" data-name="Review Tool Images">
       {/* Container fills ALL available height and splits evenly between two images */}
       <div className="flex-1 min-h-0 flex flex-col gap-[8px] p-[16px]">
         
         {/* NIRI Image */}
-        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black">
+        <div className="w-full flex-1 min-h-0 overflow-hidden" style={{ borderRadius: 'var(--ads-radius-sm)', backgroundColor: 'var(--ads-bg-inverse)' }}>
           <img src={niriImage} alt="NIRI Scan" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
 
         {/* Color Image */}
-        <div className="w-full flex-1 min-h-0 rounded-[8px] overflow-hidden bg-black">
+        <div className="w-full flex-1 min-h-0 overflow-hidden" style={{ borderRadius: 'var(--ads-radius-sm)', backgroundColor: 'var(--ads-bg-inverse)' }}>
           <img src={colorImage} alt="Color Capture" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
       </div>
@@ -227,24 +203,24 @@ function ReviewToolImages() {
 export default function CombinedReviewMarginPanel() {
   return (
     <div 
-      className="flex flex-col p-[16px] relative w-[432px] bg-[#f5f5f5] rounded-[4px] gap-[16px]"
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)', height: 'calc(100vh - 88px)' }}
+      className="flex flex-col p-[16px] relative w-[432px] bg-[var(--ads-background-subtle-02)] rounded-[8px] gap-[16px]"
+      style={{ boxShadow: 'var(--ads-shadow-sm)', height: 'calc(100vh - 88px)' }}
       data-name="Combined Review Margin Panel"
     >
       
-      {/* Margin Line Section - Updated to match exact Figma design */}
-      <div className="bg-white content-stretch flex flex-col items-start relative rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] size-full shrink-0 w-[240px]" data-name="MarginLinePanel" data-node-id="138:21991" style={{ width: '240px', minWidth: '240px', maxWidth: '240px' }}>
+      {/* Margin Line Section — natural height so it leaves room for review tool */}
+      <div className="content-stretch flex flex-col items-start relative shrink-0 w-[240px]" data-name="MarginLinePanel" style={{ width: '240px', minWidth: '240px', maxWidth: '240px', borderRadius: 'var(--ads-radius-sm)', backgroundColor: 'var(--ads-bg-surface)', boxShadow: 'var(--ads-shadow-sm)' }}>
         <Container />
-        <div className="flex-[1_0_0] min-h-px min-w-px relative w-full" data-name="Container" data-node-id="138:22006">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[16px] items-start px-[16px] py-[16px] relative size-full">
+        <div className="relative w-full" data-name="Container">
+          <div className="content-stretch flex flex-col gap-[16px] items-start px-[16px] py-[16px] relative w-full">
             <ListItem />
             <Frame />
           </div>
         </div>
       </div>
-      
-      {/* Review Tool Section - STRETCHES TO FILL ALL REMAINING HEIGHT */}
-      <div className="w-full flex-1 min-h-0 rounded-[4px] overflow-hidden shadow-md bg-white flex flex-col">
+
+      {/* Review Tool Section - fills remaining height */}
+      <div className="w-full flex-1 min-h-0 overflow-hidden flex flex-col" style={{ borderRadius: 'var(--ads-radius-sm)', backgroundColor: 'var(--ads-bg-surface)', boxShadow: 'var(--ads-shadow-sm)' }}>
         <div className="shrink-0">
           <ReviewToolHeader />
         </div>

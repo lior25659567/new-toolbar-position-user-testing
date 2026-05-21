@@ -232,6 +232,22 @@ export function createPatientInstructionsBlock(): PatientInstructionsBlock {
   };
 }
 
+/** Dispatcher used by callers that just have a `BlockType` string. */
+export function createBlock(type: BlockType): ReportBlock {
+  switch (type) {
+    case 'image':                return createImageBlock();
+    case 'notes':                return createNotesBlock();
+    case 'section-title':        return createSectionTitleBlock();
+    case 'diagnosis':            return createDiagnosisBlock();
+    case 'treatment':            return createTreatmentBlock();
+    case 'cost-summary':         return createCostSummaryBlock();
+    case 'comparison':           return createComparisonBlock();
+    case 'rx':                   return createRxBlock();
+    case 'next-appointment':     return createNextAppointmentBlock();
+    case 'patient-instructions': return createPatientInstructionsBlock();
+  }
+}
+
 // ─── Block metadata for the "Add block" menu ────────────────────────────────
 
 export const BLOCK_CATALOG: { type: BlockType; label: string; description: string }[] = [

@@ -19,8 +19,8 @@ type ProcedureMode = 'crown' | 'bridge' | 'bridge-2' | 'full-arch';
 // ─── Heatmap Legend ─────────────────────────────────────────────────────────
 
 const HEATMAP_COLORS = [
-  '#0066FF', '#0197EC', '#3FBAFF', '#0FF4FC', '#2CE9C6', '#54BF00',
-  '#FFE600', '#FFD600', '#FFA008', '#F7771A', '#FF0000', '#C61313',
+  'var(--ads-background-interactive)', 'var(--ads-background-interactive)', 'var(--ads-text-link)', '#0FF4FC', '#2CE9C6', 'var(--ads-text-success)',
+  'var(--ads-text-warning)', 'var(--ads-text-warning)', 'var(--ads-text-warning)', 'var(--ads-text-warning)', 'var(--ads-text-error)', 'var(--ads-text-error)',
 ];
 const HEATMAP_LABELS = ['0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','1.1','1.2','1.3','1.4','1.5','1.6'];
 
@@ -188,15 +188,15 @@ function ErrorNotification({ message, onDismiss }: { message: string; onDismiss:
       padding: '10px 20px', borderRadius: radius.md,
       backgroundColor: '#FEF2F2', border: '1px solid #FECACA',
       backdropFilter: 'blur(8px)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-      fontSize: font.size.sm, fontWeight: 500, color: '#DC2626',
+      fontSize: font.size.sm, fontWeight: 500, color: 'var(--ads-text-error)',
       textAlign: 'center', lineHeight: '20px',
       display: 'flex', alignItems: 'center', gap: space[2],
     }}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ads-text-error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
       {message}
-      <button onClick={onDismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', marginLeft: 'auto', color: '#DC2626' }}>
+      <button onClick={onDismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', marginLeft: 'auto', color: 'var(--ads-text-error)' }}>
         <CloseIcon />
       </button>
     </div>
@@ -325,7 +325,7 @@ function UndercutPanel({
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '6px 10px', borderRadius: '8px',
-                backgroundColor: sharedPath ? '#F0FDF4' : color.neutral50,
+                backgroundColor: sharedPath ? 'var(--ads-background-highlight-green)' : color.neutral50,
                 transition: 'background-color 0.15s ease',
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
@@ -348,9 +348,9 @@ function UndercutPanel({
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 padding: '5px 8px', borderRadius: '6px',
-                backgroundColor: '#FEF3C7', fontSize: '11px', color: '#92400E', fontWeight: 500,
+                backgroundColor: 'var(--ads-background-highlight-orange)', fontSize: '11px', color: '#92400E', fontWeight: 500,
               }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ads-text-warning)" strokeWidth="2.5">
                   <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                 </svg>
                 Select at least one more tooth
@@ -410,11 +410,11 @@ function UndercutPanel({
         {stage === 'confirm' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{
-              borderRadius: '8px', backgroundColor: '#F0FDF4',
-              fontSize: '12px', fontWeight: 600, color: '#16A34A',
+              borderRadius: '8px', backgroundColor: 'var(--ads-background-highlight-green)',
+              fontSize: '12px', fontWeight: 600, color: 'var(--ads-text-success)',
               height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ads-text-success)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
               Path Confirmed
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>

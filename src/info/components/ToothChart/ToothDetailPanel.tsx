@@ -45,21 +45,21 @@ export function ToothDetailPanel({ toothNumbers, specs, dispatch }: ToothDetailP
       style={{
         padding: "20px",
         backgroundColor: "white",
-        borderRadius: "8px",
-        border: "1px solid #E5E7EB",
+        borderRadius: "var(--ads-radius-sm)",
+        border: "1px solid var(--ads-border-subtle)",
         marginTop: "12px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-        <div style={{ fontSize: "15px", fontWeight: 600, color: "#1e2939", fontFamily: "Inter, sans-serif" }}>
+        <div style={{ fontSize: "15px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)" }}>
           {isBatch ? `Teeth ${toothNumbers.join(", ")}` : `Tooth ${toothNumbers[0]}`}
         </div>
         <IconButton
           aria-label="Close"
           onClick={() => dispatch({ type: "SET_EXPANDED_TEETH", teeth: [] })}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--ads-text-muted)" strokeWidth="1.5" strokeLinecap="round">
             <path d="M12 4L4 12M4 4l8 8" />
           </svg>
         </IconButton>
@@ -67,7 +67,7 @@ export function ToothDetailPanel({ toothNumbers, specs, dispatch }: ToothDetailP
 
       {/* Procedure buttons */}
       <div style={{ marginBottom: "16px" }}>
-        <div style={{ fontSize: "12px", fontWeight: 400, color: "#6a7282", fontFamily: "Inter, sans-serif", marginBottom: "8px" }}>
+        <div style={{ fontSize: "12px", fontWeight: 400, color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", marginBottom: "8px" }}>
           Procedure
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
@@ -89,13 +89,13 @@ export function ToothDetailPanel({ toothNumbers, specs, dispatch }: ToothDetailP
                   gap: "6px",
                   height: "36px",
                   padding: "0 12px",
-                  borderRadius: "8px",
-                  border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? color : isHovered ? "#9CA3AF" : "#E5E7EB"}`,
-                  backgroundColor: "#ffffff",
-                  color: "#1e2939",
+                  borderRadius: "var(--ads-radius-sm)",
+                  border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? color : isHovered ? "var(--ads-text-muted)" : "var(--ads-border-subtle)"}`,
+                  backgroundColor: "var(--ads-background-subtle-01)",
+                  color: "var(--ads-text-primary)",
                   fontSize: "13px",
-                  fontWeight: isSelected ? 600 : 400,
-                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 400,
+                  fontFamily: "var(--ads-font-sans)",
                   cursor: "pointer",
                   transition: "border-color 0.15s ease",
                   outline: "none",

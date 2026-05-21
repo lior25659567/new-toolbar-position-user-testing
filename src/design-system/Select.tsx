@@ -81,7 +81,9 @@ export function Select({
 }: SelectProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const hasError = Boolean(error);
-  const fieldBg = layerSet === "white" ? color.bgSurface : "#F4F4F4";
+  // v2.0: default to white (background-subtle-01). `layerSet="gray"` still
+  // available for callers that want the legacy gray field.
+  const fieldBg = layerSet === "gray" ? "var(--ads-background-subtle-02)" : "var(--ads-background-subtle-01)";
 
   const wrapperStyle: React.CSSProperties = {
     display: "flex",
@@ -128,7 +130,7 @@ export function Select({
     right: space[3],
     top: "50%",
     transform: "translateY(-50%)",
-    color: disabled ? "rgba(0,0,0,0.38)" : color.textSubtle,
+    color: disabled ? "var(--ads-icon-disabled)" : color.textSubtle,
     pointerEvents: "none",
   };
 

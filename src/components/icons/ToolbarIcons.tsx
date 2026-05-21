@@ -33,8 +33,8 @@ import svgPathsScan from '../../imports/svg-76kjqgrbiw';
  * Two overlapping squares icon
  */
 export function MonochromeIcon({ isActive = false }: { isActive?: boolean }) {
-  const fillColor = isActive ? "#008EC2" : "#5E646E";
-  const strokeColor = isActive ? "#008EC2" : "#5E646E";
+  const fillColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
+  const strokeColor = isActive ? "var(--ads-background-interactive-hover)" : "var(--ads-text-secondary)";
   
   return (
     <div className="relative shrink-0 size-[60px] flex items-center justify-center" data-name="Monochrome Icon">
@@ -73,9 +73,9 @@ function TrimAreaFeedback() {
       <div className="absolute bottom-0 left-0 right-0 top-[-2.65%]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 50 41">
           <g id="trim area">
-            <path d={svgPathsScan.p1f4faa00} fill="var(--fill-0, #FFD6D6)" id="Vector" />
-            <path d={svgPathsScan.p161588f0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, #3D3935)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.06414" />
-            <path d={svgPathsScan.p1031d180} fill="var(--fill-0, #008EC2)" id="Vector_3" stroke="var(--stroke-0, white)" strokeMiterlimit="10" strokeWidth="2.06414" />
+            <path d={svgPathsScan.p1f4faa00} fill="var(--fill-0, var(--ads-background-highlight-red))" id="Vector" />
+            <path d={svgPathsScan.p161588f0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, var(--ads-text-primary))" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.06414" />
+            <path d={svgPathsScan.p1031d180} fill="var(--fill-0, var(--ads-background-interactive-hover))" id="Vector_3" stroke="var(--stroke-0, white)" strokeMiterlimit="10" strokeWidth="2.06414" />
           </g>
         </svg>
       </div>
@@ -102,11 +102,11 @@ function TrimAreaPrepEdit() {
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 44 33">
           <g id="Frame 1618872990">
             <g id="trim area">
-              <path d={svgPathsScan.p2b201d80} fill="var(--fill-0, #FFD6D6)" id="Vector" />
-              <path d={svgPathsScan.p16a0d0e0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, #3D3935)" strokeMiterlimit="10" strokeWidth="1.4" />
+              <path d={svgPathsScan.p2b201d80} fill="var(--fill-0, var(--ads-background-highlight-red))" id="Vector" />
+              <path d={svgPathsScan.p16a0d0e0} fill="var(--fill-0, white)" id="Vector_2" stroke="var(--stroke-0, var(--ads-text-primary))" strokeMiterlimit="10" strokeWidth="1.4" />
             </g>
             <g id="Shape">
-              <path d={svgPathsScan.pabd600} fill="var(--fill-0, #009ACE)" />
+              <path d={svgPathsScan.pabd600} fill="var(--fill-0, var(--ads-background-interactive))" />
               <path clipRule="evenodd" d={svgPathsScan.p21b85980} fill="white" fillRule="evenodd" />
               <path clipRule="evenodd" d={svgPathsScan.p1ba64c70} fill="white" fillRule="evenodd" />
               <path d={svgPathsScan.p34f3c300} stroke="var(--stroke-0, white)" strokeLinejoin="round" strokeWidth="0.8" />
@@ -146,7 +146,7 @@ export function ChevronIcon({ isExpanded, direction = 'vertical' }: { isExpanded
       >
         <path 
           d="M6 9L12 15L18 9" 
-          stroke="#717182" 
+          stroke="var(--ads-text-secondary)" 
           strokeWidth="1" 
           strokeLinecap="round" 
           strokeLinejoin="round"

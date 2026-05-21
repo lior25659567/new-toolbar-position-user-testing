@@ -23,14 +23,14 @@ export function ToothBatchActions({ selectedCount, selectedTeeth, dispatch }: To
   };
 
   return (
-    <div style={{ padding: "16px 0", marginTop: "12px" }}>
+    <div style={{ padding: "16px 0", marginTop: "24px" }}>
       <div
         style={{
           fontSize: "13px",
-          fontWeight: 600,
-          color: "#1e2939",
-          fontFamily: "Inter, sans-serif",
-          marginBottom: "10px",
+          fontWeight: 500,
+          color: "var(--ads-text-primary)",
+          fontFamily: "var(--ads-font-sans)",
+          marginBottom: "20px",
         }}
       >
         Assign procedure to {selectedCount} {selectedCount === 1 ? "tooth" : "teeth"}
@@ -53,13 +53,13 @@ export function ToothBatchActions({ selectedCount, selectedTeeth, dispatch }: To
                 gap: "6px",
                 height: "36px",
                 padding: "0 12px",
-                borderRadius: "8px",
-                border: `1px solid ${isHovered ? "#9CA3AF" : "#E5E7EB"}`,
-                backgroundColor: "#ffffff",
-                color: "#1e2939",
+                borderRadius: "var(--ads-radius-sm)",
+                border: `1px solid ${isHovered ? "var(--ads-text-muted)" : "var(--ads-border-subtle)"}`,
+                backgroundColor: "var(--ads-background-subtle-01)",
+                color: "var(--ads-text-primary)",
                 fontSize: "13px",
                 fontWeight: 500,
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "var(--ads-font-sans)",
                 cursor: "pointer",
                 transition: "border-color 0.15s ease",
                 outline: "none",

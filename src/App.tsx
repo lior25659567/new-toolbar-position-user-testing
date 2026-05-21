@@ -3,13 +3,47 @@ import ScreenTemplate from "./imports/ScreenTemplate";
 import HomePage from "./components/HomePage";
 import DedicatedTopToolbarPage from "./components/DedicatedTopToolbarPage";
 import PatientReportPage from "./components/PatientReportPage";
+import PatientPage from "./components/PatientPage";
+import OrdersPage from "./components/OrdersPage";
+import JobsPage from "./components/JobsPage";
+import TreatmentPlanPage from "./components/TreatmentPlanPage";
+import AnalyticsPage from "./components/AnalyticsPage";
+import type { DSCoreNavId } from "./components/dscore/DSCoreShell";
+import type { Job } from "./components/dscore/data/types";
 import DemoPage from "./components/demo/DemoPage";
 import ScanGuidancePage from "./components/scan-guidance/ScanGuidancePage";
 import UndercutPage from "./components/undercut/UndercutPage";
+import SettingsPage from "./components/settings/SettingsPage";
+import ClaimsPage from "./components/ClaimsPage";
+import SchedulingPage from "./components/SchedulingPage";
+import ChartingPage from "./components/ChartingPage";
+import ImagingPage from "./components/ImagingPage";
+import SterilizationPage from "./components/SterilizationPage";
+import EPrescriptionsPage from "./components/EPrescriptionsPage";
+import InventoryPage from "./components/InventoryPage";
+import EquipmentPage from "./components/EquipmentPage";
+import OnboardingPage from "./components/OnboardingPage";
+import PatientPortalPage from "./components/PatientPortalPage";
+import RecallPage from "./components/RecallPage";
+import FormsPage from "./components/FormsPage";
+import EligibilityPage from "./components/EligibilityPage";
+import FinancingPage from "./components/FinancingPage";
+import AutomationPage from "./components/AutomationPage";
+import MultiLocationPage from "./components/MultiLocationPage";
+import ReportsPage from "./components/ReportsPage";
 import { DesignSystemPage } from "./design-system";
 
+type ViewId =
+  | 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top'
+  | 'patient' | 'orders' | 'jobs' | 'treatment-plan' | 'analytics'
+  | 'patient-report' | 'scan-guidance' | 'undercut' | 'demo' | 'settings'
+  | 'claims' | 'scheduling'
+  | 'charting' | 'imaging' | 'sterilization' | 'erx' | 'inventory' | 'equipment' | 'onboarding'
+  | 'patient-portal' | 'recall' | 'forms' | 'eligibility' | 'financing'
+  | 'automation' | 'multi-location' | 'reports';
+
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut' | 'demo'>('home');
+  const [currentView, setCurrentView] = useState<ViewId>('home');
 
   // Keyboard shortcut: Press 'r' to return to home
   useEffect(() => {
@@ -41,8 +75,29 @@ export default function App() {
     setCurrentView('home');
   };
 
-  const handleNavigateToLayout = (layout: 'home' | 'design-system' | 'vertical' | 'horizontal' | 'horizontal-top' | 'horizontal-bottom' | 'dedicated-top' | 'patient-report' | 'scan-guidance' | 'undercut' | 'demo') => {
+  const handleNavigateToLayout = (layout: ViewId) => {
     setCurrentView(layout);
+  };
+
+  // Cross-feature jobs storage. Treatment plans (Stage 2) push generated Jobs
+  // here; JobsPage merges them with its own seed list. Lifted to App so it
+  // survives navigation between pages.
+  const [planGeneratedJobs, setPlanGeneratedJobs] = useState<Job[]>([]);
+
+  // Routes left-rail nav clicks (Patients / Orders / Home / etc.) to top-level views.
+  const handleDSCoreNav = (id: DSCoreNavId) => {
+    switch (id) {
+      case 'home':       return setCurrentView('home');
+      case 'patients':   return setCurrentView('patient');
+      case 'orders':     return setCurrentView('orders');
+      case 'jobs':       return setCurrentView('jobs');
+      case 'treatments': return setCurrentView('analytics');
+      case 'claims':     return setCurrentView('claims');
+      case 'scheduling': return setCurrentView('scheduling');
+      // Other rail items don't have dedicated pages yet — keep the user on the
+      // current view so the click is a no-op rather than a dead navigation.
+      default:           return;
+    }
   };
   
   const handlePageChange = (page: string) => {
@@ -116,10 +171,33 @@ export default function App() {
         <HomePage
           onSelectLayout={handleSelectLayout}
           onOpenDesignSystem={() => setCurrentView('design-system')}
+          onOpenPatient={() => setCurrentView('patient')}
+          onOpenOrders={() => setCurrentView('orders')}
+          onOpenJobs={() => setCurrentView('jobs')}
+          onOpenTreatmentPlan={() => setCurrentView('treatment-plan')}
+          onOpenAnalytics={() => setCurrentView('analytics')}
           onOpenPatientReport={() => setCurrentView('patient-report')}
           onOpenScanGuidance={() => setCurrentView('scan-guidance')}
           onOpenUndercut={() => setCurrentView('undercut')}
           onOpenDemo={() => setCurrentView('demo')}
+          onOpenSettings={() => setCurrentView('settings')}
+          onOpenClaims={() => setCurrentView('claims')}
+          onOpenScheduling={() => setCurrentView('scheduling')}
+          onOpenCharting={() => setCurrentView('charting')}
+          onOpenImaging={() => setCurrentView('imaging')}
+          onOpenSterilization={() => setCurrentView('sterilization')}
+          onOpenERx={() => setCurrentView('erx')}
+          onOpenInventory={() => setCurrentView('inventory')}
+          onOpenEquipment={() => setCurrentView('equipment')}
+          onOpenOnboarding={() => setCurrentView('onboarding')}
+          onOpenPatientPortal={() => setCurrentView('patient-portal')}
+          onOpenRecall={() => setCurrentView('recall')}
+          onOpenForms={() => setCurrentView('forms')}
+          onOpenEligibility={() => setCurrentView('eligibility')}
+          onOpenFinancing={() => setCurrentView('financing')}
+          onOpenAutomation={() => setCurrentView('automation')}
+          onOpenMultiLocation={() => setCurrentView('multi-location')}
+          onOpenReports={() => setCurrentView('reports')}
           combinedPanelMode={combinedPanelMode}
           onCombinedPanelModeChange={setCombinedPanelMode}
         />
@@ -208,6 +286,45 @@ export default function App() {
         />
       )}
 
+      {currentView === 'patient' && (
+        <PatientPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+        />
+      )}
+
+      {currentView === 'orders' && (
+        <OrdersPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+        />
+      )}
+
+      {currentView === 'jobs' && (
+        <JobsPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+          externalJobs={planGeneratedJobs}
+        />
+      )}
+
+      {currentView === 'treatment-plan' && (
+        <TreatmentPlanPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+          onJobsGenerated={(jobs) => setPlanGeneratedJobs((prev) => [...jobs, ...prev])}
+          onOpenJobs={() => setCurrentView('jobs')}
+        />
+      )}
+
+      {currentView === 'analytics' && (
+        <AnalyticsPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+          externalJobs={planGeneratedJobs}
+        />
+      )}
+
       {currentView === 'patient-report' && (
         <PatientReportPage
           onBackToHome={handleBackToHome}
@@ -231,6 +348,42 @@ export default function App() {
           onBackToHome={handleBackToHome}
         />
       )}
+
+      {currentView === 'settings' && (
+        <SettingsPage
+          onBackToHome={handleBackToHome}
+        />
+      )}
+
+      {currentView === 'claims' && (
+        <ClaimsPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+        />
+      )}
+
+      {currentView === 'scheduling' && (
+        <SchedulingPage
+          onBackToHome={handleBackToHome}
+          onNavigate={(id) => handleDSCoreNav(id)}
+        />
+      )}
+
+      {currentView === 'charting'      && <ChartingPage      onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'imaging'       && <ImagingPage       onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'sterilization' && <SterilizationPage onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'erx'           && <EPrescriptionsPage onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'inventory'     && <InventoryPage     onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'equipment'     && <EquipmentPage     onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'onboarding'    && <OnboardingPage    onBackToHome={handleBackToHome} />}
+      {currentView === 'patient-portal'&& <PatientPortalPage onBackToHome={handleBackToHome} />}
+      {currentView === 'recall'        && <RecallPage        onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'forms'         && <FormsPage         onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'eligibility'   && <EligibilityPage   onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'financing'     && <FinancingPage     onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'automation'    && <AutomationPage    onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'multi-location'&& <MultiLocationPage onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
+      {currentView === 'reports'       && <ReportsPage       onBackToHome={handleBackToHome} onNavigate={handleDSCoreNav} />}
 
     </div>
   );

@@ -13,8 +13,8 @@ interface GuidanceOverlayProps {
   mode: GuidanceMode;
 }
 
-const ARROW_RED          = '#E74C3C';
-const ARROW_GREEN        = '#16A34A';
+const ARROW_RED          = 'var(--ads-text-error)';
+const ARROW_GREEN        = 'var(--ads-text-success)';
 const SIDE_DONE_THRESHOLD = 0.62;
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ const STAGE_META: Record<ScanStage | 'complete', { label: string; bg: string; te
   occlusal: { label: 'Occlusal', bg: color.neutral100,       textColor: color.textSubtle, dot: color.neutral400 },
   buccal:   { label: 'Buccal',   bg: 'rgba(0,154,206,0.12)', textColor: color.primary,    dot: color.primary    },
   lingual:  { label: 'Lingual',  bg: 'rgba(0,154,206,0.12)', textColor: color.primary,    dot: color.primary    },
-  complete: { label: 'Complete', bg: 'rgba(22,163,74,0.1)',  textColor: '#16A34A',        dot: '#16A34A'        },
+  complete: { label: 'Complete', bg: 'rgba(22,163,74,0.1)',  textColor: 'var(--ads-text-success)',        dot: 'var(--ads-text-success)'        },
 };
 
 function StagePill({ stage, phase }: { stage: ScanStage; phase: string }) {
@@ -95,7 +95,7 @@ function TopBar({ guidance, pct }: { guidance: GuidanceState; pct: number }) {
         <div style={{ flex: 1, height: '5px', backgroundColor: color.neutral200, borderRadius: radius.full, overflow: 'hidden' }}>
           <div style={{
             height: '100%', width: `${pct}%`,
-            backgroundColor: guidance.phase === 'complete' ? '#16A34A' : color.primary,
+            backgroundColor: guidance.phase === 'complete' ? 'var(--ads-text-success)' : color.primary,
             borderRadius: radius.full, transition: 'width 0.3s ease',
           }} />
         </div>
@@ -187,7 +187,7 @@ function ClassicScanFrame({ pointerNDC, glowEdge, isScanning, flashActive, direc
 }) {
   const ox = pointerNDC.x * 8;
   const oy = pointerNDC.y * -6;
-  const borderCol = flashActive ? '#16A34A' : isScanning ? color.primary : 'rgba(0,154,206,0.5)';
+  const borderCol = flashActive ? 'var(--ads-text-success)' : isScanning ? color.primary : 'rgba(0,154,206,0.5)';
   const glow = flashActive
     ? '0 0 24px 8px rgba(22,163,74,0.4), inset 0 0 12px 2px rgba(22,163,74,0.15)'
     : isScanning
@@ -274,7 +274,7 @@ function EdgeGuideOverlay({ guidance, pointerNDC, flashActive }: {
   ) : 'none';
 
   const shadows = [outerGlow, edgeInset].filter(s => s !== 'none').join(', ') || 'none';
-  const borderCol = flashActive ? '#16A34A' : isScanning ? color.primary : 'rgba(0,154,206,0.5)';
+  const borderCol = flashActive ? 'var(--ads-text-success)' : isScanning ? color.primary : 'rgba(0,154,206,0.5)';
 
   // Arrow placement inside frame
   const isHoriz = side === 'left' || side === 'right';
@@ -446,8 +446,8 @@ function SmartDotOverlay({ guidance, pointerNDC, containerSize, flashActive }: {
       {isComplete && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
           <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
-            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="#16A34A" strokeWidth="2" />
-            <polyline points="24,44 37,57 64,31" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="var(--ads-text-success)" strokeWidth="2" />
+            <polyline points="24,44 37,57 64,31" stroke="var(--ads-text-success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       )}
@@ -483,7 +483,7 @@ function GlowFrameOverlay({ guidance, pointerNDC, flashActive }: {
   const activeEdge: E | null = dir ? dirToEdge[dir] ?? null : null;
 
   const edgeColor = (e: E) => {
-    if (flashActive)        return '#16A34A';
+    if (flashActive)        return 'var(--ads-text-success)';
     if (e === activeEdge)   return accent;
     if (isScanning)         return color.primary;
     return 'rgba(0,154,206,0.4)';
@@ -619,13 +619,13 @@ function BlueDefs() {
   return (
     <defs>
       <linearGradient id="gb-h" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#80D4F0"/><stop offset="50%" stopColor="#009ACE"/><stop offset="100%" stopColor="#007A9E"/>
+        <stop offset="0%" stopColor="var(--ads-background-highlight-blue)"/><stop offset="50%" stopColor="var(--ads-background-interactive)"/><stop offset="100%" stopColor="var(--ads-text-on-highlight-blue)"/>
       </linearGradient>
       <linearGradient id="gb-v" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="#80D4F0"/><stop offset="50%" stopColor="#009ACE"/><stop offset="100%" stopColor="#007A9E"/>
+        <stop offset="0%" stopColor="var(--ads-background-highlight-blue)"/><stop offset="50%" stopColor="var(--ads-background-interactive)"/><stop offset="100%" stopColor="var(--ads-text-on-highlight-blue)"/>
       </linearGradient>
       <linearGradient id="gb-d" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#80D4F0"/><stop offset="100%" stopColor="#006080"/>
+        <stop offset="0%" stopColor="var(--ads-background-highlight-blue)"/><stop offset="100%" stopColor="#006080"/>
       </linearGradient>
       <linearGradient id="gb-hl" x1="0%" y1="0%" x2="0%" y2="100%">
         <stop offset="0%" stopColor="rgba(255,255,255,0.4)"/><stop offset="100%" stopColor="rgba(255,255,255,0)"/>
@@ -736,7 +736,7 @@ const MODE_LABEL: Record<string, string> = {
   'dof-gizmo':'6DoF Overview',
 };
 
-function ModeLabel({ mode, c = '#009ACE' }: { mode: string; c?: string }) {
+function ModeLabel({ mode, c = 'var(--ads-background-interactive)' }: { mode: string; c?: string }) {
   return (
     <div style={{
       position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
@@ -755,7 +755,7 @@ function ModeLabel({ mode, c = '#009ACE' }: { mode: string; c?: string }) {
 function DofFrame({ mode, flashActive, children, anim }: {
   mode: string; flashActive: boolean; children?: React.ReactNode; anim?: string;
 }) {
-  const bc = flashActive ? '#16A34A' : 'rgba(0,154,206,0.45)';
+  const bc = flashActive ? 'var(--ads-text-success)' : 'rgba(0,154,206,0.45)';
   const glow = flashActive ? '0 0 24px 8px rgba(22,163,74,0.4)' : 'none';
   return (
     <div style={{
@@ -796,7 +796,7 @@ function DofLR({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean })
       <W mode={m} flashActive={f}>
         <div style={{ position:'absolute',left:-64,top:'50%',transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="left"/></div>
         <div style={{ position:'absolute',right:-64,top:'50%',transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="right"/></div>
-        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'dof-slide-lr 2.5s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,var(--ads-text-on-highlight-blue))',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'dof-slide-lr 2.5s ease-in-out infinite' }}/>
       </W>
     </div>
   );
@@ -812,7 +812,7 @@ function DofUD({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean })
       <W mode={m} flashActive={f}>
         <div style={{ position:'absolute',top:-64,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="up"/></div>
         <div style={{ position:'absolute',bottom:-64,left:'50%',transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="down"/></div>
-        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'dof-slide-ud 2.5s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute',top:'50%',left:'50%',width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,var(--ads-text-on-highlight-blue))',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'dof-slide-ud 2.5s ease-in-out infinite' }}/>
       </W>
     </div>
   );
@@ -828,7 +828,7 @@ function DofFB({ g, f, bare }: { g: GuidanceState; f: boolean; bare?: boolean })
         position:'absolute',top:'50%',left:'50%',
         width:'clamp(220px,20vw,300px)',height:'clamp(340px,32vw,450px)',
         pointerEvents:'none',
-        border: bare ? 'none' : `3px solid ${f ? '#16A34A' : 'rgba(0,154,206,0.45)'}`,
+        border: bare ? 'none' : `3px solid ${f ? 'var(--ads-text-success)' : 'rgba(0,154,206,0.45)'}`,
         borderRadius:'14px', boxShadow: !bare && f ? '0 0 24px 8px rgba(22,163,74,0.4)' : 'none',
         animation:'dof-scale-fb 3s ease-in-out infinite',
       }}>
@@ -906,7 +906,7 @@ function RingOverlay({ mode, g }: { mode: string; g: GuidanceState }) {
       <SvgRing variant={variant}/>
       <div style={{
         position:'absolute',bottom:36,left:'50%',transform:'translateX(-50%)',
-        fontSize:'12px',fontWeight:600,color:'#009ACE',
+        fontSize:'12px',fontWeight:600,color:'var(--ads-background-interactive)',
         backgroundColor:'rgba(255,255,255,0.9)',padding:'4px 14px',
         borderRadius:'12px',whiteSpace:'nowrap',
         border:'1px solid rgba(0,154,206,0.2)',boxShadow:'0 2px 8px rgba(0,154,206,0.1)',
@@ -919,7 +919,7 @@ function RingOverlay({ mode, g }: { mode: string; g: GuidanceState }) {
 
 // ─── Pulse overlays ──────────────────────────────────────────────────────────
 
-const PT = '#009ACE';
+const PT = 'var(--ads-background-interactive)';
 const PTG = 'rgba(0,154,206,0.35)';
 
 function PulseOverlay({ mode, g, f, anim, lead }: {
@@ -927,9 +927,9 @@ function PulseOverlay({ mode, g, f, anim, lead }: {
   lead?: 'top'|'right'|'bottom'|'left'|'all'|null;
 }) {
   const pct = Math.round(g.coveragePercent * 100);
-  const bc = f ? '#16A34A' : PT;
+  const bc = f ? 'var(--ads-text-success)' : PT;
   const ew = (e: string) => (lead === 'all' ? 3 : e === lead ? 4 : 2);
-  const ec = (e: string) => (f ? '#16A34A' : lead === 'all' ? PT : e === lead ? PT : 'rgba(0,154,206,0.3)');
+  const ec = (e: string) => (f ? 'var(--ads-text-success)' : lead === 'all' ? PT : e === lead ? PT : 'rgba(0,154,206,0.3)');
   const glows: string[] = [];
   if (f) glows.push('0 0 20px 6px rgba(22,163,74,0.35)');
   else if (lead && lead !== 'all') {
@@ -973,41 +973,41 @@ function GizmoOverlay({ g }: { g: GuidanceState }) {
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite' }}>
             <rect x="40" y="155" width="240" height="10" rx="5" fill="url(#gb-h)"/><rect x="40" y="155" width="240" height="5" rx="5" fill="url(#gb-hl)"/>
             <path d="M40 145L20 160L40 175Z" fill="url(#gb-h)"/><path d="M280 145L300 160L280 175Z" fill="url(#gb-h)"/>
-            <text x="305" y="164" fill="#007A9E" fontSize="11" fontWeight="700" fontFamily="system-ui">X</text>
+            <text x="305" y="164" fill="var(--ads-text-on-highlight-blue)" fontSize="11" fontWeight="700" fontFamily="system-ui">X</text>
           </g>
           {/* Y — U/D */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'0.5s' }}>
             <rect x="155" y="40" width="10" height="240" rx="5" fill="url(#gb-v)"/><rect x="155" y="40" width="5" height="240" rx="5" fill="url(#gb-hl)"/>
             <path d="M145 40L160 20L175 40Z" fill="url(#gb-v)"/><path d="M145 280L160 300L175 280Z" fill="url(#gb-v)"/>
-            <text x="164" y="14" fill="#16A34A" fontSize="11" fontWeight="700" fontFamily="system-ui" textAnchor="middle">Y</text>
+            <text x="164" y="14" fill="var(--ads-text-success)" fontSize="11" fontWeight="700" fontFamily="system-ui" textAnchor="middle">Y</text>
           </g>
           {/* Z — F/B diagonal */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'1s' }}>
             <line x1="90" y1="230" x2="230" y2="90" stroke="url(#gb-d)" strokeWidth="8" strokeLinecap="round"/>
             <path d="M90 230L78 212L102 218Z" fill="url(#gb-d)"/><path d="M230 90L218 78L242 84Z" fill="url(#gb-d)"/>
-            <text x="240" y="78" fill="#007A9E" fontSize="11" fontWeight="700" fontFamily="system-ui">Z</text>
+            <text x="240" y="78" fill="var(--ads-text-on-highlight-blue)" fontSize="11" fontWeight="700" fontFamily="system-ui">Z</text>
           </g>
           {/* Roll arc */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'1.5s' }}>
             <path d="M110 70A100 100 0 0 1 210 70" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
             <path d="M210 70L200 60L203 75Z" fill="url(#gb-d)"/>
-            <text x="160" y="56" fill="#009ACE" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Roll</text>
+            <text x="160" y="56" fill="var(--ads-background-interactive)" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Roll</text>
           </g>
           {/* Pitch arc */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'2s' }}>
             <path d="M252 110A100 100 0 0 1 252 210" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
             <path d="M252 210L242 200L257 203Z" fill="url(#gb-d)"/>
-            <text x="268" y="164" fill="#009ACE" fontSize="9" fontWeight="600" fontFamily="system-ui">Pitch</text>
+            <text x="268" y="164" fill="var(--ads-background-interactive)" fontSize="9" fontWeight="600" fontFamily="system-ui">Pitch</text>
           </g>
           {/* Yaw arc */}
           <g style={{ animation:'dof-gizmo-pulse 3s ease-in-out infinite',animationDelay:'2.5s' }}>
             <path d="M110 252A100 100 0 0 1 210 252" stroke="url(#gb-d)" strokeWidth="3" strokeLinecap="round" fill="none"/>
             <path d="M210 252L200 243L203 257Z" fill="url(#gb-d)"/>
-            <text x="160" y="272" fill="#009ACE" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Yaw</text>
+            <text x="160" y="272" fill="var(--ads-background-interactive)" fontSize="9" fontWeight="600" fontFamily="system-ui" textAnchor="middle">Yaw</text>
           </g>
           <circle cx="160" cy="160" r="8" fill="url(#gb-r)"/><circle cx="158" cy="158" r="3" fill="rgba(255,255,255,0.4)"/>
         </svg>
-        <div style={{ position:'absolute',bottom:-36,left:'50%',transform:'translateX(-50%)',fontSize:'12px',fontWeight:700,color:'#009ACE',backgroundColor:'rgba(255,255,255,0.92)',padding:'4px 16px',borderRadius:'12px',whiteSpace:'nowrap',border:`1px solid ${color.borderDefault}`,boxShadow:'0 1px 4px rgba(0,0,0,0.08)' }}>
+        <div style={{ position:'absolute',bottom:-36,left:'50%',transform:'translateX(-50%)',fontSize:'12px',fontWeight:700,color:'var(--ads-background-interactive)',backgroundColor:'rgba(255,255,255,0.92)',padding:'4px 16px',borderRadius:'12px',whiteSpace:'nowrap',border:`1px solid ${color.borderDefault}`,boxShadow:'0 1px 4px rgba(0,0,0,0.08)' }}>
           6 Degrees of Freedom
         </div>
       </div>
@@ -1043,14 +1043,14 @@ const GHOST_LABEL: Record<string, string> = {
   'ghost-roll': 'Roll', 'ghost-pitch': 'Pitch', 'ghost-yaw': 'Yaw',
 };
 
-const GW = '#009ACE';
+const GW = 'var(--ads-background-interactive)';
 
 function GhostOverlay({ mode, g, f }: { mode: string; g: GuidanceState; f: boolean }) {
   const pct = Math.round(g.coveragePercent * 100);
   const isScanning = g.phase === 'scanning';
 
   // Real frame colors
-  const realBorder = f ? '#16A34A' : isScanning ? GW : 'rgba(0,154,206,0.5)';
+  const realBorder = f ? 'var(--ads-text-success)' : isScanning ? GW : 'rgba(0,154,206,0.5)';
   const realGlow = f
     ? '0 0 24px 8px rgba(22,163,74,0.4), inset 0 0 12px 2px rgba(22,163,74,0.15)'
     : isScanning
@@ -1233,8 +1233,8 @@ function SurfaceGuideOverlay({ guidance, containerSize }: {
           animation: 'surface-pulse 2s ease-in-out infinite',
         }}>
           <svg width="36" height="60" viewBox="0 0 36 60" fill="none">
-            <path d="M28 8C12 12 8 28 12 48" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" fill="none" />
-            <path d="M12 48L6 40M12 48L20 42" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" />
+            <path d="M28 8C12 12 8 28 12 48" stroke="var(--ads-background-interactive)" strokeWidth="2" strokeLinecap="round" fill="none" />
+            <path d="M12 48L6 40M12 48L20 42" stroke="var(--ads-background-interactive)" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
       )}
@@ -1256,7 +1256,7 @@ function SurfaceGuideOverlay({ guidance, containerSize }: {
               dir === 'right' ? 'M6,14 L22,14 M16,8 L22,14 L16,20' :
               dir === 'up'    ? 'M14,22 L14,6 M8,12 L14,6 L20,12' :
                                 'M14,6 L14,22 M8,16 L14,22 L20,16'
-            } stroke="#009ACE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            } stroke="var(--ads-background-interactive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       )}
@@ -1266,7 +1266,7 @@ function SurfaceGuideOverlay({ guidance, containerSize }: {
         position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)',
         display: 'flex', alignItems: 'center', gap: '8px',
         fontSize: '12px', fontWeight: 500,
-        color: isComplete ? '#16A34A' : '#009ACE',
+        color: isComplete ? 'var(--ads-text-success)' : 'var(--ads-background-interactive)',
         backgroundColor: isComplete ? 'rgba(22,163,74,0.06)' : 'rgba(0,154,206,0.06)',
         padding: '6px 18px', borderRadius: '14px', whiteSpace: 'nowrap',
         border: `1px solid ${isComplete ? 'rgba(22,163,74,0.15)' : 'rgba(0,154,206,0.12)'}`,
@@ -1277,7 +1277,7 @@ function SurfaceGuideOverlay({ guidance, containerSize }: {
         {/* Pulsing dot indicator */}
         <div style={{
           width: 6, height: 6, borderRadius: '50%',
-          backgroundColor: isComplete ? '#16A34A' : isScanning ? '#009ACE' : 'rgba(0,154,206,0.4)',
+          backgroundColor: isComplete ? 'var(--ads-text-success)' : isScanning ? 'var(--ads-background-interactive)' : 'rgba(0,154,206,0.4)',
           animation: isScanning ? 'surface-pulse 1.2s ease-in-out infinite' : undefined,
         }} />
         {hint}
@@ -1287,8 +1287,8 @@ function SurfaceGuideOverlay({ guidance, containerSize }: {
       {isComplete && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}>
           <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
-            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="#16A34A" strokeWidth="2" />
-            <polyline points="24,44 37,57 64,31" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="var(--ads-text-success)" strokeWidth="2" />
+            <polyline points="24,44 37,57 64,31" stroke="var(--ads-text-success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       )}
@@ -1380,7 +1380,7 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
   // Scan frame position (follows cursor)
   const ox = pointerNDC.x * 8;
   const oy = pointerNDC.y * -6;
-  const frameBorder = flashActive ? '#16A34A' : isScanning ? 'rgba(0,154,206,0.6)' : 'rgba(0,154,206,0.3)';
+  const frameBorder = flashActive ? 'var(--ads-text-success)' : isScanning ? 'rgba(0,154,206,0.6)' : 'rgba(0,154,206,0.3)';
   const frameGlow = flashActive
     ? '0 0 24px 8px rgba(22,163,74,0.4), inset 0 0 12px 2px rgba(22,163,74,0.15)'
     : isScanning
@@ -1426,9 +1426,9 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
         }}>
           <svg width="52" height="52" viewBox="0 0 52 52" fill="none" opacity="0.45">
-            <circle cx="26" cy="26" r="22" stroke="#009ACE" strokeWidth="1.5" strokeDasharray="6 4" />
-            <path d="M26 14v12" stroke="#009ACE" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="26" cy="32" r="1.5" fill="#009ACE" />
+            <circle cx="26" cy="26" r="22" stroke="var(--ads-background-interactive)" strokeWidth="1.5" strokeDasharray="6 4" />
+            <path d="M26 14v12" stroke="var(--ads-background-interactive)" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="26" cy="32" r="1.5" fill="var(--ads-background-interactive)" />
           </svg>
           <div style={{
             fontSize: '13px', fontWeight: 500, color: '#94A3B8',
@@ -1492,7 +1492,7 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
             left: labelLeft, top: labelTop,
             transform: 'translateX(-50%)',
             fontSize: '10px', fontWeight: 600,
-            color: '#009ACE', opacity: 0.8,
+            color: 'var(--ads-background-interactive)', opacity: 0.8,
             backgroundColor: 'rgba(255,255,255,0.9)',
             padding: '2px 8px',
             borderRadius: '6px',
@@ -1522,8 +1522,8 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
           {isRotate && (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
               style={{ animation: 'ind-rotate-hint 2s ease-in-out infinite', flexShrink: 0 }}>
-              <path d="M14 4C8 2 3 6 3 10" stroke="#009ACE" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-              <path d="M3 10L1 7M3 10L6 8" stroke="#009ACE" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M14 4C8 2 3 6 3 10" stroke="var(--ads-background-interactive)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M3 10L1 7M3 10L6 8" stroke="var(--ads-background-interactive)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           )}
 
@@ -1531,7 +1531,7 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
           {!isRotate && (
             <div style={{
               width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-              backgroundColor: hasTarget ? '#009ACE' : '#16A34A',
+              backgroundColor: hasTarget ? 'var(--ads-background-interactive)' : 'var(--ads-text-success)',
               animation: isScanning ? 'pulse-dot 1.2s infinite' : undefined,
             }} />
           )}
@@ -1539,7 +1539,7 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
             <span style={{
               fontSize: '12px', fontWeight: 600,
-              color: hasTarget ? '#009ACE' : '#16A34A',
+              color: hasTarget ? 'var(--ads-background-interactive)' : 'var(--ads-text-success)',
             }}>
               {hasTarget ? stageText : 'Coverage balanced'}
             </span>
@@ -1560,11 +1560,11 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
         }}>
           <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
-            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="#16A34A" strokeWidth="2" />
-            <polyline points="24,44 37,57 64,31" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="44" cy="44" r="40" fill="rgba(22,163,74,0.1)" stroke="var(--ads-text-success)" strokeWidth="2" />
+            <polyline points="24,44 37,57 64,31" stroke="var(--ads-text-success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <div style={{
-            fontSize: '13px', fontWeight: 600, color: '#16A34A',
+            fontSize: '13px', fontWeight: 600, color: 'var(--ads-text-success)',
             backgroundColor: 'rgba(255,255,255,0.92)', padding: '5px 16px',
             borderRadius: '12px', border: '1px solid rgba(22,163,74,0.15)',
           }}>
@@ -1576,7 +1576,7 @@ function ScanIndicatorOverlay({ guidance, containerSize, pointerNDC, flashActive
       {/* Mode label */}
       <div style={{
         position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-        fontSize: '11px', fontWeight: 600, color: '#009ACE',
+        fontSize: '11px', fontWeight: 600, color: 'var(--ads-background-interactive)',
         backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 14px',
         borderRadius: '10px', whiteSpace: 'nowrap',
         border: '1px solid rgba(0,154,206,0.1)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
@@ -1627,7 +1627,7 @@ const WRECT_CY = '29.3%';  // (30.7254 + 267.077/2) / 561
 function WandFrame({ mode, flashActive, children, anim }: {
   mode: string; flashActive: boolean; children?: React.ReactNode; anim?: string;
 }) {
-  const bc = flashActive ? '#16A34A' : 'rgba(0,154,206,0.55)';
+  const bc = flashActive ? 'var(--ads-text-success)' : 'rgba(0,154,206,0.55)';
   return (
     <div style={{
       position: 'absolute', top: '50%', left: '50%',
@@ -1639,7 +1639,7 @@ function WandFrame({ mode, flashActive, children, anim }: {
       {/* Mode label */}
       <div style={{
         position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
-        fontSize: '11px', fontWeight: 600, color: '#009ACE',
+        fontSize: '11px', fontWeight: 600, color: 'var(--ads-background-interactive)',
         backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
         borderRadius: '10px', whiteSpace: 'nowrap',
         border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
@@ -1659,7 +1659,7 @@ function WandLR({ g, f }: { g: GuidanceState; f: boolean }) {
       <WandFrame mode="wand-lr" flashActive={f}>
         <div style={{ position:'absolute',left:-64,top:WRECT_CY,transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="left"/></div>
         <div style={{ position:'absolute',right:-64,top:WRECT_CY,transform:'translateY(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowH dir="right"/></div>
-        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'wand-slide-lr 2.5s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,var(--ads-text-on-highlight-blue))',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'wand-slide-lr 2.5s ease-in-out infinite' }}/>
       </WandFrame>
     </div>
   );
@@ -1673,7 +1673,7 @@ function WandUD({ g, f }: { g: GuidanceState; f: boolean }) {
       <WandFrame mode="wand-ud" flashActive={f}>
         <div style={{ position:'absolute',top:-64,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="up"/></div>
         <div style={{ position:'absolute',bottom:-64,left:WRECT_CX,transform:'translateX(-50%)',animation:'dof-breathe 2s ease-in-out infinite' }}><ArrowV dir="down"/></div>
-        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,#007A9E)',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'wand-slide-ud 2.5s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute',top:WRECT_CY,left:WRECT_CX,width:10,height:10,borderRadius:'50%',background:'linear-gradient(135deg,#40B8DB,var(--ads-text-on-highlight-blue))',boxShadow:'0 1px 4px rgba(0,120,160,0.4)',animation:'wand-slide-ud 2.5s ease-in-out infinite' }}/>
       </WandFrame>
     </div>
   );
@@ -1909,7 +1909,7 @@ function GhostWandOverlay({ mode, g, f, showArrows = true, ghostFull = false }: 
   const isScanning = g.phase === 'scanning';
   const ghostAnim = GWAND_ANIM[mode] ?? 'none';
 
-  const wandColor = f ? '#16A34A' : isScanning ? 'rgba(0,154,206,0.7)' : 'rgba(0,154,206,0.55)';
+  const wandColor = f ? 'var(--ads-text-success)' : isScanning ? 'rgba(0,154,206,0.7)' : 'rgba(0,154,206,0.55)';
 
   const wandW = 'clamp(140px, 14vw, 200px)';
   const wandH = 'clamp(310px, 31vw, 450px)';
@@ -1932,7 +1932,7 @@ function GhostWandOverlay({ mode, g, f, showArrows = true, ghostFull = false }: 
         }
         <div style={{
           position: 'absolute', bottom: ghostFull ? -30 : -22, left: '50%', transform: 'translateX(-50%)',
-          fontSize: '10px', fontWeight: 600, color: '#009ACE', opacity: 0.7,
+          fontSize: '10px', fontWeight: 600, color: 'var(--ads-background-interactive)', opacity: 0.7,
           backgroundColor: 'rgba(255,255,255,0.88)', padding: '2px 10px',
           borderRadius: '8px', whiteSpace: 'nowrap',
           border: '1px solid rgba(0,154,206,0.12)',
@@ -1957,7 +1957,7 @@ function GhostWandOverlay({ mode, g, f, showArrows = true, ghostFull = false }: 
         {/* Mode label */}
         <div style={{
           position: 'absolute', bottom: -30, left: '50%', transform: 'translateX(-50%)',
-          fontSize: '11px', fontWeight: 600, color: '#009ACE',
+          fontSize: '11px', fontWeight: 600, color: 'var(--ads-background-interactive)',
           backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
           borderRadius: '10px', whiteSpace: 'nowrap',
           border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
@@ -2034,7 +2034,7 @@ function RotationOverlay({ mode, g, f }: { mode: string; g: GuidanceState; f: bo
       {/* Mode label */}
       <div style={{
         position: 'absolute', bottom: 36, left: '50%', transform: 'translateX(-50%)',
-        fontSize: '11px', fontWeight: 600, color: '#009ACE',
+        fontSize: '11px', fontWeight: 600, color: 'var(--ads-background-interactive)',
         backgroundColor: 'rgba(255,255,255,0.92)', padding: '3px 12px',
         borderRadius: '10px', whiteSpace: 'nowrap',
         border: `1px solid ${color.borderDefault}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)',

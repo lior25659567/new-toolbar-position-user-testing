@@ -27,7 +27,7 @@ function ToothShape({
 }) {
   const [hovered, setHovered] = useState(false);
 
-  const fill = isSelected ? color.primary : hovered ? '#E0F2FE' : color.white;
+  const fill = isSelected ? color.primary : hovered ? 'var(--ads-background-highlight-blue)' : color.white;
   const stroke = isSelected ? color.primary : hovered ? color.primary : color.neutral400;
   const strokeWidth = isSelected || hovered ? 4 : 2;
   const textColor = isSelected ? color.white : color.textSubtle;
@@ -92,8 +92,8 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
               padding: `2px ${space[2]}`,
               fontSize: font.size.xs,
               fontWeight: font.weight.medium,
-              color: '#374151',
-              backgroundColor: '#F9FAFB',
+              color: 'var(--ads-text-secondary)',
+              backgroundColor: 'var(--ads-background-subtle-00)',
               border: `1px solid ${color.borderDefault}`,
               borderRadius: radius.sm,
               lineHeight: '1.4',
@@ -124,7 +124,7 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
             cursor: 'pointer',
             transition: `background-color ${transition.fast}`,
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E0F2FE'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ads-background-highlight-blue)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
         >
           {selected.length === 0 ? '+ Select teeth' : '+ Add'}
@@ -159,7 +159,7 @@ export default function ToothSelector({ selected, onChange, compact }: ToothSele
               fontSize: '10px',
               fontWeight: font.weight.medium,
               color: color.primary,
-              backgroundColor: '#E0F2FE',
+              backgroundColor: 'var(--ads-background-highlight-blue)',
               padding: '1px 6px',
               borderRadius: radius.full,
             }}>

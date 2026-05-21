@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { color, font, space, radius, shadow, transition } from "./tokens";
+import { color, font, space, radius, shadow, transition, v2 } from "./tokens";
 import { useTheme } from "./ThemeProvider";
 import { PrimaryButton } from "./PrimaryButton";
 import { SecondaryButton } from "./SecondaryButton";
@@ -24,9 +24,18 @@ import { Notification } from "./Notification";
 import { DatePicker } from "./DatePicker";
 import { MessageList } from "./MessageList";
 import { IconButton } from "./IconButton";
+import { Icon } from "./Icon";
+import { Spinner } from "./Spinner";
+import { Slider } from "./Slider";
+import { Combobox } from "./Combobox";
+import { ContextualMenu } from "./ContextualMenu";
+import { MessageBubble } from "./MessageBubble";
+import { Accordion, Avatar } from "./Kit";
+import { Logo, LogoMark, TopBar, LeftRail } from "./Shell";
 import { HorizontalScanToolbar, UpperJawIcon, LowerJawIcon, BothJawsIcon } from "../components/HorizontalToolbarScan";
 import { HorizontalViewToolbar } from "../components/HorizontalToolbarView";
 import HeaderNavigation from "../components/HeaderNavigation";
+import JawSelector from "../components/JawSelector";
 import PrepReviewPanel from "../imports/PrepReviewPanel";
 import MarginLinePanel from "../imports/MarginLinePanel";
 import TrimPanel from "../imports/Panel-88-1668";
@@ -48,9 +57,14 @@ const PROCEDURE_ICONS: Record<string, React.ReactNode> = {
 
 // ─── Nav ─────────────────────────────────────────────────────────────────────
 
+// NAV mirrors Figma "06. Web components 0.9.0" grouping.
+// Section IDs are stable — only group headers and order changed.
+// Group `id` + `icon` are consumed by <LeftRail groups={NAV} /> below.
 const NAV = [
   {
-    group: "Foundation",
+    id: "g-foundation",
+    label: "Foundation",
+    icon: "palette",
     items: [
       { id: "colors",     label: "Colors" },
       { id: "typography", label: "Typography" },
@@ -60,68 +74,111 @@ const NAV = [
     ],
   },
   {
-    group: "Controls",
+    id: "g-actions",
+    label: "Actions",
+    icon: "button",
     items: [
       { id: "button",      label: "Button" },
       { id: "icon-button", label: "Icon Button" },
-      { id: "toggle",     label: "Toggle" },
-      { id: "checkbox",   label: "Checkbox" },
-      { id: "radio",      label: "Radio" },
+      { id: "link",        label: "Link" },
     ],
   },
   {
-    group: "Inputs",
+    id: "g-selection",
+    label: "Selection",
+    icon: "check-square",
+    items: [
+      { id: "toggle",     label: "Toggle" },
+      { id: "checkbox",   label: "Checkbox" },
+      { id: "radio",      label: "Radio" },
+      { id: "tag",        label: "Tag" },
+    ],
+  },
+  {
+    id: "g-inputs",
+    label: "Inputs",
+    icon: "form",
     items: [
       { id: "text-input",    label: "Text Input" },
       { id: "text-area",     label: "Text Area" },
       { id: "number-input",  label: "Number Input" },
       { id: "search-input",  label: "Search" },
-      { id: "select",        label: "Select" },
-      { id: "dropdown-list", label: "Dropdown List" },
+      { id: "combobox",      label: "Combobox" },
+      { id: "slider",        label: "Slider" },
       { id: "date-picker",   label: "Date Picker" },
     ],
   },
   {
-    group: "Navigation",
+    id: "g-pickers",
+    label: "Pickers & Menus",
+    icon: "more",
+    items: [
+      { id: "select",          label: "Select" },
+      { id: "dropdown-list",   label: "Dropdown List" },
+      { id: "contextual-menu", label: "Contextual Menu" },
+    ],
+  },
+  {
+    id: "g-navigation",
+    label: "Navigation",
+    icon: "layout",
     items: [
       { id: "tabs",        label: "Tabs" },
       { id: "breadcrumbs", label: "Breadcrumbs" },
       { id: "stepper",     label: "Stepper" },
+      { id: "page-header", label: "Page Header" },
+      { id: "nav-panel",   label: "Navigation Panel" },
     ],
   },
   {
-    group: "Data Display",
+    id: "g-data",
+    label: "Data Display",
+    icon: "grid-dashboard",
     items: [
-      { id: "tag",          label: "Tag" },
-      { id: "progress-bar", label: "Progress Bar" },
-      { id: "message-list", label: "Message List" },
+      { id: "avatar",         label: "Avatar" },
+      { id: "card",           label: "Card" },
+      { id: "accordion",      label: "Accordion" },
+      { id: "message-list",   label: "Message List" },
+      { id: "message-bubble", label: "Message Bubble" },
+      { id: "progress-bar",   label: "Progress Bar" },
     ],
   },
   {
-    group: "Feedback",
+    id: "g-feedback",
+    label: "Feedback",
+    icon: "bell",
     items: [
       { id: "tooltip",       label: "Tooltip" },
       { id: "notification",  label: "Notification" },
       { id: "modal",         label: "Modal" },
+      { id: "spinner",       label: "Loading / Spinner" },
     ],
   },
   {
-    group: "Application",
+    id: "g-branding",
+    label: "Branding",
+    icon: "logo-mark",
     items: [
-      { id: "toolbar",  label: "Toolbar" },
-      { id: "header",   label: "Header" },
-      { id: "panels",   label: "Panels" },
-    ],
-  },
-  {
-    group: "Iconography",
-    items: [
+      { id: "logo",            label: "Logo" },
       { id: "icons-toolbar",   label: "Toolbar Icons" },
       { id: "icons-procedure", label: "Procedure Icons" },
     ],
   },
   {
-    group: "Templates",
+    id: "g-application",
+    label: "Application",
+    icon: "browser",
+    items: [
+      { id: "toolbar",      label: "Toolbar" },
+      { id: "header",       label: "Header" },
+      { id: "jaw-selector", label: "Jaw Selector" },
+      { id: "panels",       label: "Panels" },
+    ],
+  },
+  {
+    id: "g-templates",
+    label: "Templates",
+    icon: "blocks",
     items: [
       { id: "templates", label: "Templates" },
     ],
@@ -459,6 +516,48 @@ function ShadowSwatch({ token, value, usage, bg }: { token: string; value: strin
   );
 }
 
+// ─── DemoCard — used in the "Card" section of the styleguide ─────────────────
+// Implements the unified v2.0 card pattern: border-only, no bg fill on any
+// state. "static" = no hover; "interactive" = hover darkens border; "selected"
+// = 2px border-interactive (brand blue), inner padding -1px so the card
+// doesn't grow.
+function DemoCard({ kind, label }: { kind: "static" | "interactive" | "selected"; label?: string }) {
+  const [hovered, setHovered] = React.useState(false);
+  const isSelected = kind === "selected";
+  const isInteractive = kind !== "static";
+  const border = isSelected
+    ? "2px solid var(--ads-background-interactive)"
+    : hovered && isInteractive
+      ? "1px solid var(--ads-border-subtle-hover)"
+      : "1px solid var(--ads-border-subtle)";
+  return (
+    <div
+      onMouseEnter={() => isInteractive && setHovered(true)}
+      onMouseLeave={() => isInteractive && setHovered(false)}
+      aria-selected={isSelected || undefined}
+      style={{
+        padding: isSelected ? "15px" : "16px",
+        borderRadius: "var(--ads-radius-md)",
+        border,
+        backgroundColor: "var(--ads-background-subtle-01)",
+        cursor: isInteractive ? "pointer" : "default",
+        transition: "border-color var(--ads-duration-fast) var(--ads-ease-standard)",
+        minHeight: "96px",
+        display: "flex",
+        flexDirection: "column",
+        gap: space[2],
+      }}
+    >
+      <div style={{ fontSize: font.size.sm, fontWeight: font.weight.medium, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)" }}>
+        Card title
+      </div>
+      <div style={{ fontSize: font.size.xs, color: "var(--ads-text-secondary)", fontFamily: "var(--ads-font-sans)" }}>
+        {label ?? (kind === "static" ? "Static (no hover)" : "Hover or click to see state")}
+      </div>
+    </div>
+  );
+}
+
 // ─── Section divider label ────────────────────────────────────────────────────
 
 function GroupLabel({ children }: { children: React.ReactNode }) {
@@ -488,12 +587,26 @@ const BUTTON_SIZES: Array<{ label: string; size: 36 | 44 | 60 }> = [
   { label: "Large — 60px",  size: 60 },
 ];
 
+const BUTTON_VARIANTS = [
+  { key: "primary",   label: "Button / Primary",   Comp: PrimaryButton },
+  { key: "secondary", label: "Button / Secondary", Comp: SecondaryButton },
+  { key: "link",      label: "Button / Link",      Comp: LinkButton },
+  { key: "ghost",     label: "Button / Ghost",     Comp: GhostButton },
+  { key: "danger",    label: "Button / Danger",    Comp: WarningButton },
+] as const;
+
+/** Sizes shown in the icon-only grid — matches Figma (Large 44, Medium 36). */
+const ICON_BUTTON_SIZES: Array<{ label: string; size: 36 | 44 }> = [
+  { label: "Small — 36px",  size: 36 },
+  { label: "Medium — 44px", size: 44 },
+];
+
 function ButtonSection() {
   return (
     <>
-      {/* Type × Size comparison */}
+      {/* Type × Size comparison — Text only */}
       <div style={{ marginBottom: space[10] }}>
-        <SubHeading title="Button / Type — all variants" />
+        <SubHeading title="Button / Type — text only" />
         <div
           style={{
             display: "grid",
@@ -502,7 +615,6 @@ function ButtonSection() {
             alignItems: "center",
           }}
         >
-          {/* Column headers */}
           <div />
           {BUTTON_SIZES.map((s) => (
             <div key={s.size} style={{ fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textLabel, paddingBottom: space[2] }}>
@@ -510,25 +622,85 @@ function ButtonSection() {
             </div>
           ))}
 
-          {/* Primary */}
-          <VariantRowLabel>Button / Primary</VariantRowLabel>
-          {BUTTON_SIZES.map((s) => <PrimaryButton key={s.size} size={s.size}>Label</PrimaryButton>)}
+          {BUTTON_VARIANTS.map(({ key, label, Comp }) => (
+            <React.Fragment key={key}>
+              <VariantRowLabel>{label}</VariantRowLabel>
+              {BUTTON_SIZES.map((s) => <Comp key={s.size} size={s.size}>Label</Comp>)}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
 
-          {/* Secondary */}
-          <VariantRowLabel>Button / Secondary</VariantRowLabel>
-          {BUTTON_SIZES.map((s) => <SecondaryButton key={s.size} size={s.size}>Label</SecondaryButton>)}
+      {/* Type × Size comparison — Text + icon */}
+      <div style={{ marginBottom: space[10] }}>
+        <SubHeading title="Button / Type — text + icon" />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `160px repeat(${BUTTON_SIZES.length}, 1fr)`,
+            gap: `${space[2]} ${space[4]}`,
+            alignItems: "center",
+          }}
+        >
+          <div />
+          {BUTTON_SIZES.map((s) => (
+            <div key={s.size} style={{ fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textLabel, paddingBottom: space[2] }}>
+              {s.label}
+            </div>
+          ))}
 
-          {/* Ghost */}
-          <VariantRowLabel>Button / Ghost</VariantRowLabel>
-          {BUTTON_SIZES.map((s) => <GhostButton key={s.size} size={s.size}>Label</GhostButton>)}
+          {BUTTON_VARIANTS.map(({ key, label, Comp }) => (
+            <React.Fragment key={key}>
+              <VariantRowLabel>{label}</VariantRowLabel>
+              {BUTTON_SIZES.map((s) => (
+                <Comp key={s.size} size={s.size}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: space[2] }}>
+                    <Icon name="plus" size={s.size === 36 ? 14 : 16} />
+                    Label
+                  </span>
+                </Comp>
+              ))}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
 
-          {/* Link */}
-          <VariantRowLabel>Button / Link</VariantRowLabel>
-          {BUTTON_SIZES.map((s) => <LinkButton key={s.size} size={s.size}>Label</LinkButton>)}
+      {/* Type × Size comparison — Icon only */}
+      <div style={{ marginBottom: space[10] }}>
+        <SubHeading title="Button / Type — icon only" />
+        <p style={{ fontSize: font.size.xs, color: color.textPlaceholder, margin: `0 0 ${space[3]} 0` }}>
+          Icon-only variants render the colored Button shim with just an icon child. For neutral toolbar-style icon buttons, prefer the standalone <code>&lt;IconButton /&gt;</code> shown below.
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `160px repeat(${ICON_BUTTON_SIZES.length}, max-content)`,
+            gap: `${space[2]} ${space[4]}`,
+            alignItems: "center",
+          }}
+        >
+          <div />
+          {ICON_BUTTON_SIZES.map((s) => (
+            <div key={s.size} style={{ fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textLabel, paddingBottom: space[2] }}>
+              {s.label}
+            </div>
+          ))}
 
-          {/* Danger */}
-          <VariantRowLabel>Button / Danger</VariantRowLabel>
-          {BUTTON_SIZES.map((s) => <WarningButton key={s.size} size={s.size}>Label</WarningButton>)}
+          {BUTTON_VARIANTS.map(({ key, label, Comp }) => (
+            <React.Fragment key={key}>
+              <VariantRowLabel>{label}</VariantRowLabel>
+              {ICON_BUTTON_SIZES.map((s) => (
+                <Comp
+                  key={s.size}
+                  size={s.size}
+                  aria-label={`${key} icon-only`}
+                  style={{ width: s.size, paddingLeft: 0, paddingRight: 0 }}
+                >
+                  <Icon name="plus" size={s.size === 36 ? 16 : 18} />
+                </Comp>
+              ))}
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
@@ -563,20 +735,25 @@ function ButtonSection() {
       {/* States — Secondary */}
       <div style={{ marginBottom: space[10] }}>
         <SubHeading title="Button / Secondary / States" />
+        <p style={{ fontSize: font.size.xs, color: color.textPlaceholder, margin: `0 0 ${space[3]} 0` }}>
+          v2.0 spec: <b>transparent fill on every state</b> — only the border darkens through the
+          accent ladder (23% → 34% → 49% black). No background fill on hover or pressed. The card
+          components (ProcedureCard, ViewLayersPanel rows) follow this exact same border-only model.
+        </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: space[3] }}>
-          <StateCell label="Default" tokens={[{ name: "color.borderDefault" }]}>
+          <StateCell label="Default" tokens={[{ name: "bg: transparent" }, { name: "border: border-accent" }]}>
             <SecondaryButton>Secondary</SecondaryButton>
           </StateCell>
-          <StateCell label="Hover" tokens={[{ name: "borderColor: #9CA3AF", value: "~borderHover" }]}>
+          <StateCell label="Hover" tokens={[{ name: "bg: transparent (no fill)" }, { name: "border: border-accent-hover" }]}>
             <SecondaryButton>Hover me</SecondaryButton>
           </StateCell>
-          <StateCell label="Pressed" tokens={[{ name: "scale(0.98)" }, { name: "borderColor: #9CA3AF" }]}>
+          <StateCell label="Pressed" tokens={[{ name: "bg: transparent (no fill)" }, { name: "border: border-accent-active" }, { name: "scale(0.98)" }]}>
             <SecondaryButton>Press me</SecondaryButton>
           </StateCell>
-          <StateCell label="Focused" tokens={[{ name: "borderColor: #9CA3AF" }]}>
+          <StateCell label="Focused" tokens={[{ name: "border: border-focus" }, { name: "outlineOffset: 1px" }]}>
             <SecondaryButton>Focus me</SecondaryButton>
           </StateCell>
-          <StateCell label="Disabled" tokens={[{ name: "opacity: 0.5" }]}>
+          <StateCell label="Disabled" tokens={[{ name: "opacity: 0.5" }, { name: "border: border-disabled" }]}>
             <SecondaryButton disabled>Disabled</SecondaryButton>
           </StateCell>
         </div>
@@ -589,10 +766,10 @@ function ButtonSection() {
           <StateCell label="Toolbar / Default" tokens={[{ name: "bg: transparent" }, { name: "border: color.borderDefault" }]}>
             <SecondaryButton variant="toolbar">Toolbar</SecondaryButton>
           </StateCell>
-          <StateCell label="Toolbar / Hover" hint="Mouse over" tokens={[{ name: "bg: #f5f5f5", value: "hard-coded" }]}>
+          <StateCell label="Toolbar / Hover" hint="Mouse over" tokens={[{ name: "bg: background-subtle-02" }]}>
             <SecondaryButton variant="toolbar">Hover me</SecondaryButton>
           </StateCell>
-          <StateCell label="Toolbar / Active" hint="Toggled on" tokens={[{ name: "bg: #E0F2FE", value: "hard-coded" }]}>
+          <StateCell label="Toolbar / Active" hint="Toggled on" tokens={[{ name: "bg: background-highlight-blue" }]}>
             <SecondaryButton variant="toolbar">Active</SecondaryButton>
           </StateCell>
         </div>
@@ -741,6 +918,420 @@ function StepperSection() {
   );
 }
 
+// ─── Link demo ─────────────────────────────────────────────────────────────────
+
+function LinkSection() {
+  return (
+    <>
+      <SectionHeading id="link" title="Link" description="LinkButton — transparent-background, primary-colored text. Used inline or as a standalone button-styled action. Figma: 'Link' page (06. Web components 0.9.0)." />
+      <div style={{ marginBottom: space[8] }}>
+        <SubHeading title="Link / Sizes" />
+        <div style={{ display: "flex", gap: space[4], alignItems: "center" }}>
+          <LinkButton size={36}>Small link</LinkButton>
+          <LinkButton size={44}>Medium link</LinkButton>
+          <LinkButton size={60}>Large link</LinkButton>
+        </div>
+      </div>
+      <div>
+        <SubHeading title="Link / States" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: space[3] }}>
+          <StateCell label="Default"><LinkButton>Link</LinkButton></StateCell>
+          <StateCell label="Hover" hint="Mouse over"><LinkButton>Hover me</LinkButton></StateCell>
+          <StateCell label="Pressed" hint="Click & hold"><LinkButton>Press me</LinkButton></StateCell>
+          <StateCell label="Focused" hint="Tab to focus"><LinkButton>Focus me</LinkButton></StateCell>
+          <StateCell label="Disabled"><LinkButton disabled>Disabled</LinkButton></StateCell>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Combobox demo ─────────────────────────────────────────────────────────────
+
+const COMBOBOX_OPTIONS = [
+  { value: "amber",    label: "Amber" },
+  { value: "azure",    label: "Azure" },
+  { value: "beige",    label: "Beige" },
+  { value: "coral",    label: "Coral" },
+  { value: "crimson",  label: "Crimson" },
+  { value: "indigo",   label: "Indigo" },
+  { value: "ivory",    label: "Ivory" },
+  { value: "magenta",  label: "Magenta" },
+  { value: "olive",    label: "Olive" },
+  { value: "scarlet",  label: "Scarlet" },
+];
+
+function ComboboxSection() {
+  const [v1, setV1] = useState("");
+  const [v2, setV2] = useState("indigo");
+  return (
+    <>
+      <SectionHeading id="combobox" title="Combobox" description="Searchable select with type-ahead. Both layer-sets (white surface and grey surface) match Figma. States: enabled, hovered, focused, activated, filled, disabled, error. Figma: 15305:6735." />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: space[6], maxWidth: 720 }}>
+        <div>
+          <VariantLabel>Layer set 01 — white surface</VariantLabel>
+          <Combobox label="Color" options={COMBOBOX_OPTIONS} value={v1} onChange={setV1} placeholder="Search colors…" fullWidth />
+        </div>
+        <div>
+          <VariantLabel>Layer set 02 — grey surface</VariantLabel>
+          <Combobox label="Color" layerSet="grey" options={COMBOBOX_OPTIONS} value={v2} onChange={setV2} placeholder="Search colors…" fullWidth />
+        </div>
+        <div>
+          <VariantLabel>With helper text</VariantLabel>
+          <Combobox label="Color" options={COMBOBOX_OPTIONS} helper="Type to filter the list" fullWidth />
+        </div>
+        <div>
+          <VariantLabel>With error</VariantLabel>
+          <Combobox label="Color" options={COMBOBOX_OPTIONS} error="Please choose one" fullWidth />
+        </div>
+        <div>
+          <VariantLabel>Disabled</VariantLabel>
+          <Combobox label="Color" options={COMBOBOX_OPTIONS} disabled defaultValue="indigo" fullWidth />
+        </div>
+        <div>
+          <VariantLabel>Non-searchable (dropdown mode)</VariantLabel>
+          <Combobox label="Color" options={COMBOBOX_OPTIONS} searchable={false} fullWidth />
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Slider demo ───────────────────────────────────────────────────────────────
+
+function SliderSection() {
+  const [single, setSingle] = useState(40);
+  const [ranged, setRanged] = useState<[number, number]>([20, 70]);
+  return (
+    <>
+      <SectionHeading id="slider" title="Slider" description="Single-value and ranged sliders. 20×20 circular handle on a thin track. States: enabled, hover, active, disabled. Figma: 18362:19162." />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: space[8], maxWidth: 720 }}>
+        <div>
+          <VariantLabel>Single — enabled</VariantLabel>
+          <Slider label="Opacity" value={single} onChange={(v) => setSingle(v as number)} formatValue={(v) => `${v}%`} />
+        </div>
+        <div>
+          <VariantLabel>Single — disabled</VariantLabel>
+          <Slider label="Opacity" value={50} onChange={() => {}} disabled formatValue={(v) => `${v}%`} />
+        </div>
+        <div>
+          <VariantLabel>Ranged — enabled</VariantLabel>
+          <Slider label="Price range" value={ranged} onChange={(v) => setRanged(v as [number, number])} formatValue={(v) => `$${v}`} />
+        </div>
+        <div>
+          <VariantLabel>Ranged — disabled</VariantLabel>
+          <Slider label="Price range" value={[30, 80]} onChange={() => {}} disabled formatValue={(v) => `$${v}`} />
+        </div>
+        <div>
+          <VariantLabel>Custom min / max / step</VariantLabel>
+          <Slider label="Temperature (°C)" value={37} onChange={() => {}} min={35} max={42} step={0.1} formatValue={(v) => v.toFixed(1)} />
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Contextual Menu demo ──────────────────────────────────────────────────────
+
+function ContextualMenuSection() {
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLButtonElement>(null);
+  return (
+    <>
+      <SectionHeading id="contextual-menu" title="Contextual Menu" description="Popover menu of items anchored to a trigger. Items: 180×44, with optional icon and trailing element. Keyboard nav (↑/↓ Enter Esc). Figma: 15305:6736." />
+      <div style={{ marginBottom: space[8] }}>
+        <SubHeading title="Trigger + menu — interactive" />
+        <div style={{ position: "relative" }}>
+          <SecondaryButton
+            ref={anchorRef as unknown as React.Ref<HTMLButtonElement>}
+            size={36}
+            onClick={() => setOpen((v) => !v)}
+          >
+            Open menu
+          </SecondaryButton>
+          <ContextualMenu
+            anchor={anchorRef.current}
+            open={open}
+            onClose={() => setOpen(false)}
+          >
+            <ContextualMenu.Item icon={<Icon name="edit" size={16} />} onSelect={() => setOpen(false)}>Edit</ContextualMenu.Item>
+            <ContextualMenu.Item icon={<Icon name="upload" size={16} />} onSelect={() => setOpen(false)}>Upload</ContextualMenu.Item>
+            <ContextualMenu.Item icon={<Icon name="filter" size={16} />} trailing={<Icon name="chevron-right" size={16} />} onSelect={() => setOpen(false)}>Filter by…</ContextualMenu.Item>
+            <ContextualMenu.Separator />
+            <ContextualMenu.Item icon={<Icon name="close" size={16} />} destructive onSelect={() => setOpen(false)}>Delete</ContextualMenu.Item>
+            <ContextualMenu.Item disabled>Archived (disabled)</ContextualMenu.Item>
+          </ContextualMenu>
+        </div>
+      </div>
+      <div>
+        <SubHeading title="Item states (static preview)" />
+        <div
+          style={{
+            display: "inline-block",
+            width: 220,
+            background: color.bgSurface,
+            border: `1px solid ${color.borderDefault}`,
+            borderRadius: radius.md,
+            boxShadow: shadow.md,
+            padding: `${space[1]} 0`,
+            fontFamily: font.family,
+          }}
+        >
+          <MenuItemPreview state="enabled">Enabled</MenuItemPreview>
+          <MenuItemPreview state="hovered">Hovered</MenuItemPreview>
+          <MenuItemPreview state="active">Active</MenuItemPreview>
+          <MenuItemPreview state="focused">Focused</MenuItemPreview>
+          <MenuItemPreview state="disabled">Disabled</MenuItemPreview>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function MenuItemPreview({ state, children }: { state: "enabled" | "hovered" | "active" | "focused" | "disabled"; children: React.ReactNode }) {
+  const bg =
+    state === "hovered" ? color.bgHover :
+    state === "active"  ? color.bgActive :
+    "transparent";
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        height: 44,
+        padding: `0 ${space[3]}`,
+        fontSize: font.size.base,
+        color: state === "disabled" ? color.textPlaceholder : color.textDefault,
+        background: bg,
+        opacity: state === "disabled" ? 0.5 : 1,
+        outline: state === "focused" ? `2px solid ${color.primary}` : "none",
+        outlineOffset: state === "focused" ? -2 : 0,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ─── Page Header demo ──────────────────────────────────────────────────────────
+
+function PageHeaderSection() {
+  const [theme, setTheme] = useState<"align-light" | "align-dark">("align-light");
+  return (
+    <>
+      <SectionHeading id="page-header" title="Page Header" description="Top app bar (TopBar) — search field, size-mode toggle, theme toggle, notification bell, avatar. Used by the application shell. Figma: 'Page header' page." />
+      <div style={{ border: `1px solid ${color.borderDefault}`, borderRadius: radius.md, overflow: "hidden" }}>
+        <TopBar
+          theme={theme}
+          onThemeToggle={() => setTheme((t) => (t === "align-light" ? "align-dark" : "align-light"))}
+          onNew={() => {}}
+          unread={3}
+        />
+      </div>
+      <p style={{ fontSize: font.size.xs, color: color.textPlaceholder, marginTop: space[3] }}>
+        Render with <code style={{ fontFamily: font.mono }}>&lt;TopBar /&gt;</code> from <code style={{ fontFamily: font.mono }}>./Shell</code>.
+      </p>
+    </>
+  );
+}
+
+// ─── Navigation Panel demo ────────────────────────────────────────────────────
+
+function NavPanelSection() {
+  const [nav, setNav] = useState("cases");
+  const [collapsed, setCollapsed] = useState(false);
+  return (
+    <>
+      <SectionHeading id="nav-panel" title="Navigation Panel" description="LeftRail — collapsible side navigation with logo, primary nav items, and optional grouping. Figma: 'Navigation panel' page." />
+      <div style={{ marginBottom: space[8] }}>
+        <SubHeading title="Expanded" />
+        <div style={{ height: 360, border: `1px solid ${color.borderDefault}`, borderRadius: radius.md, overflow: "hidden", display: "flex", background: color.bgPage }}>
+          <LeftRail nav={nav} setNav={setNav} collapsed={false} onToggleCollapsed={() => setCollapsed((v) => !v)} />
+          <div style={{ flex: 1, padding: space[6], color: color.textSubtle, fontSize: font.size.sm }}>
+            Active nav: <b>{nav}</b>
+          </div>
+        </div>
+      </div>
+      <div>
+        <SubHeading title="Collapsed" />
+        <div style={{ height: 360, border: `1px solid ${color.borderDefault}`, borderRadius: radius.md, overflow: "hidden", display: "flex", background: color.bgPage }}>
+          <LeftRail nav={nav} setNav={setNav} collapsed={true} onToggleCollapsed={() => {}} />
+          <div style={{ flex: 1, padding: space[6], color: color.textSubtle, fontSize: font.size.sm }}>
+            Active nav: <b>{nav}</b>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Avatar demo ───────────────────────────────────────────────────────────────
+
+function AvatarSection() {
+  return (
+    <>
+      <SectionHeading id="avatar" title="Avatar" description="Initials avatar in 4 sizes (xs/sm/md/lg). Pass a name string — the first letters of two words become the initials. Figma: 'Avatar' page." />
+      <div style={{ marginBottom: space[8] }}>
+        <SubHeading title="Avatar / Sizes" />
+        <div style={{ display: "flex", alignItems: "center", gap: space[6] }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Avatar name="Sarah Chen" size="xs" />
+            <VariantLabel>xs</VariantLabel>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Avatar name="Sarah Chen" size="sm" />
+            <VariantLabel>sm</VariantLabel>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Avatar name="Sarah Chen" size="md" />
+            <VariantLabel>md (default)</VariantLabel>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Avatar name="Sarah Chen" size="lg" />
+            <VariantLabel>lg</VariantLabel>
+          </div>
+        </div>
+      </div>
+      <div>
+        <SubHeading title="Avatar / Different names" />
+        <div style={{ display: "flex", gap: space[3], alignItems: "center" }}>
+          <Avatar name="Alex Davis" />
+          <Avatar name="Maria Lopez" />
+          <Avatar name="Yuki Tanaka" />
+          <Avatar name="Patient Zero" />
+          <Avatar name="N" />
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Accordion demo ────────────────────────────────────────────────────────────
+
+function AccordionSection() {
+  return (
+    <>
+      <SectionHeading id="accordion" title="Accordion" description="Stack of expandable panels. One opens by default; clicking a title toggles the panel. Figma: 'Accordion' page." />
+      <div style={{ maxWidth: 560 }}>
+        <Accordion
+          defaultOpen={0}
+          items={[
+            { title: "What is included in the scan?", body: <p style={{ margin: 0, color: color.textSubtle, fontSize: font.size.base }}>The intra-oral scan captures upper jaw, lower jaw, and bite registration. Optional add-ons include occlusalgram and prep QC.</p> },
+            { title: "How long does the workflow take?", body: <p style={{ margin: 0, color: color.textSubtle, fontSize: font.size.base }}>End-to-end: scanning (4–8 min), review (2 min), submission (~1 min). Lab turnaround is separate.</p> },
+            { title: "Can I edit a scan after submission?", body: <p style={{ margin: 0, color: color.textSubtle, fontSize: font.size.base }}>Yes — submitted scans can be reopened from the Cases list. Re-submission requires a quick re-validation step.</p> },
+          ]}
+        />
+      </div>
+    </>
+  );
+}
+
+// ─── Message Bubble demo ───────────────────────────────────────────────────────
+
+function MessageBubbleSection() {
+  return (
+    <>
+      <SectionHeading id="message-bubble" title="Message Bubble" description="Chat bubble primitive. from = 'them' (left, neutral) or 'you' (right, blue). position controls corner rounding for chained messages. Figma: 15305:6742." />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: space[6], maxWidth: 760 }}>
+        <div>
+          <VariantLabel>Interlocutor (them) — chain</VariantLabel>
+          <div style={{ display: "flex", flexDirection: "column", gap: space[1], padding: space[3], background: color.bgPage, borderRadius: radius.md }}>
+            <MessageBubble from="them" position="top">First message in a chain.</MessageBubble>
+            <MessageBubble from="them" position="center">Middle — both corners on the speaker side are tight.</MessageBubble>
+            <MessageBubble from="them" position="bottom">Last message in the chain.</MessageBubble>
+          </div>
+        </div>
+        <div>
+          <VariantLabel>You — chain</VariantLabel>
+          <div style={{ display: "flex", flexDirection: "column", gap: space[1], padding: space[3], background: color.bgPage, borderRadius: radius.md }}>
+            <MessageBubble from="you" position="top">First reply.</MessageBubble>
+            <MessageBubble from="you" position="center">Middle reply.</MessageBubble>
+            <MessageBubble from="you" position="bottom">Last reply.</MessageBubble>
+          </div>
+        </div>
+        <div>
+          <VariantLabel>Single bubbles</VariantLabel>
+          <div style={{ display: "flex", flexDirection: "column", gap: space[2], padding: space[3], background: color.bgPage, borderRadius: radius.md }}>
+            <MessageBubble from="them" position="single">A standalone message from them.</MessageBubble>
+            <MessageBubble from="you"  position="single">A standalone reply from you.</MessageBubble>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Spinner / Loading demo ────────────────────────────────────────────────────
+
+function SpinnerSection() {
+  return (
+    <>
+      <SectionHeading id="spinner" title="Loading / Spinner" description="Indeterminate progress indicator. Two Figma sizes (Large 96, Small 16) plus a Medium 24 for the common case. Pure CSS rotation. Figma: 15305:6739." />
+      <div style={{ marginBottom: space[8] }}>
+        <SubHeading title="Spinner / Sizes" />
+        <div style={{ display: "flex", alignItems: "center", gap: space[8] }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Spinner size="sm" /><VariantLabel>sm — 16</VariantLabel>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Spinner size="md" /><VariantLabel>md — 24</VariantLabel>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: space[2] }}>
+            <Spinner size="lg" /><VariantLabel>lg — 96</VariantLabel>
+          </div>
+        </div>
+      </div>
+      <div>
+        <SubHeading title="Inline in a button" />
+        <div style={{ display: "flex", gap: space[3] }}>
+          <PrimaryButton disabled>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: space[2] }}>
+              <Spinner size="sm" color="currentColor" /> Submitting…
+            </span>
+          </PrimaryButton>
+          <SecondaryButton disabled>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: space[2] }}>
+              <Spinner size="sm" color="currentColor" /> Loading…
+            </span>
+          </SecondaryButton>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── Logo demo ─────────────────────────────────────────────────────────────────
+
+function LogoSection() {
+  return (
+    <>
+      <SectionHeading id="logo" title="Logo" description="Brand mark. <Logo /> renders the full wordmark; <LogoMark /> renders the icon-only mark used in the collapsed nav rail. Both accept a height prop (default 22). Figma: 'Logo' page." />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: space[6], maxWidth: 720 }}>
+        <StateCell label="Logo (full wordmark)" tokens={[{ name: "height: 22 (default)" }]}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 60, color: color.textDefault }}>
+            <Logo />
+          </div>
+        </StateCell>
+        <StateCell label="LogoMark (icon only)" tokens={[{ name: "height: 22 (default)" }]}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 60, color: color.textDefault }}>
+            <LogoMark />
+          </div>
+        </StateCell>
+        <StateCell label="Logo — height: 32" tokens={[{ name: "height={32}" }]}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 60, color: color.textDefault }}>
+            <Logo height={32} />
+          </div>
+        </StateCell>
+        <StateCell label="LogoMark — height: 40" tokens={[{ name: "height={40}" }]}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 60, color: color.textDefault }}>
+            <LogoMark height={40} />
+          </div>
+        </StateCell>
+      </div>
+    </>
+  );
+}
+
 // ─── Modal demo ────────────────────────────────────────────────────────────────
 
 function ModalSection() {
@@ -844,7 +1435,7 @@ function ToolbarSection() {
           <StateCell label="Hover" tokens={[{ name: "bg", value: "color.neutral100" }, { name: "icon", value: "color.primary" }]}>
             <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Mouse over button</span>
           </StateCell>
-          <StateCell label="Active" tokens={[{ name: "bg", value: "primaryLight" }, { name: "icon", value: "color.primary" }]}>
+          <StateCell label="Active" tokens={[{ name: "bg: background-highlight-blue" }, { name: "icon", value: "color.primary" }]}>
             <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Toggled on</span>
           </StateCell>
         </div>
@@ -871,7 +1462,7 @@ function ToolbarSection() {
           <StateCell label="Hover" tokens={[{ name: "bg", value: "color.neutral100" }, { name: "icon", value: "color.primary" }]}>
             <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Mouse over button</span>
           </StateCell>
-          <StateCell label="Active" tokens={[{ name: "bg", value: "primaryLight" }, { name: "icon", value: "color.primary" }]}>
+          <StateCell label="Active" tokens={[{ name: "bg: background-highlight-blue" }, { name: "icon", value: "color.primary" }]}>
             <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Toggled on</span>
           </StateCell>
         </div>
@@ -904,7 +1495,7 @@ function HeaderSection() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: space[3] }}>
         <StateCell
           label="Complete"
-          tokens={[{ name: "bg", value: "#F4F4F4" }, { name: "hover", value: "#E8E8E8" }, { name: "text", value: "rgba(0,0,0,0.93)" }]}
+          tokens={[{ name: "bg: background-subtle-00" }, { name: "hover: background-subtle-active" }, { name: "text: text-primary" }]}
         >
           <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Steps before the current step</span>
         </StateCell>
@@ -916,7 +1507,7 @@ function HeaderSection() {
         </StateCell>
         <StateCell
           label="Incomplete"
-          tokens={[{ name: "bg", value: "white" }, { name: "border", value: "#E0E0E0" }, { name: "hover-bg", value: "#FAFAFA" }]}
+          tokens={[{ name: "bg: background-subtle-01" }, { name: "border: border-accent" }, { name: "hover-bg: background-subtle-00" }]}
         >
           <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Steps after the current step</span>
         </StateCell>
@@ -945,6 +1536,51 @@ function HeaderSection() {
               {step}
             </button>
           ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function JawSelectorSection() {
+  const [view, setView] = React.useState<"upper" | "lower" | "bite">("lower");
+  const labels: Record<typeof view, string> = {
+    upper: "Upper jaw",
+    lower: "Lower jaw",
+    bite: "Bite (both jaws)",
+  };
+
+  return (
+    <>
+      <SectionHeading
+        id="jaw-selector"
+        title="Jaw Selector"
+        description="Dental anatomy selector. Click the upper arch, lower arch, or centre bite to choose which jaw is active — the selected arch/bite outline is drawn blue. True-vector artwork. Figma: node 917:12240."
+      />
+
+      <SubHeading title="States" />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: space[6], marginBottom: space[8] }}>
+        {(["upper", "lower", "bite"] as const).map((s) => (
+          <div key={s} style={{ display: "flex", flexDirection: "column", gap: space[2], alignItems: "center" }}>
+            <VariantLabel>{labels[s]} selected</VariantLabel>
+            <div style={{ background: color.neutral100, padding: space[4], borderRadius: radius.md }}>
+              <JawSelector value={s} width={150} showSwitcher={false} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <SubHeading title="Interactive Demo" />
+      <VariantLabel>Click the arches or the centre bite to change the selection:</VariantLabel>
+      <div style={{ display: "flex", alignItems: "center", gap: space[8], marginTop: space[3] }}>
+        <div style={{ background: color.neutral100, padding: space[4], borderRadius: radius.md }}>
+          <JawSelector value={view} onChange={setView} width={200} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: space[2] }}>
+          <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Current selection</span>
+          <span style={{ fontSize: font.size.xl, fontWeight: font.weight.semibold, color: color.textDefault }}>
+            {labels[view]}
+          </span>
         </div>
       </div>
     </>
@@ -1256,11 +1892,29 @@ function TemplatesSection() {
 export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
   const mainRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState("colors");
+  // Color-section preview mode: scoped to the swatch wrapper only, doesn't affect the rest of the page.
+  const [colorPreviewMode, setColorPreviewMode] = useState<"light" | "dark">("light");
+  const [railCollapsed, setRailCollapsed] = useState(false);
+  // Default: every group expanded. The group that contains the active section also stays open.
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set(NAV.map((g) => g.id)));
 
   const selectSection = (id: string) => {
     setActiveId(id);
+    // Ensure the group containing the new section is expanded.
+    const owningGroup = NAV.find((g) => g.items.some((it) => it.id === id));
+    if (owningGroup && !expandedGroups.has(owningGroup.id)) {
+      setExpandedGroups((prev) => new Set([...prev, owningGroup.id]));
+    }
     // scroll main panel back to top when switching sections
     if (mainRef.current) mainRef.current.scrollTop = 0;
+  };
+
+  const toggleGroup = (id: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   };
 
   return (
@@ -1308,7 +1962,18 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
               fontFamily: font.mono,
             }}
           >
-            Figma: nswYX2pzgi7ToSzWuRkyd8 · Component / Variant / State
+            Align DS v2.0 · 27 background / 20 border / 20 text / 20 icon tokens · 21 typography tokens · Roboto + Roboto Mono
+          </p>
+          <p
+            style={{
+              fontSize: font.size["2xs"],
+              color: color.textPlaceholder,
+              margin: `${space[1]} 0 0`,
+              maxWidth: 720,
+              lineHeight: font.lineHeight.normal,
+            }}
+          >
+            Source of truth: <code style={{ fontFamily: font.mono }}>Deisgn-system 2.0/Design-System 2.0.md</code>. Three tokens (text/border/icon-warning, icon-inverse-secondary in dark) are flagged unresolved in the spec; this page renders the v2.0 doc values for them and the source has matching <code style={{ fontFamily: font.mono }}>// UNRESOLVED</code> markers.
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: space[2] }}>
@@ -1340,61 +2005,27 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
       {/* ── Body ── */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 
-        {/* Sidebar */}
-        <nav
-          style={{
-            width: 192,
-            flexShrink: 0,
-            borderRight: `1px solid ${color.neutral150}`,
-            overflowY: "auto",
-            padding: `${space[6]} 0`,
-            backgroundColor: color.bgSurface,
-          }}
-        >
-          {NAV.map(({ group, items }) => (
-            <div key={group} style={{ marginBottom: space[5] }}>
-              <div
-                style={{
-                  fontSize: font.size["2xs"],
-                  fontWeight: font.weight.semibold,
-                  color: color.textPlaceholder,
-                  letterSpacing: font.tracking.wide,
-                  textTransform: "uppercase",
-                  padding: `0 ${space[4]}`,
-                  marginBottom: space[1],
-                }}
-              >
-                {group}
-              </div>
-              {items.map(({ id, label }) => {
-                const isActive = activeId === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => selectSection(id)}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      textAlign: "left",
-                      padding: `${space[2]} ${space[4]}`,
-                      fontSize: font.size.base,
-                      fontWeight: isActive ? font.weight.medium : font.weight.regular,
-                      color: isActive ? color.primary : color.textSubtle,
-                      backgroundColor: isActive ? color.primaryRingLight : "transparent",
-                      border: "none",
-                      borderLeft: isActive ? `2px solid ${color.primary}` : "2px solid transparent",
-                      cursor: "pointer",
-                      transition: transition.base,
-                    }}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+        {/* Sidebar — dogfooded LeftRail from the design system itself. */}
+        <style>{`
+          /* Scope LeftRail to the DS page body: don't use viewport height
+             (we live inside a flex container), and hide the per-item icons
+             since gallery labels carry the meaning on their own. */
+          .ds-page-rail { display: flex; flex-shrink: 0; height: 100%; overflow: hidden; }
+          .ds-page-rail .left-rail { position: static; height: 100%; overflow-y: auto; }
+          .ds-page-rail .nav-sub-item .nav-icon { display: none; }
+          .ds-page-rail .nav-sub-item { padding-left: 36px; }
+        `}</style>
+        <div className="ds-page-rail">
+          <LeftRail
+            nav={activeId}
+            setNav={selectSection}
+            collapsed={railCollapsed}
+            onToggleCollapsed={() => setRailCollapsed((v) => !v)}
+            groups={NAV}
+            expandedGroups={expandedGroups}
+            onToggleGroup={toggleGroup}
+          />
+        </div>
 
         {/* Content — only the active section renders */}
         <main
@@ -1403,82 +2034,149 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
             flex: 1,
             overflowY: "auto",
             padding: `${space[8]} ${space[10]}`,
-            backgroundColor: activeId === "templates" ? "#F5F5F5" : undefined,
+            backgroundColor: activeId === "templates" ? "var(--ads-background-subtle-02)" : undefined,
           }}
         >
 
           {/* ── Colors ── */}
           {activeId === "colors" && (
             <>
-              <SectionHeading id="colors" title="Colors" description="All values live in tokens.ts under the color object. Never use raw hex values in components." />
-              <ColorGroup title="Primary" items={[
-                { token: "color.primary",       value: color.primary,        usage: "Default fill" },
-                { token: "color.primaryHover",   value: color.primaryHover,   usage: "Hover state" },
-                { token: "color.primaryPressed", value: color.primaryPressed, usage: "Pressed state" },
-                { token: "color.primaryRing",    value: color.primaryRing,    usage: "Focus ring" },
-              ]} />
-              <ColorGroup title="Danger" items={[
-                { token: "color.danger",        value: color.danger,        usage: "Default fill" },
-                { token: "color.dangerHover",    value: color.dangerHover,   usage: "Hover state" },
-                { token: "color.dangerPressed",  value: color.dangerPressed, usage: "Pressed state" },
-                { token: "color.dangerRing",     value: color.dangerRing,    usage: "Focus ring" },
-              ]} />
-              <ColorGroup title="Neutral scale" columns="repeat(auto-fill, minmax(110px, 1fr))" items={[
-                { token: "neutral950", value: color.neutral950 }, { token: "neutral900", value: color.neutral900 },
-                { token: "neutral800", value: color.neutral800 }, { token: "neutral700", value: color.neutral700 },
-                { token: "neutral600", value: color.neutral600 }, { token: "neutral400", value: color.neutral400 },
-                { token: "neutral300", value: color.neutral300 }, { token: "neutral200", value: color.neutral200 },
-                { token: "neutral150", value: color.neutral150 }, { token: "neutral100", value: color.neutral100 },
-                { token: "neutral50",  value: color.neutral50 },  { token: "neutral25",  value: color.neutral25 },
-                { token: "white",      value: color.white },
-              ]} />
-              <ColorGroup title="Semantic — Text" items={[
-                { token: "color.textHeading",     value: color.textHeading,     usage: "Page / section titles" },
-                { token: "color.textDefault",     value: color.textDefault,     usage: "Body copy" },
-                { token: "color.textSubtle",      value: color.textSubtle,      usage: "Descriptions, secondary" },
-                { token: "color.textLabel",       value: color.textLabel,       usage: "Form labels" },
-                { token: "color.textPlaceholder", value: color.textPlaceholder, usage: "Hints, captions" },
-                { token: "color.textOnPrimary",   value: color.textOnPrimary,   usage: "Text on filled bg" },
-              ]} />
-              <ColorGroup title="Semantic — Border & Background" items={[
-                { token: "color.borderDefault", value: color.borderDefault, usage: "Normal dividers" },
-                { token: "color.borderStrong",  value: color.borderStrong,  usage: "Prominent borders" },
-                { token: "color.borderHover",   value: color.borderHover,   usage: "Hover borders" },
-                { token: "color.bgPage",        value: color.bgPage,        usage: "Page / canvas" },
-                { token: "color.bgSurface",     value: color.bgSurface,     usage: "Card / panel" },
-                { token: "color.bgHover",       value: color.bgHover,       usage: "Hover fill" },
-                { token: "color.bgActive",      value: color.bgActive,      usage: "Pressed fill" },
-              ]} />
-              <ColorGroup title="Success" items={[
-                { token: "color.success",       value: color.success,       usage: "Success fill" },
-                { token: "color.successLight",  value: color.successLight,  usage: "Success background" },
-                { token: "color.successBorder", value: color.successBorder, usage: "Success border" },
-                { token: "color.successText",   value: color.successText,   usage: "Success text" },
-              ]} />
-              <div style={{ marginBottom: space[8] }}>
-                <SubHeading title="Tag Colors" />
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: space[3] }}>
-                  {(["Red", "Orange", "Magenta", "Purple", "Blue", "Green"] as const).map((name) => {
-                    const key = `tag${name}` as keyof typeof color;
-                    const c = color[key] as { bg: string; border: string; text: string };
-                    return (
-                      <div key={name} style={{ borderRadius: radius.md, overflow: "hidden", border: `1px solid ${color.neutral150}` }}>
-                        <div style={{ display: "flex", height: 36 }}>
-                          <div style={{ flex: 1, backgroundColor: c.bg }} title="bg" />
-                          <div style={{ flex: 1, backgroundColor: c.border }} title="border" />
-                          <div style={{ flex: 1, backgroundColor: c.text }} title="text" />
-                        </div>
-                        <div style={{ padding: `${space[2]} ${space[3]}`, background: color.bgSurface }}>
-                          <code style={{ display: "block", fontFamily: font.mono, fontSize: font.size["2xs"], color: color.textLabel, fontWeight: font.weight.medium }}>
-                            color.tag{name}
-                          </code>
-                          <div style={{ display: "flex", gap: space[2], marginTop: 4 }}>
-                            <Tag color={name.toLowerCase() as any} size="small">{name}</Tag>
+              <SectionHeading
+                id="colors"
+                title="Colors"
+                description="Align DS v2.0 (Deisgn-system 2.0/Design-System 2.0.md). Tokens resolve through CSS custom properties so light/dark modes are handled automatically. Use the toggle to preview dark mode on these swatches without flipping the rest of the page."
+              />
+              <div style={{ display: "flex", alignItems: "center", gap: space[3], marginBottom: space[6] }}>
+                <code style={{ fontFamily: font.mono, fontSize: font.size.xs, color: color.textLabel }}>
+                  Preview mode:
+                </code>
+                <SecondaryButton size={36} onClick={() => setColorPreviewMode(colorPreviewMode === "dark" ? "light" : "dark")}>
+                  {colorPreviewMode === "dark" ? "Switch to Light" : "Switch to Dark"}
+                </SecondaryButton>
+                <span style={{ fontSize: font.size["2xs"], color: color.textPlaceholder }}>
+                  Currently showing: <b>{colorPreviewMode}</b>
+                </span>
+              </div>
+
+              <div data-theme={colorPreviewMode === "dark" ? "align-dark" : "align-light"} style={{ background: "var(--ads-background-subtle-00)", padding: space[4], borderRadius: radius.md, border: `1px solid var(--ads-border-subtle)` }}>
+                {/* Background tokens — 27 v2.0 */}
+                <ColorGroup title="Background" items={[
+                  { token: "background-subtle-00",     value: "var(--ads-background-subtle-00)",     usage: "Page / canvas" },
+                  { token: "background-subtle-01",     value: "var(--ads-background-subtle-01)",     usage: "Card / toolbar / header surface" },
+                  { token: "background-subtle-02",     value: "var(--ads-background-subtle-02)",     usage: "Raised surface, hover fill" },
+                  { token: "background-accent",        value: "var(--ads-background-accent)",        usage: "Accent surface" },
+                  { token: "background-menu",          value: "var(--ads-background-menu)",          usage: "Elevated (dropdown, popover)" },
+                  { token: "background-overlay",       value: "var(--ads-background-overlay)",       usage: "Modal scrim (#000 @ 63%)" },
+                  { token: "background-on-color",      value: "var(--ads-background-on-color)",      usage: "Surface on filled bg" },
+                  { token: "background-inverse",       value: "var(--ads-background-inverse)",       usage: "Inverse surface (tooltip)" },
+                  { token: "background-interactive",   value: "var(--ads-background-interactive)",   usage: "Brand fill (primary CTA)" },
+                  { token: "background-destructive",   value: "var(--ads-background-destructive)",   usage: "Destructive CTA" },
+                  { token: "background-subtle-hover",  value: "var(--ads-background-subtle-hover)",  usage: "Subtle hover" },
+                  { token: "background-subtle-active", value: "var(--ads-background-subtle-active)", usage: "Subtle pressed" },
+                  { token: "background-success",       value: "var(--ads-background-success)",       usage: "Success fill (extended)" },
+                ]} />
+
+                <ColorGroup title="Highlight Palette — Backgrounds" items={[
+                  { token: "background-highlight-red",     value: "var(--ads-background-highlight-red)" },
+                  { token: "background-highlight-magenta", value: "var(--ads-background-highlight-magenta)" },
+                  { token: "background-highlight-purple",  value: "var(--ads-background-highlight-purple)" },
+                  { token: "background-highlight-blue",    value: "var(--ads-background-highlight-blue)" },
+                  { token: "background-highlight-green",   value: "var(--ads-background-highlight-green)" },
+                  { token: "background-highlight-orange",  value: "var(--ads-background-highlight-orange)" },
+                  { token: "background-highlight-gray",    value: "var(--ads-background-highlight-gray)" },
+                ]} />
+
+                {/* Text tokens — 20 v2.0 */}
+                <ColorGroup title="Text" items={[
+                  { token: "text-primary",        value: "var(--ads-text-primary)",        usage: "Body copy, headings (93% / 100%)" },
+                  { token: "text-secondary",      value: "var(--ads-text-secondary)",      usage: "Descriptions (63%)" },
+                  { token: "text-tertiary",      value: "var(--ads-text-tertiary)",       usage: "Hints, captions (44% / 47%)" },
+                  { token: "text-link",           value: "var(--ads-text-link)",           usage: "Links (#009ACE / #41C1F0)" },
+                  { token: "text-link-hovered",   value: "var(--ads-text-link-hovered)",   usage: "Link hover" },
+                  { token: "text-error",          value: "var(--ads-text-error)",          usage: "Error message" },
+                  { token: "text-warning",        value: "var(--ads-text-warning)",        usage: "Warning ⚠ unresolved in source" },
+                  { token: "text-success",        value: "var(--ads-text-success)",        usage: "Success message" },
+                  { token: "text-disabled",       value: "var(--ads-text-disabled)",       usage: "Disabled labels" },
+                ]} />
+                <ColorGroup title="Text — On color / inverse" items={[
+                  { token: "text-on-color-primary",   value: "var(--ads-text-on-color-primary)",   usage: "Label on filled CTA" },
+                  { token: "text-on-color-secondary", value: "var(--ads-text-on-color-secondary)" },
+                  { token: "text-on-color-tertiary",  value: "var(--ads-text-on-color-tertiary)" },
+                  { token: "text-inverse-primary",    value: "var(--ads-text-inverse-primary)",    usage: "Tooltip, inverse surface" },
+                  { token: "text-inverse-secondary",  value: "var(--ads-text-inverse-secondary)" },
+                  { token: "text-inverse-tertiary",   value: "var(--ads-text-inverse-tertiary)" },
+                ]} />
+                <ColorGroup title="Text — On highlight" items={[
+                  { token: "text-on-highlight-red",     value: "var(--ads-text-on-highlight-red)" },
+                  { token: "text-on-highlight-magenta", value: "var(--ads-text-on-highlight-magenta)" },
+                  { token: "text-on-highlight-purple",  value: "var(--ads-text-on-highlight-purple)" },
+                  { token: "text-on-highlight-blue",    value: "var(--ads-text-on-highlight-blue)" },
+                  { token: "text-on-highlight-green",   value: "var(--ads-text-on-highlight-green)" },
+                  { token: "text-on-highlight-orange",  value: "var(--ads-text-on-highlight-orange)" },
+                ]} />
+
+                {/* Border tokens — 20 v2.0 */}
+                <ColorGroup title="Border" items={[
+                  { token: "border-subtle",       value: "var(--ads-border-subtle)",       usage: "Default dividers (9%)" },
+                  { token: "border-accent",       value: "var(--ads-border-accent)",       usage: "Secondary button border (23%)" },
+                  { token: "border-strong",       value: "var(--ads-border-strong)",       usage: "Prominent border (#121212)" },
+                  { token: "border-interactive",  value: "var(--ads-border-interactive)",  usage: "Brand outline" },
+                  { token: "border-focus",        value: "var(--ads-border-focus)",        usage: "Keyboard focus ring" },
+                  { token: "border-error",        value: "var(--ads-border-error)" },
+                  { token: "border-warning",      value: "var(--ads-border-warning)", usage: "⚠ unresolved in source" },
+                  { token: "border-success",      value: "var(--ads-border-success)" },
+                  { token: "border-disabled",     value: "var(--ads-border-disabled)" },
+                  { token: "border-subtle-hover", value: "var(--ads-border-subtle-hover)" },
+                  { token: "border-accent-hover", value: "var(--ads-border-accent-hover)" },
+                  { token: "border-accent-active",value: "var(--ads-border-accent-active)" },
+                ]} />
+                <ColorGroup title="Highlight Palette — Borders" items={[
+                  { token: "border-highlight-red",     value: "var(--ads-border-highlight-red)" },
+                  { token: "border-highlight-magenta", value: "var(--ads-border-highlight-magenta)" },
+                  { token: "border-highlight-purple",  value: "var(--ads-border-highlight-purple)" },
+                  { token: "border-highlight-blue",    value: "var(--ads-border-highlight-blue)" },
+                  { token: "border-highlight-green",   value: "var(--ads-border-highlight-green)" },
+                  { token: "border-highlight-orange",  value: "var(--ads-border-highlight-orange)" },
+                ]} />
+
+                {/* Icon tokens — 20 v2.0 */}
+                <ColorGroup title="Icon" items={[
+                  { token: "icon-primary",       value: "var(--ads-icon-primary)" },
+                  { token: "icon-secondary",     value: "var(--ads-icon-secondary)" },
+                  { token: "icon-tertiary",      value: "var(--ads-icon-tertiary)" },
+                  { token: "icon-link",          value: "var(--ads-icon-link)" },
+                  { token: "icon-link-hovered",  value: "var(--ads-icon-link-hovered)" },
+                  { token: "icon-error",         value: "var(--ads-icon-error)" },
+                  { token: "icon-warning",       value: "var(--ads-icon-warning)", usage: "⚠ unresolved in source" },
+                  { token: "icon-success",       value: "var(--ads-icon-success)" },
+                  { token: "icon-disabled",      value: "var(--ads-icon-disabled)" },
+                ]} />
+
+                <div style={{ marginBottom: space[8] }}>
+                  <SubHeading title="Tag Colors (highlight pairs)" />
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: space[3] }}>
+                    {(["Red", "Orange", "Magenta", "Purple", "Blue", "Green"] as const).map((name) => {
+                      const key = `tag${name}` as keyof typeof color;
+                      const c = color[key] as { bg: string; border: string; text: string };
+                      return (
+                        <div key={name} style={{ borderRadius: radius.md, overflow: "hidden", border: `1px solid var(--ads-border-subtle)`, background: "var(--ads-background-subtle-01)" }}>
+                          <div style={{ display: "flex", height: 36 }}>
+                            <div style={{ flex: 1, backgroundColor: c.bg }} title="bg" />
+                            <div style={{ flex: 1, backgroundColor: c.border }} title="border" />
+                            <div style={{ flex: 1, backgroundColor: c.text }} title="text" />
+                          </div>
+                          <div style={{ padding: `${space[2]} ${space[3]}` }}>
+                            <code style={{ display: "block", fontFamily: font.mono, fontSize: font.size["2xs"], color: "var(--ads-text-secondary)", fontWeight: font.weight.medium }}>
+                              {name.toLowerCase()} (= background-highlight-{name.toLowerCase()})
+                            </code>
+                            <div style={{ display: "flex", gap: space[2], marginTop: 4 }}>
+                              <Tag color={name.toLowerCase() as any} size="small">{name}</Tag>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </>
@@ -1487,15 +2185,48 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
           {/* ── Typography ── */}
           {activeId === "typography" && (
             <>
-              <SectionHeading id="typography" title="Typography" description="All type styles use Inter. Import from the font token — never hardcode sizes or weights." />
-              <TypeRow label="Heading 2XL"  sample="Design system"                           size={font.size["2xl"]} weight="600" lineHeight="1.2"   tracking={font.tracking.tighter} tokenNote="font.size['2xl'] / weight.semibold" />
-              <TypeRow label="Heading XL"   sample="Section heading"                         size={font.size.xl}    weight="600" lineHeight="1.2"   tracking={font.tracking.tight}   tokenNote="font.size.xl / weight.semibold" />
-              <TypeRow label="Heading MD"   sample="Subsection label"                        size={font.size.md}    weight="600" lineHeight="1.375"                                  tokenNote="font.size.md / weight.semibold" />
-              <TypeRow label="Body Base"    sample="Main call-to-action. Default #009ACE."   size={font.size.base}  weight="400" lineHeight="1.5"                                    tokenNote="font.size.base / weight.regular" />
-              <TypeRow label="Body Small"   sample="Secondary description and helper text."  size={font.size.sm}    weight="400" lineHeight="1.5"                                    tokenNote="font.size.sm / weight.regular" />
-              <TypeRow label="Label / Caps" sample="SIZES (60, 44, 36 PX)"                   size={font.size.xs}    weight="600" lineHeight="1"     tracking={font.tracking.wide}    tokenNote="font.size.xs / weight.semibold / tracking.wide" />
-              <TypeRow label="Caption"      sample="Tab here or click then Tab"              size={font.size["2xs"]}weight="400" lineHeight="1.5"                                    tokenNote="font.size['2xs'] / weight.regular" />
-              <TypeRow label="Code / Mono"  sample="color.primary · #009ACE"                 size={font.size.xs}    weight="500" lineHeight="1.5"                                    tokenNote="font.mono / size.xs / weight.medium" />
+              <SectionHeading
+                id="typography"
+                title="Typography"
+                description="Align DS v2.0 type ramp — 21 tokens. Roboto 500 for headings & display-medium, 400 for body / label / link, 300 for display-regular 02–05, Roboto Mono 400 for code. Links underlined by default."
+              />
+
+              <GroupLabel>Heading — Roboto 500 Medium</GroupLabel>
+              <TypeRow label="$tp-heading-01" sample="Heading 01 — 14 / 20"  size="14px" weight="500" lineHeight="20px" tokenNote="v2.typography.heading01" />
+              <TypeRow label="$tp-heading-02" sample="Heading 02 — 17 / 24"  size="17px" weight="500" lineHeight="24px" tokenNote="v2.typography.heading02" />
+              <TypeRow label="$tp-heading-03" sample="Heading 03 — 20 / 28"  size="20px" weight="500" lineHeight="28px" tokenNote="v2.typography.heading03" />
+              <TypeRow label="$tp-heading-04" sample="Heading 04 — 24 / 32"  size="24px" weight="500" lineHeight="32px" tokenNote="v2.typography.heading04" />
+              <TypeRow label="$tp-heading-05" sample="Heading 05 — 28 / 36"  size="28px" weight="500" lineHeight="36px" tokenNote="v2.typography.heading05" />
+
+              <GroupLabel>Body — Roboto 400 Regular</GroupLabel>
+              <TypeRow label="$tp-body-01" sample="Body 01 — default body copy at 14 / 20." size="14px" weight="400" lineHeight="20px" tokenNote="v2.typography.body01" />
+              <TypeRow label="$tp-body-02" sample="Body 02 — larger paragraph at 17 / 24."  size="17px" weight="400" lineHeight="24px" tokenNote="v2.typography.body02" />
+
+              <GroupLabel>Label — Roboto 400 Regular</GroupLabel>
+              <TypeRow label="$tp-label-01" sample="Label 01 — form labels, captions"  size="12px" weight="400" lineHeight="16px" tokenNote="v2.typography.label01" />
+
+              <GroupLabel>Link — Roboto 400, text-decoration: underline</GroupLabel>
+              <TypeRow label="$tp-link-01" sample="Link 01 — 12 / 16"  size="12px" weight="400" lineHeight="16px" tokenNote="v2.typography.link01 (underlined)" />
+              <TypeRow label="$tp-link-02" sample="Link 02 — 14 / 20"  size="14px" weight="400" lineHeight="20px" tokenNote="v2.typography.link02 (underlined)" />
+              <TypeRow label="$tp-link-03" sample="Link 03 — 17 / 24"  size="17px" weight="400" lineHeight="24px" tokenNote="v2.typography.link03 (underlined)" />
+
+              <GroupLabel>Code — Roboto Mono 400</GroupLabel>
+              <TypeRow label="$tp-code-01" sample="const code = '12/16'"  size="12px" weight="400" lineHeight="16px" tokenNote="v2.typography.code01 (mono)" />
+              <TypeRow label="$tp-code-02" sample="const code = '14/20'"  size="14px" weight="400" lineHeight="20px" tokenNote="v2.typography.code02 (mono)" />
+
+              <GroupLabel>Display Regular — Roboto (400 for -01; 300 Light for -02..05)</GroupLabel>
+              <TypeRow label="$tp-display-regular-01" sample="Display 01"  size="36px" weight="400" lineHeight="44px" tokenNote="v2.typography.displayRegular01 (Roboto 400)" />
+              <TypeRow label="$tp-display-regular-02" sample="Display 02"  size="44px" weight="300" lineHeight="52px" tokenNote="v2.typography.displayRegular02 (Roboto 300 Light)" />
+              <TypeRow label="$tp-display-regular-03" sample="Display 03"  size="52px" weight="300" lineHeight="60px" tokenNote="v2.typography.displayRegular03 (Roboto 300 Light)" />
+              <TypeRow label="$tp-display-regular-04" sample="Display 04"  size="72px" weight="300" lineHeight="96px" tokenNote="v2.typography.displayRegular04 (Roboto 300 Light)" />
+              <TypeRow label="$tp-display-regular-05" sample="Display 05"  size="96px" weight="300" lineHeight="116px" tokenNote="v2.typography.displayRegular05 (Roboto 300 Light)" />
+
+              <GroupLabel>Display Medium — Roboto 500</GroupLabel>
+              <TypeRow label="$tp-display-medium-01" sample="Display Medium 01"  size="36px" weight="500" lineHeight="44px" tokenNote="v2.typography.displayMedium01" />
+              <TypeRow label="$tp-display-medium-02" sample="Display Medium 02"  size="44px" weight="500" lineHeight="52px" tokenNote="v2.typography.displayMedium02" />
+              <TypeRow label="$tp-display-medium-03" sample="Display Medium 03"  size="52px" weight="500" lineHeight="60px" tokenNote="v2.typography.displayMedium03" />
+              <TypeRow label="$tp-display-medium-04" sample="Display Medium 04"  size="72px" weight="500" lineHeight="96px" tokenNote="v2.typography.displayMedium04" />
+              <TypeRow label="$tp-display-medium-05" sample="Display Medium 05"  size="96px" weight="500" lineHeight="116px" tokenNote="v2.typography.displayMedium05" />
             </>
           )}
 
@@ -1616,12 +2347,12 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
               <div style={{ marginBottom: space[8] }}>
                 <SubHeading title="Toggle / States" />
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: space[3] }}>
-                  <StateCell label="Toggle / Unselected / Default" tokens={[{ name: "bg: #DFDFDF", value: "hard-coded" }]}><Toggle /></StateCell>
+                  <StateCell label="Toggle / Unselected / Default" tokens={[{ name: "bg: track-off (--ds-toggle-off-bg)" }]}><Toggle /></StateCell>
                   <StateCell label="Toggle / Selected / Default" tokens={[{ name: "color.primary" }]}><Toggle defaultChecked /></StateCell>
-                  <StateCell label="Toggle / Unselected / Hover" hint="Hover to see" tokens={[{ name: "bg: #D2D2D2", value: "hard-coded" }]}><Toggle /></StateCell>
-                  <StateCell label="Toggle / Selected / Hover" hint="Hover to see" tokens={[{ name: "bg: #008EC2", value: "hard-coded" }]}><Toggle defaultChecked /></StateCell>
-                  <StateCell label="Toggle / Unselected / Pressed" hint="Click & hold" tokens={[{ name: "bg: #C5C5C5", value: "hard-coded" }]}><Toggle /></StateCell>
-                  <StateCell label="Toggle / Selected / Pressed" hint="Click & hold" tokens={[{ name: "bg: #0080B2", value: "hard-coded" }]}><Toggle defaultChecked /></StateCell>
+                  <StateCell label="Toggle / Unselected / Hover" hint="Hover to see" tokens={[{ name: "bg: track-off hover (--ds-toggle-off-hover)" }]}><Toggle /></StateCell>
+                  <StateCell label="Toggle / Selected / Hover" hint="Hover to see" tokens={[{ name: "bg: background-interactive-hover" }]}><Toggle defaultChecked /></StateCell>
+                  <StateCell label="Toggle / Unselected / Pressed" hint="Click & hold" tokens={[{ name: "bg: track-off active (--ds-toggle-off-active)" }]}><Toggle /></StateCell>
+                  <StateCell label="Toggle / Selected / Pressed" hint="Click & hold" tokens={[{ name: "bg: background-interactive-active" }]}><Toggle defaultChecked /></StateCell>
                   <StateCell label="Toggle / Unselected / Focused" hint="Tab to focus" tokens={[{ name: "border: color.primary" }]}><Toggle /></StateCell>
                   <StateCell label="Toggle / Selected / Focused" hint="Tab to focus" tokens={[{ name: "border: color.primary" }]}><Toggle defaultChecked /></StateCell>
                   <StateCell label="Toggle / Unselected / Disabled" tokens={[{ name: "opacity 0.38" }]}><Toggle disabled /></StateCell>
@@ -1719,12 +2450,12 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
           {/* ── Text Input ── */}
           {activeId === "text-input" && (
             <>
-              <SectionHeading id="text-input" title="Text Input" description="Single-line input with label, helper, and error. Two background variants: white (Set 01) and grey (Set 02). Figma: node 5:494." />
+              <SectionHeading id="text-input" title="Text Input" description='Single-line input with label, helper, and error. v2.0 default: white surface (background-subtle-01) + 1px subtle border. Legacy "grey" layer set still available via layerSet="grey" for fields on white cards. Figma: node 5:494.' />
               <div style={{ marginBottom: space[8] }}>
                 <SubHeading title="Text Input / Layer Sets" />
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: space[5] }}>
-                  <div><VariantLabel>Input / Set 01 — White field</VariantLabel><TextInput label="Label" placeholder="Placeholder text" layerSet="white" /></div>
-                  <div><VariantLabel>Input / Set 02 — Grey field</VariantLabel><TextInput label="Label" placeholder="Placeholder text" layerSet="grey" /></div>
+                  <div><VariantLabel>{`Input / Default — White field (v2.0)`}</VariantLabel><TextInput label="Label" placeholder="Placeholder text" /></div>
+                  <div><VariantLabel>{`Input / layerSet="grey" — Legacy fill`}</VariantLabel><TextInput label="Label" placeholder="Placeholder text" layerSet="grey" /></div>
                 </div>
               </div>
               <div>
@@ -1792,6 +2523,48 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
                   <StateCell label="Tab / Focused" hint="Tab to focus" tokens={[{ name: "border: color.primary" }]}><Tabs items={[{ id: "a", label: "Tab" }]} defaultActiveId="" /></StateCell>
                   <StateCell label="Tab / Disabled" tokens={[{ name: "opacity: 0.5" }]}><Tabs items={[{ id: "a", label: "Tab", disabled: true }]} defaultActiveId="" /></StateCell>
                 </div>
+              </div>
+            </>
+          )}
+
+          {/* ── Card ── */}
+          {activeId === "card" && (
+            <>
+              <SectionHeading
+                id="card"
+                title="Card"
+                description="Unified card model — border-only treatment. Mirrors the .btn-secondary state ladder: transparent fill, the border carries every state. Static cards have no hover. Interactive cards darken their border on hover; selected interactive cards swap to a 2px border-interactive (no fill). Radius: --ads-radius-md (8px)."
+              />
+
+              <div style={{ marginBottom: space[8] }}>
+                <SubHeading title="Static card — display only (PatientCard, Config panels, ToothSpecCard)" />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: space[3] }}>
+                  <DemoCard kind="static" />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: space[8] }}>
+                <SubHeading title="Interactive card — clickable (ProcedureCard, list rows)" />
+                <p style={{ fontSize: font.size.xs, color: color.textPlaceholder, margin: `0 0 ${space[3]} 0` }}>
+                  Hover the rest card → border darkens (border-subtle-hover, 13% black). No background
+                  fill on hover, no shadow, no transform. Click → switches to the selected state.
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: space[3] }}>
+                  <DemoCard kind="interactive" label="Rest / Hover" />
+                  <DemoCard kind="selected" label="Selected (2px border-interactive)" />
+                </div>
+              </div>
+
+              <div>
+                <SubHeading title="Anatomy & tokens" />
+                <ul style={{ fontSize: font.size.xs, color: color.textSubtle, lineHeight: font.lineHeight.relaxed, fontFamily: font.mono, paddingLeft: space[5] }}>
+                  <li>background = <b>--ads-background-subtle-01</b> (#FFFFFF)</li>
+                  <li>border (rest) = 1px solid <b>--ads-border-subtle</b> (9% black)</li>
+                  <li>border (hover) = 1px solid <b>--ads-border-subtle-hover</b> (13% black) — interactive only</li>
+                  <li>border (selected) = 2px solid <b>--ads-background-interactive</b> (#009ACE) — inner padding shifts -1px</li>
+                  <li>border-radius = <b>--ads-radius-md</b> (8px)</li>
+                  <li>transition = border-color <b>--ads-duration-fast</b> <b>--ads-ease-standard</b></li>
+                </ul>
               </div>
             </>
           )}
@@ -2030,6 +2803,11 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
             <HeaderSection />
           )}
 
+          {/* ── Jaw Selector ── */}
+          {activeId === "jaw-selector" && (
+            <JawSelectorSection />
+          )}
+
           {/* ── Panels ── */}
           {activeId === "panels" && (
             <PanelsSection />
@@ -2038,7 +2816,7 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
           {/* ── Toolbar Icons ── */}
           {activeId === "icons-toolbar" && (
             <>
-              <SectionHeading id="icons-toolbar" title="Toolbar Icons" description="Icons used in scan and view toolbars. Active state uses #008EC2 (= color.primaryHover), inactive uses #5E646E (not in tokens.ts). Scan Assist and Prep Edit are static compound illustrations and don't accept an isActive prop." />
+              <SectionHeading id="icons-toolbar" title="Toolbar Icons" description="Icons used in scan and view toolbars. Active state uses background-interactive-hover, inactive uses icon-secondary. Scan Assist and Prep Edit are static compound illustrations and don't accept an isActive prop." />
               <div style={{ marginBottom: space[8] }}>
                 <SubHeading title="Scan Toolbar Icons" />
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: space[3] }}>
@@ -2095,6 +2873,61 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
           {/* ── Templates ── */}
           {activeId === "templates" && (
             <TemplatesSection />
+          )}
+
+          {/* ── Link ── */}
+          {activeId === "link" && (
+            <LinkSection />
+          )}
+
+          {/* ── Combobox ── */}
+          {activeId === "combobox" && (
+            <ComboboxSection />
+          )}
+
+          {/* ── Slider ── */}
+          {activeId === "slider" && (
+            <SliderSection />
+          )}
+
+          {/* ── Contextual Menu ── */}
+          {activeId === "contextual-menu" && (
+            <ContextualMenuSection />
+          )}
+
+          {/* ── Page Header ── */}
+          {activeId === "page-header" && (
+            <PageHeaderSection />
+          )}
+
+          {/* ── Navigation Panel ── */}
+          {activeId === "nav-panel" && (
+            <NavPanelSection />
+          )}
+
+          {/* ── Avatar ── */}
+          {activeId === "avatar" && (
+            <AvatarSection />
+          )}
+
+          {/* ── Accordion ── */}
+          {activeId === "accordion" && (
+            <AccordionSection />
+          )}
+
+          {/* ── Message Bubble ── */}
+          {activeId === "message-bubble" && (
+            <MessageBubbleSection />
+          )}
+
+          {/* ── Spinner ── */}
+          {activeId === "spinner" && (
+            <SpinnerSection />
+          )}
+
+          {/* ── Logo ── */}
+          {activeId === "logo" && (
+            <LogoSection />
           )}
 
           {/* ── Procedure Icons ── */}

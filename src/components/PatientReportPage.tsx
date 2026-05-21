@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { color, font, space, radius, transition } from '../design-system/tokens';
+import { color, font, space, radius, shadow, transition } from '../design-system/tokens';
 import { SecondaryButton } from '../design-system/SecondaryButton';
 import { PrimaryButton } from '../design-system/PrimaryButton';
 import BlockEditor from './report/BlockEditor';
-import ReportPreview from './report/ReportPreview';
+import BlockNavList from './report/BlockNavList';
+import ReportPreview, { IteroLogoSvg, DentalFlowerLogo } from './report/ReportPreview';
 import type { ImageBlock, ComparisonBlock, CostSummaryBlock, NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock, PatientInfo, ReportSettings } from './report/types';
-import { createImageBlock, REPORT_TEMPLATES } from './report/types';
+import { createImageBlock, createBlock, REPORT_TEMPLATES } from './report/types';
+import type { BlockType } from './report/types';
 import ShareModal from './report/ShareModal';
-import PatientReportDemoPage from './report/PatientReportDemoPage';
+
 import ReactDOM from 'react-dom';
 
 type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlock | RxBlock | NextAppointmentBlock | PatientInstructionsBlock;
@@ -67,11 +69,11 @@ function MetaChip({ label, value, onChange, placeholder }: {
         alignItems: 'center',
         gap: space[2],
         padding: `6px ${space[4]}`,
-        backgroundColor: color.neutral50,
+        backgroundColor: 'transparent',
         borderRadius: radius.md,
         fontSize: font.size.sm,
         lineHeight: '1',
-        border: `1px solid ${focused ? color.primary : 'transparent'}`,
+        border: `1px solid ${focused ? color.primary : hovered ? color.borderDefault : 'transparent'}`,
         transition: `border-color ${transition.fast}`,
       }}
     >
@@ -124,6 +126,181 @@ function MetaChip({ label, value, onChange, placeholder }: {
       )}
     </div>
   );
+}
+
+// ─── Report header (logo + clinic/doctor on left, patient + date on right) ──
+
+function HeaderEditable({
+  value,
+  onChange,
+  placeholder,
+  size,
+  align = 'left',
+  maxWidth,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  size: 'sm' | 'lg';
+  align?: 'left' | 'right';
+  maxWidth?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+  const isLg = size === 'lg';
+  return (
+    <input
+      type="text"
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={{
+        fontSize: isLg ? font.size.lg : font.size.sm,
+        color: isLg ? color.textHeading : color.textSubtle,
+        fontWeight: isLg ? font.weight.semibold : font.weight.regular,
+        letterSpacing: isLg ? font.tracking.tight : 'normal',
+        fontFamily: font.family,
+        background: 'transparent',
+        border: 'none',
+        borderBottom: `1px solid ${focused ? color.primary : 'transparent'}`,
+        outline: 'none',
+        padding: `2px 0`,
+        textAlign: align,
+        width: '100%',
+        maxWidth,
+        minWidth: 0,
+        transition: `border-color ${transition.fast}`,
+      }}
+    />
+  );
+}
+
+function ReportHeader({
+  settings,
+  patient,
+  date,
+  onSettingsChange,
+  onPatientChange,
+  onLogoUpload,
+}: {
+  settings: ReportSettings;
+  patient: PatientInfo;
+  date: string;
+  onSettingsChange: (next: Partial<ReportSettings>) => void;
+  onPatientChange: (next: Partial<PatientInfo>) => void;
+  onLogoUpload: (url: string) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [hovered, setHovered] = useState(false);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    onLogoUpload(URL.createObjectURL(file));
+    e.target.value = '';
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: space[6],
+      padding: `${space[6]} ${space[8]}`,
+      borderBottom: `1px solid ${color.borderDefault}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: space[6], minWidth: 0 }}>
+        {/* Logo placeholder / actual logo */}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          aria-label={settings.clinicLogoUrl ? 'Change clinic logo' : 'Add clinic logo'}
+          style={{
+            width: 96,
+            height: 96,
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: settings.clinicLogoUrl ? `1px solid ${color.borderDefault}` : `1.5px dashed ${hovered ? color.primary : color.borderDefault}`,
+            borderRadius: radius.lg,
+            background: settings.clinicLogoUrl ? color.bgSurface : (hovered ? color.bgHover : 'transparent'),
+            cursor: 'pointer',
+            padding: 0,
+            overflow: 'hidden',
+            transition: `border-color ${transition.fast}, background-color ${transition.fast}`,
+          }}
+        >
+          {settings.clinicLogoUrl ? (
+            <img src={settings.clinicLogoUrl} alt="Clinic logo" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+          ) : (
+            <span style={{
+              fontSize: font.size['2xs'],
+              fontWeight: font.weight.medium,
+              color: hovered ? color.primary : color.textPlaceholder,
+              letterSpacing: font.tracking.wide,
+              textTransform: 'uppercase',
+              textAlign: 'center',
+              lineHeight: font.lineHeight.tight,
+            }}>
+              Add<br />Logo
+            </span>
+          )}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+
+        <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+          <HeaderEditable
+            value={settings.clinicName}
+            onChange={(v) => onSettingsChange({ clinicName: v })}
+            placeholder="Clinic name"
+            size="sm"
+          />
+          <HeaderEditable
+            value={settings.doctorName}
+            onChange={(v) => onSettingsChange({ doctorName: v })}
+            placeholder="Doctor name"
+            size="lg"
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0, textAlign: 'right' }}>
+        <HeaderEditable
+          value={patient.patientName}
+          onChange={(v) => onPatientChange({ patientName: v })}
+          placeholder="Patient name"
+          size="lg"
+          align="right"
+          maxWidth={360}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+          <span style={{ fontSize: font.size.sm, color: color.textSubtle }}>Patient ·</span>
+          <input
+            type="text"
+            value={patient.chartNumber}
+            placeholder="Chart #"
+            onChange={(e) => onPatientChange({ chartNumber: e.target.value })}
+            style={{
+              fontSize: font.size.sm, color: color.textSubtle, fontFamily: font.family,
+              background: 'transparent', border: 'none', outline: 'none',
+              padding: 0, textAlign: 'right', width: 80,
+            }}
+          />
+        </div>
+        <span style={{ fontSize: font.size.sm, color: color.textSubtle }}>
+          {date}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function formatReportDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 // ─── Settings sidebar sections ───────────────────────────────────────────────
@@ -284,7 +461,7 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
         alignItems: 'flex-start',
         gap: space[1],
         padding: space[3],
-        backgroundColor: isSelected ? '#E0F2FE' : hovered ? color.bgHover : color.white,
+        backgroundColor: isSelected ? 'var(--ads-background-highlight-blue)' : hovered ? color.bgHover : color.white,
         border: `${isSelected ? '2px' : '1px'} solid ${isSelected ? color.primary : hovered ? color.borderHover : color.borderDefault}`,
         borderRadius: radius.md,
         cursor: 'pointer',
@@ -367,7 +544,7 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: `${space[3]} ${space[5]}`,
-          backgroundColor: '#323639',
+          backgroundColor: 'var(--ads-background-inverse)',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
           flexShrink: 0,
         }}>
@@ -424,7 +601,7 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
           flex: 1,
           width: '100%',
           overflowY: 'auto',
-          backgroundColor: '#525659',
+          backgroundColor: 'var(--ads-background-inverse)',
           display: 'flex',
           justifyContent: 'center',
           padding: `${space[8]} ${space[4]}`,
@@ -449,6 +626,27 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
   );
 }
 
+// ─── Empty state ─────────────────────────────────────────────────────────────
+
+function EmptyStatePlaceholder() {
+  return (
+    <div style={{
+      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: space[10], color: color.textPlaceholder, fontSize: font.size.sm,
+      textAlign: 'center', fontFamily: font.family,
+    }}>
+      <div style={{ maxWidth: 320, display: 'flex', flexDirection: 'column', gap: space[2] }}>
+        <span style={{ fontSize: font.size.md, fontWeight: font.weight.medium, color: color.textSubtle }}>
+          No section selected
+        </span>
+        <span>
+          Pick a section from the left, or apply a template to get started.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export interface PatientReportPageHandle {
@@ -464,6 +662,8 @@ export interface PatientReportPageHandle {
   clickInEditor: (selector: string) => void;
   /** Programmatically click a DOM element anywhere in the page (including portals) by CSS selector */
   clickInPage: (selector: string) => void;
+  /** Programmatically apply a template by its ID */
+  selectTemplate: (templateId: string) => void;
 }
 
 export interface PatientReportPageProps {
@@ -507,8 +707,24 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
   const [appliedTemplate, setAppliedTemplate] = useState<string | null>(null);
   const [blocksBeforeTemplate, setBlocksBeforeTemplate] = useState<SupportedBlock[] | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [templatesOpen, setTemplatesOpen] = useState(true);
-  const [demoOpen, setDemoOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  // null → slide-over editor closed (preview is fully visible behind it).
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+
+  // If the active block disappears (deletion, template swap), close the slide-over.
+  useEffect(() => {
+    if (activeBlockId && !blocks.some((b) => b.id === activeBlockId)) {
+      setActiveBlockId(null);
+    }
+  }, [blocks, activeBlockId]);
+
+  // Smooth-scroll the matching card into view when the nav selection changes.
+  useEffect(() => {
+    if (!activeBlockId) return;
+    const el = document.querySelector<HTMLDivElement>(`[data-block-id="${activeBlockId}"]`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [activeBlockId]);
+
   const editorScrollRef = useRef<HTMLDivElement>(null);
   const editorContentRef = useRef<HTMLDivElement>(null);
   const previewScrollRef = useRef<HTMLDivElement>(null);
@@ -539,6 +755,16 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
       const el = document.querySelector<HTMLElement>(selector);
       if (el) el.click();
     },
+    selectTemplate: (templateId: string) => {
+      const tpl = REPORT_TEMPLATES.find((t) => t.id === templateId);
+      if (!tpl) return;
+      const supported = tpl.blocks.map((b, i) => ({
+        ...b,
+        id: `tpl-block-${Date.now()}-${i}`,
+        collapsed: true,
+      })) as SupportedBlock[];
+      handleTemplateSelect(supported, tpl.name, tpl.id);
+    },
   }));
 
 
@@ -560,11 +786,53 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
     setTimeout(() => setSaved(true), 1500);
   };
 
+  // "+ Add section" from the left nav — creates the block, appends it,
+  // and focuses it.
+  const handleAddBlock = (type: BlockType) => {
+    const created = createBlock(type) as SupportedBlock;
+    setBlocks((prev) => [...prev, created]);
+    setActiveBlockId(created.id);
+    setSaved(false);
+    setTimeout(() => setSaved(true), 1500);
+  };
+
+  const handleDuplicateBlock = (id: string) => {
+    const idx = blocks.findIndex((b) => b.id === id);
+    if (idx === -1) return;
+    const clone = { ...blocks[idx], id: `block-${Date.now()}` } as SupportedBlock;
+    const next = [...blocks];
+    next.splice(idx + 1, 0, clone);
+    setBlocks(next);
+    setActiveBlockId(clone.id);
+    setSaved(false);
+    setTimeout(() => setSaved(true), 1500);
+  };
+
+  const handleDeleteBlock = (id: string) => {
+    setBlocks((prev) => prev.filter((b) => b.id !== id));
+    if (activeBlockId === id) setActiveBlockId(null);
+    setSaved(false);
+    setTimeout(() => setSaved(true), 1500);
+  };
+
+  /** Insert a new block of the given type at a specific position (used by the inline "+" between cards). */
+  const handleInsertBlock = (type: BlockType, atIndex: number) => {
+    const created = createBlock(type) as SupportedBlock;
+    setBlocks((prev) => {
+      const next = [...prev];
+      next.splice(atIndex, 0, created);
+      return next;
+    });
+    setActiveBlockId(created.id);
+    setSaved(false);
+    setTimeout(() => setSaved(true), 1500);
+  };
+
   const handleTemplateSelect = (templateBlocks: SupportedBlock[], templateName: string, templateId: string) => {
     setBlocksBeforeTemplate(blocks);
     setAppliedTemplate(templateName);
     setSelectedTemplateId(templateId);
-    setBlocks(templateBlocks);
+    setBlocks(templateBlocks.map(b => ({ ...b, collapsed: true }) as SupportedBlock));
     setSaved(false);
     setTimeout(() => setSaved(true), 1500);
     setTemplatesOpen(false);
@@ -645,26 +913,8 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
             placeholder="Report name"
           />
 
-          <div style={{ display: 'flex', gap: space[2], alignItems: 'center', flexShrink: 0 }}>
-            <MetaChip
-              label="Doctor"
-              value={settings.doctorName}
-              placeholder="Doctor name"
-              onChange={(v) => { setSettings((s) => ({ ...s, doctorName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
-            />
-            <MetaChip
-              label="Clinic"
-              value={settings.clinicName}
-              placeholder="Clinic name"
-              onChange={(v) => { setSettings((s) => ({ ...s, clinicName: v })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
-            />
-            <MetaChip
-              label="Patient"
-              value={patient.patientName}
-              placeholder="Patient name"
-              onChange={(v) => setPatient((p) => ({ ...p, patientName: v }))}
-            />
-          </div>
+          {/* MetaChips removed — Doctor / Clinic / Patient are editable
+              inline from the ReportHeader at the top of the preview. */}
         </div>
 
         {/* Right: save status + actions */}
@@ -715,125 +965,165 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
         </div>
       </div>
 
-      {/* ── Main Content ── */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      {/* ── Main Content ── Wynde-style: white nav rail (left), gray preview canvas (right), slide-over editor sits between them. */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
-        {/* ── Left: Editor Panel ── */}
-        <div ref={(el) => { (editorScrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el; (editorContentRef as React.MutableRefObject<HTMLDivElement | null>).current = el; }} style={{
-          width: '480px',
-          minWidth: '420px',
-          maxWidth: '560px',
+        {/* ── Left: Block navigation rail ── */}
+        <aside style={{
+          width: '300px',
+          flexShrink: 0,
           overflowY: 'auto',
+          backgroundColor: color.bgSurface,
           borderRight: `1px solid ${color.borderDefault}`,
-          backgroundColor: color.white,
-          padding: space[4],
+          padding: `${space[4]} ${space[3]}`,
           display: 'flex',
           flexDirection: 'column',
-          gap: space[4],
+          gap: space[3],
+          zIndex: 2,
         }}>
-              {/* Templates card — header is sticky, picker body inside the same card */}
-              <div style={{
-                backgroundColor: color.bgSurface,
-                borderRadius: radius.lg,
-                border: `1px solid ${color.borderDefault}`,
-              }}>
-                {/* Sticky header */}
-                <div
-                  onClick={() => setTemplatesOpen(!templatesOpen)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: `${space[3]} ${space[4]}`,
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    position: 'sticky',
-                    top: -16,
-                    backgroundColor: color.bgSurface,
-                    borderRadius: radius.lg,
-                    zIndex: 2,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: space[2], flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textHeading }}>
-                      {appliedTemplate || 'Templates'}
-                    </span>
-                    {appliedTemplate && blocksBeforeTemplate && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handleUndoTemplate(); }}
-                        style={{
-                          fontSize: font.size.xs, fontWeight: font.weight.semibold,
-                          color: color.primary, backgroundColor: 'transparent',
-                          border: 'none', cursor: 'pointer', padding: `2px ${space[2]}`,
-                          borderRadius: radius.sm, transition: `background-color ${transition.fast}`,
-                        }}
-                      >
-                        Undo
-                      </button>
-                    )}
-                  </div>
-                  <svg
-                    width="14" height="14" viewBox="0 0 16 16" fill="none"
-                    stroke={color.neutral400} strokeWidth="1.5" strokeLinecap="round"
-                    style={{ flexShrink: 0, transform: templatesOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: `transform ${transition.fast}` }}
+          {/* Templates — minimal disclosure at the top of the rail */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
+            <button
+              type="button"
+              onClick={() => setTemplatesOpen((v) => !v)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                gap: space[2], padding: `${space[2]} ${space[3]}`,
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                color: color.textSubtle, fontSize: font.size.xs,
+                fontWeight: font.weight.semibold, letterSpacing: font.tracking.wide,
+                textTransform: 'uppercase', fontFamily: font.family,
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: space[2], minWidth: 0 }}>
+                {appliedTemplate ? appliedTemplate : 'Templates'}
+                {appliedTemplate && blocksBeforeTemplate && (
+                  <span
+                    onClick={(e) => { e.stopPropagation(); handleUndoTemplate(); }}
+                    style={{ color: color.primary, textTransform: 'none', fontSize: font.size.xs, fontWeight: font.weight.semibold }}
                   >
-                    <path d="M4 6l4 4 4-4" />
-                  </svg>
-                </div>
-
-                {/* Template picker body — animated collapse */}
-                <div style={{
-                  maxHeight: templatesOpen ? '500px' : '0px',
-                  opacity: templatesOpen ? 1 : 0,
-                  overflow: 'hidden',
-                  transition: 'max-height 0.25s ease, opacity 0.2s ease',
-                }}>
-                  <div style={{
-                    padding: `0 ${space[4]} ${space[4]}`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: space[3],
-                  }}>
-                    <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
-                  </div>
-                </div>
+                    Undo
+                  </span>
+                )}
+              </span>
+              <svg
+                width="12" height="12" viewBox="0 0 16 16" fill="none"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+                style={{ transform: templatesOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: `transform ${transition.fast}` }}
+              >
+                <path d="M4 6l4 4 4-4" />
+              </svg>
+            </button>
+            {templatesOpen && (
+              <div style={{ padding: `0 ${space[1]}` }}>
+                <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
               </div>
+            )}
+          </div>
 
-              {/* Content count */}
-              <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          {/* Divider between Templates and Sections */}
+          <div style={{ height: 1, background: color.borderDefault, margin: `0 ${space[1]}` }} />
+
+          {/* Section list */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: `0 ${space[3]}`,
+            }}>
+              <span style={{
+                fontSize: font.size.xs, fontWeight: font.weight.semibold,
+                color: color.textSubtle, letterSpacing: font.tracking.wide,
+                textTransform: 'uppercase',
               }}>
-                <span style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textHeading }}>
-                  Content
-                </span>
-                <span style={{ fontSize: font.size.xs, color: color.textPlaceholder }}>
-                  {blocks.length} section{blocks.length !== 1 ? 's' : ''}
-                </span>
+                Sections
+              </span>
+              <span style={{ fontSize: font.size.xs, color: color.textPlaceholder }}>
+                {blocks.length}
+              </span>
+            </div>
+            <BlockNavList
+              blocks={blocks}
+              activeBlockId={activeBlockId}
+              onSelect={(id) => setActiveBlockId(id)}
+              onReorder={handleBlocksChange}
+              onAdd={handleAddBlock}
+              onDuplicate={handleDuplicateBlock}
+              onDelete={handleDeleteBlock}
+            />
+          </div>
+        </aside>
+
+        {/* ── Right: white page surface — header at top, section cards below ── */}
+        <main
+          ref={(el) => {
+            (previewScrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            (editorScrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            (editorContentRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+          }}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            backgroundColor: color.bgSurface,
+          }}
+        >
+          <div style={{
+            maxWidth: 880,
+            width: '100%',
+            margin: '0 auto',
+            paddingBottom: space[12],
+          }}>
+            <ReportHeader
+              settings={settings}
+              patient={patient}
+              date={formatReportDate(new Date())}
+              onSettingsChange={(next) => {
+                setSettings((s) => ({ ...s, ...next }));
+                setSaved(false); setTimeout(() => setSaved(true), 1500);
+              }}
+              onPatientChange={(next) => {
+                setPatient((p) => ({ ...p, ...next }));
+                setSaved(false); setTimeout(() => setSaved(true), 1500);
+              }}
+              onLogoUpload={(url) => {
+                setSettings((s) => ({ ...s, clinicLogoUrl: url }));
+                setSaved(false); setTimeout(() => setSaved(true), 1500);
+              }}
+            />
+            <div style={{ padding: `${space[5]} ${space[8]}` }}>
+              {blocks.length === 0 ? (
+                <EmptyStatePlaceholder />
+              ) : (
+                <BlockEditor
+                  blocks={blocks}
+                  onBlocksChange={handleBlocksChange}
+                  activeBlockId={activeBlockId}
+                  onBlockAdded={(id) => setActiveBlockId(id)}
+                  onInsert={handleInsertBlock}
+                />
+              )}
+            </div>
+
+            {/* Powered-by footer */}
+            <div style={{
+              borderTop: `1px solid ${color.borderDefault}`,
+              padding: `${space[5]} ${space[8]}`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: space[2],
+            }}>
+              <span style={{ fontSize: font.size.xs, color: color.textPlaceholder, fontWeight: font.weight.medium }}>
+                Powered by
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: space[5] }}>
+                <IteroLogoSvg />
+                <DentalFlowerLogo />
               </div>
-
-              <BlockEditor
-                blocks={blocks}
-                onBlocksChange={handleBlocksChange}
-              />
-        </div>
-
-        {/* ── Right: Live Preview ── */}
-        <div ref={previewScrollRef} style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: space[6],
-          backgroundColor: color.neutral100,
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          <ReportPreview
-            settings={settings}
-            patient={patient}
-            blocks={blocks}
-            onClinicLogoUpload={(url) => { setSettings((s) => ({ ...s, clinicLogoUrl: url })); setSaved(false); setTimeout(() => setSaved(true), 1500); }}
-          />
-        </div>
+            </div>
+          </div>
+        </main>
       </div>
 
       <ShareModal
@@ -869,7 +1159,6 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
         document.body
       )}
 
-      {demoOpen && <PatientReportDemoPage onClose={() => setDemoOpen(false)} />}
     </div>
     </>
   );

@@ -1,8 +1,7 @@
 import * as React from "react";
-import { color, font, radius, shadow, transition, space } from "./tokens";
 
 /**
- * Radio group – design system. Wrap RadioItem components in a RadioGroup.
+ * RadioGroup / RadioItem — back-compat shims using ADS .radio / .rad styles.
  */
 export interface RadioGroupProps {
   name: string;
@@ -14,6 +13,12 @@ export interface RadioGroupProps {
   className?: string;
 }
 
+const RadioGroupContext = React.createContext<{
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+} | null>(null);
+
 export function RadioGroup({
   name,
   value: controlledValue,
@@ -23,16 +28,16 @@ export function RadioGroup({
   style,
   className,
 }: RadioGroupProps) {
-  const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue ?? "");
+  const [uncontrolled, setUncontrolled] = React.useState(defaultValue ?? "");
   const isControlled = controlledValue !== undefined;
-  const value = isControlled ? controlledValue : uncontrolledValue;
+  const value = isControlled ? (controlledValue ?? "") : uncontrolled;
 
-  const context = React.useMemo(
+  const ctx = React.useMemo(
     () => ({
       name,
       value,
       onChange: (v: string) => {
-        if (!isControlled) setUncontrolledValue(v);
+        if (!isControlled) setUncontrolled(v);
         onChange?.(v);
       },
     }),
@@ -40,10 +45,10 @@ export function RadioGroup({
   );
 
   return (
-    <RadioGroupContext.Provider value={context}>
+    <RadioGroupContext.Provider value={ctx}>
       <div
         role="radiogroup"
-        style={{ display: "flex", flexDirection: "column", gap: space[2], ...style }}
+        style={{ display: "flex", flexDirection: "column", gap: 8, ...style }}
         className={className}
       >
         {children}
@@ -52,17 +57,6 @@ export function RadioGroup({
   );
 }
 
-const RadioGroupContext = React.createContext<{
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-} | null>(null);
-
-/**
- * Radio item – design system component.
- * States: default, hover, selected, focus, disabled.
- * Size: 16 | 20 | 24. Default 20.
- */
 export interface RadioItemProps {
   value: string;
   label?: React.ReactNode;
@@ -71,19 +65,8 @@ export interface RadioItemProps {
   id?: string;
 }
 
-const sizePx = { 16: 16, 20: 20, 24: 24 } as const;
-const dotScale = { 16: 6, 20: 8, 24: 10 } as const;
-
-export function RadioItem({
-  value,
-  label,
-  size = 20,
-  disabled = false,
-  id: idProp,
-}: RadioItemProps) {
+export function RadioItem({ value, label, size = 20, disabled, id: idProp }: RadioItemProps) {
   const group = React.useContext(RadioGroupContext);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isFocused, setIsFocused] = React.useState(false);
   const id = React.useId();
   const inputId = idProp ?? id;
 
@@ -93,63 +76,14 @@ export function RadioItem({
   }
 
   const checked = group.value === value;
-  const px = sizePx[size];
-  const dotPx = dotScale[size];
-
-  const circleStyle: React.CSSProperties = {
-    width: px,
-    height: px,
-    minWidth: px,
-    minHeight: px,
-    borderRadius: radius.full,
-    borderWidth: "2px",
-    borderStyle: "solid",
-    borderColor: color.borderStrong,
-    background: color.bgSurface,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: transition.input,
-    pointerEvents: "none",
-  };
-
-  if (disabled) {
-    circleStyle.opacity = 0.5;
-    circleStyle.cursor = "not-allowed";
-  } else {
-    if (checked) {
-      circleStyle.borderColor = color.primary;
-      circleStyle.background = color.bgSurface;
-      if (isHovered) {
-        circleStyle.borderColor = color.primaryHover;
-      }
-    } else {
-      if (isHovered) {
-        circleStyle.borderColor = color.borderHover;
-        circleStyle.background = color.bgHover;
-      }
-    }
-    if (isFocused) {
-      circleStyle.borderColor = color.primary;
-    }
-  }
-
-  const labelStyle: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: space[2],
-    cursor: disabled ? "not-allowed" : "pointer",
-    fontFamily: font.family,
-    fontSize: size >= 24 ? font.size.md : font.size.base,
-    color: color.textDefault,
-    userSelect: "none",
-  };
+  const sizeOverride: React.CSSProperties | undefined = size !== 20 ? { width: size, height: size, flex: `0 0 ${size}px` } : undefined;
 
   return (
     <label
-      style={labelStyle}
-      onMouseEnter={() => !disabled && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      htmlFor={inputId}
+      className="radio"
+      style={{ opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "pointer" }}
+      aria-disabled={disabled || undefined}
     >
       <input
         type="radio"
@@ -159,7 +93,6 @@ export function RadioItem({
         disabled={disabled}
         id={inputId}
         aria-checked={checked}
-        aria-disabled={disabled}
         style={{
           position: "absolute",
           width: 1,
@@ -172,22 +105,9 @@ export function RadioItem({
           border: 0,
         }}
         onChange={() => group.onChange(value)}
-        onFocus={(e) => { if (e.target === e.currentTarget) setIsFocused(true); }}
-        onBlur={() => setIsFocused(false)}
       />
-      <span style={circleStyle} aria-hidden>
-        {checked && (
-          <span
-            style={{
-              width: dotPx,
-              height: dotPx,
-              borderRadius: radius.full,
-              background: color.primary,
-            }}
-          />
-        )}
-      </span>
-      {label != null && <span>{label}</span>}
+      <span className={`rad ${checked ? "on" : ""}`} aria-hidden style={sizeOverride} />
+      {label != null && <span className="check-lbl">{label}</span>}
     </label>
   );
 }

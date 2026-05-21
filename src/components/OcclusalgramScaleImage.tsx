@@ -3,18 +3,18 @@
 export default function OcclusalgramScaleImage() {
   // Color segments from left to right
   const colorSegments = [
-    '#0066FF', // 1.3 - Bright Blue
-    '#0197EC', // 1.2 - Blue
-    '#3FBAFF', // 1.1 - Light Blue
+    'var(--ads-background-interactive)', // 1.3 - Bright Blue
+    'var(--ads-background-interactive)', // 1.2 - Blue
+    'var(--ads-text-link)', // 1.1 - Light Blue
     '#0FF4FC', // 1.0 - Cyan
     '#2CE9C6', // 0.9 - Cyan Green
-    '#54BF00', // 0.8 - Green
-    '#FFE600', // 0.7 - Yellow
-    '#FFD600', // 0.6 - Yellow Orange
-    '#FFA008', // 0.5 - Orange
-    '#F7771A', // 0.4 - Orange Red
-    '#FF0000', // 0.3 - Bright Red
-    '#C61313', // 0.2 - Red
+    'var(--ads-text-success)', // 0.8 - Green
+    'var(--ads-text-warning)', // 0.7 - Yellow
+    'var(--ads-text-warning)', // 0.6 - Yellow Orange
+    'var(--ads-text-warning)', // 0.5 - Orange
+    'var(--ads-text-warning)', // 0.4 - Orange Red
+    'var(--ads-text-error)', // 0.3 - Bright Red
+    'var(--ads-text-error)', // 0.2 - Red
   ];
 
   // All labels

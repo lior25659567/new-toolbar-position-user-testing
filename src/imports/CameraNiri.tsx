@@ -6,25 +6,6 @@ import niriImage from "../assets/button-images/review-tool/Niri.png";
 const PLACEHOLDER_IMAGE_COLOR = colorImage;
 const PLACEHOLDER_IMAGE_NIRI = niriImage;
 
-function DragHandle() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-      <div style={{ display: 'flex', gap: '3px' }}>
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
-      </div>
-      <div style={{ display: 'flex', gap: '3px' }}>
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
-      </div>
-      <div style={{ display: 'flex', gap: '3px' }}>
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#99a1af' }} />
-      </div>
-    </div>
-  );
-}
-
 function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -125,21 +106,18 @@ export default function CameraNiri() {
           flexShrink: 0,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <DragHandle />
-          <h2
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '16px',
-              color: '#1e2939',
-              letterSpacing: '-0.45px',
-              margin: 0,
-            }}
-          >
-            Review tool
-          </h2>
-        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--ads-font-sans)',
+            fontWeight: 500,
+            fontSize: '17px',
+            lineHeight: '24px',
+            color: 'var(--ads-text-primary)',
+            margin: 0,
+          }}
+        >
+          Review tool
+        </h2>
         <IconButton aria-label="Close panel">
           <CloseIcon />
         </IconButton>

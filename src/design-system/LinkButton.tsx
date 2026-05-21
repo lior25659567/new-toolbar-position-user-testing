@@ -1,97 +1,58 @@
 import * as React from "react";
-import { color, font, radius, shadow, transition, space } from "./tokens";
+import { Button } from "./Kit";
 
 /**
- * LinkButton – design system component.
- * Figma: Button Variation=03 Link, node 5:6473.
- *
- * Text-only button styled as a link (no background/border in default state).
- * States: enabled, hover (subtle bg), pressed, focused, disabled.
+ * LinkButton / GhostButton — back-compat shims.
+ * States: enabled / hovered / selected (aria-pressed) / pressed (:active) /
+ * focused (:focus-visible) / disabled — driven by .btn-link / .btn-ghost CSS.
+ *   LinkButton  → ADS <Button variant="link">  (transparent, blue text)
+ *   GhostButton → ADS <Button variant="ghost"> (transparent, hover bg, neutral text)
  */
 export interface LinkButtonProps extends React.ComponentProps<"button"> {
   children?: React.ReactNode;
   size?: 60 | 44 | 36;
   fullWidth?: boolean;
+  selected?: boolean;
 }
 
-const baseStyle: React.CSSProperties = {
-  fontFamily: font.family,
-  fontWeight: font.weight.regular,
-  border: "none",
-  cursor: "pointer",
-  outline: "none",
-  transition: transition.button,
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: space[2],
-  color: color.primary,
-  backgroundColor: "transparent",
-  borderRadius: radius.sm,
-  textDecoration: "none",
-};
+function adsSize(size: 60 | 44 | 36): "sm" | "md" {
+  return size === 36 ? "sm" : "md";
+}
 
-const sizeStyles: Record<60 | 44 | 36, React.CSSProperties> = {
-  60: { minHeight: "60px", padding: `0 ${space[6]}`, fontSize: font.size.lg },
-  44: { minHeight: "44px", padding: `0 ${space[4]}`, fontSize: font.size.base },
-  36: { minHeight: "36px", padding: `0 ${space[3]}`, fontSize: font.size.sm },
-};
+function sizeOverride(size: 60 | 44 | 36): React.CSSProperties | undefined {
+  if (size === 60) return { minHeight: 60, height: 60, padding: "0 24px", fontSize: 16 };
+  return undefined;
+}
 
 export function LinkButton({
   children = "Link button",
   size = 44,
   fullWidth,
   style,
-  disabled,
+  selected,
+  "aria-pressed": ariaPressed,
   ...props
 }: LinkButtonProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isActive, setIsActive] = React.useState(false);
-  const [isFocused, setIsFocused] = React.useState(false);
-
-  const combinedStyle: React.CSSProperties = {
-    ...baseStyle,
-    ...sizeStyles[size],
-    ...(fullWidth ? { width: "100%" } : {}),
-    ...(disabled
-      ? { opacity: 0.5, cursor: "not-allowed" }
-      : {
-          ...(isHovered && { backgroundColor: color.bgHover }),
-          ...(isActive && { backgroundColor: color.bgActive }),
-          ...(isFocused && { borderWidth: 1, borderStyle: "solid", borderColor: color.primary }),
-        }),
-    ...style,
-  };
-
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      style={combinedStyle}
+    <Button
+      variant="link"
+      size={adsSize(size)}
+      fullWidth={fullWidth}
+      style={{ ...sizeOverride(size), ...style }}
       data-design-system="link-button"
-      onMouseEnter={() => !disabled && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onMouseDown={() => !disabled && setIsActive(true)}
-      onMouseUp={() => setIsActive(false)}
-      onFocus={(e) => { if (e.target === e.currentTarget) setIsFocused(true); }}
-      onBlur={() => setIsFocused(false)}
+      aria-pressed={selected ?? ariaPressed}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
-/**
- * GhostButton – design system component.
- * Figma: Button Variation=04 Ghost.
- *
- * Transparent background with no border. Similar to Link but neutral color.
- */
 export interface GhostButtonProps extends React.ComponentProps<"button"> {
   children?: React.ReactNode;
   size?: 60 | 44 | 36;
   fullWidth?: boolean;
+  selected?: boolean;
 }
 
 export function GhostButton({
@@ -99,43 +60,21 @@ export function GhostButton({
   size = 44,
   fullWidth,
   style,
-  disabled,
+  selected,
+  "aria-pressed": ariaPressed,
   ...props
 }: GhostButtonProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isActive, setIsActive] = React.useState(false);
-  const [isFocused, setIsFocused] = React.useState(false);
-
-  const combinedStyle: React.CSSProperties = {
-    ...baseStyle,
-    ...sizeStyles[size],
-    color: color.textDefault,
-    ...(fullWidth ? { width: "100%" } : {}),
-    ...(disabled
-      ? { opacity: 0.5, cursor: "not-allowed" }
-      : {
-          ...(isHovered && { backgroundColor: color.bgHover }),
-          ...(isActive && { backgroundColor: color.bgActive, transform: "scale(0.98)" }),
-          ...(isFocused && { outline: `2px solid ${color.primary}`, outlineOffset: "2px" }),
-        }),
-    ...style,
-  };
-
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      style={combinedStyle}
+    <Button
+      variant="ghost"
+      size={adsSize(size)}
+      fullWidth={fullWidth}
+      style={{ color: "var(--ads-text-primary)", ...sizeOverride(size), ...style }}
       data-design-system="ghost-button"
-      onMouseEnter={() => !disabled && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onMouseDown={() => !disabled && setIsActive(true)}
-      onMouseUp={() => setIsActive(false)}
-      onFocus={(e) => { if (e.target === e.currentTarget) setIsFocused(true); }}
-      onBlur={() => setIsFocused(false)}
+      aria-pressed={selected ?? ariaPressed}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }

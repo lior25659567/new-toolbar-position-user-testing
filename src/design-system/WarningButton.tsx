@@ -1,89 +1,47 @@
 import * as React from "react";
-import { color, font, radius, shadow, transition, space } from "./tokens";
+import { Button } from "./Kit";
 
 /**
- * Warning button – design system component.
- * Figma: Enabled 5-6738, Hovered 5-6740, Pressed 5-6742, Focused 5-6744.
- * For destructive / high-risk actions (e.g. Delete, Remove).
+ * Warning button — back-compat shim around the ADS <Button variant="danger">.
+ * States: enabled / hovered / selected (aria-pressed) / pressed (:active) /
+ * focused (:focus-visible) / disabled — all managed in theme.css.
  */
 export interface WarningButtonProps extends React.ComponentProps<"button"> {
   children?: React.ReactNode;
-  /** Size: 60 | 44 | 36 (height in px). Default 44. */
   size?: 60 | 44 | 36;
   fullWidth?: boolean;
+  selected?: boolean;
 }
 
-const baseStyle: React.CSSProperties = {
-  fontFamily: font.family,
-  fontWeight: font.weight.medium,
-  border: "none",
-  cursor: "pointer",
-  outline: "none",
-  transition: transition.button,
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: space[2],
-  color: color.textOnPrimary,
-  borderRadius: radius.sm,
-  backgroundColor: color.danger,
-};
+function adsSize(size: 60 | 44 | 36): "sm" | "md" {
+  return size === 36 ? "sm" : "md";
+}
 
-const sizeStyles: Record<60 | 44 | 36, React.CSSProperties> = {
-  60: { minHeight: "60px", padding: `0 ${space[6]}`, fontSize: font.size.lg, lineHeight: "28px", letterSpacing: "-0.44px" },
-  44: { minHeight: "44px", padding: `0 ${space[4]}`, fontSize: font.size.base, lineHeight: "20px", letterSpacing: "-0.15px" },
-  36: { minHeight: "36px", padding: `0 ${space[3]}`, fontSize: font.size.sm, lineHeight: "18px", letterSpacing: "-0.1px" },
-};
+function sizeOverride(size: 60 | 44 | 36): React.CSSProperties | undefined {
+  if (size === 60) return { minHeight: 60, height: 60, padding: "0 24px", fontSize: 16, lineHeight: "22px" };
+  return undefined;
+}
 
 export function WarningButton({
   children = "Warning button",
   size = 44,
   fullWidth,
   style,
-  disabled,
+  selected,
+  "aria-pressed": ariaPressed,
   ...props
 }: WarningButtonProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isActive, setIsActive] = React.useState(false);
-  const [isFocused, setIsFocused] = React.useState(false);
-
-  const combinedStyle: React.CSSProperties = {
-    ...baseStyle,
-    ...sizeStyles[size],
-    ...(fullWidth ? { width: "100%" } : {}),
-    ...(disabled
-      ? { opacity: 0.5, cursor: "not-allowed" }
-      : {
-          ...(isActive && {
-            backgroundColor: color.dangerPressed,
-            transform: "scale(0.98)",
-          }),
-          ...(isHovered && !isActive && {
-            backgroundColor: color.dangerHover,
-          }),
-          ...(isFocused && {
-            outline: `2px solid ${color.primary}`,
-            outlineOffset: "2px",
-          }),
-        }),
-    ...style,
-  };
-
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      style={combinedStyle}
+    <Button
+      variant="danger"
+      size={adsSize(size)}
+      fullWidth={fullWidth}
+      style={{ ...sizeOverride(size), ...style }}
       data-design-system="warning-button"
-      onMouseEnter={() => !disabled && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onMouseDown={() => !disabled && setIsActive(true)}
-      onMouseUp={() => setIsActive(false)}
-      onFocus={(e) => { if (e.target === e.currentTarget) setIsFocused(true); }}
-      onBlur={() => setIsFocused(false)}
+      aria-pressed={selected ?? ariaPressed}
       {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }

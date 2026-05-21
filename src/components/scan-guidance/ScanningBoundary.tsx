@@ -58,7 +58,7 @@ export default function ScanningBoundary({ meshRef, isScanning }: ScanningBounda
     <mesh ref={discRef} visible={false}>
       <circleGeometry args={[0.06, 32]} />
       <meshBasicMaterial
-        color="#009ACE"
+        color="var(--ads-background-interactive)"
         transparent
         opacity={0.3}
         side={THREE.DoubleSide}

@@ -197,7 +197,7 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
       if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
     }
 
-    // Primary blue color for feedback marks: #009ACE
+    // Primary blue color for feedback marks: var(--ads-background-interactive)
     const blueR = 0 / 255;
     const blueG = 154 / 255;
     const blueB = 206 / 255;
@@ -288,7 +288,7 @@ function PLYModel({ url, monochrome = false, feedback = false, opacity = 100, he
           pressure = Math.min(1, Math.max(0, pressure));
 
           // Colormap matching prep QC legend gradient
-          // Stops: #0066FF → #0197EC → #3FBAFF → #0FF4FC → #2CE9C6 → #54BF00 → #FFE600 → #FFD600 → #FFA008 → #F7771A → #FF0000 → #C61313
+          // Stops: var(--ads-background-interactive) → var(--ads-background-interactive) → var(--ads-text-link) → #0FF4FC → #2CE9C6 → var(--ads-text-success) → var(--ads-text-warning) → var(--ads-text-warning) → var(--ads-text-warning) → var(--ads-text-warning) → var(--ads-text-error) → var(--ads-text-error)
           const stops = [
             { t: 0.000, r: 0/255, g: 102/255, b: 255/255 },
             { t: 0.091, r: 1/255, g: 151/255, b: 236/255 },
@@ -420,7 +420,7 @@ function LoadingSpinner() {
   return (
     <mesh>
       <sphereGeometry args={[0.5, 16, 16]} />
-      <meshBasicMaterial color="#009ACE" wireframe />
+      <meshBasicMaterial color="var(--ads-background-interactive)" wireframe />
     </mesh>
   );
 }
@@ -528,12 +528,12 @@ export default function TeethModel3D({
           position={[5, 8, 5]} 
           intensity={0.8} 
           castShadow
-          color="#f5f0e8"
+          color="var(--ads-background-highlight-orange)"
         />
         <directionalLight 
           position={[-5, 5, -5]} 
           intensity={0.35}
-          color="#e8eef5"
+          color="var(--ads-background-highlight-blue)"
         />
         <directionalLight 
           position={[0, -3, 5]} 
@@ -543,8 +543,8 @@ export default function TeethModel3D({
           position={[0, 5, -5]} 
           intensity={0.2}
         />
-        <pointLight position={[0, 10, 0]} intensity={0.2} color="#fff5e6" />
-        <pointLight position={[3, 0, 3]} intensity={0.15} color="#e6f0ff" />
+        <pointLight position={[0, 10, 0]} intensity={0.2} color="var(--ads-background-highlight-orange)" />
+        <pointLight position={[3, 0, 3]} intensity={0.15} color="var(--ads-background-highlight-blue)" />
 
         {/* Environment for subtle realistic reflections */}
         <Environment preset="apartment" background={false} />

@@ -9,6 +9,9 @@ interface ProcedureCardProps {
   selected: boolean;
   disabled: boolean;
   onSelect: (id: ProcedureType) => void;
+  /** Larger icon + bottom-aligned text. Used by the wizard variant where
+   *  each card stretches vertically. */
+  wizard?: boolean;
 }
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -23,10 +26,10 @@ const iconMap: Record<string, React.ReactNode> = {
         <path d="M9.12134 22.1872L12.4824 16.3813C12.6434 16.1101 12.9281 15.9448 13.2349 15.9448H16.862" stroke="black" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M31.2992 32.9909H17.5984C17.8162 32.5095 18.0535 31.8722 18.2086 31.0993C18.3636 30.3307 18.3925 29.6536 18.3789 29.1265H30.2374C30.2458 29.6383 30.3052 30.3053 30.5052 31.0587C30.7221 31.8748 31.0323 32.5248 31.2992 32.9909Z" fill="white" stroke="black" strokeWidth="1" strokeMiterlimit="10"/>
         <path d="M13.3433 32.9907H35.5543" stroke="black" strokeWidth="1" strokeMiterlimit="10" strokeLinecap="round"/>
-        <path d="M16.7272 17.562H13.3433" stroke="#4482B8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M18.1306 19.3687H12.6136" stroke="#4482B8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M36.3653 19.3687H30.8492" stroke="#4482B8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M34.9789 17.562H31.595" stroke="#4482B8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M16.7272 17.562H13.3433" stroke="var(--ads-border-highlight-blue)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M18.1306 19.3687H12.6136" stroke="var(--ads-border-highlight-blue)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M36.3653 19.3687H30.8492" stroke="var(--ads-border-highlight-blue)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M34.9789 17.562H31.595" stroke="var(--ads-border-highlight-blue)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
       </g>
       <defs>
         <clipPath id="clip0_study">
@@ -65,7 +68,7 @@ const iconMap: Record<string, React.ReactNode> = {
       <path d="M22.5905 37.1334C23.3296 37.0215 24.0195 37.53 24.1314 38.2691C24.2433 39.0082 23.7349 39.6981 22.9958 39.81L13.6743 41.2214C12.9352 41.3333 12.2453 40.8249 12.1334 40.0857C12.0215 39.3466 12.53 38.6568 13.269 38.5448L22.5905 37.1334Z" fill="white" stroke="black" strokeWidth="1" strokeMiterlimit="10"/>
       <path d="M22.5905 32.1334C23.3296 32.0215 24.0195 32.53 24.1314 33.2691C24.2433 34.0082 23.7349 34.6981 22.9958 34.81L13.6743 36.2214C12.9352 36.3333 12.2453 35.8249 12.1334 35.0857C12.0215 34.3467 12.53 33.6568 13.269 33.5448L22.5905 32.1334Z" fill="white" stroke="black" strokeWidth="1" strokeMiterlimit="10"/>
       <path d="M22.5905 27.1334C23.3296 27.0215 24.0195 27.53 24.1314 28.2691C24.2433 29.0082 23.7349 29.6981 22.9958 29.81L13.6743 31.2214C12.9352 31.3333 12.2453 30.8249 12.1334 30.0857C12.0215 29.3466 12.53 28.6568 13.269 28.5448L22.5905 27.1334Z" fill="white" stroke="black" strokeWidth="1" strokeMiterlimit="10"/>
-      <path d="M18.3104 25.3753C28.1468 25.3753 36.1208 22.9408 36.1208 19.9377C36.1208 16.9345 28.1468 14.5 18.3104 14.5C8.474 14.5 0.5 16.9345 0.5 19.9377C0.5 22.9408 8.474 25.3753 18.3104 25.3753Z" fill="white" stroke="#4482B8" strokeWidth="1" strokeMiterlimit="10"/>
+      <path d="M18.3104 25.3753C28.1468 25.3753 36.1208 22.9408 36.1208 19.9377C36.1208 16.9345 28.1468 14.5 18.3104 14.5C8.474 14.5 0.5 16.9345 0.5 19.9377C0.5 22.9408 8.474 25.3753 18.3104 25.3753Z" fill="white" stroke="var(--ads-border-highlight-blue)" strokeWidth="1" strokeMiterlimit="10"/>
       <path d="M24.3194 21.0313C28.7093 21.0313 31.3571 16.4367 32.2679 10.9352C33.634 2.69343 28.7093 0.840051 24.3194 0.840051C22.2612 0.840051 20.386 1.83336 18.975 3.46203C17.2042 1.50226 14.627 0.5 12.0398 0.5C7.41032 0.5 4.5 3.71259 4.5 9.87428C4.5 15.4082 7.52816 20 11.5 20.8786C11.5019 20.879 11.5039 20.8792 11.5059 20.8792L24.3184 21.0303L24.3194 21.0313Z" fill="white" stroke="black" strokeWidth="1" strokeMiterlimit="10"/>
       <path d="M15.2623 5.68168C15.2623 5.68168 17.0809 5.84376 18.9751 3.4624" stroke="black" strokeWidth="1" strokeMiterlimit="10" strokeLinecap="round"/>
     </svg>
@@ -118,49 +121,76 @@ const iconMap: Record<string, React.ReactNode> = {
   ),
 };
 
-export function ProcedureCard({ id, name, description, icon, selected, disabled, onSelect }: ProcedureCardProps) {
+export function ProcedureCard({ id, name, description, icon, selected, disabled, onSelect, wizard }: ProcedureCardProps) {
   const [hovered, setHovered] = useState(false);
+
+  // v2.0 unified card behavior: border-only treatment, no bg fill on any state.
+  // Default border = border-subtle. Hover = border darkens (border-subtle-hover).
+  // Selected = 2px border-interactive (brand blue). Mirrors .btn-secondary.
+  // -1px padding offset on selected so the card doesn't grow when the border
+  // thickens from 1px to 2px.
+  const isInteractive = !disabled;
+  const border = selected
+    ? "2px solid var(--ads-background-interactive)"
+    : hovered && isInteractive
+      ? "1px solid var(--ads-border-subtle-hover)"
+      : "1px solid var(--ads-border-subtle)";
 
   return (
     <div
       onClick={() => !disabled && onSelect(id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      aria-selected={selected || undefined}
       style={{
-        padding: "20px",
-        borderRadius: "8px",
-        border: selected ? "2px solid #009ACE" : "1px solid #E5E5E5",
-        backgroundColor: selected ? "#E0F2FE" : hovered && !disabled ? "#F9FAFB" : "white",
+        padding: selected ? "19px" : "20px",
+        borderRadius: "var(--ads-radius-md)",
+        border,
+        backgroundColor: "var(--ads-background-subtle-01)",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.5 : 1,
-        transition: "all 0.2s ease",
-        transform: hovered && !disabled ? "translateY(-2px)" : "none",
-        boxShadow: hovered && !disabled ? "0 4px 12px rgba(0,0,0,0.08)" : "none",
+        transition: "border-color var(--ads-duration-fast) var(--ads-ease-standard)",
         minHeight: "120px",
         display: "flex",
         flexDirection: "column",
         gap: "8px",
+        // In wizard mode the card grows vertically (parent uses
+        // `gridAutoRows: 1fr`); make it stretch to fill its grid cell so
+        // the bottom-aligned text actually has room to push to.
+        ...(wizard ? { height: "100%" } : null),
       }}
     >
-      <div style={{ color: selected ? "#009ACE" : "#6a7282" }}>
-        {iconMap[icon] || iconMap.study}
-      </div>
       <div
         style={{
-          fontSize: "16px",
-          fontWeight: 600,
-          color: selected ? "#005780" : "#1e2939",
-          fontFamily: "Inter, sans-serif",
+          color: selected ? "var(--ads-background-interactive)" : "var(--ads-text-secondary)",
+          // 1.4× the icons in wizard mode — bigger than classic but not
+          // overwhelming. Scaling the wrapper keeps the SVGs crisp.
+          ...(wizard ? { transform: "scale(1.4)", transformOrigin: "left top", marginBottom: 12 } : null),
+        }}
+      >
+        {iconMap[icon] || iconMap.study}
+      </div>
+      {/* Spacer pushes the text block to the bottom of the card in
+          wizard mode; in classic mode it's a no-op since the card hugs
+          its content. */}
+      {wizard && <div style={{ flex: 1 }} />}
+      <div
+        style={{
+          fontSize: "var(--tp-body-01-size)",
+          lineHeight: "var(--tp-body-01-lh)",
+          fontWeight: 500,
+          color: "var(--ads-text-primary)",
+          fontFamily: "var(--ads-font-sans)",
         }}
       >
         {name}
       </div>
       <div
         style={{
-          fontSize: "13px",
-          color: selected ? "#007BA3" : "#6a7282",
-          fontFamily: "Inter, sans-serif",
-          lineHeight: "1.4",
+          fontSize: "var(--tp-label-01-size)",
+          lineHeight: "var(--tp-label-01-lh)",
+          color: "var(--ads-text-secondary)",
+          fontFamily: "var(--ads-font-sans)",
         }}
       >
         {description}

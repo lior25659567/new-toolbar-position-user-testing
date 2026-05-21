@@ -119,7 +119,7 @@ export default function SignaturePanel({ signatureUrl, signatureMethod, onSignat
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#FAFAFA',
+          backgroundColor: 'var(--ads-background-subtle-00)',
           minHeight: '80px',
           position: 'relative',
         }}>
@@ -234,7 +234,7 @@ export default function SignaturePanel({ signatureUrl, signatureMethod, onSignat
               height: '120px',
               border: `2px dashed ${color.borderDefault}`,
               borderRadius: radius.md,
-              backgroundColor: '#FAFAFA',
+              backgroundColor: 'var(--ads-background-subtle-00)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -278,7 +278,7 @@ export default function SignaturePanel({ signatureUrl, signatureMethod, onSignat
                   border: `1px solid ${color.borderDefault}`,
                   borderRadius: radius.md,
                   cursor: 'crosshair',
-                  backgroundColor: '#FAFAFA',
+                  backgroundColor: 'var(--ads-background-subtle-00)',
                   touchAction: 'none',
                   display: 'block',
                 }}

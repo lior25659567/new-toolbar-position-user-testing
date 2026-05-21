@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { InfoState } from "../../types";
-import { PrimaryButton } from "../../../design-system";
+import { PrimaryButton, SecondaryButton } from "../../../design-system";
 import { PROCEDURES, TOOTH_PROCEDURES, TOOTH_PROCEDURE_COLORS, LAB_DESTINATIONS, INVISALIGN_TYPES, TREATMENT_STAGES, DENTURE_TYPES, DENTURE_STAGES } from "../../constants";
 
 interface CaseSummaryPanelProps {
@@ -13,10 +13,10 @@ function SummaryRow({ label, value }: { label: string; value: React.ReactNode })
   if (!value) return null;
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
-      <span style={{ fontSize: "13px", color: "#6a7282", fontFamily: "Inter, sans-serif", flexShrink: 0 }}>
+      <span style={{ fontSize: "13px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", flexShrink: 0 }}>
         {label}
       </span>
-      <span style={{ fontSize: "13px", fontWeight: 500, color: "#1e2939", fontFamily: "Inter, sans-serif", textAlign: "right" }}>
+      <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)", textAlign: "right" }}>
         {value}
       </span>
     </div>
@@ -25,8 +25,8 @@ function SummaryRow({ label, value }: { label: string; value: React.ReactNode })
 
 function SummarySection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ padding: "16px 0", borderBottom: "1px solid #E5E7EB", animation: "info-fade-in 0.3s ease-out both" }}>
-      <div style={{ fontSize: "12px", fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.5px", fontFamily: "Inter, sans-serif", marginBottom: "12px" }}>
+    <div style={{ padding: "16px 0", borderBottom: "1px solid var(--ads-border-subtle)", animation: "info-fade-in 0.3s ease-out both" }}>
+      <div style={{ fontSize: "11px", fontWeight: 500, color: "var(--ads-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: "var(--ads-font-sans)", marginBottom: "12px" }}>
         {title}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -74,11 +74,11 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
       style={{
         width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
         minWidth: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
-        borderLeft: "1px solid #E5E7EB",
+        borderLeft: "1px solid var(--ads-border-subtle)",
         position: "sticky",
         top: 0,
         height: "100%",
-        backgroundColor: "white",
+        backgroundColor: "var(--ads-bg-surface)",
         display: "flex",
         flexDirection: "column",
         transition: "width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1)",
@@ -99,10 +99,10 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
         {!collapsed && (
           <h3
             style={{
-              fontSize: "16px",
-              fontWeight: 600,
-              color: "#1e2939",
-              fontFamily: "Inter, sans-serif",
+              fontSize: "17px",
+              fontWeight: 500,
+              color: "var(--ads-text-primary)",
+              fontFamily: "var(--ads-font-sans)",
               margin: 0,
               whiteSpace: "nowrap",
               opacity: collapsed ? 0 : 1,
@@ -112,34 +112,14 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
             Case Summary
           </h3>
         )}
-        <button
+        <SecondaryButton
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? "Expand summary" : "Collapse summary"}
-          style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "8px",
-            border: "1px solid #E5E7EB",
-            backgroundColor: "white",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "background-color 0.15s, box-shadow 0.15s",
-            flexShrink: 0,
-            color: "#6a7282",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#F3F4F6";
-            e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "white";
-            e.currentTarget.style.boxShadow = "none";
-          }}
+          size={36}
+          style={{ width: 36, height: 36, padding: 0, minWidth: 36, flexShrink: 0 }}
         >
           <CollapseChevron collapsed={collapsed} />
-        </button>
+        </SecondaryButton>
       </div>
 
       {/* Collapsed vertical label */}
@@ -157,10 +137,10 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
               writingMode: "vertical-rl",
               textOrientation: "mixed",
               fontSize: "11px",
-              fontWeight: 600,
-              color: "#9CA3AF",
-              fontFamily: "Inter, sans-serif",
-              letterSpacing: "1px",
+              fontWeight: 500,
+              color: "var(--ads-text-muted)",
+              fontFamily: "var(--ads-font-sans)",
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}
           >
@@ -217,19 +197,8 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
                 return (
                   <span
                     key={spec.toothNumber}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      padding: "3px 10px",
-                      borderRadius: "9999px",
-                      border: "1px solid #E5E7EB",
-                      backgroundColor: "#F9FAFB",
-                      fontSize: "12px",
-                      fontFamily: "Inter, sans-serif",
-                      color: "#374151",
-                      fontWeight: 500,
-                    }}
+                    className="tag tag-gray"
+                    style={{ fontWeight: 400 }}
                   >
                     {spec.toothNumber} · {procLabel}
                   </span>
@@ -248,14 +217,14 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
               const noteItems = state.notes.split("\n---\n");
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "4px" }}>
-                  <span style={{ fontSize: "13px", color: "#6a7282", fontFamily: "Inter, sans-serif", flexShrink: 0 }}>
+                  <span style={{ fontSize: "13px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", flexShrink: 0 }}>
                     Notes ({noteItems.length})
                   </span>
                   {noteItems.map((note, i) => (
                     <div
                       key={i}
                       style={{
-                        fontSize: "12px", color: "#374151", fontFamily: "Inter, sans-serif",
+                        fontSize: "12px", color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)",
                         lineHeight: "1.4",
                         wordBreak: "break-word",
                         animation: "info-fade-in 0.35s ease-out both",
@@ -278,7 +247,7 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
             Continue to Scan
           </PrimaryButton>
           {!canProceed && (
-            <div style={{ fontSize: "12px", color: "#9CA3AF", fontFamily: "Inter, sans-serif", textAlign: "center", marginTop: "8px" }}>
+            <div style={{ fontSize: "12px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", textAlign: "center", marginTop: "8px" }}>
               Complete all required fields to continue
             </div>
           )}
