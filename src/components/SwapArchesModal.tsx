@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SecondaryButton } from "@/design-system/SecondaryButton";
-import upperArchImg from "@/assets/button-images/default/3d-model-upper.png";
-import lowerArchImg from "@/assets/button-images/default/3d-model-lower.png";
+import upperArchImg from "@/assets/button-images/swap-arches/upper-arch.png";
+import lowerArchImg from "@/assets/button-images/swap-arches/lower-arch.png";
 
 // ============================================================================
 // SWAP ARCHES MODAL
@@ -80,7 +80,7 @@ function ArchCard({ label, src }: { label: string; src: string }) {
           alt={label}
           src={src}
           draggable={false}
-          style={{ height: "100%", width: "100%", maxHeight: "100%", objectFit: "contain", objectPosition: "center", pointerEvents: "none" }}
+          style={{ height: "100%", width: "100%", maxHeight: "100%", objectFit: "contain", objectPosition: "center", pointerEvents: "none", transform: "rotate(180deg)" }}
         />
       </div>
     </div>

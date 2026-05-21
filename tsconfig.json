@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode (Vite) */
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Interop */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Path alias — mirrors vite.config.ts ('@' -> ./src).
+       Resolved relative to this tsconfig; baseUrl is omitted (deprecated in TS 6). */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* Lenient: this is a prototype that has never been type-checked.
+       Module/JSX resolution is fixed above; strict typing is intentionally
+       relaxed so the editor doesn't flood pre-existing latent type issues. */
+    "strict": false,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src"]
+}
