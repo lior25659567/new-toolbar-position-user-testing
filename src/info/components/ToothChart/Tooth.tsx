@@ -46,7 +46,7 @@ function ToothIcon({ number, color: iconColor, hovered, strokeWidth }: { number:
   }
   const isUpper = number <= 28;
   return (
-    <svg width="24" height="28" viewBox="0 0 16 18" fill="none">
+    <svg width="20" height="24" viewBox="0 0 16 18" fill="none">
       {isUpper ? (
         <path
           d="M8 1C5.5 1 3.5 2.5 3 5C2.5 7.5 3 9 4 10.5C4.5 11.2 5 12 5.5 14C6 16 6.5 17 8 17C9.5 17 10 16 10.5 14C11 12 11.5 11.2 12 10.5C13 9 13.5 7.5 13 5C12.5 2.5 10.5 1 8 1Z"
@@ -67,7 +67,7 @@ function ToothIcon({ number, color: iconColor, hovered, strokeWidth }: { number:
 // number row land on a single baseline across all teeth in an arch — the
 // numbers always sit at the same offset from the top/bottom edge of the
 // button.
-const TOOTH_VIEWPORT_HEIGHT = 64;
+const TOOTH_VIEWPORT_HEIGHT = 54;
 
 export function Tooth({ number, selected, color, procedure, onClick }: ToothProps) {
   const [hovered, setHovered] = useState(false);
@@ -118,14 +118,14 @@ export function Tooth({ number, selected, color, procedure, onClick }: ToothProp
       onMouseLeave={() => setHovered(false)}
       style={{
         flex: "1 1 0",
-        minWidth: 51,
-        height: 104,
-        padding: "8px 4px",
+        minWidth: 43,
+        height: 88,
+        padding: "7px 3px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 6,
+        gap: 5,
         // White card surface with the design-system small elevation.
         backgroundColor: "var(--ads-background-subtle-01)",
         boxShadow: "var(--ads-shadow-sm)",

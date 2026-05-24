@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useInfoState } from "../state/useInfoState";
 import { PatientSection } from "./PatientSection/PatientSection";
+import { PatientHeaderBar } from "./PatientSection/PatientHeaderBar";
 import { ProcedureSection } from "./ProcedureSection/ProcedureSection";
 import { ConfigSection } from "./ConfigSection/ConfigSection";
 import { CaseSummaryPanel } from "./CaseSummaryPanel/CaseSummaryPanel";
@@ -10,7 +11,7 @@ import { InfoPageAccordion } from "./InfoPageAccordion";
 import type { Patient } from "../types";
 import type { InfoStepId } from "./InfoSummaryWizard";
 
-export type InfoLayoutVariant = "classic" | "wizard" | "rail" | "accordion";
+export type InfoLayoutVariant = "classic" | "wizard" | "rail" | "accordion" | "sticky";
 
 /** State surfaced up from the wizard variants so a host (e.g. the global
  *  topbar) can render the step indicator instead of the in-page one. */
@@ -25,6 +26,7 @@ const VARIANT_BY_KEY: Record<string, InfoLayoutVariant> = {
   "2": "wizard",
   "3": "rail",
   "4": "accordion",
+  "5": "sticky",
 };
 
 interface InfoPageProps {
@@ -71,12 +73,13 @@ export function InfoPage({ onContinue, onPatientChange, initialVariant = "classi
   // previously-published topbar state so the global header reverts to
   // its default tabs.
   useEffect(() => {
-    if (variant === "classic" || variant === "accordion") {
+    if (variant === "classic" || variant === "accordion" || variant === "sticky") {
       onWizardTopbarChange?.(null);
     }
   }, [variant, onWizardTopbarChange]);
 
-  // Hidden keyboard shortcut: 1 → Classic, 2 → Wizard, 3 → Rail, 4 → Accordion.
+  // Hidden keyboard shortcut: 1 → Classic, 2 → Wizard, 3 → Rail, 4 → Accordion,
+  // 5 → Sticky patient (press "h" inside it to hide the case summary).
   // Ignored while focus is in a text input, textarea, or contenteditable so
   // typing numbers in form fields doesn't trigger a layout swap.
   useEffect(() => {
@@ -99,6 +102,8 @@ export function InfoPage({ onContinue, onPatientChange, initialVariant = "classi
       <InfoPageWizardRail onContinue={onContinue} onPatientChange={onPatientChange} onWizardTopbarChange={onWizardTopbarChange} />
     ) : variant === "accordion" ? (
       <InfoPageAccordion onContinue={onContinue} onPatientChange={onPatientChange} />
+    ) : variant === "sticky" ? (
+      <InfoPageStickyPatient onContinue={onContinue} onPatientChange={onPatientChange} />
     ) : (
       <InfoPageClassic onContinue={onContinue} onPatientChange={onPatientChange} />
     );
@@ -140,7 +145,7 @@ function InfoPageClassic({ onContinue, onPatientChange }: Omit<InfoPageProps, "i
             padding: "32px",
             display: "flex",
             flexDirection: "column",
-            gap: "24px",
+            gap: "16px",
           }}
         >
           <div style={{ ...sectionCardStyle, animationDelay: "0s" }}>
@@ -175,6 +180,122 @@ function InfoPageClassic({ onContinue, onPatientChange }: Omit<InfoPageProps, "i
         canProceed={canProceed}
         onContinue={onContinue}
       />
+    </div>
+  );
+}
+
+/**
+ * Sticky-patient layout (key "5"): single full-width scrolling column where
+ * only the Patient section is pinned to the top. Everything else — Procedure,
+ * config, and the Case Summary — flows beneath it and scrolls normally (the
+ * summary is rendered inline, not sticky).
+ */
+function InfoPageStickyPatient({ onContinue, onPatientChange }: Omit<InfoPageProps, "initialVariant">) {
+  const { state, dispatch, canProceed, toothColorMap } = useInfoState();
+  // Press "h" to hide/show the case summary panel. Ignored while typing in a
+  // form field so it doesn't fire mid-input.
+  const [showSummary, setShowSummary] = useState(true);
+  // Open the patient table immediately only when re-entering the picker via
+  // "Edit" — not on first load, where it stays closed.
+  const [openPickerOnMount, setOpenPickerOnMount] = useState(false);
+
+  useEffect(() => {
+    onPatientChange?.(state.patient);
+  }, [state.patient, onPatientChange]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "h" && e.key !== "H") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+      setShowSummary((v) => !v);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  return (
+    <div
+      style={{
+        height: "100%",
+        overflowY: "auto",
+        backgroundColor: "var(--ads-bg-page)",
+      }}
+    >
+      <style>{ANIM_KF}</style>
+
+      {/* Full-width patient header (non-sticky). When a patient is selected this
+          is the edge-to-edge Figma-style header bar; otherwise it falls back to
+          the patient picker so one can be chosen. */}
+      <div
+        style={{
+          padding: "20px 32px",
+          backgroundColor: "var(--ads-bg-surface)",
+          borderBottom: "1px solid var(--ads-border-subtle)",
+        }}
+      >
+        {state.patient && !state.isCreatingPatient ? (
+          <PatientHeaderBar
+            patient={state.patient}
+            onEdit={() => {
+              setOpenPickerOnMount(true);
+              dispatch({ type: "CLEAR_PATIENT" });
+            }}
+          />
+        ) : (
+          <PatientSection
+            patient={state.patient}
+            searchQuery={state.patientSearchQuery}
+            isCreating={state.isCreatingPatient}
+            dispatch={dispatch}
+            hideHeading
+            defaultPickerOpen={openPickerOnMount}
+          />
+        )}
+      </div>
+
+      {/* Scrolling content beneath the pinned patient header: main column on
+          the left, Case Summary as a non-sticky right column that starts level
+          with the Procedure section. */}
+      <div
+        style={{
+          padding: "16px 32px 32px",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "24px",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ ...sectionCardStyle, animationDelay: "0.06s" }}>
+            <ProcedureSection
+              selectedProcedure={state.selectedProcedure}
+              hasPatient={!!state.patient}
+              dispatch={dispatch}
+              collapsible
+            />
+          </div>
+          {state.selectedProcedure && (
+            <ConfigSection
+              state={state}
+              toothColorMap={toothColorMap}
+              dispatch={dispatch}
+            />
+          )}
+        </div>
+        {/* Case summary — right column, vertical, non-sticky. Omitted entirely
+            in the "no summary" variant. */}
+        {showSummary && (
+          <div style={{ width: 300, flexShrink: 0 }}>
+            <CaseSummaryPanel
+              state={state}
+              canProceed={canProceed}
+              onContinue={onContinue}
+              layout="inline"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

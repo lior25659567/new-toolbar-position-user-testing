@@ -172,7 +172,7 @@ export function ToothChart({ state, toothColorMap, dispatch, title }: ToothChart
               label="Upper"
             />
             {/* Occlusal spacer between the upper and lower arches (divider line removed). */}
-            <div style={{ height: "33px" }} />
+            <div style={{ height: "28px" }} />
             <ToothArc
               teeth={LOWER_TEETH}
               selectedTeeth={state.selectedTeeth}

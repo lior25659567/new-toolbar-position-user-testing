@@ -86,19 +86,19 @@ type SupportedBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlo
 function PreviewTeethTags({ teeth }: { teeth: number[] }) {
   if (teeth.length === 0) return null;
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: space[2], alignItems: 'center' }}>
-      <span style={{ fontSize: '14px', color: color.textSubtle, marginRight: '4px' }}>Teeth:</span>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: space[1], marginTop: space[2], alignItems: 'center' }}>
+      <span style={{ fontSize: font.size.base, color: color.textSubtle, marginRight: space[1] }}>Teeth:</span>
       {teeth.map((t) => (
         <span key={t} style={{
           display: 'inline-flex',
           alignItems: 'center',
           padding: `2px 9px`,
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'var(--ads-text-secondary)',
-          backgroundColor: 'var(--ads-background-subtle-00)',
+          fontSize: font.size.base,
+          fontWeight: font.weight.semibold,
+          color: color.textSubtle,
+          backgroundColor: color.bgPage,
           border: `1px solid ${color.borderDefault}`,
-          borderRadius: '9999px',
+          borderRadius: radius.full,
         }}>
           {t}
         </span>
@@ -110,8 +110,8 @@ function PreviewTeethTags({ teeth }: { teeth: number[] }) {
 function PreviewClinicalRow({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
-    <div style={{ display: 'flex', gap: space[2], fontSize: '14px', lineHeight: '1.6' }}>
-      <span style={{ color: color.textSubtle, fontWeight: 500, minWidth: '80px' }}>{label}:</span>
+    <div style={{ display: 'flex', gap: space[2], fontSize: font.size.base, lineHeight: font.lineHeight.normal }}>
+      <span style={{ color: color.textSubtle, fontWeight: font.weight.semibold, minWidth: '80px' }}>{label}:</span>
       <span style={{ color: color.textDefault }}>{value}</span>
     </div>
   );
@@ -119,37 +119,42 @@ function PreviewClinicalRow({ label, value }: { label: string; value: string }) 
 
 // ─── Block Previews ─────────────────────────────────────────────────────────
 
-function ImageBlockPreview({ block }: { block: ImageBlock }) {
-  const hasNotes = !!block.notes;
-  const hasClinical = !!(block.diagnosis || block.treatment || block.estimatedCost || block.treatmentDate);
-  const hasTeeth = block.teeth.length > 0;
-  const hasMeta = hasNotes || hasClinical || hasTeeth || !!block.title;
-
+/** Section heading used above every block (sentence case, no uppercase). */
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
-      borderRadius: '8px',
-      border: `1px solid ${color.borderDefault}`,
-      overflow: 'hidden',
-      backgroundColor: color.white,
+      fontSize: font.size.sm,
+      fontWeight: font.weight.semibold,
+      color: color.textHeading,
+      marginBottom: space[3],
     }}>
+      {children}
+    </div>
+  );
+}
+
+function ImageBlockPreview({ block }: { block: ImageBlock }) {
+  const hasTeeth = block.teeth.length > 0;
+
+  return (
+    <div className="report-section">
+      <SectionLabel>{block.title || 'Clinical photo'}</SectionLabel>
       {block.previewUrl ? (
         <img
           src={block.previewUrl}
           alt={block.title || 'Clinical image'}
           style={{
             width: '100%',
-            height: '300px',
-            objectFit: 'contain',
+            aspectRatio: '4 / 3',
+            objectFit: 'cover',
             display: 'block',
             backgroundColor: color.neutral50,
-            padding: '8px',
-            boxSizing: 'border-box',
           }}
         />
       ) : (
         <div style={{
           width: '100%',
-          height: '200px',
+          aspectRatio: '4 / 3',
           backgroundColor: color.neutral50,
           display: 'flex',
           alignItems: 'center',
@@ -164,29 +169,12 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
         </div>
       )}
 
-      {hasMeta && (
-        <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {block.title && (
-            <div style={{ fontSize: '14px', fontWeight: 600, color: color.textHeading }}>
-              {block.title}
-            </div>
-          )}
-          {hasNotes && (
-            <div style={{ fontSize: '14px', color: color.textSubtle, lineHeight: '1.45' }}>
-              {block.notes}
-            </div>
-          )}
-          <PreviewTeethTags teeth={block.teeth} />
-          {hasClinical && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
-              <PreviewClinicalRow label="Diagnosis" value={block.diagnosis} />
-              <PreviewClinicalRow label="Treatment" value={block.treatment} />
-              <PreviewClinicalRow label="Est. Cost" value={block.estimatedCost} />
-              <PreviewClinicalRow label="Date" value={block.treatmentDate} />
-            </div>
-          )}
+      {block.notes && (
+        <div style={{ fontSize: font.size.sm, color: color.textSubtle, fontStyle: 'italic', marginTop: space[2], lineHeight: font.lineHeight.normal }}>
+          {block.notes}
         </div>
       )}
+      {hasTeeth && <div style={{ marginTop: space[2] }}><PreviewTeethTags teeth={block.teeth} /></div>}
     </div>
   );
 }
@@ -194,18 +182,18 @@ function ImageBlockPreview({ block }: { block: ImageBlock }) {
 function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
   const renderSide = (img: { previewUrl: string }, label: string) => (
     <div style={{ flex: 1 }}>
-      <div style={{ fontSize: '12px', fontWeight: 600, color: color.textLabel, textAlign: 'center', marginBottom: space[1] }}>
+      <div style={{ fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textLabel, textAlign: 'center', marginBottom: space[1] }}>
         {label}
       </div>
       {img.previewUrl ? (
         <img src={img.previewUrl} alt={label} style={{
-          width: '100%', height: '100px', objectFit: 'contain',
-          borderRadius: '8px', backgroundColor: color.neutral50, display: 'block',
+          width: '100%', aspectRatio: '4 / 3', objectFit: 'cover',
+          borderRadius: radius.md, backgroundColor: color.neutral50, display: 'block',
         }} />
       ) : (
         <div style={{
-          width: '100%', height: '100px', backgroundColor: color.neutral50,
-          borderRadius: '8px', display: 'flex',
+          width: '100%', aspectRatio: '4 / 3', backgroundColor: color.neutral50,
+          borderRadius: radius.md, display: 'flex',
           alignItems: 'center', justifyContent: 'center',
           color: color.neutral300,
         }}>
@@ -220,14 +208,14 @@ function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
   );
 
   return (
-    <div style={{ marginBottom: space[4] }}>
+    <div className="report-section">
       <div style={{ display: 'flex', gap: space[2] }}>
         {renderSide(block.imageA, block.labelA || 'Before')}
         {renderSide(block.imageB, block.labelB || 'After')}
       </div>
       {block.notes && (
         <div style={{
-          fontSize: '12px', color: color.textDefault, lineHeight: '1.5',
+          fontSize: font.size.xs, color: color.textDefault, lineHeight: font.lineHeight.normal,
           marginTop: space[2], paddingLeft: space[2], borderLeft: `2px solid ${color.neutral200}`,
         }}>
           {block.notes}
@@ -238,43 +226,14 @@ function ComparisonBlockPreview({ block }: { block: ComparisonBlock }) {
 }
 
 function CostSummaryBlockPreview({ block }: { block: CostSummaryBlock }) {
-  const total = block.items.reduce((sum, it) => {
-    const n = parseFloat(it.amount.replace(/[^0-9.]/g, ''));
-    return sum + (isNaN(n) ? 0 : n);
-  }, 0);
-  const hasContent = block.items.some((it) => it.description || it.amount);
-
-  if (!hasContent) return null;
+  if (!block.content) return null;
 
   return (
-    <div style={{ marginBottom: space[4] }}>
-      <table style={{
-        width: '100%',
-        fontSize: '14px',
-        borderCollapse: 'collapse',
-        color: color.textDefault,
-      }}>
-        <thead>
-          <tr style={{ borderBottom: `1px solid ${color.borderDefault}` }}>
-            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel }}>Item</th>
-            <th style={{ textAlign: 'right', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '90px' }}>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {block.items.filter((it) => it.description || it.amount).map((item) => (
-            <tr key={item.id} style={{ borderBottom: `1px solid ${color.neutral100}` }}>
-              <td style={{ padding: '4px 0' }}>{item.description || '---'}</td>
-              <td style={{ padding: '4px 0', textAlign: 'right' }}>{item.amount || '---'}</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr style={{ borderTop: `1.5px solid ${color.borderStrong}` }}>
-            <td style={{ padding: '5px 0', fontWeight: 600 }}>Total</td>
-            <td style={{ padding: '5px 0', textAlign: 'right', fontWeight: 600 }}>${total.toFixed(2)}</td>
-          </tr>
-        </tfoot>
-      </table>
+    <div className="report-section">
+      <SectionLabel>Cost summary</SectionLabel>
+      <div style={{ fontSize: font.size.base, color: color.textDefault, lineHeight: font.lineHeight.normal, whiteSpace: 'pre-wrap' }}>
+        {block.content}
+      </div>
     </div>
   );
 }
@@ -282,17 +241,12 @@ function CostSummaryBlockPreview({ block }: { block: CostSummaryBlock }) {
 function NotesBlockPreview({ block }: { block: NotesBlock }) {
   if (!block.content) return null;
   return (
-    <div style={{
-      marginBottom: space[4],
-      padding: `${space[4]} ${space[4]}`,
-      backgroundColor: color.neutral50,
-      borderRadius: '8px',
-      borderLeft: `3px solid ${color.borderStrong}`,
-    }}>
-      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
-        Clinical Notes
+    <div className="report-section">
+      <SectionLabel>Clinical notes</SectionLabel>
+      <div style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textLabel, marginBottom: space[1] }}>
+        Note
       </div>
-      <div style={{ fontSize: '14px', color: color.textDefault, lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+      <div style={{ fontSize: font.size.base, color: color.textDefault, lineHeight: font.lineHeight.normal, whiteSpace: 'pre-wrap' }}>
         {block.content}
       </div>
     </div>
@@ -304,32 +258,30 @@ function RxBlockPreview({ block }: { block: RxBlock }) {
   if (!hasContent) return null;
 
   return (
-    <div style={{ marginBottom: space[4] }}>
-      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
-        Prescription (Rx)
-      </div>
-      <table style={{ width: '100%', fontSize: '14px', borderCollapse: 'collapse', color: color.textDefault }}>
+    <div className="report-section">
+      <SectionLabel>Prescription</SectionLabel>
+      <table style={{ width: '100%', fontSize: font.size.base, borderCollapse: 'collapse', color: color.textDefault }}>
         <thead>
           <tr style={{ borderBottom: `1px solid ${color.borderDefault}` }}>
-            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel }}>Medication</th>
-            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '80px' }}>Dosage</th>
-            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '100px' }}>Frequency</th>
-            <th style={{ textAlign: 'left', padding: '5px 0', fontWeight: 600, color: color.textLabel, width: '80px' }}>Duration</th>
+            <th style={{ textAlign: 'left', padding: `${space[1]} 0`, fontWeight: font.weight.semibold, color: color.textLabel }}>Medication</th>
+            <th style={{ textAlign: 'left', padding: `${space[1]} 0`, fontWeight: font.weight.semibold, color: color.textLabel, width: '80px' }}>Dosage</th>
+            <th style={{ textAlign: 'left', padding: `${space[1]} 0`, fontWeight: font.weight.semibold, color: color.textLabel, width: '100px' }}>Frequency</th>
+            <th style={{ textAlign: 'left', padding: `${space[1]} 0`, fontWeight: font.weight.semibold, color: color.textLabel, width: '80px' }}>Duration</th>
           </tr>
         </thead>
         <tbody>
           {block.items.filter((it) => it.medication).map((item) => (
             <tr key={item.id} style={{ borderBottom: `1px solid ${color.neutral100}` }}>
-              <td style={{ padding: '4px 0', fontWeight: 500 }}>{item.medication}</td>
-              <td style={{ padding: '4px 0' }}>{item.dosage || '---'}</td>
-              <td style={{ padding: '4px 0' }}>{item.frequency || '---'}</td>
-              <td style={{ padding: '4px 0' }}>{item.duration || '---'}</td>
+              <td style={{ padding: `${space[1]} 0`, fontWeight: font.weight.semibold }}>{item.medication}</td>
+              <td style={{ padding: `${space[1]} 0` }}>{item.dosage || '---'}</td>
+              <td style={{ padding: `${space[1]} 0` }}>{item.frequency || '---'}</td>
+              <td style={{ padding: `${space[1]} 0` }}>{item.duration || '---'}</td>
             </tr>
           ))}
         </tbody>
       </table>
       {block.notes && (
-        <div style={{ fontSize: '13px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
+        <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
           {block.notes}
         </div>
       )}
@@ -342,38 +294,30 @@ function NextAppointmentBlockPreview({ block }: { block: NextAppointmentBlock })
   if (!hasContent) return null;
 
   return (
-    <div style={{
-      marginBottom: space[4],
-      padding: `${space[4]} ${space[4]}`,
-      backgroundColor: color.neutral50,
-      borderRadius: '8px',
-      border: `1px solid ${color.borderDefault}`,
-    }}>
-      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
-        Next Appointment
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2], fontSize: '14px' }}>
+    <div className="report-section">
+      <SectionLabel>Next appointment</SectionLabel>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[2], fontSize: font.size.base }}>
         {block.date && (
           <div>
-            <span style={{ color: color.textSubtle, fontWeight: 500 }}>Date: </span>
-            <span style={{ color: color.textDefault, fontWeight: 600 }}>{block.date}</span>
+            <span style={{ color: color.textSubtle, fontWeight: font.weight.semibold }}>Date: </span>
+            <span style={{ color: color.textDefault, fontWeight: font.weight.semibold }}>{block.date}</span>
           </div>
         )}
         {block.time && (
           <div>
-            <span style={{ color: color.textSubtle, fontWeight: 500 }}>Time: </span>
-            <span style={{ color: color.textDefault, fontWeight: 600 }}>{block.time}</span>
+            <span style={{ color: color.textSubtle, fontWeight: font.weight.semibold }}>Time: </span>
+            <span style={{ color: color.textDefault, fontWeight: font.weight.semibold }}>{block.time}</span>
           </div>
         )}
       </div>
       {block.procedure && (
-        <div style={{ fontSize: '14px', marginTop: space[1] }}>
-          <span style={{ color: color.textSubtle, fontWeight: 500 }}>Procedure: </span>
+        <div style={{ fontSize: font.size.base, marginTop: space[1] }}>
+          <span style={{ color: color.textSubtle, fontWeight: font.weight.semibold }}>Procedure: </span>
           <span style={{ color: color.textDefault }}>{block.procedure}</span>
         </div>
       )}
       {block.instructions && (
-        <div style={{ fontSize: '13px', color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
+        <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginTop: space[2], fontStyle: 'italic' }}>
           {block.instructions}
         </div>
       )}
@@ -386,17 +330,9 @@ function PatientInstructionsBlockPreview({ block }: { block: PatientInstructions
   if (!hasContent) return null;
 
   return (
-    <div style={{
-      marginBottom: space[4],
-      padding: `${space[4]} ${space[4]}`,
-      backgroundColor: color.neutral50,
-      borderRadius: '8px',
-      border: `1px solid ${color.borderDefault}`,
-    }}>
-      <div style={{ fontSize: '13px', fontWeight: 600, color: color.textSubtle, letterSpacing: '0.02em', marginBottom: space[2] }}>
-        {block.title || 'Patient Instructions'}
-      </div>
-      <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '14px', color: color.textDefault, lineHeight: '1.9' }}>
+    <div className="report-section">
+      <SectionLabel>{block.title || 'Patient instructions'}</SectionLabel>
+      <ol style={{ margin: 0, paddingLeft: '18px', fontSize: font.size.base, color: color.textDefault, lineHeight: '1.9' }}>
         {block.items.filter((it) => it.text).map((item) => (
           <li key={item.id}>{item.text}</li>
         ))}
@@ -415,14 +351,12 @@ interface ReportPreviewProps {
 }
 
 export default function ReportPreview({ settings, patient, blocks, onClinicLogoUpload }: ReportPreviewProps) {
+  const reportDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   return (
     <div style={{
       backgroundColor: color.white,
-      border: `1px solid ${color.borderDefault}`,
-      borderRadius: radius.lg,
-      padding: `${space[8]} ${space[6]}`,
+      padding: `${space[10]} ${space[12]}`,
       minHeight: '700px',
-      boxShadow: shadow.md,
       fontFamily: font.family,
       position: 'relative',
       display: 'flex',
@@ -430,187 +364,126 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
       flexGrow: 1,
       flexShrink: 0,
     }}>
-      {/* Logo Bar */}
+      {/* Section rhythm: dividers + consistent spacing only between rendered sections */}
+      <style>{`
+        .report-section + .report-section {
+          margin-top: ${space[8]};
+          padding-top: ${space[8]};
+          border-top: 1px solid var(--ds-border-subtle);
+        }
+      `}</style>
+      {/* Header — clinic & doctor (left), patient & date (right) */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: space[4],
-      }}>
-        {/* Clinic logo upload (left) */}
-        {settings.clinicLogoUrl ? (
-          <img
-            src={settings.clinicLogoUrl}
-            alt="Clinic logo"
-            style={{
-              height: '36px',
-              maxWidth: '140px',
-              objectFit: 'contain',
-            }}
-          />
-        ) : onClinicLogoUpload ? (
-          <label style={{
-            height: '36px',
-            padding: '0 12px',
-            borderRadius: radius.md,
-            border: `1.5px dashed ${color.neutral200}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: color.neutral300,
-            backgroundColor: color.neutral50,
-            cursor: 'pointer',
-            transition: `border-color 0.15s, background-color 0.15s`,
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.backgroundColor = 'var(--ds-color-primary-subtle)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.neutral200; e.currentTarget.style.backgroundColor = color.neutral50; }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="3" />
-              <circle cx="8.5" cy="10.5" r="2" />
-              <path d="M5 20l5-6 3 3 4-5 4 4" />
-            </svg>
-            <span style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/svg+xml"
-              style={{ display: 'none' }}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) onClinicLogoUpload(URL.createObjectURL(file));
-              }}
-            />
-          </label>
-        ) : (
-          <div style={{
-            height: '36px',
-            padding: '0 12px',
-            borderRadius: radius.md,
-            border: `1.5px dashed ${color.neutral200}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: color.neutral300,
-            backgroundColor: color.neutral50,
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="3" />
-              <circle cx="8.5" cy="10.5" r="2" />
-              <path d="M5 20l5-6 3 3 4-5 4 4" />
-            </svg>
-            <span style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '0.02em' }}>Your Logo</span>
-          </div>
-        )}
-
-        {/* Brand logo (right) */}
-        <HeaderBrandLogo />
-      </div>
-
-      {/* Report Header */}
-      <div style={{
+        gap: space[6],
+        paddingBottom: space[5],
         borderBottom: `2px solid ${color.primary}`,
-        paddingBottom: space[3],
-        marginBottom: space[5],
+        marginBottom: space[8],
       }}>
-        <div style={{
-          fontSize: '16px',
-          fontWeight: 700,
-          color: color.textHeading,
-          letterSpacing: font.tracking.tight,
-        }}>
-          {settings.reportName || 'Untitled Report'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: space[5], minWidth: 0 }}>
+          {settings.clinicLogoUrl && (
+            <img
+              src={settings.clinicLogoUrl}
+              alt="Clinic logo"
+              style={{ height: '96px', maxWidth: '180px', objectFit: 'contain', flexShrink: 0 }}
+            />
+          )}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: font.size.sm, color: color.textSubtle, fontWeight: font.weight.regular }}>
+              {settings.clinicName || 'Clinic name'}
+            </div>
+            <div style={{ fontSize: font.size.lg, fontWeight: font.weight.semibold, color: color.textHeading, letterSpacing: font.tracking.tight, marginTop: '2px' }}>
+              {settings.doctorName || 'Doctor name'}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Doctor / Clinic / Patient info */}
-      <div style={{
-        backgroundColor: color.neutral50,
-        borderRadius: '8px',
-        border: `1px solid ${color.borderDefault}`,
-        padding: `${space[4]} ${space[5]}`,
-        marginBottom: space[5],
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: space[4],
-      }}>
-        <div>
-          <div style={{ fontSize: '12px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Doctor</div>
-          <div style={{ fontSize: '14px', fontWeight: 600, color: color.textDefault }}>{settings.doctorName || '---'}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: '12px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Clinic</div>
-          <div style={{ fontSize: '14px', fontWeight: 600, color: color.textDefault }}>{settings.clinicName || '---'}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: '12px', color: color.textPlaceholder, letterSpacing: '0.02em', marginBottom: '4px', fontWeight: 500 }}>Patient</div>
-          <div style={{ fontSize: '14px', fontWeight: 600, color: color.textDefault }}>{patient.patientName || '---'}</div>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{ fontSize: font.size.lg, fontWeight: font.weight.semibold, color: color.textHeading, letterSpacing: font.tracking.tight }}>
+            {patient.patientName || 'Patient name'}
+          </div>
+          <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginTop: space[1] }}>
+            Patient · {patient.chartNumber || '---'}
+          </div>
+          <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginTop: '2px' }}>
+            {reportDate}
+          </div>
         </div>
       </div>
 
       {/* Blocks */}
       {blocks.length === 0 ? (
         <div style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           textAlign: 'center',
           padding: `${space[16]} 0`,
           color: color.textPlaceholder,
-          fontSize: '13px',
+          fontSize: font.size.sm,
         }}>
           Add sections to see the report preview
         </div>
-      ) : (() => {
-        const imageBlocks = blocks.filter((b) => b.type === 'image') as ImageBlock[];
-        const otherBlocks = blocks.filter((b) => b.type !== 'image');
-
-        return (
-          <>
-            {imageBlocks.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: imageBlocks.length === 1 ? '1fr' : '1fr 1fr', gap: space[3], marginBottom: otherBlocks.length > 0 ? space[4] : 0 }}>
-                {imageBlocks.map((block) => (
-                  <ImageBlockPreview key={block.id} block={block} />
-                ))}
-              </div>
-            )}
-            {otherBlocks.map((block) => {
-              switch (block.type) {
-                case 'comparison':
-                  return <ComparisonBlockPreview key={block.id} block={block as ComparisonBlock} />;
-                case 'cost-summary':
-                  return <CostSummaryBlockPreview key={block.id} block={block as CostSummaryBlock} />;
-                case 'notes':
-                  return <NotesBlockPreview key={block.id} block={block as NotesBlock} />;
-                case 'rx':
-                  return <RxBlockPreview key={block.id} block={block as RxBlock} />;
-                case 'next-appointment':
-                  return <NextAppointmentBlockPreview key={block.id} block={block as NextAppointmentBlock} />;
-                case 'patient-instructions':
-                  return <PatientInstructionsBlockPreview key={block.id} block={block as PatientInstructionsBlock} />;
-                default:
-                  return null;
-              }
-            })}
-          </>
-        );
-      })()}
-
-      {/* Signature */}
-      {settings.signatureUrl && (
-        <div style={{
-          marginTop: space[8],
-          paddingTop: space[4],
-          borderTop: `1px solid ${color.borderDefault}`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-        }}>
-          <img src={settings.signatureUrl} alt="Doctor signature" style={{ maxHeight: '50px', objectFit: 'contain' }} />
-          <div style={{ fontSize: '12px', fontWeight: 500, color: color.textDefault, marginTop: '2px' }}>
-            {settings.doctorName}
-          </div>
-        </div>
+      ) : (
+        <>
+          {blocks.map((block) => {
+            switch (block.type) {
+              case 'image':
+                return <ImageBlockPreview key={block.id} block={block as ImageBlock} />;
+              case 'comparison':
+                return <ComparisonBlockPreview key={block.id} block={block as ComparisonBlock} />;
+              case 'cost-summary':
+                return <CostSummaryBlockPreview key={block.id} block={block as CostSummaryBlock} />;
+              case 'notes':
+                return <NotesBlockPreview key={block.id} block={block as NotesBlock} />;
+              case 'rx':
+                return <RxBlockPreview key={block.id} block={block as RxBlock} />;
+              case 'next-appointment':
+                return <NextAppointmentBlockPreview key={block.id} block={block as NextAppointmentBlock} />;
+              case 'patient-instructions':
+                return <PatientInstructionsBlockPreview key={block.id} block={block as PatientInstructionsBlock} />;
+              default:
+                return null;
+            }
+          })}
+        </>
       )}
 
-      {/* Flex spacer pushes Powered-by to the bottom */}
-      <div style={{ flex: 1 }} />
+      {/* Flex spacer pushes the signature + footer to the bottom (only when
+          there's content; the empty state already fills the space). */}
+      {blocks.length > 0 && <div style={{ flex: 1 }} />}
+
+      {/* Signature line */}
+      <div style={{
+        marginTop: space[8],
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+        gap: space[6],
+      }}>
+        <div style={{ maxWidth: 360, width: '100%' }}>
+          <div style={{
+            minHeight: 56,
+            display: 'flex',
+            alignItems: 'flex-end',
+            borderBottom: `1px solid ${color.textHeading}`,
+            paddingBottom: space[2],
+          }}>
+            {settings.signatureUrl
+              ? <img src={settings.signatureUrl} alt="Doctor signature" style={{ maxHeight: 48, maxWidth: '100%', objectFit: 'contain' }} />
+              : <span style={{ fontSize: font.size.base, color: color.textPlaceholder }}>Signature</span>}
+          </div>
+          <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginTop: space[2] }}>
+            {settings.doctorName || 'Doctor name'}
+          </div>
+        </div>
+        <span style={{ fontSize: font.size.sm, color: color.textSubtle, flexShrink: 0 }}>
+          Generated {reportDate}
+        </span>
+      </div>
 
       {/* Powered by */}
       <div style={{
@@ -622,7 +495,7 @@ export default function ReportPreview({ settings, patient, blocks, onClinicLogoU
         alignItems: 'center',
         gap: space[2],
       }}>
-        <span style={{ fontSize: '12px', color: color.textPlaceholder, fontWeight: 500 }}>
+        <span style={{ fontSize: font.size.xs, color: color.textPlaceholder, fontWeight: font.weight.semibold }}>
           Powered by
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: space[5] }}>

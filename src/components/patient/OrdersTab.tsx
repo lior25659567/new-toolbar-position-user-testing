@@ -28,6 +28,9 @@ interface OrdersTabProps {
   onOrderCreated: (order: PatientOrder) => void;
   onSaveTemplate?: (template: OrderTemplate) => void;
   onOpenOrder?: (id: string) => void;
+  /** Externally control the create-order wizard (e.g. a header button). */
+  externalOpen?: boolean;
+  onExternalOpenChange?: (open: boolean) => void;
 }
 
 export function OrdersTab({
@@ -39,12 +42,19 @@ export function OrdersTab({
   onOrderCreated,
   onSaveTemplate,
   onOpenOrder,
+  externalOpen,
+  onExternalOpenChange,
 }: OrdersTabProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [serviceFilter, setServiceFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('any');
-  const [wizardOpen, setWizardOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const wizardOpen = externalOpen ?? internalOpen;
+  const setWizardOpen = (v: boolean) => {
+    setInternalOpen(v);
+    onExternalOpenChange?.(v);
+  };
   const [initialDraft, setInitialDraft] = useState<OrderDraft | undefined>(undefined);
 
   // External "duplicate" request — open the wizard pre-filled.

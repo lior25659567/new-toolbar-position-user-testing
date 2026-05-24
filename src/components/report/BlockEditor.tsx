@@ -1,16 +1,36 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
+import { notify } from '../../design-system/notify';
 import { color, font, space, radius, shadow, transition } from '../../design-system/tokens';
 import { SecondaryButton } from '../../design-system/SecondaryButton';
 import { PrimaryButton } from '../../design-system/PrimaryButton';
 import { DropdownList } from '../../design-system/DropdownList';
 import { DatePicker } from '../../design-system/DatePicker';
+import { Checkbox } from '../../design-system/Checkbox';
 import ToothSelector from './ToothSelector';
 import { BlockTypeIcon } from './BlockNavList';
+import { BLOCK_TYPE_TINT } from './blockTheme';
 import type {
   ReportBlock, ImageBlock, ComparisonBlock, CostSummaryBlock, BlockType,
   NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock,
 } from './types';
+
+// ─── Image upload validation ─────────────────────────────────────────────────
+
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
+
+/** Returns true if the file is a usable image; otherwise toasts the reason. */
+function isValidImageFile(file: File): boolean {
+  if (!file.type.startsWith('image/')) {
+    notify.error(`"${file.name}" isn't a supported image file`);
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    notify.error(`"${file.name}" is larger than 10MB`);
+    return false;
+  }
+  return true;
+}
 
 // ─── Shared field components ─────────────────────────────────────────────────
 
@@ -165,20 +185,6 @@ function BlockCardShell({
               {label}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: space[1], flexShrink: 0 }}>
-            <ActionButton title="Duplicate" onClick={onDuplicate}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="4" y="4" width="8" height="8" rx="1.5" />
-                <path d="M10 4V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5.5A1.5 1.5 0 003 10h1" />
-              </svg>
-            </ActionButton>
-            <ActionButton title="Delete" danger onClick={onDelete}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-                <line x1="3" y1="3" x2="11" y2="11" />
-                <line x1="11" y1="3" x2="3" y2="11" />
-              </svg>
-            </ActionButton>
-          </div>
         </div>
         {!collapsed && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: space[3] }}>
@@ -206,11 +212,13 @@ function BlockCardShell({
         borderRadius: radius.lg,
         transition: 'border-color 0.2s, box-shadow 0.2s',
         overflow: 'hidden',
-        boxShadow: hovered ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
+        boxShadow: hovered ? shadow.sm : 'none',
       }}
     >
-      {/* Card header — Wynde-style: drag · number · type chip · title · actions */}
+      {/* Card header — Wynde-style: drag · number · type chip · title · actions.
+          Clicking anywhere on the header (except the drag handle / actions) toggles collapse. */}
       <div
+        onClick={onToggleCollapse}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -220,23 +228,10 @@ function BlockCardShell({
           borderBottom: collapsed ? 'none' : `1px solid ${color.borderDefault}`,
           backgroundColor: 'transparent',
           userSelect: 'none',
+          cursor: 'pointer',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: space[2], minWidth: 0, flex: 1 }}>
-          {/* Drag handle */}
-          {!hideDragHandle && (
-            <div
-              style={{ cursor: 'grab', color: color.neutral400, display: 'flex', flexShrink: 0, opacity: hovered ? 1 : 0.4, transition: `opacity ${transition.fast}` }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor">
-                <circle cx="3" cy="3" r="1.2" /><circle cx="9" cy="3" r="1.2" />
-                <circle cx="3" cy="7" r="1.2" /><circle cx="9" cy="7" r="1.2" />
-                <circle cx="3" cy="11" r="1.2" /><circle cx="9" cy="11" r="1.2" />
-              </svg>
-            </div>
-          )}
-
           {/* Number prefix */}
           <span style={{
             fontSize: font.size.base,
@@ -268,8 +263,8 @@ function BlockCardShell({
               height: 28,
               borderRadius: radius.md,
               flexShrink: 0,
-              background: color.neutral100,
-              color: color.textDefault,
+              background: (blockType && BLOCK_TYPE_TINT[blockType] ? BLOCK_TYPE_TINT[blockType].bg : color.neutral100),
+              color: (blockType && BLOCK_TYPE_TINT[blockType] ? BLOCK_TYPE_TINT[blockType].fg : color.textSubtle),
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -297,6 +292,7 @@ function BlockCardShell({
             type="button"
             onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
             aria-label={collapsed ? 'Expand section' : 'Collapse section'}
+            aria-expanded={!collapsed}
             style={{
               flexShrink: 0,
               width: 24,
@@ -319,30 +315,6 @@ function BlockCardShell({
           </button>
         </div>
 
-        {/* Actions */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: space[1],
-            opacity: hovered ? 1 : 0,
-            transition: `opacity ${transition.fast}`,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <ActionButton title="Duplicate" onClick={onDuplicate}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="4" y="4" width="8" height="8" rx="1.5" />
-              <path d="M10 4V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5.5A1.5 1.5 0 003 10h1" />
-            </svg>
-          </ActionButton>
-          <ActionButton title="Delete" danger onClick={onDelete}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-              <line x1="3" y1="3" x2="11" y2="11" />
-              <line x1="11" y1="3" x2="3" y2="11" />
-            </svg>
-          </ActionButton>
-        </div>
       </div>
 
       {/* Card content */}
@@ -363,6 +335,7 @@ function ActionButton({ children, onClick, title, danger }: {
     <button
       type="button"
       title={title}
+      aria-label={title}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -390,34 +363,56 @@ function ActionButton({ children, onClick, title, danger }: {
 
 import upperArchColor from '../../assets/button-images/review-tool/Color.png';
 import lowerArchNiri from '../../assets/button-images/review-tool/Niri.png';
-import occlusalView from '../../assets/button-images/review-tool/Color.png';
+import occlusalView from '../../assets/button-images/default/3d-model-upper.png';
+import model3dLower from '../../assets/button-images/default/3d-model-lower.png';
 import dentalArchColor from '../../assets/button-images/default/dental-arch-color.png';
+import archGrayscale from '../../assets/button-images/monochrome/dental-arch-grayscale.png';
+import archColorFeedback from '../../assets/button-images/default/dental-arch-color-feedback.png';
+import archGrayscaleFeedback from '../../assets/button-images/default/dental-arch-grayscale-feedback.png';
+import marginView from '../../assets/button-images/margin-line/dental-arch-margin-view.png';
 import prepModel1 from '../../assets/button-images/prep-qc/prep-model-1.png';
 import prepModel2 from '../../assets/button-images/prep-qc/prep-model-2.png';
+import toothCrown from '../../assets/button-images/teeth/crown.svg';
+import toothImplant from '../../assets/button-images/teeth/implant.svg';
+import toothMolar from '../../assets/button-images/teeth/molar.svg';
+import toothIncisor from '../../assets/button-images/teeth/incisor.svg';
 
-type GalleryCategory = 'full-arch' | 'prep-review' | 'diagnostics';
+type GalleryCategory = 'full-arch' | 'restorative' | 'single-tooth' | 'diagnostics';
 
 const CATEGORY_LABELS: Record<GalleryCategory, string> = {
   'full-arch': 'Full Arch Scans',
-  'prep-review': 'Prep & Review',
+  'restorative': 'Crown, Prep & Implant',
+  'single-tooth': 'Single Tooth',
   'diagnostics': 'NIRI & Diagnostics',
 };
 
-const CATEGORY_ORDER: GalleryCategory[] = ['full-arch', 'prep-review', 'diagnostics'];
+const CATEGORY_ORDER: GalleryCategory[] = ['full-arch', 'restorative', 'single-tooth', 'diagnostics'];
 
 interface GalleryImage {
+  /** Stable unique id — selection is keyed by this, never by url (two
+   *  entries may legitimately share the same image file). */
+  id: string;
   url: string;
   label: string;
   category: GalleryCategory;
 }
 
 const GALLERY_IMAGES: GalleryImage[] = [
-  { url: upperArchColor, label: 'Upper arch (color)', category: 'full-arch' },
-  { url: dentalArchColor, label: 'Dental arch (color)', category: 'full-arch' },
-  { url: occlusalView,   label: 'Occlusal view',       category: 'full-arch' },
-  { url: prepModel1,     label: 'Prep model 1',        category: 'prep-review' },
-  { url: prepModel2,     label: 'Prep model 2',        category: 'prep-review' },
-  { url: lowerArchNiri,  label: 'Lower arch (NIRI)',   category: 'diagnostics' },
+  { id: 'upper-arch-color',   url: upperArchColor,        label: 'Upper arch (color)',  category: 'full-arch' },
+  { id: 'lower-arch-3d',      url: model3dLower,          label: 'Lower arch (3D)',     category: 'full-arch' },
+  { id: 'dental-arch-color',  url: dentalArchColor,       label: 'Dental arch (color)', category: 'full-arch' },
+  { id: 'occlusal-view',      url: occlusalView,          label: 'Occlusal view',       category: 'full-arch' },
+  { id: 'arch-monochrome',    url: archGrayscale,         label: 'Monochrome arch',     category: 'full-arch' },
+  { id: 'crown',              url: toothCrown,            label: 'Crown',               category: 'restorative' },
+  { id: 'implant',            url: toothImplant,          label: 'Implant',             category: 'restorative' },
+  { id: 'crown-prep',         url: prepModel1,            label: 'Crown prep',          category: 'restorative' },
+  { id: 'onlay-prep',         url: prepModel2,            label: 'Onlay prep',          category: 'restorative' },
+  { id: 'margin-line-view',   url: marginView,            label: 'Margin line',         category: 'restorative' },
+  { id: 'tooth-molar',        url: toothMolar,            label: 'Molar',               category: 'single-tooth' },
+  { id: 'tooth-incisor',      url: toothIncisor,          label: 'Incisor',             category: 'single-tooth' },
+  { id: 'lower-arch-niri',    url: lowerArchNiri,         label: 'Lower arch (NIRI)',   category: 'diagnostics' },
+  { id: 'arch-color-fb',      url: archColorFeedback,     label: 'Color + feedback',    category: 'diagnostics' },
+  { id: 'arch-gray-fb',       url: archGrayscaleFeedback, label: 'Grayscale + feedback', category: 'diagnostics' },
 ];
 
 // ─── Image Upload Zone (change image within a card) ─────────────────────────
@@ -434,7 +429,8 @@ function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onFileSelect(file, URL.createObjectURL(file));
+    if (file && isValidImageFile(file)) onFileSelect(file, URL.createObjectURL(file));
+    e.target.value = '';
   };
 
   if (previewUrl) {
@@ -442,10 +438,10 @@ function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate
       <div style={{ position: 'relative' }}>
         <img
           src={previewUrl}
-          alt=""
+          alt="Uploaded clinical image"
           style={{
             width: '100%',
-            maxHeight: '200px',
+            aspectRatio: '4 / 3',
             objectFit: 'cover',
             borderRadius: radius.md,
             display: 'block',
@@ -553,6 +549,7 @@ function OverlayButton({ label, onClick, icon }: { label: string; onClick: () =>
   return (
     <button
       type="button"
+      aria-label={label}
       data-demo={label.toLowerCase().replace(/\s+/g, '-')}
       onClick={onClick}
       style={{
@@ -566,7 +563,7 @@ function OverlayButton({ label, onClick, icon }: { label: string; onClick: () =>
         cursor: 'pointer',
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '4px',
+        gap: space[1],
       }}
     >
       {icon}
@@ -611,6 +608,39 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
   // Store the original clean image for clear & eraser
   const cleanCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasScaleRef = useRef(1);
+  // Inline text annotations — placed, editable & draggable directly on the
+  // image (display-pixel coords relative to the canvas), baked in on save.
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
+  type TextItem = { id: string; x: number; y: number; text: string; color: string; sizePx: number };
+  const [texts, setTexts] = useState<TextItem[]>([]);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+
+  const startTextDrag = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const wrap = canvasWrapRef.current;
+    const item = texts.find((t) => t.id === id);
+    if (!wrap || !item) return;
+    const rect = wrap.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left - item.x;
+    const offsetY = e.clientY - rect.top - item.y;
+    const onMove = (ev: MouseEvent) => {
+      const x = ev.clientX - rect.left - offsetX;
+      const y = ev.clientY - rect.top - offsetY;
+      setTexts((prev) => prev.map((t) => (t.id === id ? { ...t, x, y } : t)));
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  const removeText = (id: string) => {
+    setTexts((prev) => prev.filter((t) => t.id !== id));
+    setEditingTextId((cur) => (cur === id ? null : cur));
+  };
 
   // Load image onto canvas + store clean original
   useEffect(() => {
@@ -690,13 +720,24 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
 
     const { x, y } = getPos(e);
 
-    // Text tool: prompt for text and place it
+    // Text tool: drop an inline, editable & draggable text box at the click
+    // point (display coords) — no modal/prompt.
     if (tool === 'text') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.font = `${Math.max(14, brushSize * 4)}px Inter, sans-serif`;
-      ctx.fillStyle = brushColor;
-      ctx.globalAlpha = 1;
-      ctx.fillText(prompt('Enter text:') || '', x, y);
+      const wrap = canvasWrapRef.current;
+      if (!wrap) return;
+      const rect = wrap.getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0]?.clientX ?? 0 : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0]?.clientY ?? 0 : e.clientY;
+      const id = `text-${Date.now()}`;
+      setTexts((prev) => [...prev, {
+        id,
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+        text: '',
+        color: brushColor,
+        sizePx: Math.max(14, brushSize * 4),
+      }]);
+      setEditingTextId(id);
       return;
     }
 
@@ -765,11 +806,30 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(cleanCanvasRef.current, 0, 0);
+    setTexts([]);
+    setEditingTextId(null);
   };
 
   const handleSave = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Bake inline text annotations onto the canvas before exporting.
+    const ctx = canvas.getContext('2d');
+    if (ctx && texts.length) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = rect.width ? canvas.width / rect.width : 1;
+      ctx.save();
+      ctx.textBaseline = 'top';
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+      texts.forEach((t) => {
+        if (!t.text.trim()) return;
+        ctx.font = `${Math.round(t.sizePx * scale)}px Inter, "Helvetica Neue", Arial, sans-serif`;
+        ctx.fillStyle = t.color;
+        ctx.fillText(t.text, t.x * scale, t.y * scale);
+      });
+      ctx.restore();
+    }
     onSave(canvas.toDataURL('image/png'));
   };
 
@@ -811,7 +871,7 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
         maxHeight: '94vh',
         backgroundColor: color.white,
         borderRadius: radius.xl,
-        boxShadow: '0 32px 64px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04)',
+        boxShadow: shadow.lg,
         zIndex: 101,
         display: 'flex',
         flexDirection: 'column',
@@ -834,6 +894,8 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
                 key={t.id}
                 type="button"
                 title={t.label}
+                aria-label={t.label}
+                aria-pressed={tool === t.id}
                 onClick={() => setTool(t.id)}
                 style={{
                   width: '32px',
@@ -865,11 +927,13 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
               <button
                 key={c}
                 type="button"
+                aria-label={`Brush color ${c}`}
+                aria-pressed={brushColor === c}
                 onClick={() => setBrushColor(c)}
                 style={{
                   width: '20px',
                   height: '20px',
-                  borderRadius: '50%',
+                  borderRadius: radius.full,
                   backgroundColor: c,
                   border: brushColor === c ? `2px solid ${color.primary}` : `1px solid ${c === 'var(--ads-background-subtle-01)' ? color.borderDefault : 'transparent'}`,
                   cursor: 'pointer',
@@ -884,11 +948,13 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
           <div style={{ width: '1px', height: '24px', backgroundColor: color.borderDefault }} />
 
           {/* Brush size */}
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: space[1], alignItems: 'center' }}>
             {BRUSH_SIZES.map((s) => (
               <button
                 key={s}
                 type="button"
+                aria-label={`Brush size ${s}`}
+                aria-pressed={brushSize === s}
                 onClick={() => setBrushSize(s)}
                 style={{
                   width: '28px',
@@ -906,7 +972,7 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
                 <div style={{
                   width: `${Math.min(s + 2, 14)}px`,
                   height: `${Math.min(s + 2, 14)}px`,
-                  borderRadius: '50%',
+                  borderRadius: radius.full,
                   backgroundColor: color.textDefault,
                 }} />
               </button>
@@ -953,23 +1019,82 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
           backgroundColor: 'var(--ads-background-subtle-02)',
           overflow: 'auto',
         }}>
-          <canvas
-            ref={canvasRef}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              cursor: tool === 'text' ? 'text' : buildCircleCursor(getCursorSize()),
-              borderRadius: radius.sm,
-              touchAction: 'none',
-            }}
-            onMouseDown={onDown}
-            onMouseMove={onMove}
-            onMouseUp={onUp}
-            onMouseLeave={onUp}
-            onTouchStart={onDown}
-            onTouchMove={onMove}
-            onTouchEnd={onUp}
-          />
+          <div ref={canvasWrapRef} style={{ position: 'relative', display: 'inline-block', lineHeight: 0 }}>
+            <canvas
+              ref={canvasRef}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                cursor: tool === 'text' ? 'text' : buildCircleCursor(getCursorSize()),
+                borderRadius: radius.sm,
+                touchAction: 'none',
+              }}
+              onMouseDown={onDown}
+              onMouseMove={onMove}
+              onMouseUp={onUp}
+              onMouseLeave={onUp}
+              onTouchStart={onDown}
+              onTouchMove={onMove}
+              onTouchEnd={onUp}
+            />
+            {/* Inline editable + draggable text annotations */}
+            {texts.map((t) => {
+              const editing = editingTextId === t.id;
+              return (
+                <div
+                  key={t.id}
+                  style={{ position: 'absolute', left: t.x, top: t.y, lineHeight: 1 }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  {/* Drag handle (above the text, doesn't shift baseline) */}
+                  <div
+                    onMouseDown={(e) => startTextDrag(t.id, e)}
+                    title="Drag to move"
+                    style={{
+                      position: 'absolute', top: -20, left: 0,
+                      display: 'flex', alignItems: 'center', gap: 2,
+                      cursor: 'grab', color: color.textSubtle,
+                      background: color.bgSurface, border: `1px solid ${color.borderDefault}`,
+                      borderRadius: radius.sm, padding: '1px 4px',
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" />
+                      <circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" />
+                      <circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" />
+                    </svg>
+                    <button
+                      type="button"
+                      aria-label="Remove text"
+                      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); removeText(t.id); }}
+                      style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', color: color.textSubtle, display: 'flex' }}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><line x1="3" y1="3" x2="9" y2="9" /><line x1="9" y1="3" x2="3" y2="9" /></svg>
+                    </button>
+                  </div>
+                  <input
+                    value={t.text}
+                    autoFocus={editing}
+                    placeholder="Type…"
+                    onFocus={() => setEditingTextId(t.id)}
+                    onChange={(e) => setTexts((prev) => prev.map((it) => it.id === t.id ? { ...it, text: e.target.value } : it))}
+                    onBlur={() => setEditingTextId((cur) => (cur === t.id ? null : cur))}
+                    style={{
+                      font: `${t.sizePx}px Inter, "Helvetica Neue", Arial, sans-serif`,
+                      color: t.color,
+                      background: 'transparent',
+                      border: `1px dashed ${editing ? color.primary : 'transparent'}`,
+                      outline: 'none',
+                      padding: 0,
+                      margin: 0,
+                      minWidth: 40,
+                      width: `${Math.max(4, t.text.length + 2)}ch`,
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Footer */}
@@ -1001,19 +1126,26 @@ function AnnotationLightbox({ imageUrl, originalImageUrl, onSave, onClose }: {
 
 // ─── Gallery Overlay Modal ──────────────────────────────────────────────────
 
-function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: {
+export function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: {
   onSelect: (url: string) => void;
   onClose: () => void;
   multiSelect?: boolean;
   onMultiSelect?: (urls: string[]) => void;
 }) {
+  // Selection is keyed by image id (not url) so two entries that share the
+  // same image file can't get highlighted together.
   const [selected, setSelected] = useState<string[]>([]);
 
-  const toggleSelection = (url: string) => {
+  const toggleSelection = (id: string) => {
     setSelected((prev) =>
-      prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
+
+  const urlsForSelectedIds = () =>
+    selected
+      .map((id) => GALLERY_IMAGES.find((g) => g.id === id)?.url)
+      .filter((u): u is string => !!u);
 
   const filteredImages = GALLERY_IMAGES;
 
@@ -1024,8 +1156,8 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
     return acc;
   }, []);
 
-  const handleImageClick = (url: string) => {
-    toggleSelection(url);
+  const handleImageClick = (id: string) => {
+    toggleSelection(id);
   };
 
   const selectMode = true;
@@ -1181,14 +1313,14 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
                   gridTemplateColumns: 'repeat(5, 1fr)',
                   gap: space[3],
                 }}>
-                  {images.map((img, i) => (
+                  {images.map((img) => (
                     <GalleryThumbnail
-                      key={i}
+                      key={img.id}
                       url={img.url}
                       label={img.label}
-                      isSelected={selected.includes(img.url)}
+                      isSelected={selected.includes(img.id)}
                       showCheckbox={selectMode}
-                      onClick={() => handleImageClick(img.url)}
+                      onClick={() => handleImageClick(img.id)}
                     />
                   ))}
                 </div>
@@ -1219,14 +1351,14 @@ function GalleryOverlayModal({ onSelect, onClose, multiSelect, onMultiSelect }: 
             disabled={selected.length === 0}
             data-demo="gallery-add-btn"
             onClick={() => {
+              const urls = urlsForSelectedIds();
+              if (urls.length === 0) return;
               if (multiSelect && onMultiSelect) {
-                onMultiSelect(selected);
-              } else if (selected.length === 1) {
-                onSelect(selected[0]);
-              } else if (selected.length > 1 && onMultiSelect) {
-                onMultiSelect(selected);
-              } else if (selected.length > 0) {
-                onSelect(selected[0]);
+                onMultiSelect(urls);
+              } else if (urls.length > 1 && onMultiSelect) {
+                onMultiSelect(urls);
+              } else {
+                onSelect(urls[0]);
               }
             }}
           >
@@ -1264,28 +1396,10 @@ function GalleryThumbnail({ url, label, onClick, isSelected, showCheckbox }: {
         position: 'relative',
       }}
     >
-      {/* Checkbox */}
+      {/* DS checkbox — visual only; the thumbnail button handles selection */}
       {showCheckbox && (hovered || isSelected) && (
-        <div style={{
-          position: 'absolute',
-          top: '8px',
-          left: '8px',
-          width: '22px',
-          height: '22px',
-          borderRadius: radius.sm,
-          backgroundColor: isSelected ? color.primary : color.white,
-          border: `2px solid ${isSelected ? color.primary : color.neutral300}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1,
-          transition: `all ${transition.fast}`,
-        }}>
-          {isSelected && (
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={color.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 6.5L5 9.5l5-7" />
-            </svg>
-          )}
+        <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, pointerEvents: 'none', display: 'flex' }}>
+          <Checkbox checked={!!isSelected} readOnly tabIndex={-1} size={20} aria-hidden />
         </div>
       )}
 
@@ -1405,98 +1519,6 @@ function ImageCardEditor({ block, onUpdate }: {
           rows={2}
         />
       </div>
-
-      {/* Clinical details toggle */}
-      <div style={{
-        borderTop: `1px solid ${color.borderDefault}`,
-        paddingTop: space[3],
-      }}>
-        <button
-          type="button"
-          onClick={() => {
-            onUpdate({ showClinicalFields: !block.showClinicalFields });
-            if (!block.showClinicalFields) {
-              setTimeout(() => clinicalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
-            }
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: space[2],
-            padding: 0,
-            fontSize: font.size.xs,
-            fontWeight: font.weight.medium,
-            color: color.textSubtle,
-            backgroundColor: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <svg
-            width="14" height="14" viewBox="0 0 16 16" fill="none"
-            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-            style={{ transition: `transform ${transition.fast}`, transform: block.showClinicalFields ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-          >
-            <path d="M4 6l4 4 4-4" />
-          </svg>
-          Clinical details
-        </button>
-
-        {block.showClinicalFields && (
-          <div ref={clinicalRef} style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: space[3],
-            marginTop: space[3],
-          }}>
-            <DropdownList
-              placeholder="Diagnosis"
-              options={DIAGNOSIS_ITEMS}
-              value={block.diagnosis}
-              onChange={(v) => onUpdate({ diagnosis: v })}
-              fullWidth
-              menuPlacement="top"
-            />
-            <DropdownList
-              placeholder="Treatment"
-              options={TREATMENT_ITEMS}
-              value={block.treatment}
-              onChange={(v) => onUpdate({ treatment: v })}
-              fullWidth
-              menuPlacement="top"
-            />
-            <div>
-              <input
-                type="text"
-                value={block.estimatedCost}
-                onChange={(e) => onUpdate({ estimatedCost: e.target.value })}
-                placeholder="Est. cost"
-                style={{
-                  width: '100%',
-                  padding: `${space[3]} ${space[4]}`,
-                  fontFamily: font.family,
-                  fontSize: font.size.base,
-                  color: block.estimatedCost ? color.textDefault : color.textPlaceholder,
-                  backgroundColor: color.bgSurface,
-                  border: `1px solid ${color.borderDefault}`,
-                  borderRadius: radius.sm,
-                  outline: 'none',
-                  boxSizing: 'border-box' as const,
-                  transition: transition.input,
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = color.primary; e.currentTarget.style.boxShadow = shadow.focusPrimaryLight; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = color.borderDefault; e.currentTarget.style.boxShadow = 'none'; }}
-              />
-            </div>
-            <DatePicker
-              placeholder="Date"
-              value={block.treatmentDate}
-              onChange={(v) => onUpdate({ treatmentDate: v })}
-              fullWidth
-            />
-          </div>
-        )}
-      </div>
     </>
   );
 }
@@ -1505,6 +1527,10 @@ function ComparisonCardEditor({ block, onUpdate }: {
   block: ComparisonBlock;
   onUpdate: (updates: Partial<ComparisonBlock>) => void;
 }) {
+  const [annotating, setAnnotating] = useState<'A' | 'B' | null>(null);
+  const origA = useRef<string>(block.imageA.previewUrl);
+  const origB = useRef<string>(block.imageB.previewUrl);
+
   return (
     <>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[3] }}>
@@ -1512,8 +1538,9 @@ function ComparisonCardEditor({ block, onUpdate }: {
           <FieldLabel>{block.labelA || 'Before'}</FieldLabel>
           <ImageUploadZone
             previewUrl={block.imageA.previewUrl}
-            onFileSelect={(file, url) => onUpdate({ imageA: { file, previewUrl: url } })}
-            onGallerySelect={(url) => onUpdate({ imageA: { file: null, previewUrl: url } })}
+            onFileSelect={(file, url) => { origA.current = url; onUpdate({ imageA: { file, previewUrl: url } }); }}
+            onGallerySelect={(url) => { origA.current = url; onUpdate({ imageA: { file: null, previewUrl: url } }); }}
+            onAnnotate={block.imageA.previewUrl ? () => setAnnotating('A') : undefined}
           />
           <div style={{ marginTop: space[2] }}>
             <TextInput value={block.labelA} onChange={(v) => onUpdate({ labelA: v })} placeholder="Label (e.g. Before)" />
@@ -1523,8 +1550,9 @@ function ComparisonCardEditor({ block, onUpdate }: {
           <FieldLabel>{block.labelB || 'After'}</FieldLabel>
           <ImageUploadZone
             previewUrl={block.imageB.previewUrl}
-            onFileSelect={(file, url) => onUpdate({ imageB: { file, previewUrl: url } })}
-            onGallerySelect={(url) => onUpdate({ imageB: { file: null, previewUrl: url } })}
+            onFileSelect={(file, url) => { origB.current = url; onUpdate({ imageB: { file, previewUrl: url } }); }}
+            onGallerySelect={(url) => { origB.current = url; onUpdate({ imageB: { file: null, previewUrl: url } }); }}
+            onAnnotate={block.imageB.previewUrl ? () => setAnnotating('B') : undefined}
           />
           <div style={{ marginTop: space[2] }}>
             <TextInput value={block.labelB} onChange={(v) => onUpdate({ labelB: v })} placeholder="Label (e.g. After)" />
@@ -1535,6 +1563,20 @@ function ComparisonCardEditor({ block, onUpdate }: {
         <FieldLabel>Comparison Notes</FieldLabel>
         <TextArea value={block.notes} onChange={(v) => onUpdate({ notes: v })} placeholder="Describe what changed between these images..." rows={2} />
       </div>
+
+      {annotating && ReactDOM.createPortal(
+        <AnnotationLightbox
+          imageUrl={annotating === 'A' ? block.imageA.previewUrl : block.imageB.previewUrl}
+          originalImageUrl={annotating === 'A' ? origA.current : origB.current}
+          onSave={(annotatedUrl) => {
+            if (annotating === 'A') onUpdate({ imageA: { file: null, previewUrl: annotatedUrl } });
+            else onUpdate({ imageB: { file: null, previewUrl: annotatedUrl } });
+            setAnnotating(null);
+          }}
+          onClose={() => setAnnotating(null)}
+        />,
+        document.body
+      )}
     </>
   );
 }
@@ -1543,86 +1585,16 @@ function SummaryCardEditor({ block, onUpdate }: {
   block: CostSummaryBlock;
   onUpdate: (updates: Partial<CostSummaryBlock>) => void;
 }) {
-  const updateItem = (id: string, field: 'description' | 'amount', value: string) => {
-    onUpdate({ items: block.items.map((it) => it.id === id ? { ...it, [field]: value } : it) });
-  };
-
-  const addItem = () => {
-    onUpdate({ items: [...block.items, { id: `cost-${Date.now()}`, description: '', amount: '' }] });
-  };
-
-  const removeItem = (id: string) => {
-    if (block.items.length <= 1) return;
-    onUpdate({ items: block.items.filter((it) => it.id !== id) });
-  };
-
-  const total = block.items.reduce((sum, it) => {
-    const n = parseFloat(it.amount.replace(/[^0-9.]/g, ''));
-    return sum + (isNaN(n) ? 0 : n);
-  }, 0);
-
   return (
-    <>
-      {block.items.map((item, i) => (
-        <div key={item.id} style={{ display: 'flex', gap: space[2], alignItems: 'flex-start' }}>
-          <div style={{ flex: 1 }}>
-            {i === 0 && <FieldLabel>Description</FieldLabel>}
-            <TextInput value={item.description} onChange={(v) => updateItem(item.id, 'description', v)} placeholder="Item description" />
-          </div>
-          <div style={{ width: '120px' }}>
-            {i === 0 && <FieldLabel>Amount</FieldLabel>}
-            <TextInput value={item.amount} onChange={(v) => updateItem(item.id, 'amount', v)} placeholder="$0.00" />
-          </div>
-          <button
-            type="button"
-            onClick={() => removeItem(item.id)}
-            style={{
-              width: '28px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: 'none',
-              backgroundColor: 'transparent',
-              color: block.items.length <= 1 ? color.neutral200 : color.neutral400,
-              cursor: block.items.length <= 1 ? 'not-allowed' : 'pointer',
-              marginTop: i === 0 ? '20px' : 0,
-              padding: 0,
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <line x1="3" y1="3" x2="11" y2="11" /><line x1="11" y1="3" x2="3" y2="11" />
-            </svg>
-          </button>
-        </div>
-      ))}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button
-          type="button"
-          onClick={addItem}
-          style={{
-            fontSize: font.size.xs,
-            fontWeight: font.weight.medium,
-            color: color.primary,
-            backgroundColor: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: space[1],
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
-          </svg>
-          Add item
-        </button>
-        <div style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textHeading }}>
-          Total: ${total.toFixed(2)}
-        </div>
-      </div>
-    </>
+    <div>
+      <FieldLabel>Summary</FieldLabel>
+      <TextArea
+        value={block.content ?? ''}
+        onChange={(v) => onUpdate({ content: v })}
+        placeholder="Write a summary..."
+        rows={4}
+      />
+    </div>
   );
 }
 
@@ -1688,7 +1660,7 @@ function RxCardEditor({ block, onUpdate }: {
               border: 'none', backgroundColor: 'transparent',
               color: block.items.length <= 1 ? color.neutral200 : color.neutral400,
               cursor: block.items.length <= 1 ? 'not-allowed' : 'pointer',
-              marginTop: i === 0 ? '20px' : 0, padding: 0,
+              marginTop: i === 0 ? space[5] : 0, padding: 0,
             }}
           >
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -1719,6 +1691,20 @@ function RxCardEditor({ block, onUpdate }: {
   );
 }
 
+// Half-hour appointment slots (8:00 AM – 6:30 PM) for the DS time dropdown.
+const TIME_SLOTS: { value: string; label: string }[] = (() => {
+  const slots: { value: string; label: string }[] = [];
+  for (let h = 8; h <= 18; h++) {
+    for (const m of [0, 30]) {
+      const ampm = h < 12 ? 'AM' : 'PM';
+      const hour12 = h % 12 === 0 ? 12 : h % 12;
+      const label = `${hour12}:${m === 0 ? '00' : '30'} ${ampm}`;
+      slots.push({ value: label, label });
+    }
+  }
+  return slots;
+})();
+
 function NextAppointmentCardEditor({ block, onUpdate }: {
   block: NextAppointmentBlock;
   onUpdate: (updates: Partial<NextAppointmentBlock>) => void;
@@ -1728,11 +1714,11 @@ function NextAppointmentCardEditor({ block, onUpdate }: {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: space[3] }}>
         <div>
           <FieldLabel>Date</FieldLabel>
-          <TextInput value={block.date} onChange={(v) => onUpdate({ date: v })} placeholder="e.g. 2026-05-01" />
+          <DatePicker value={block.date} onChange={(v) => onUpdate({ date: v })} placeholder="Select date" fullWidth />
         </div>
         <div>
           <FieldLabel>Time</FieldLabel>
-          <TextInput value={block.time} onChange={(v) => onUpdate({ time: v })} placeholder="e.g. 10:00 AM" />
+          <DropdownList options={TIME_SLOTS} value={block.time} onChange={(v) => onUpdate({ time: v })} placeholder="Select time" fullWidth menuPlacement="bottom" />
         </div>
       </div>
       <div>
@@ -1829,83 +1815,102 @@ const BLOCK_LABELS: Record<string, string> = {
 const ADDABLE_BLOCKS: { type: BlockType; label: string; description: string }[] = [
   { type: 'image',         label: 'Image',          description: 'Clinical photo with notes' },
   { type: 'comparison',    label: 'Before / After',  description: 'Side-by-side comparison' },
-  { type: 'cost-summary',  label: 'Summary',         description: 'Itemized cost table' },
+  { type: 'cost-summary',  label: 'Summary',         description: 'Free-text cost summary' },
   { type: 'notes',         label: 'Notes',           description: 'Free-form clinical notes' },
   { type: 'rx',            label: 'Prescription',    description: 'Medication & dosage details' },
   { type: 'next-appointment', label: 'Next Appointment', description: 'Schedule follow-up visit' },
   { type: 'patient-instructions', label: 'Patient Instructions', description: 'Post-treatment care checklist' },
 ];
 
-export function AddBlockMenu({ onAdd, renderTrigger }: {
+export function AddBlockMenu({ onAdd, renderTrigger, onOpenChange, onAddImageGallery }: {
   onAdd: (type: BlockType) => void;
   /** Custom trigger; receives helpers to control open state. Defaults to the dashed "+ Add Section" bar. */
   renderTrigger?: (api: { open: boolean; toggle: () => void; ref: React.RefObject<HTMLButtonElement | null> }) => React.ReactNode;
+  /** Fires whenever the menu opens/closes (incl. backdrop dismiss) so callers can sync their own UI. */
+  onOpenChange?: (open: boolean) => void;
+  /** When provided, adds an "Image gallery" entry that opens the multi-select gallery (one section per image). */
+  onAddImageGallery?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [openUp, setOpenUp] = useState(false);
+
+  // Keep external callers (e.g. the insert-between slot) in sync with every
+  // open/close — including backdrop dismissal — so their UI never gets stuck.
+  useEffect(() => { onOpenChange?.(open); }, [open, onOpenChange]);
+  // Fixed-viewport position so the menu escapes the scrolling nav rail's
+  // overflow clipping (the rail is 300px wide with overflow:auto).
+  const [pos, setPos] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
   const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleOpen = () => {
     if (!open && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      // Menu is roughly 7 items * 48px + padding ≈ 370px
-      setOpenUp(spaceBelow < 380);
+      const MENU_W = 300;
+      let left = rect.left;
+      if (left + MENU_W > window.innerWidth - 8) left = window.innerWidth - MENU_W - 8;
+      if (left < 8) left = 8;
+      // Open just below the trigger; the layout effect clamps it into view.
+      setPos({ left, top: rect.bottom + 4 });
     }
     setOpen(!open);
   };
+
+  // After the menu renders we know its real height, so clamp it fully into the
+  // viewport — when there isn't room below the trigger it slides up to stay
+  // entirely visible beside it (rather than dropping off-screen).
+  React.useLayoutEffect(() => {
+    if (!open || !menuRef.current) return;
+    const m = menuRef.current.getBoundingClientRect();
+    const MARGIN = 8;
+    let left = m.left;
+    let top = m.top;
+    if (m.bottom > window.innerHeight - MARGIN) top = window.innerHeight - m.height - MARGIN;
+    if (top < MARGIN) top = MARGIN;
+    if (m.right > window.innerWidth - MARGIN) left = window.innerWidth - m.width - MARGIN;
+    if (left < MARGIN) left = MARGIN;
+    if (Math.abs(left - m.left) > 0.5 || Math.abs(top - m.top) > 0.5) {
+      setPos({ left, top });
+    }
+  }, [open]);
 
   return (
     <div style={{ position: 'relative' }}>
       {renderTrigger ? (
         renderTrigger({ open, toggle: handleOpen, ref: btnRef })
       ) : (
-        <button
-          ref={btnRef}
-          type="button"
-          onClick={handleOpen}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          style={{
-            width: '100%',
-            height: '36px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: space[2],
-            border: `1.5px dashed ${hovered || open ? color.primary : color.borderDefault}`,
-            borderRadius: radius.md,
-            backgroundColor: hovered || open ? 'var(--ads-background-highlight-blue)' : 'transparent',
-            color: hovered || open ? color.primary : color.textSubtle,
-            fontSize: font.size.xs,
-            fontWeight: font.weight.medium,
-            cursor: 'pointer',
-            transition: `all ${transition.fast}`,
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="7" y1="3" x2="7" y2="11" /><line x1="3" y1="7" x2="11" y2="7" />
-          </svg>
-          Add Section
-        </button>
+        <span ref={btnRef as unknown as React.Ref<HTMLSpanElement>} style={{ display: 'block' }}>
+          <SecondaryButton
+            size={36}
+            fullWidth
+            selected={open}
+            onClick={handleOpen}
+            style={{ backgroundColor: color.bgSurface, boxShadow: shadow.sm }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="7" y1="3" x2="7" y2="11" /><line x1="3" y1="7" x2="11" y2="7" />
+            </svg>
+            Add Section
+          </SecondaryButton>
+        </span>
       )}
 
-      {open && (
+      {open && ReactDOM.createPortal(
         <>
-          <div style={{ position: 'fixed', inset: 0, zIndex: 9 }} onClick={() => setOpen(false)} />
-          <div style={{
-            position: 'absolute',
-            ...(openUp
-              ? { bottom: '100%', marginBottom: space[1] }
-              : { top: '100%', marginTop: space[1] }),
-            left: 0,
-            right: 0,
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onClick={() => setOpen(false)} />
+          <div ref={menuRef} style={{
+            position: 'fixed',
+            left: pos.left,
+            top: pos.top,
+            width: 300,
+            maxWidth: '90vw',
+            maxHeight: '92vh',
+            overflowY: 'auto',
             backgroundColor: color.bgSurface,
             border: `1px solid ${color.borderDefault}`,
             borderRadius: radius.lg,
             boxShadow: shadow.lg,
-            zIndex: 10,
+            zIndex: 9999,
             padding: space[2],
             display: 'flex',
             flexDirection: 'column',
@@ -1914,22 +1919,33 @@ export function AddBlockMenu({ onAdd, renderTrigger }: {
             {ADDABLE_BLOCKS.map((item) => (
               <MenuRow
                 key={item.type}
+                type={item.type}
                 label={item.label}
                 description={item.description}
                 onClick={() => { onAdd(item.type); setOpen(false); }}
               />
             ))}
+            {onAddImageGallery && (
+              <MenuRow
+                type="image"
+                label="Image gallery"
+                description="Pick multiple photos at once — one section each"
+                onClick={() => { onAddImageGallery(); setOpen(false); }}
+              />
+            )}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
 }
 
-function MenuRow({ label, description, onClick }: {
-  label: string; description: string; onClick: () => void;
+function MenuRow({ type, label, description, onClick }: {
+  type: BlockType; label: string; description: string; onClick: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const c = BLOCK_TYPE_TINT[type] ?? { bg: color.neutral100, fg: color.textSubtle };
   return (
     <button
       type="button"
@@ -1938,9 +1954,9 @@ function MenuRow({ label, description, onClick }: {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: space[3],
-        padding: `${space[2]} ${space[3]}`,
+        padding: `${space[3]} ${space[3]}`,
         backgroundColor: hovered ? color.bgHover : 'transparent',
         border: 'none',
         borderRadius: radius.md,
@@ -1951,96 +1967,23 @@ function MenuRow({ label, description, onClick }: {
       }}
     >
       <div style={{
-        width: '24px',
-        height: '24px',
+        width: '32px',
+        height: '32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: hovered ? color.neutral200 : color.neutral100,
-        borderRadius: radius.sm,
+        backgroundColor: c.bg,
+        color: c.fg,
+        borderRadius: radius.md,
         flexShrink: 0,
-        transition: `background-color ${transition.fast}`,
       }}>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={color.textSubtle} strokeWidth="1.3" strokeLinecap="round">
-          <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
-        </svg>
+        <BlockTypeIcon type={type} size={16} />
       </div>
-      <div>
-        <div style={{ fontSize: font.size.sm, fontWeight: font.weight.medium, color: color.textDefault }}>{label}</div>
-        <div style={{ fontSize: font.size.xs, color: color.textSubtle }}>{description}</div>
+      <div style={{ minWidth: 0, paddingTop: 1 }}>
+        <div style={{ fontSize: font.size.sm, fontWeight: font.weight.semibold, color: color.textHeading }}>{label}</div>
+        <div style={{ fontSize: font.size.xs, color: color.textSubtle, lineHeight: font.lineHeight.normal, marginTop: 2 }}>{description}</div>
       </div>
     </button>
-  );
-}
-
-// ─── Insert-between-cards slot — Wynde-style "+" between sections ──────────
-
-function InsertBetweenSlot({ onInsert, isLast }: {
-  onInsert: (type: BlockType) => void;
-  isLast: boolean;
-}) {
-  const [hovered, setHovered] = useState(false);
-  const [open, setOpen] = useState(false);
-  const baseHeight = space[3]; // 12px — natural gap between cards
-  const expandedHeight = '32px';
-  const visible = hovered || open;
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        position: 'relative',
-        height: visible ? expandedHeight : baseHeight,
-        marginTop: isLast ? space[3] : 0,
-        marginBottom: isLast ? 0 : 0,
-        transition: `height ${transition.fast}`,
-      }}
-    >
-      {visible && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          gap: space[2],
-          paddingLeft: space[1],
-          paddingRight: space[1],
-        }}>
-          <div style={{ flex: 1, height: 1, background: color.borderDefault }} />
-          <AddBlockMenu
-            onAdd={(type) => { onInsert(type); setOpen(false); }}
-            renderTrigger={({ open: o, toggle, ref }) => (
-              <button
-                ref={ref}
-                type="button"
-                aria-label="Insert section"
-                onClick={() => { setOpen(true); toggle(); }}
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: color.bgSurface,
-                  border: `1px solid ${o ? color.primary : color.borderDefault}`,
-                  color: o ? color.primary : color.textSubtle,
-                  cursor: 'pointer',
-                  padding: 0,
-                  transition: `border-color ${transition.fast}, color ${transition.fast}`,
-                  flexShrink: 0,
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
-                </svg>
-              </button>
-            )}
-          />
-          <div style={{ flex: 1, height: 1, background: color.borderDefault }} />
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -2059,19 +2002,11 @@ interface BlockEditorProps {
   activeBlockId?: string | null;
   /** Notify parent when a new block is added so it can update selection. */
   onBlockAdded?: (id: string) => void;
-  /**
-   * If provided, an inline "+" insert affordance appears between cards
-   * (visible on hover). Called with the chosen section type and the
-   * insertion index in the blocks array.
-   */
-  onInsert?: (type: BlockType, atIndex: number) => void;
 }
 
-export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onBlockAdded, onInsert }: BlockEditorProps) {
+export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onBlockAdded }: BlockEditorProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [showGallery, setShowGallery] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const updateBlock = (id: string, updates: Partial<SupportedBlock>) => {
     onBlocksChange(blocks.map((b) => b.id === id ? { ...b, ...updates } as SupportedBlock : b));
@@ -2144,51 +2079,6 @@ export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onB
     onBlockAdded?.(created.id);
   };
 
-  const addImagesFromGallery = (urls: string[]) => {
-    const newBlocks: ImageBlock[] = urls.map((url, i) => ({
-      id: `block-${Date.now()}-${i}`,
-      type: 'image' as const,
-      collapsed: false,
-      file: null,
-      previewUrl: url,
-      title: '',
-      notes: '',
-      teeth: [],
-      diagnosis: '',
-      treatment: '',
-      estimatedCost: '',
-      treatmentDate: '',
-      annotations: [],
-      showClinicalFields: false,
-    }));
-    onBlocksChange([...blocks, ...newBlocks]);
-    if (newBlocks[0]) onBlockAdded?.(newBlocks[0].id);
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    const newBlocks: ImageBlock[] = Array.from(files).map((file, i) => ({
-      id: `block-${Date.now()}-${i}`,
-      type: 'image' as const,
-      collapsed: false,
-      file,
-      previewUrl: URL.createObjectURL(file),
-      title: '',
-      notes: '',
-      teeth: [],
-      diagnosis: '',
-      treatment: '',
-      estimatedCost: '',
-      treatmentDate: '',
-      annotations: [],
-      showClinicalFields: false,
-    }));
-    onBlocksChange([...blocks, ...newBlocks]);
-    if (newBlocks[0]) onBlockAdded?.(newBlocks[0].id);
-    e.target.value = '';
-  };
-
   // Drag and drop
   const handleDragStart = (i: number) => setDragIndex(i);
   const handleDragOver = (e: React.DragEvent, i: number) => { e.preventDefault(); setDragOverIndex(i); };
@@ -2244,11 +2134,11 @@ export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onB
   const singleMode = false;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: space[3] }}>
       {blocks.map((block, i) => {
         return (
-          <React.Fragment key={block.id}>
             <BlockCardShell
+              key={block.id}
               blockId={block.id}
               label={getBlockLabel(block, i)}
               thumbnail={getBlockThumbnail(block)}
@@ -2268,38 +2158,13 @@ export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onB
             >
               {renderBlockContent(block)}
             </BlockCardShell>
-            {onInsert && (
-              <InsertBetweenSlot
-                isLast={i === blocks.length - 1}
-                onInsert={(type) => onInsert(type, i + 1)}
-              />
-            )}
-          </React.Fragment>
         );
       })}
 
-      {/* Gallery overlay modal */}
-      {showGallery && ReactDOM.createPortal(
-        <GalleryOverlayModal
-          multiSelect
-          onSelect={() => {}}
-          onMultiSelect={(urls) => { addImagesFromGallery(urls); setShowGallery(false); }}
-          onClose={() => setShowGallery(false)}
-        />,
-        document.body
-      )}
-
-      {/* Sticky footer removed — adding sections happens via the + button
-          in the left nav; image uploads happen via each ImageCardEditor. */}
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileUpload}
-        style={{ display: 'none' }}
-      />
+      {/* Adding sections happens via the + button in the left nav; image
+          uploads happen via each ImageCardEditor. Adding multiple gallery
+          images at once is handled by PatientReportPage (Add Section →
+          Image gallery). */}
     </div>
   );
 }

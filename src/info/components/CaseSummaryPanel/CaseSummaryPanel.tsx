@@ -7,10 +7,30 @@ interface CaseSummaryPanelProps {
   state: InfoState;
   canProceed: boolean;
   onContinue: () => void;
+  /** "sidebar" (default): sticky right column, collapsible.
+   *  "inline": full-width, non-sticky card that flows in the page. */
+  layout?: "sidebar" | "inline";
 }
 
+// When true (inline layout), rows stack the label above the value and
+// left-align instead of spreading label/value across a wide row.
+const VerticalRowContext = React.createContext(false);
+
 function SummaryRow({ label, value }: { label: string; value: React.ReactNode }) {
+  const vertical = React.useContext(VerticalRowContext);
   if (!value) return null;
+  if (vertical) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+        <span style={{ fontSize: "13px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)" }}>
+          {label}
+        </span>
+        <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--ads-text-primary)", fontFamily: "var(--ads-font-sans)" }}>
+          {value}
+        </span>
+      </div>
+    );
+  }
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
       <span style={{ fontSize: "13px", color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", flexShrink: 0 }}>
@@ -58,8 +78,11 @@ function CollapseChevron({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
+export function CaseSummaryPanel({ state, canProceed, onContinue, layout = "sidebar" }: CaseSummaryPanelProps) {
+  const inline = layout === "inline";
+  const [collapsedState, setCollapsed] = useState(false);
+  // Inline layout is always expanded — collapse only applies to the sidebar.
+  const collapsed = inline ? false : collapsedState;
 
   const procedureName = state.selectedProcedure
     ? PROCEDURES.find((p) => p.id === state.selectedProcedure)?.name
@@ -70,20 +93,33 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
     : null;
 
   return (
+    <VerticalRowContext.Provider value={inline}>
     <div
-      style={{
-        width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
-        minWidth: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
-        borderLeft: "1px solid var(--ads-border-subtle)",
-        position: "sticky",
-        top: 0,
-        height: "100%",
-        backgroundColor: "var(--ads-bg-surface)",
-        display: "flex",
-        flexDirection: "column",
-        transition: "width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1)",
-        overflow: "hidden",
-      }}
+      style={
+        inline
+          ? {
+              width: "100%",
+              backgroundColor: "var(--ads-bg-surface)",
+              border: "1px solid var(--ads-border-subtle)",
+              borderRadius: "var(--ads-radius-md)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }
+          : {
+              width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
+              minWidth: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
+              borderLeft: "1px solid var(--ads-border-subtle)",
+              position: "sticky",
+              top: 0,
+              height: "100%",
+              backgroundColor: "var(--ads-bg-surface)",
+              display: "flex",
+              flexDirection: "column",
+              transition: "width 0.3s cubic-bezier(0.4,0,0.2,1), min-width 0.3s cubic-bezier(0.4,0,0.2,1)",
+              overflow: "hidden",
+            }
+      }
     >
       <style>{PANEL_KF}</style>
       {/* Toggle button - always visible */}
@@ -112,14 +148,16 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
             Case Summary
           </h3>
         )}
-        <SecondaryButton
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expand summary" : "Collapse summary"}
-          size={36}
-          style={{ width: 36, height: 36, padding: 0, minWidth: 36, flexShrink: 0 }}
-        >
-          <CollapseChevron collapsed={collapsed} />
-        </SecondaryButton>
+        {!inline && (
+          <SecondaryButton
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "Expand summary" : "Collapse summary"}
+            size={36}
+            style={{ width: 36, height: 36, padding: 0, minWidth: 36, flexShrink: 0 }}
+          >
+            <CollapseChevron collapsed={collapsed} />
+          </SecondaryButton>
+        )}
       </div>
 
       {/* Collapsed vertical label */}
@@ -153,7 +191,7 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
       <div
         style={{
           flex: 1,
-          overflowY: "auto",
+          overflowY: inline ? "visible" : "auto",
           overflowX: "hidden",
           padding: collapsed ? "0" : "0 24px",
           opacity: collapsed ? 0 : 1,
@@ -254,5 +292,6 @@ export function CaseSummaryPanel({ state, canProceed, onContinue }: CaseSummaryP
         </div>
       )}
     </div>
+    </VerticalRowContext.Provider>
   );
 }

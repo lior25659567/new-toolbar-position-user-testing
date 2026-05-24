@@ -23,6 +23,10 @@ interface PatientSectionProps {
    *  variant so the Patient step card doesn't have a short table
    *  floating inside a tall card. */
   fillHeight?: boolean;
+  /** Open the picker table immediately on mount (vs. showing only the
+   *  search toolbar). Used by the sticky variant so pressing "Edit" jumps
+   *  straight to the list of patients. */
+  defaultPickerOpen?: boolean;
 }
 
 // ─── Sort options for the toolbar "Sort by: <key>" control ─────────────────
@@ -63,12 +67,12 @@ function compare(a: Patient, b: Patient, key: SortKey): number {
   }
 }
 
-export function PatientSection({ patient, searchQuery, isCreating, dispatch, hideHeading, fillHeight }: PatientSectionProps) {
+export function PatientSection({ patient, searchQuery, isCreating, dispatch, hideHeading, fillHeight, defaultPickerOpen }: PatientSectionProps) {
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   // When a patient is selected the card view shows; opening search/sort
   // reveals the picker again so another patient can be chosen without clearing.
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(!!defaultPickerOpen);
 
   const hasQuery = searchQuery.trim().length > 0;
 

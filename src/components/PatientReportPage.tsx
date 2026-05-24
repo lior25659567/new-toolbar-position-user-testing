@@ -2,13 +2,23 @@ import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } f
 import { color, font, space, radius, shadow, transition } from '../design-system/tokens';
 import { SecondaryButton } from '../design-system/SecondaryButton';
 import { PrimaryButton } from '../design-system/PrimaryButton';
-import BlockEditor from './report/BlockEditor';
+import { useFocusTrap } from '../design-system/useFocusTrap';
+import { notify } from '../design-system/notify';
+import SignatureModal from './report/SignatureModal';
+import BlockEditor, { GalleryOverlayModal } from './report/BlockEditor';
 import BlockNavList from './report/BlockNavList';
 import ReportPreview, { IteroLogoSvg, DentalFlowerLogo } from './report/ReportPreview';
 import type { ImageBlock, ComparisonBlock, CostSummaryBlock, NotesBlock, RxBlock, NextAppointmentBlock, PatientInstructionsBlock, PatientInfo, ReportSettings } from './report/types';
 import { createImageBlock, createBlock, REPORT_TEMPLATES } from './report/types';
 import type { BlockType } from './report/types';
 import ShareModal from './report/ShareModal';
+import { BatteryFull, Settings as SettingsIcon, CircleHelp } from 'lucide-react';
+import reportEmptyStateImg from '../assets/Report-Empty state/new patient report image empty state.png';
+import scratchIcon from '../assets/new report icons/Start from scrach.svg';
+import generalIcon from '../assets/new report icons/Genral report.svg';
+import implantIcon from '../assets/new report icons/Implanet based.svg';
+import crownIcon from '../assets/new report icons/Crown.svg';
+import followupIcon from '../assets/new report icons/Follow up visit.svg';
 
 import ReactDOM from 'react-dom';
 
@@ -211,45 +221,67 @@ function ReportHeader({
       borderBottom: `1px solid ${color.borderDefault}`,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: space[6], minWidth: 0 }}>
-        {/* Logo placeholder / actual logo */}
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
+        {/* Logo placeholder / actual logo (with remove control) */}
+        <div
+          style={{ position: 'relative', flexShrink: 0 }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          aria-label={settings.clinicLogoUrl ? 'Change clinic logo' : 'Add clinic logo'}
-          style={{
-            width: 96,
-            height: 96,
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: settings.clinicLogoUrl ? `1px solid ${color.borderDefault}` : `1.5px dashed ${hovered ? color.primary : color.borderDefault}`,
-            borderRadius: radius.lg,
-            background: settings.clinicLogoUrl ? color.bgSurface : (hovered ? color.bgHover : 'transparent'),
-            cursor: 'pointer',
-            padding: 0,
-            overflow: 'hidden',
-            transition: `border-color ${transition.fast}, background-color ${transition.fast}`,
-          }}
         >
-          {settings.clinicLogoUrl ? (
-            <img src={settings.clinicLogoUrl} alt="Clinic logo" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
-          ) : (
-            <span style={{
-              fontSize: font.size['2xs'],
-              fontWeight: font.weight.medium,
-              color: hovered ? color.primary : color.textPlaceholder,
-              letterSpacing: font.tracking.wide,
-              textTransform: 'uppercase',
-              textAlign: 'center',
-              lineHeight: font.lineHeight.tight,
-            }}>
-              Add<br />Logo
-            </span>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            aria-label={settings.clinicLogoUrl ? 'Change clinic logo' : 'Add clinic logo'}
+            style={{
+              width: 96,
+              height: 96,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: settings.clinicLogoUrl ? `1px solid ${color.borderDefault}` : `1.5px dashed ${hovered ? color.primary : color.borderDefault}`,
+              borderRadius: radius.lg,
+              background: settings.clinicLogoUrl ? color.bgSurface : (hovered ? color.bgHover : 'transparent'),
+              cursor: 'pointer',
+              padding: 0,
+              overflow: 'hidden',
+              transition: `border-color ${transition.fast}, background-color ${transition.fast}`,
+            }}
+          >
+            {settings.clinicLogoUrl ? (
+              <img src={settings.clinicLogoUrl} alt="Clinic logo" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+            ) : (
+              <span style={{
+                fontSize: font.size['2xs'],
+                fontWeight: font.weight.medium,
+                color: hovered ? color.primary : color.textPlaceholder,
+                letterSpacing: font.tracking.wide,
+                textTransform: 'uppercase',
+                textAlign: 'center',
+                lineHeight: font.lineHeight.tight,
+              }}>
+                Add<br />Logo
+              </span>
+            )}
+          </button>
+          {settings.clinicLogoUrl && hovered && (
+            <button
+              type="button"
+              aria-label="Remove logo"
+              onClick={(e) => { e.stopPropagation(); onSettingsChange({ clinicLogoUrl: '' }); }}
+              style={{
+                position: 'absolute', top: -6, right: -6,
+                width: 20, height: 20, borderRadius: radius.full,
+                background: color.textHeading, color: color.bgSurface,
+                border: 'none', cursor: 'pointer', padding: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: shadow.sm,
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="3" y1="3" x2="9" y2="9" /><line x1="9" y1="3" x2="3" y2="9" />
+              </svg>
+            </button>
           )}
-        </button>
+        </div>
         <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
 
         <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
@@ -287,7 +319,8 @@ function ReportHeader({
             style={{
               fontSize: font.size.sm, color: color.textSubtle, fontFamily: font.family,
               background: 'transparent', border: 'none', outline: 'none',
-              padding: 0, textAlign: 'right', width: 80,
+              padding: 0, textAlign: 'left',
+              width: `${Math.max((patient.chartNumber || 'Chart #').length, 4)}ch`,
             }}
           />
         </div>
@@ -362,6 +395,22 @@ function SidebarSection({ title, children, defaultOpen = true, isOpen: controlle
 
 // ─── Template picker ─────────────────────────────────────────────────────────
 
+// Per-template icons, shared by the picker cards and the Templates row header.
+const TEMPLATE_ICON_SRC: Record<string, string> = {
+  scratch: scratchIcon,
+  general: generalIcon,
+  implant: implantIcon,
+  crown: crownIcon,
+  followup: followupIcon,
+};
+
+const TEMPLATE_ICONS: Record<string, React.ReactNode> = Object.fromEntries(
+  Object.entries(TEMPLATE_ICON_SRC).map(([id, src]) => [
+    id,
+    <img src={src} alt="" aria-hidden="true" style={{ width: 36, height: 36, display: 'block' }} />,
+  ]),
+);
+
 function TemplatePicker({ onSelect, selectedId }: {
   onSelect: (blocks: SupportedBlock[], name: string, id: string) => void;
   selectedId: string | null;
@@ -373,13 +422,7 @@ function TemplatePicker({ onSelect, selectedId }: {
         description="Empty report, add your own blocks"
         isSelected={selectedId === 'scratch'}
         onClick={() => onSelect([], 'Start from Scratch', 'scratch')}
-        icon={
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="14" height="14" rx="2" />
-            <line x1="10" y1="7" x2="10" y2="13" />
-            <line x1="7" y1="10" x2="13" y2="10" />
-          </svg>
-        }
+        icon={TEMPLATE_ICONS.scratch}
       />
       {REPORT_TEMPLATES.map((tpl) => {
         const supported = tpl.blocks
@@ -387,37 +430,6 @@ function TemplatePicker({ onSelect, selectedId }: {
             ...b,
             id: `tpl-block-${Date.now()}-${i}`,
           })) as SupportedBlock[];
-        const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
-          general: (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="2" width="14" height="16" rx="2" />
-              <line x1="7" y1="7" x2="13" y2="7" />
-              <line x1="7" y1="10" x2="13" y2="10" />
-              <line x1="7" y1="13" x2="10" y2="13" />
-            </svg>
-          ),
-          implant: (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 2v6" />
-              <path d="M7 8h6l-1 8H8L7 8z" />
-              <line x1="7.5" y1="11" x2="12.5" y2="11" />
-              <line x1="8" y1="14" x2="12" y2="14" />
-            </svg>
-          ),
-          crown: (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 14l2-8 4 4 4-4 2 8H4z" />
-              <line x1="4" y1="14" x2="16" y2="14" />
-              <rect x="4" y="14" width="12" height="3" rx="1" />
-            </svg>
-          ),
-          followup: (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="10" cy="10" r="7" />
-              <polyline points="10,6 10,10 13,12" />
-            </svg>
-          ),
-        };
         return (
           <TemplateCard
             key={tpl.id}
@@ -437,17 +449,16 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
   name: string; description: string; onClick: () => void; isSelected: boolean; icon?: React.ReactNode;
 }) {
   const [hovered, setHovered] = useState(false);
-  const [justSelected, setJustSelected] = useState(false);
-  const prevSelected = useRef(isSelected);
 
-  useEffect(() => {
-    if (isSelected && !prevSelected.current) {
-      setJustSelected(true);
-      const t = setTimeout(() => setJustSelected(false), 300);
-      return () => clearTimeout(t);
-    }
-    prevSelected.current = isSelected;
-  }, [isSelected]);
+  // Matches the DS procedure-card behavior: white surface always; selected =
+  // 2px interactive (blue) border + blue icon (no bg tint / no check badge);
+  // hover only transitions the border color.
+  const borderColor = isSelected
+    ? 'var(--ads-background-interactive)'
+    : hovered
+    ? 'var(--ads-border-accent-hover)'
+    : 'var(--ads-border-subtle)';
+  const iconColor = isSelected ? 'var(--ads-background-interactive)' : color.textSubtle;
 
   return (
     <button
@@ -455,50 +466,32 @@ function TemplateCard({ name, description, onClick, isSelected, icon }: {
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      aria-pressed={isSelected}
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
-        gap: space[1],
-        padding: space[3],
-        backgroundColor: isSelected ? 'var(--ads-background-highlight-blue)' : hovered ? color.bgHover : color.white,
-        border: `${isSelected ? '2px' : '1px'} solid ${isSelected ? color.primary : hovered ? color.borderHover : color.borderDefault}`,
+        gap: space[2],
+        // 19px when selected so the 2px border doesn't shift layout vs 1px.
+        padding: isSelected ? '19px' : space[5],
+        minHeight: 120,
+        backgroundColor: color.bgSurface,
+        border: `${isSelected ? '2px' : '1px'} solid ${borderColor}`,
         borderRadius: radius.md,
         cursor: 'pointer',
         textAlign: 'left',
-        transition: `all 0.2s ease, transform 0.2s ease`,
-        position: 'relative',
-        transform: justSelected ? 'scale(0.96)' : hovered ? 'scale(1.02)' : 'scale(1)',
+        transition: `border-color ${transition.fast}`,
       }}
     >
-      {isSelected && (
-        <div style={{
-          position: 'absolute',
-          top: '6px',
-          right: '6px',
-          width: '16px',
-          height: '16px',
-          borderRadius: '50%',
-          backgroundColor: color.primary,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          animation: justSelected ? 'checkPop 0.3s ease' : undefined,
-        }}>
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke={color.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 6.5L5 9.5l5-7" />
-          </svg>
+      {icon && <div style={{ color: iconColor, transition: `color ${transition.fast}` }}>{icon}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: space[2] }}>
+        <div style={{ fontSize: font.size.base, fontWeight: font.weight.medium, color: color.textHeading }}>
+          {name}
         </div>
-      )}
-      {icon && <div style={{ color: isSelected ? color.primary : color.neutral400, transition: `color 0.2s ease` }}>{icon}</div>}
-      <span style={{
-        fontSize: font.size.xs,
-        fontWeight: font.weight.semibold,
-        color: isSelected ? color.primary : color.textDefault,
-        transition: `color 0.2s ease`,
-      }}>
-        {name}
-      </span>
+        <div style={{ fontSize: font.size.xs, color: color.textSubtle, lineHeight: font.lineHeight.normal }}>
+          {description}
+        </div>
+      </div>
     </button>
   );
 }
@@ -520,23 +513,32 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, true);
+
   return (
     <>
       {/* Backdrop */}
       <div
         onClick={onClose}
+        aria-hidden="true"
         style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 200 }}
       />
 
       {/* Modal */}
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 201,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${settings.reportName || 'Untitled Report'} preview`}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 201,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
         {/* Header bar */}
         <div style={{
           width: '100%',
@@ -552,17 +554,18 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close preview"
               style={{
                 width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 border: 'none', borderRadius: radius.md, backgroundColor: 'rgba(255,255,255,0.08)',
-                color: '#fff', cursor: 'pointer', padding: 0,
+                color: color.textOnPrimary, cursor: 'pointer', padding: 0,
               }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="4" y1="4" x2="12" y2="12" /><line x1="12" y1="4" x2="4" y2="12" />
               </svg>
             </button>
-            <span style={{ fontSize: font.size.base, fontWeight: font.weight.semibold, color: '#fff' }}>
+            <span style={{ fontSize: font.size.base, fontWeight: font.weight.semibold, color: color.textOnPrimary }}>
               {settings.reportName || 'Untitled Report'}.pdf
             </span>
           </div>
@@ -573,7 +576,7 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
               style={{
                 height: '34px', padding: `0 ${space[4]}`, display: 'flex', alignItems: 'center', gap: space[2],
                 border: '1px solid rgba(255,255,255,0.15)', borderRadius: radius.md,
-                backgroundColor: 'rgba(255,255,255,0.06)', color: '#fff',
+                backgroundColor: 'rgba(255,255,255,0.06)', color: color.textOnPrimary,
                 fontSize: font.size.sm, fontWeight: font.weight.medium, cursor: 'pointer',
                 fontFamily: font.family,
               }}
@@ -586,7 +589,7 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
               style={{
                 height: '34px', padding: `0 ${space[4]}`, display: 'flex', alignItems: 'center', gap: space[2],
                 border: 'none', borderRadius: radius.md,
-                backgroundColor: color.primary, color: '#fff',
+                backgroundColor: color.primary, color: color.textOnPrimary,
                 fontSize: font.size.sm, fontWeight: font.weight.medium, cursor: 'pointer',
                 fontFamily: font.family,
               }}
@@ -611,8 +614,8 @@ function ReportPreviewModal({ settings, patient, blocks, onClose, onShare, onExp
             width: '794px',
             minHeight: '1123px',
             maxWidth: '95vw',
-            backgroundColor: '#fff',
-            boxShadow: '0 2px 8px 2px rgba(0,0,0,0.3)',
+            backgroundColor: color.bgSurface,
+            boxShadow: shadow.lg,
             flexShrink: 0,
             alignSelf: 'flex-start',
             display: 'flex',
@@ -635,15 +638,54 @@ function EmptyStatePlaceholder() {
       padding: space[10], color: color.textPlaceholder, fontSize: font.size.sm,
       textAlign: 'center', fontFamily: font.family,
     }}>
-      <div style={{ maxWidth: 320, display: 'flex', flexDirection: 'column', gap: space[2] }}>
-        <span style={{ fontSize: font.size.md, fontWeight: font.weight.medium, color: color.textSubtle }}>
-          No section selected
-        </span>
+      <div style={{ maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: space[2] }}>
+        <img
+          src={reportEmptyStateImg}
+          alt=""
+          aria-hidden="true"
+          style={{ width: 320, height: 'auto', marginBottom: space[2] }}
+        />
         <span>
           Pick a section from the left, or apply a template to get started.
         </span>
       </div>
     </div>
+  );
+}
+
+// ─── Header utility icon cell ─── mirrors the scan-flow header's nav icons:
+// 40×40 hit area, 8px radius, subtle hover fill, 24px glyph.
+function HeaderIconCell({ label, onClick, children }: {
+  label: string;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 40,
+        height: 40,
+        minWidth: 40,
+        minHeight: 40,
+        flexShrink: 0,
+        padding: 0,
+        border: 'none',
+        borderRadius: 8,
+        backgroundColor: 'transparent',
+        cursor: 'pointer',
+        transition: `background-color ${transition.fast}`,
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ads-background-subtle-hover)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -681,7 +723,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
   initialData,
 }, ref) {
   const [settings, setSettings] = useState<ReportSettings>(initialData?.settings ?? {
-    reportName: 'Patient Report',
+    reportName: 'Align Oral Health Report',
     doctorName: 'Dr. Smith',
     doctorImageUrl: '',
     clinicName: 'Bright Smile Clinic',
@@ -761,7 +803,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
       const supported = tpl.blocks.map((b, i) => ({
         ...b,
         id: `tpl-block-${Date.now()}-${i}`,
-        collapsed: true,
+        collapsed: false,
       })) as SupportedBlock[];
       handleTemplateSelect(supported, tpl.name, tpl.id);
     },
@@ -770,12 +812,14 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
 
   const [shareOpen, setShareOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [signatureOpen, setSignatureOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const handleExportOrShare = (action: 'share' | 'export') => {
     if (action === 'share') {
       setShareOpen(true);
     } else {
-      alert('Exporting PDF...');
+      notify.success('Report exported as PDF');
     }
   };
 
@@ -790,8 +834,20 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
   // and focuses it.
   const handleAddBlock = (type: BlockType) => {
     const created = createBlock(type) as SupportedBlock;
-    setBlocks((prev) => [...prev, created]);
+    // Adding a section expands every section so the new content is visible.
+    setBlocks((prev) => [...prev, created].map((b) => ({ ...b, collapsed: false }) as SupportedBlock));
     setActiveBlockId(created.id);
+    setSaved(false);
+    setTimeout(() => setSaved(true), 1500);
+  };
+
+  // "Image gallery" from the Add Section menu — turns each selected gallery
+  // image into its own image section, appended in a bunch.
+  const handleAddImagesFromGallery = (urls: string[]) => {
+    if (urls.length === 0) return;
+    const created = urls.map((url) => ({ ...createImageBlock(), previewUrl: url }) as SupportedBlock);
+    setBlocks((prev) => [...prev, ...created].map((b) => ({ ...b, collapsed: false }) as SupportedBlock));
+    setActiveBlockId(created[0].id);
     setSaved(false);
     setTimeout(() => setSaved(true), 1500);
   };
@@ -821,7 +877,8 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
     setBlocks((prev) => {
       const next = [...prev];
       next.splice(atIndex, 0, created);
-      return next;
+      // Inserting a section expands every section so the new content is visible.
+      return next.map((b) => ({ ...b, collapsed: false }) as SupportedBlock);
     });
     setActiveBlockId(created.id);
     setSaved(false);
@@ -832,7 +889,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
     setBlocksBeforeTemplate(blocks);
     setAppliedTemplate(templateName);
     setSelectedTemplateId(templateId);
-    setBlocks(templateBlocks.map(b => ({ ...b, collapsed: true }) as SupportedBlock));
+    setBlocks(templateBlocks.map(b => ({ ...b, collapsed: false }) as SupportedBlock));
     setSaved(false);
     setTimeout(() => setSaved(true), 1500);
     setTemplatesOpen(false);
@@ -866,15 +923,20 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
       backgroundColor: color.bgPage,
       fontFamily: font.family,
     }}>
-      {/* ── Sticky Header ── */}
+      {/* ── Sticky Header ── matches the info page's dedicated top header
+          (56px tall, 16px horizontal padding, subtle bottom border). */}
       <div style={{
         height: '56px',
-        backgroundColor: color.bgSurface,
-        borderBottom: `1px solid ${color.borderDefault}`,
+        minHeight: '56px',
+        maxHeight: '56px',
+        width: '100%',
+        backgroundColor: 'var(--ads-background-subtle-01)',
+        borderBottom: `1px solid var(--ads-border-subtle)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: `0 ${space[5]}`,
+        gap: space[4],
+        padding: `${space[1]} ${space[4]}`,
         flexShrink: 0,
         zIndex: 10,
       }}>
@@ -883,6 +945,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
           <button
             type="button"
             onClick={onBackToHome}
+            aria-label="Back"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -905,7 +968,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
             </svg>
           </button>
 
-          <div style={{ width: '1px', height: '24px', backgroundColor: color.borderDefault, flexShrink: 0 }} />
+          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--ds-border-subtle)', flexShrink: 0 }} />
 
           <InlineInput
             value={settings.reportName}
@@ -945,23 +1008,29 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
           </SecondaryButton>
 
           {/* Share */}
-          <SecondaryButton size={36} onClick={() => handleExportOrShare('share')}>
+          <PrimaryButton size={36} onClick={() => handleExportOrShare('share')}>
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 7.5v4a1 1 0 001 1h4a1 1 0 001-1v-4" />
               <polyline points="3,5 7,1 11,5" />
               <line x1="7" y1="1" x2="7" y2="9" />
             </svg>
             Share
-          </SecondaryButton>
-
-          {/* Export PDF */}
-          <PrimaryButton size={36} onClick={() => handleExportOrShare('export')}>
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 1v8M3 6l4 4 4-4" />
-              <path d="M1 11v1a1 1 0 001 1h10a1 1 0 001-1v-1" />
-            </svg>
-            Export PDF
           </PrimaryButton>
+
+          {/* Divider + global header utilities (battery / settings / help) —
+              the icons sit adjacent (no gap) like the dedicated header cluster. */}
+          <div style={{ width: 1, height: 24, backgroundColor: 'var(--ds-border-subtle)', margin: `0 ${space[1]}` }} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <HeaderIconCell label="Battery">
+              <BatteryFull size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />
+            </HeaderIconCell>
+            <HeaderIconCell label="Settings">
+              <SettingsIcon size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />
+            </HeaderIconCell>
+            <HeaderIconCell label="Help">
+              <CircleHelp size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />
+            </HeaderIconCell>
+          </div>
         </div>
       </div>
 
@@ -978,77 +1047,71 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
           padding: `${space[4]} ${space[3]}`,
           display: 'flex',
           flexDirection: 'column',
-          gap: space[3],
+          gap: space[4],
           zIndex: 2,
         }}>
-          {/* Templates — minimal disclosure at the top of the rail */}
+          {/* Templates — disclosure styled as a section-family row */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
             <button
               type="button"
               onClick={() => setTemplatesOpen((v) => !v)}
+              aria-expanded={templatesOpen}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ads-border-accent-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = color.borderDefault; }}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                gap: space[2], padding: `${space[2]} ${space[3]}`,
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                color: color.textSubtle, fontSize: font.size.xs,
-                fontWeight: font.weight.semibold, letterSpacing: font.tracking.wide,
-                textTransform: 'uppercase', fontFamily: font.family,
+                display: 'flex', alignItems: 'center', gap: space[2],
+                padding: `${space[3]} ${space[2]} ${space[3]} ${space[3]}`,
+                borderRadius: radius.md, cursor: 'pointer',
+                background: color.bgSurface,
+                border: `1px solid ${color.borderDefault}`,
+                boxShadow: shadow.sm,
+                transition: `border-color ${transition.fast}`,
+                width: '100%', textAlign: 'left', fontFamily: font.family,
               }}
             >
-              <span style={{ display: 'flex', alignItems: 'center', gap: space[2], minWidth: 0 }}>
+              <span style={{
+                flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: space[2],
+                fontSize: font.size.sm, fontWeight: font.weight.medium, color: color.textDefault,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
                 {appliedTemplate ? appliedTemplate : 'Templates'}
                 {appliedTemplate && blocksBeforeTemplate && (
                   <span
                     onClick={(e) => { e.stopPropagation(); handleUndoTemplate(); }}
-                    style={{ color: color.primary, textTransform: 'none', fontSize: font.size.xs, fontWeight: font.weight.semibold }}
+                    style={{ color: color.primary, fontSize: font.size.xs, fontWeight: font.weight.semibold, flexShrink: 0 }}
                   >
                     Undo
                   </span>
                 )}
               </span>
               <svg
-                width="12" height="12" viewBox="0 0 16 16" fill="none"
-                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-                style={{ transform: templatesOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: `transform ${transition.fast}` }}
+                width="14" height="14" viewBox="0 0 16 16" fill="none"
+                stroke={color.textSubtle} strokeWidth="1.5" strokeLinecap="round"
+                aria-hidden="true"
+                style={{ flexShrink: 0, transform: templatesOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: `transform ${transition.fast}` }}
               >
                 <path d="M4 6l4 4 4-4" />
               </svg>
             </button>
             {templatesOpen && (
-              <div style={{ padding: `0 ${space[1]}` }}>
+              <div style={{ padding: `${space[1]} ${space[1]} 0` }}>
                 <TemplatePicker onSelect={handleTemplateSelect} selectedId={selectedTemplateId} />
               </div>
             )}
           </div>
 
-          {/* Divider between Templates and Sections */}
-          <div style={{ height: 1, background: color.borderDefault, margin: `0 ${space[1]}` }} />
-
           {/* Section list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: `0 ${space[3]}`,
-            }}>
-              <span style={{
-                fontSize: font.size.xs, fontWeight: font.weight.semibold,
-                color: color.textSubtle, letterSpacing: font.tracking.wide,
-                textTransform: 'uppercase',
-              }}>
-                Sections
-              </span>
-              <span style={{ fontSize: font.size.xs, color: color.textPlaceholder }}>
-                {blocks.length}
-              </span>
-            </div>
             <BlockNavList
               blocks={blocks}
               activeBlockId={activeBlockId}
               onSelect={(id) => setActiveBlockId(id)}
               onReorder={handleBlocksChange}
               onAdd={handleAddBlock}
+              onInsert={handleInsertBlock}
+              onAddImageGallery={() => setGalleryOpen(true)}
               onDuplicate={handleDuplicateBlock}
-              onDelete={handleDeleteBlock}
+              onDelete={(id) => handleDeleteBlock(id)}
             />
           </div>
         </aside>
@@ -1065,7 +1128,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
             minWidth: 0,
             overflowY: 'auto',
             overflowX: 'hidden',
-            backgroundColor: color.bgSurface,
+            backgroundColor: color.bgPage,
           }}
         >
           <div style={{
@@ -1073,6 +1136,11 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
             width: '100%',
             margin: '0 auto',
             paddingBottom: space[12],
+            backgroundColor: color.bgSurface,
+            minHeight: '100%',
+            borderRadius: 0,
+            display: 'flex',
+            flexDirection: 'column',
           }}>
             <ReportHeader
               settings={settings}
@@ -1091,7 +1159,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
                 setSaved(false); setTimeout(() => setSaved(true), 1500);
               }}
             />
-            <div style={{ padding: `${space[5]} ${space[8]}` }}>
+            <div style={{ padding: `${space[5]} ${space[8]}`, flex: 1, display: 'flex', flexDirection: 'column' }}>
               {blocks.length === 0 ? (
                 <EmptyStatePlaceholder />
               ) : (
@@ -1100,9 +1168,49 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
                   onBlocksChange={handleBlocksChange}
                   activeBlockId={activeBlockId}
                   onBlockAdded={(id) => setActiveBlockId(id)}
-                  onInsert={handleInsertBlock}
                 />
               )}
+            </div>
+
+            {/* Signature line — click to open the signature modal */}
+            <div style={{
+              padding: `${space[8]} ${space[8]} ${space[5]}`,
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              gap: space[6],
+            }}>
+              <div style={{ minWidth: 0, maxWidth: 360, width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => setSignatureOpen(true)}
+                  aria-label={settings.signatureUrl ? 'Edit signature' : 'Add signature'}
+                  style={{
+                    width: '100%',
+                    minHeight: 56,
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    background: 'transparent',
+                    border: 'none',
+                    borderBottom: `1px solid ${color.textHeading}`,
+                    padding: `0 0 ${space[2]}`,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  {settings.signatureUrl ? (
+                    <img src={settings.signatureUrl} alt="Doctor signature" style={{ maxHeight: 48, maxWidth: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <span style={{ fontSize: font.size.base, color: color.textPlaceholder }}>Click to sign</span>
+                  )}
+                </button>
+                <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginTop: space[2] }}>
+                  {settings.doctorName || 'Doctor name'}
+                </div>
+              </div>
+              <span style={{ fontSize: font.size.sm, color: color.textSubtle, flexShrink: 0 }}>
+                Generated {formatReportDate(new Date())}
+              </span>
             </div>
 
             {/* Powered-by footer */}
@@ -1155,6 +1263,26 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
           onClose={() => setPreviewOpen(false)}
           onShare={() => { setPreviewOpen(false); handleExportOrShare('share'); }}
           onExport={() => { setPreviewOpen(false); handleExportOrShare('export'); }}
+        />,
+        document.body
+      )}
+
+      <SignatureModal
+        open={signatureOpen}
+        onClose={() => setSignatureOpen(false)}
+        onSave={(url, method) => {
+          setSettings((s) => ({ ...s, signatureUrl: url, signatureMethod: method }));
+          setSaved(false); setTimeout(() => setSaved(true), 1500);
+          notify.success('Signature saved');
+        }}
+      />
+
+      {galleryOpen && ReactDOM.createPortal(
+        <GalleryOverlayModal
+          multiSelect
+          onSelect={() => {}}
+          onMultiSelect={(urls) => { handleAddImagesFromGallery(urls); setGalleryOpen(false); }}
+          onClose={() => setGalleryOpen(false)}
         />,
         document.body
       )}

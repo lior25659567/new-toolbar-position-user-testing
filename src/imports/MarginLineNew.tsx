@@ -3,36 +3,20 @@ interface MarginLineNewProps {
 }
 
 export default function MarginLineNew({ isActive = false }: MarginLineNewProps) {
-  const strokeColor = isActive ? "#008EC2" : "#5E646E";
-  const fillColor = isActive ? "#008EC2" : "#5E646E";
-  
+  const strokeColor = isActive ? "#008EC2" : "var(--ads-icon-secondary)";
+  const fillColor = isActive ? "#008EC2" : "var(--ads-icon-secondary)";
+
   return (
     <div className="relative size-full flex items-center justify-center" data-name="Margin line new">
-      <svg width="28" height="28" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path 
-          d="M44.2469 7.24327C34.462 9.09508 27.1515 8.91905 16.3801 7.0611C14.4685 6.73133 12.6335 7.76427 11.8039 9.48842C11.3833 10.3627 11.4394 11.3701 11.5427 12.3348L12.2225 18.684C13.0607 26.5126 11.9189 34.4262 8.90178 41.6985L6.34375 47.8642C24.305 54.8927 34.6087 53.6998 53.1569 47.8642L50.6413 40.4363C48.4502 33.9666 47.6957 27.0972 48.4301 20.3062L49.275 12.4944C49.3652 11.66 49.4216 10.7974 49.1179 10.0149C48.3558 8.05169 46.3346 6.84827 44.2469 7.24327Z" 
-          stroke={strokeColor} 
-          strokeWidth="2" 
+      <svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M2.01016 16.3008L0.856662 19.8696C0.48193 21.029 0.680298 22.2975 1.3911 23.2871C1.92429 24.0294 2.70521 24.561 3.59623 24.7645C10.3115 26.2984 14.5236 26.3224 21.3801 24.7635C22.2719 24.5608 23.054 24.0291 23.5875 23.2863C24.2979 22.2972 24.4962 21.0294 24.1217 19.8706L22.9678 16.3008C22.1824 13.8709 21.7825 11.3329 21.7825 8.77921V5.38341C21.7825 4.22372 21.2853 3.09182 20.2854 2.50441C15.7045 -0.186709 8.79937 -0.182782 4.54836 2.51621C3.62952 3.09959 3.19552 4.17194 3.19552 5.26033V8.77921C3.19552 11.3329 2.79556 13.8709 2.01016 16.3008Z"
+          stroke={strokeColor} strokeWidth="1" vectorEffect="non-scaling-stroke"
           strokeLinecap="round"
         />
-        <path 
-          d="M7.68502 49.37C9.16792 49.37 10.37 48.1679 10.37 46.685C10.37 45.2021 9.16792 44 7.68502 44C6.20213 44 5 45.2021 5 46.685C5 48.1679 6.20213 49.37 7.68502 49.37Z" 
-          fill={fillColor} 
-          stroke={strokeColor} 
-          strokeWidth="2"
-        />
-        <path 
-          d="M30.685 54.37C32.1679 54.37 33.37 53.1679 33.37 51.685C33.37 50.2021 32.1679 49 30.685 49C29.2021 49 28 50.2021 28 51.685C28 53.1679 29.2021 54.37 30.685 54.37Z" 
-          fill={fillColor} 
-          stroke={strokeColor} 
-          strokeWidth="2"
-        />
-        <path 
-          d="M51.685 50.37C53.1679 50.37 54.37 49.1679 54.37 47.685C54.37 46.2021 53.1679 45 51.685 45C50.2021 45 49 46.2021 49 47.685C49 49.1679 50.2021 50.37 51.685 50.37Z" 
-          fill={fillColor} 
-          stroke={strokeColor} 
-          strokeWidth="2"
-        />
+        <circle cx="2.02173" cy="23.5107" r="2.02173" fill={fillColor} />
+        <circle cx="23.2825" cy="23.5107" r="2.02173" fill={fillColor} />
+        <circle cx="12.2825" cy="25.5107" r="2.02173" fill={fillColor} />
       </svg>
     </div>
   );

@@ -1,5 +1,11 @@
 import * as React from "react";
-import { color, font, radius, space, transition } from "../../design-system/tokens";
+import {
+  Image as ImageIcon, Columns2, Receipt, StickyNote, Pill,
+  CalendarClock, ClipboardCheck, Square,
+} from "lucide-react";
+import { color, font, radius, shadow, space, transition } from "../../design-system/tokens";
+import { SecondaryButton } from "../../design-system/SecondaryButton";
+import { BLOCK_TYPE_TINT } from "./blockTheme";
 import type {
   BlockType, ImageBlock, ComparisonBlock, CostSummaryBlock, NotesBlock,
   RxBlock, NextAppointmentBlock, PatientInstructionsBlock,
@@ -17,6 +23,10 @@ interface BlockNavListProps {
   onReorder: (next: SupportedBlock[]) => void;
   /** Called when the user picks a section type from the "+ Add section" popover. */
   onAdd?: (type: BlockType) => void;
+  /** Called when the user inserts a section between two rows. atIndex is the position to insert at. */
+  onInsert?: (type: BlockType, atIndex: number) => void;
+  /** Called when the user picks "Image gallery" — opens the multi-select gallery (one section per image). */
+  onAddImageGallery?: () => void;
   onDuplicate?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
@@ -31,62 +41,20 @@ const BLOCK_TYPE_LABEL: Record<string, string> = {
   "patient-instructions": "Instructions",
 };
 
-/** Tiny per-block-type icon. Single-color, currentColor inheritance. */
-export function BlockTypeIcon({ type }: { type: SupportedBlock["type"] }) {
-  const props = { width: 14, height: 14, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-  switch (type) {
-    case "image":
-      return (
-        <svg {...props}>
-          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
-          <circle cx="6" cy="6.5" r="1" fill="currentColor" stroke="none" />
-          <path d="M2.5 11l3.5-3 3 2.5 2.5-2 2 2" />
-        </svg>
-      );
-    case "comparison":
-      return (
-        <svg {...props}>
-          <rect x="2" y="3" width="5" height="10" rx="1" />
-          <rect x="9" y="3" width="5" height="10" rx="1" />
-        </svg>
-      );
-    case "cost-summary":
-      return (
-        <svg {...props}>
-          <rect x="2.5" y="3" width="11" height="10" rx="1" />
-          <path d="M2.5 6.5h11M5.5 3v10" />
-        </svg>
-      );
-    case "notes":
-      return (
-        <svg {...props}>
-          <path d="M4 3h6l2.5 2.5V13a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5V3.5A.5.5 0 014 3z" />
-          <path d="M5.5 7.5h5M5.5 9.5h5M5.5 11.5h3" />
-        </svg>
-      );
-    case "rx":
-      return (
-        <svg {...props}>
-          <path d="M5 3h3a2 2 0 010 4H5V3zm0 4v6M9 9l4 4M9 13l4-4" />
-        </svg>
-      );
-    case "next-appointment":
-      return (
-        <svg {...props}>
-          <rect x="2.5" y="3.5" width="11" height="10" rx="1" />
-          <path d="M2.5 6.5h11M5.5 2.5v2M10.5 2.5v2" />
-        </svg>
-      );
-    case "patient-instructions":
-      return (
-        <svg {...props}>
-          <path d="M4 3.5h8a.5.5 0 01.5.5v9a.5.5 0 01-.5.5H4a.5.5 0 01-.5-.5V4a.5.5 0 01.5-.5z" />
-          <path d="M5.5 6.5l1 1 2-2M5.5 9.5l1 1 2-2M5.5 12h3" />
-        </svg>
-      );
-    default:
-      return <svg {...props}><circle cx="8" cy="8" r="3" /></svg>;
-  }
+/** Per-block-type icon, sourced from lucide-react. Single-color via currentColor. */
+const BLOCK_TYPE_ICON: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  image: ImageIcon,
+  comparison: Columns2,
+  "cost-summary": Receipt,
+  notes: StickyNote,
+  rx: Pill,
+  "next-appointment": CalendarClock,
+  "patient-instructions": ClipboardCheck,
+};
+
+export function BlockTypeIcon({ type, size = 14 }: { type: BlockType; size?: number }) {
+  const LucideIcon = BLOCK_TYPE_ICON[type] ?? Square;
+  return <LucideIcon size={size} strokeWidth={1.6} />;
 }
 
 function getBlockTitle(block: SupportedBlock, i: number): string {
@@ -101,48 +69,117 @@ function getThumbnail(block: SupportedBlock): string | undefined {
   return undefined;
 }
 
-export default function BlockNavList({ blocks, activeBlockId, onSelect, onReorder, onAdd, onDuplicate, onDelete }: BlockNavListProps) {
+export default function BlockNavList({ blocks, activeBlockId, onSelect, onReorder, onAdd, onInsert, onAddImageGallery, onDuplicate, onDelete }: BlockNavListProps) {
   const [dragIndex, setDragIndex] = React.useState<number | null>(null);
   const [overIndex, setOverIndex] = React.useState<number | null>(null);
+
+  // Shared reorder used by both drag-and-drop and keyboard move.
+  const move = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= blocks.length) return;
+    const next = [...blocks];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onReorder(next);
+  };
 
   const handleDrop = (target: number) => {
     if (dragIndex === null || dragIndex === target) {
       setDragIndex(null); setOverIndex(null); return;
     }
-    const next = [...blocks];
-    const [moved] = next.splice(dragIndex, 1);
-    next.splice(target, 0, moved);
-    onReorder(next);
+    move(dragIndex, target);
     setDragIndex(null); setOverIndex(null);
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: onInsert ? 0 : 4 }}>
       {blocks.map((b, i) => {
         const isActive = b.id === activeBlockId;
         const isDropTarget = overIndex === i && dragIndex !== i;
         return (
-          <NavRow
-            key={b.id}
-            index={i}
-            label={getBlockTitle(b, i)}
-            type={b.type}
-            thumbnail={getThumbnail(b)}
-            isActive={isActive}
-            isDropTarget={isDropTarget}
-            onClick={() => onSelect(b.id)}
-            onDragStart={() => setDragIndex(i)}
-            onDragOver={(e) => { e.preventDefault(); setOverIndex(i); }}
-            onDrop={() => handleDrop(i)}
-            onDragEnd={() => { setDragIndex(null); setOverIndex(null); }}
-            onDuplicate={onDuplicate ? () => onDuplicate(b.id) : undefined}
-            onDelete={onDelete ? () => onDelete(b.id) : undefined}
-          />
+          <React.Fragment key={b.id}>
+            <NavRow
+              index={i}
+              label={getBlockTitle(b, i)}
+              type={b.type}
+              thumbnail={getThumbnail(b)}
+              isActive={isActive}
+              isDropTarget={isDropTarget}
+              onClick={() => onSelect(b.id)}
+              onDragStart={() => setDragIndex(i)}
+              onDragOver={(e) => { e.preventDefault(); setOverIndex(i); }}
+              onDrop={() => handleDrop(i)}
+              onDragEnd={() => { setDragIndex(null); setOverIndex(null); }}
+              onMove={(dir) => move(i, i + dir)}
+              total={blocks.length}
+              onDuplicate={onDuplicate ? () => onDuplicate(b.id) : undefined}
+              onDelete={onDelete ? () => onDelete(b.id) : undefined}
+            />
+            {onInsert && i < blocks.length - 1 && (
+              <InsertBetweenSlot onInsert={(type) => onInsert(type, i + 1)} />
+            )}
+          </React.Fragment>
         );
       })}
       {onAdd && (
-        <div style={{ padding: `${space[2]} ${space[1]} 0`, marginTop: space[2] }}>
-          <AddBlockMenu onAdd={onAdd} />
+        <div style={{
+          marginTop: blocks.length ? space[2] : 0,
+        }}>
+          <AddBlockMenu onAdd={onAdd} onAddImageGallery={onAddImageGallery} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Insert-between-rows slot — "+" appears on hover, mirrors the right-panel editor. */
+function InsertBetweenSlot({ onInsert }: { onInsert: (type: BlockType) => void }) {
+  const [hovered, setHovered] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const visible = hovered || open;
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "relative",
+        height: visible ? 32 : 6,
+        transition: `height ${transition.fast}`,
+      }}
+    >
+      {visible && (
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: space[2],
+          paddingLeft: space[2],
+          paddingRight: space[2],
+        }}>
+          <div style={{ flex: 1, height: 1, background: color.borderDefault }} />
+          <AddBlockMenu
+            onAdd={(type) => { onInsert(type); }}
+            onOpenChange={setOpen}
+            renderTrigger={({ toggle, ref }) => (
+              <span
+                ref={ref as unknown as React.Ref<HTMLSpanElement>}
+                style={{ display: "inline-flex", flexShrink: 0 }}
+              >
+                <SecondaryButton
+                  variant="toolbar"
+                  size={36}
+                  aria-label="Insert section"
+                  onClick={(e) => { e.stopPropagation(); toggle(); }}
+                  style={{ width: 28, height: 28, minHeight: 28, padding: 0, color: "var(--ads-icon-secondary)" }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
+                  </svg>
+                </SecondaryButton>
+              </span>
+            )}
+          />
+          <div style={{ flex: 1, height: 1, background: color.borderDefault }} />
         </div>
       )}
     </div>
@@ -151,7 +188,7 @@ export default function BlockNavList({ blocks, activeBlockId, onSelect, onReorde
 
 function NavRow({
   index, label, type, thumbnail, isActive, isDropTarget,
-  onClick, onDragStart, onDragOver, onDrop, onDragEnd,
+  onClick, onDragStart, onDragOver, onDrop, onDragEnd, onMove, total,
   onDuplicate, onDelete,
 }: {
   index: number;
@@ -165,19 +202,20 @@ function NavRow({
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
   onDragEnd: () => void;
+  /** Keyboard reorder: dir is -1 (up) or +1 (down). */
+  onMove: (dir: number) => void;
+  total: number;
   onDuplicate?: () => void;
   onDelete?: () => void;
 }) {
   const [hovered, setHovered] = React.useState(false);
-  // Secondary-button-style: transparent fill, border carries every state.
-  const borderColor = isDropTarget
-    ? color.primary
-    : isActive
-    ? color.primary
-    : hovered
-    ? color.borderHover
+  // Secondary-button look: white fill, neutral border, subtle shadow — no blue.
+  // Selected row mirrors the DS secondary button's selected (pressed) border.
+  // Hover/drag only — no persistent "selected" state after clicking a row.
+  const borderColor = hovered || isDropTarget
+    ? "var(--ads-border-accent-hover)"
     : color.borderDefault;
-  const textColor = isActive ? color.primary : color.textDefault;
+  const textColor = color.textDefault;
 
   return (
     <div
@@ -193,21 +231,33 @@ function NavRow({
         display: "flex",
         alignItems: "center",
         gap: space[2],
-        padding: `${space[2]} ${space[2]} ${space[2]} ${space[3]}`,
+        padding: `${space[3]} ${space[2]} ${space[3]} ${space[3]}`,
         borderRadius: radius.md,
         cursor: "pointer",
-        background: "transparent",
+        background: color.bgSurface,
         border: `1px solid ${borderColor}`,
+        boxShadow: shadow.sm,
         transition: `border-color ${transition.fast}`,
         userSelect: "none",
       }}
     >
-      {/* Drag handle */}
-      <span
-        title="Drag to reorder"
+      {/* Drag handle — also a keyboard reorder control (↑/↓ arrows) */}
+      <button
+        type="button"
+        title="Drag to reorder, or use arrow up/down keys"
+        aria-label={`Reorder ${label}, position ${index + 1} of ${total}. Use arrow up and down keys to move.`}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowUp") { e.preventDefault(); e.stopPropagation(); onMove(-1); }
+          else if (e.key === "ArrowDown") { e.preventDefault(); e.stopPropagation(); onMove(1); }
+        }}
         style={{
           display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "none",
+          background: "transparent",
+          padding: 0,
           color: color.neutral400,
           cursor: "grab",
           opacity: hovered || isActive ? 1 : 0.4,
@@ -215,18 +265,18 @@ function NavRow({
           transition: `opacity ${transition.fast}`,
         }}
       >
-        <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden>
-          <circle cx="2" cy="2" r="1" /><circle cx="8" cy="2" r="1" />
-          <circle cx="2" cy="7" r="1" /><circle cx="8" cy="7" r="1" />
-          <circle cx="2" cy="12" r="1" /><circle cx="8" cy="12" r="1" />
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" />
+          <circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" />
+          <circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" />
         </svg>
-      </span>
+      </button>
 
       {/* Index */}
       <span style={{
         fontSize: font.size.xs,
         fontWeight: font.weight.medium,
-        color: isActive ? color.primary : color.textPlaceholder,
+        color: color.textPlaceholder,
         minWidth: 16,
         textAlign: "right",
         flexShrink: 0,
@@ -238,9 +288,9 @@ function NavRow({
       {/* Type icon or thumbnail */}
       {thumbnail ? (
         <span style={{
-          width: 22,
-          height: 22,
-          borderRadius: radius.sm,
+          width: 28,
+          height: 28,
+          borderRadius: radius.md,
           overflow: "hidden",
           flexShrink: 0,
           border: `1px solid ${color.borderDefault}`,
@@ -249,12 +299,14 @@ function NavRow({
         </span>
       ) : (
         <span style={{
-          width: 22,
-          height: 22,
+          width: 28,
+          height: 28,
+          borderRadius: radius.md,
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          color: isActive ? color.primary : color.textSubtle,
+          background: (BLOCK_TYPE_TINT[type] ?? { bg: color.neutral100 }).bg,
+          color: (BLOCK_TYPE_TINT[type] ?? { fg: color.textSubtle }).fg,
           flexShrink: 0,
         }}>
           <BlockTypeIcon type={type} />
@@ -266,7 +318,7 @@ function NavRow({
         flex: 1,
         minWidth: 0,
         fontSize: font.size.sm,
-        fontWeight: isActive ? font.weight.medium : font.weight.regular,
+        fontWeight: font.weight.regular,
         color: textColor,
         overflow: "hidden",
         textOverflow: "ellipsis",
@@ -290,7 +342,7 @@ function NavRow({
         >
           {onDuplicate && (
             <RowIconButton title="Duplicate" onClick={onDuplicate}>
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="4" y="4" width="8" height="8" rx="1.5" />
                 <path d="M10 4V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5.5A1.5 1.5 0 003 10h1" />
               </svg>
@@ -298,7 +350,7 @@ function NavRow({
           )}
           {onDelete && (
             <RowIconButton title="Delete" danger onClick={onDelete}>
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
                 <line x1="3" y1="3" x2="11" y2="11" /><line x1="11" y1="3" x2="3" y2="11" />
               </svg>
             </RowIconButton>
@@ -325,8 +377,8 @@ function RowIconButton({ children, onClick, title, danger }: {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: 22,
-        height: 22,
+        width: 28,
+        height: 28,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",

@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
-import { Modal, TextInput } from '../../design-system';
-import { color, font, space, radius, transition, shadow } from '../../design-system/tokens';
+import React, { useState } from 'react';
+import { notify } from '../../design-system/notify';
+import { Modal } from '../../design-system';
+import { color, font, space, radius, transition } from '../../design-system/tokens';
 import { QRCodePreview } from '../shared/QRCodePreview';
 
 interface ShareModalProps {
@@ -18,396 +19,111 @@ interface ShareModalProps {
   onPinChange: (pin: string) => void;
 }
 
-// ─── Small icon button for bottom row ───────────────────────────────────────
+// ─── Share option card ───────────────────────────────────────────────────────
 
-function SocialIcon({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+function ShareOption({ icon, label, selected, onClick }: {
+  icon: React.ReactNode; label: string; selected?: boolean; onClick: () => void;
+}) {
   const [hovered, setHovered] = useState(false);
+  const borderColor = selected
+    ? 'var(--ds-color-primary)'
+    : hovered
+    ? 'var(--ads-border-accent-hover)'
+    : color.borderDefault;
   return (
     <button
       type="button"
-      title={label}
+      aria-label={label}
+      aria-pressed={selected}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: 40, height: 40, borderRadius: radius.full, border: `1px solid ${color.borderDefault}`,
-        backgroundColor: hovered ? color.neutral100 : color.bgSurface,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer', color: color.textDefault, padding: 0,
-        transition: `all ${transition.fast}`,
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: space[2],
+        padding: `${space[4]} ${space[3]}`,
+        border: `${selected ? '2px' : '1px'} solid ${borderColor}`,
+        borderRadius: radius.md,
+        backgroundColor: color.bgSurface,
+        cursor: 'pointer',
+        fontFamily: font.family,
+        transition: `border-color ${transition.fast}`,
       }}
     >
-      {icon}
+      <span style={{
+        width: 44, height: 44, borderRadius: radius.full, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: color.bgPage,
+        color: selected ? 'var(--ds-color-primary)' : color.textDefault,
+      }}>
+        {icon}
+      </span>
+      <span style={{ fontSize: font.size.sm, fontWeight: font.weight.medium, color: color.textDefault, textAlign: 'center' }}>
+        {label}
+      </span>
     </button>
   );
 }
 
 // ─── Main Modal ─────────────────────────────────────────────────────────────
 
-export default function ShareModal({ open, onClose, reportName, patientName, doctorName, signatureUrl, signatureMethod, onSignatureChange, pinEnabled, pin, onPinEnabledChange, onPinChange }: ShareModalProps) {
-  const [copied, setCopied] = useState(false);
-  const [emailInput, setEmailInput] = useState('');
-  const [emails, setEmails] = useState<string[]>([]);
-  const [emailFocused, setEmailFocused] = useState(false);
+export default function ShareModal({ open, onClose, reportName }: ShareModalProps) {
   const [showQR, setShowQR] = useState(false);
-  const [accessLevel, setAccessLevel] = useState<'invited' | 'anyone'>('invited');
-  const [accessDropdownOpen, setAccessDropdownOpen] = useState(false);
-
   const reportLink = `https://reports.itero.com/share/${Date.now().toString(36)}`;
 
-  const handleCopyLink = useCallback(() => {
-    navigator.clipboard?.writeText(reportLink).catch(() => {});
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
-  }, [reportLink]);
-
   return (
-    <Modal open={open} onClose={onClose} title="Share Report" width={480}>
+    <Modal open={open} onClose={onClose} title="Share report" width={440}>
+      <div style={{ fontSize: font.size.sm, color: color.textSubtle, marginBottom: space[4] }}>
+        Choose how to share “{reportName || 'this report'}”.
+      </div>
 
-      {/* Email input with chips */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          gap: '6px',
-          padding: `${space[2]} ${space[3]}`,
-          minHeight: '40px',
-          border: `1px solid ${emailFocused ? color.primary : color.borderDefault}`,
-          borderRadius: radius.md,
-          backgroundColor: color.white,
-          marginBottom: space[4],
-          cursor: 'text',
-          boxSizing: 'border-box' as const,
-          transition: `border-color ${transition.fast}`,
-        }}
-        onClick={() => {
-          const input = document.getElementById('share-email-input');
-          if (input) input.focus();
-        }}
-      >
-        {emails.map((em, i) => (
-          <span
-            key={i}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '3px 8px',
-              backgroundColor: color.neutral100,
-              borderRadius: radius.sm,
-              fontSize: font.size.sm,
-              color: color.textDefault,
-              lineHeight: '1',
-            }}
-          >
-            {em}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setEmails(emails.filter((_, j) => j !== i)); }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: '14px', height: '14px', padding: 0, border: 'none',
-                backgroundColor: 'transparent', color: color.textSubtle,
-                cursor: 'pointer', borderRadius: '50%', fontSize: '12px', lineHeight: '1',
-              }}
-            >
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <line x1="2.5" y1="2.5" x2="7.5" y2="7.5" /><line x1="7.5" y1="2.5" x2="2.5" y2="7.5" />
-              </svg>
-            </button>
-          </span>
-        ))}
-        <input
-          id="share-email-input"
-          type="text"
-          value={emailInput}
-          onChange={(e) => setEmailInput(e.target.value)}
-          onKeyDown={(e) => {
-            if ((e.key === 'Enter' || e.key === ',' || e.key === ' ') && emailInput.trim()) {
-              e.preventDefault();
-              const trimmed = emailInput.trim().replace(/,$/,'');
-              if (trimmed && trimmed.includes('@')) {
-                setEmails([...emails, trimmed]);
-                setEmailInput('');
-              }
-            }
-            if (e.key === 'Backspace' && !emailInput && emails.length > 0) {
-              setEmails(emails.slice(0, -1));
-            }
-          }}
-          onFocus={() => setEmailFocused(true)}
-          onBlur={() => {
-            setEmailFocused(false);
-            const trimmed = emailInput.trim().replace(/,$/,'');
-            if (trimmed && trimmed.includes('@')) {
-              setEmails([...emails, trimmed]);
-              setEmailInput('');
-            }
-          }}
-          placeholder={emails.length === 0 ? 'Add emails...' : ''}
-          style={{
-            flex: 1,
-            minWidth: '80px',
-            border: 'none',
-            outline: 'none',
-            fontSize: font.size.sm,
-            fontFamily: font.family,
-            color: color.textDefault,
-            backgroundColor: 'transparent',
-            padding: '2px 0',
-          }}
+      <div style={{ display: 'flex', gap: space[3] }}>
+        {/* Download PDF */}
+        <ShareOption
+          label="Download PDF"
+          onClick={() => { notify.success('Report downloaded as PDF'); onClose(); }}
+          icon={
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" />
+              <path d="M5 19h14" />
+            </svg>
+          }
+        />
+        {/* WeChat */}
+        <ShareOption
+          label="WeChat"
+          onClick={() => { notify.success('Shared to WeChat'); onClose(); }}
+          icon={
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .718-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05a5.797 5.797 0 0 1-.231-1.61c0-3.367 3.272-6.105 7.337-6.105.246 0 .487.013.728.039-.665-3.412-4.064-5.984-8.46-5.984zm-2.91 2.964c.491 0 .89.397.89.888a.89.89 0 0 1-.89.888.888.888 0 1 1 0-1.776zm5.819 0a.888.888 0 1 1 0 1.776.89.89 0 0 1-.89-.888c0-.491.398-.888.89-.888zm6.318 4.49c-3.633 0-6.582 2.476-6.582 5.534 0 3.057 2.95 5.533 6.582 5.533.79 0 1.546-.123 2.246-.346a.713.713 0 0 1 .592.082l1.439.832c.041.024.082.041.13.041a.236.236 0 0 0 .238-.238c0-.06-.024-.118-.038-.176l-.295-1.115a.49.49 0 0 1-.018-.13.49.49 0 0 1 .197-.382C23.555 18.398 24 17.376 24 16.05c0-3.058-2.95-5.534-6.582-5.534v.626zm-2.18 1.789a.738.738 0 1 1 0 1.476.738.738 0 0 1 0-1.476zm4.36 0a.738.738 0 1 1 0 1.476.738.738 0 0 1 0-1.476z" />
+            </svg>
+          }
+        />
+        {/* Share via QR code */}
+        <ShareOption
+          label="QR code"
+          selected={showQR}
+          onClick={() => setShowQR((v) => !v)}
+          icon={
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="8" height="8" rx="1" /><rect x="13" y="3" width="8" height="8" rx="1" /><rect x="3" y="13" width="8" height="8" rx="1" />
+              <path d="M14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h3v3h-3z" strokeWidth="1.4" />
+            </svg>
+          }
         />
       </div>
 
-      {/* Who has access */}
-      <div style={{ marginBottom: space[3] }}>
-        <div style={{ fontSize: font.size.xs, color: color.textSubtle, marginBottom: space[2] }}>
-          Who has access
-        </div>
-
-        {/* Access level dropdown */}
-        <div style={{ position: 'relative', marginBottom: space[3] }}>
-          <button
-            type="button"
-            onClick={() => setAccessDropdownOpen(!accessDropdownOpen)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: space[2], width: '100%',
-              padding: `${space[2]} ${space[3]}`,
-              backgroundColor: color.bgSurface, borderRadius: radius.md,
-              border: `1px solid ${color.borderDefault}`, cursor: 'pointer',
-              fontFamily: font.family, textAlign: 'left',
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color.textSubtle} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {accessLevel === 'invited' ? (
-                <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></>
-              ) : (
-                <><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></>
-              )}
-            </svg>
-            <span style={{ fontSize: font.size.sm, color: color.textDefault, fontWeight: font.weight.medium, flex: 1 }}>
-              {accessLevel === 'invited' ? 'Only those invited' : 'Anyone with the link'}
-            </span>
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={color.textSubtle} strokeWidth="1.5" strokeLinecap="round">
-              <path d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
-          {accessDropdownOpen && (
-            <>
-              <div style={{ position: 'fixed', inset: 0, zIndex: 1 }} onClick={() => setAccessDropdownOpen(false)} />
-              <div style={{
-                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: space[1],
-                backgroundColor: color.bgSurface, border: `1px solid ${color.borderDefault}`,
-                borderRadius: radius.md, boxShadow: shadow.lg, zIndex: 2, overflow: 'hidden',
-              }}>
-                {([
-                  { value: 'invited' as const, label: 'Only those invited', icon: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></> },
-                  { value: 'anyone' as const, label: 'Anyone with the link', icon: <><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></> },
-                ]).map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => { setAccessLevel(opt.value); setAccessDropdownOpen(false); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: space[2], width: '100%',
-                      padding: `${space[2]} ${space[3]}`, border: 'none', backgroundColor: accessLevel === opt.value ? color.neutral50 : 'transparent',
-                      cursor: 'pointer', fontFamily: font.family, fontSize: font.size.sm,
-                      color: color.textDefault, textAlign: 'left',
-                      transition: `background-color ${transition.fast}`,
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = color.bgHover; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = accessLevel === opt.value ? color.neutral50 : 'transparent'; }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color.textSubtle} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      {opt.icon}
-                    </svg>
-                    <span style={{ flex: 1 }}>{opt.label}</span>
-                    {accessLevel === opt.value && (
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke={color.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 8.5L6.5 12 13 4" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Owner row */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: space[3],
-          padding: `${space[2]} 0`,
-        }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: radius.full,
-            backgroundColor: color.neutral200, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textLabel,
-            flexShrink: 0,
-          }}>
-            {(doctorName || 'D').charAt(0).toUpperCase()}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: font.size.sm, fontWeight: font.weight.medium, color: color.textDefault }}>
-              {doctorName || 'Doctor'} <span style={{ color: color.textPlaceholder, fontWeight: font.weight.regular }}>(you)</span>
-            </div>
-          </div>
-          <span style={{ fontSize: font.size.xs, color: color.textSubtle }}>Owner</span>
-        </div>
-      </div>
-
-      {/* Warning box */}
-      <div style={{
-        display: 'flex', alignItems: 'flex-start', gap: space[2],
-        padding: `${space[3]} ${space[4]}`,
-        backgroundColor: color.neutral50, borderRadius: radius.md,
-        border: `1px solid ${color.borderDefault}`,
-        marginTop: space[2], marginBottom: space[4],
-      }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color.textSubtle} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
-        </svg>
-        <div>
-          <div style={{ fontSize: font.size.xs, fontWeight: font.weight.semibold, color: color.textDefault, marginBottom: 2 }}>
-            This report may include personal information
-          </div>
-          <div style={{ fontSize: font.size.xs, color: color.textSubtle, lineHeight: '1.45' }}>
-            All report contents are visible to recipients. Enable PIN protection for added security.
-          </div>
-        </div>
-      </div>
-
-      {/* PIN Protection — after warning */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: `${space[2]} 0`, marginBottom: pinEnabled ? space[2] : space[3],
-      }}>
-        <span style={{ fontSize: font.size.sm, color: color.textDefault, fontWeight: font.weight.medium }}>
-          PIN Protection
-        </span>
-        <button
-          type="button"
-          onClick={() => onPinEnabledChange(!pinEnabled)}
-          style={{
-            width: '36px', height: '20px', borderRadius: radius.full, border: 'none',
-            backgroundColor: pinEnabled ? color.primary : color.neutral300,
-            cursor: 'pointer', position: 'relative', transition: `background-color ${transition.fast}`, padding: 0,
-          }}
-        >
-          <div style={{
-            width: '16px', height: '16px', borderRadius: '50%', backgroundColor: color.white,
-            position: 'absolute', top: '2px', left: pinEnabled ? '18px' : '2px',
-            transition: `left ${transition.fast}`, boxShadow: shadow.sm,
-          }} />
-        </button>
-      </div>
-      {pinEnabled && (
-        <div style={{ marginBottom: space[3] }}>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={pin}
-            onChange={(e) => onPinChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-            placeholder="4-6 digit PIN"
-            style={{
-              width: '100%', height: '36px', padding: `0 ${space[3]}`,
-              fontSize: font.size.sm, fontFamily: font.family, color: color.textDefault,
-              backgroundColor: color.white, border: `1px solid ${color.borderDefault}`,
-              borderRadius: radius.md, outline: 'none', boxSizing: 'border-box' as const,
-              letterSpacing: '0.2em', textAlign: 'center',
-            }}
-          />
-          <span style={{ fontSize: font.size['2xs'], color: color.textPlaceholder, marginTop: space[1], display: 'block' }}>
-            Recipients will need this PIN to view
-          </span>
-        </div>
-      )}
-
-      {/* QR expanded */}
       {showQR && (
-        <div style={{ marginBottom: space[3] }}>
+        <div style={{ marginTop: space[4] }}>
           <QRCodePreview link={reportLink} />
           <div style={{ textAlign: 'center', fontSize: font.size.xs, color: color.textSubtle }}>
-            Scan to open report
+            Scan to open the report
           </div>
         </div>
       )}
-
-      {/* Bottom: social icons + Copy link */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderTop: `1px solid ${color.borderDefault}`, paddingTop: space[4],
-      }}>
-        <div style={{ display: 'flex', gap: space[2] }}>
-          {/* WhatsApp — cleaner icon */}
-          <SocialIcon
-            label="WhatsApp"
-            onClick={() => {}}
-            icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.72.44 3.34 1.21 4.75L2 22l5.37-1.17C8.72 21.56 10.32 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="1.8" fill="none" />
-                <path d="M16.5 14.38c-.25-.12-1.47-.72-1.7-.8-.23-.08-.39-.12-.56.12-.17.25-.64.8-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.38-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.44.12-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.42-.14 0-.31-.02-.48-.02s-.44.06-.67.31c-.23.25-.87.85-.87 2.08s.89 2.41 1.02 2.58c.12.17 1.76 2.68 4.26 3.76.6.26 1.06.41 1.42.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.17-.48-.29z" fill="currentColor" />
-              </svg>
-            }
-          />
-          {/* WeChat — cleaner icon */}
-          <SocialIcon
-            label="WeChat"
-            onClick={() => {}}
-            icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M9 4C5.13 4 2 6.58 2 9.8c0 1.76.95 3.35 2.46 4.44l-.62 1.87 2.2-1.1c.92.26 1.9.4 2.93.4.33 0 .66-.02.98-.05" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M9.97 14.95c-.33.03-.66.05-1 .05" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <path d="M22 14.2c0-2.76-2.69-5-6-5s-6 2.24-6 5 2.69 5 6 5c.73 0 1.43-.1 2.08-.3l1.72.86-.49-1.46C20.88 17.6 22 16.02 22 14.2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="7" cy="8.5" r="0.8" fill="currentColor" /><circle cx="11" cy="8.5" r="0.8" fill="currentColor" />
-                <circle cx="14" cy="13.5" r="0.8" fill="currentColor" /><circle cx="18" cy="13.5" r="0.8" fill="currentColor" />
-              </svg>
-            }
-          />
-          {/* QR — cleaner icon */}
-          <SocialIcon
-            label="QR Code"
-            onClick={() => setShowQR(!showQR)}
-            icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="8" height="8" rx="1" /><rect x="13" y="3" width="8" height="8" rx="1" /><rect x="3" y="13" width="8" height="8" rx="1" />
-                <rect x="6" y="6" width="2" height="2" fill="currentColor" stroke="none" /><rect x="16" y="6" width="2" height="2" fill="currentColor" stroke="none" /><rect x="6" y="16" width="2" height="2" fill="currentColor" stroke="none" />
-                <path d="M13 13h2v2h-2zM17 13h2v2h-2zM13 17h2v2h-2zM17 17h4v4h-4z" strokeWidth="1.5" />
-              </svg>
-            }
-          />
-        </div>
-
-        {/* Copy link — primary color, design system radius */}
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          style={{
-            display: 'flex', alignItems: 'center', gap: space[2],
-            height: 40, padding: `0 ${space[5]}`,
-            borderRadius: radius.md,
-            border: 'none',
-            backgroundColor: color.primary,
-            color: color.textOnPrimary,
-            fontSize: font.size.sm,
-            fontWeight: font.weight.medium,
-            fontFamily: font.family,
-            cursor: 'pointer',
-            transition: `background-color ${transition.fast}`,
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--ds-color-primary-hover)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = color.primary; }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-          </svg>
-          {copied ? 'Copied!' : 'Copy link'}
-        </button>
-      </div>
     </Modal>
   );
 }

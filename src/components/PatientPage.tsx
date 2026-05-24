@@ -15,6 +15,8 @@ import {
   Notification,
 } from '../design-system';
 import { DSCoreShell, type DSCoreNavId } from './dscore/DSCoreShell';
+import { PatientHeaderBar } from '../info/components/PatientSection/PatientHeaderBar';
+import type { Patient } from '../info/types';
 import { Modal } from '../design-system';
 import { OrdersTab } from './patient/OrdersTab';
 import { TreatmentsTab } from './patient/TreatmentsTab';
@@ -92,6 +94,16 @@ const SORT_OPTIONS = [
 
 const PATIENT_DISPLAY_NAME = 'DS Core, Demo';
 
+// Patient identity for the shared header bar (mirrors the previous title/meta).
+const HEADER_PATIENT: Patient = {
+  id: 'ds-core-demo',
+  firstName: 'DS Core,',
+  lastName: 'Demo',
+  gender: 'male',
+  dateOfBirth: '1985-09-01',
+  chartNumber: 'DentsplySironaR2',
+};
+
 export default function PatientPage({ onBackToHome, onNavigate }: PatientPageProps) {
   const [search, setSearch] = useState('');
   const [mediaType, setMediaType] = useState('all');
@@ -107,6 +119,7 @@ export default function PatientPage({ onBackToHome, onNavigate }: PatientPagePro
   const [treatments, setTreatments] = useState<PatientTreatment[]>(SEED_PATIENT_TREATMENTS);
   const [createdNotice, setCreatedNotice] = useState<{ kind: 'order' | 'treatment'; status: 'draft' | 'submitted'; label: string; orderId?: string } | null>(null);
   const [treatmentWizardOpen, setTreatmentWizardOpen] = useState(false);
+  const [orderWizardOpen, setOrderWizardOpen] = useState(false);
   const [openOrderId, setOpenOrderId] = useState<string | null>(null);
   const [duplicateSource, setDuplicateSource] = useState<PatientOrder | null>(null);
 
@@ -169,27 +182,33 @@ export default function PatientPage({ onBackToHome, onNavigate }: PatientPagePro
     <DSCoreShell
       active="patients"
       unread={1}
+      hideNav
       onNavigate={(id) => {
         if (id === 'home' && onBackToHome) onBackToHome();
         else onNavigate?.(id);
       }}
     >
+      {/* Full-width white patient header (edge-to-edge, like the dedicated
+          top page). */}
+      <PageHeader
+        onBackToHome={onBackToHome}
+        onScheduleClick={() => setScheduleOpen(true)}
+        onStartOrder={() => {
+          setActiveTab('orders');
+          setOrderWizardOpen(true);
+        }}
+        onCreateTreatment={() => {
+          setActiveTab('treatments');
+          setTreatmentWizardOpen(true);
+        }}
+      />
+
       <div
         style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '24px 40px 80px',
+          width: '100%',
+          padding: '16px 32px 80px',
         }}
       >
-        <PageHeader
-          onBackToHome={onBackToHome}
-          onScheduleClick={() => setScheduleOpen(true)}
-          onCreateTreatment={() => {
-            setActiveTab('treatments');
-            setTreatmentWizardOpen(true);
-          }}
-        />
-
         {bookingConfirmed && (
           <Notification
             type="success"
@@ -220,7 +239,7 @@ export default function PatientPage({ onBackToHome, onNavigate }: PatientPagePro
           items={tabs}
           activeId={activeTab}
           onChange={setActiveTab}
-          style={{ marginTop: '32px', marginBottom: '24px' }}
+          style={{ marginTop: '8px', marginBottom: '24px' }}
         />
 
         {activeTab === 'media' && (
@@ -248,6 +267,8 @@ export default function PatientPage({ onBackToHome, onNavigate }: PatientPagePro
             onOrderCreated={handleOrderCreated}
             onSaveTemplate={handleSaveTemplate}
             onOpenOrder={(id) => setOpenOrderId(id)}
+            externalOpen={orderWizardOpen}
+            onExternalOpenChange={setOrderWizardOpen}
           />
         )}
 
@@ -317,72 +338,197 @@ export default function PatientPage({ onBackToHome, onNavigate }: PatientPagePro
    Page header — back link, title + meta, action buttons
    ============================================================================ */
 
-function PageHeader({ onBackToHome, onScheduleClick, onCreateTreatment }: { onBackToHome?: () => void; onScheduleClick: () => void; onCreateTreatment: () => void }) {
+function PageHeader({
+  onBackToHome,
+  onScheduleClick,
+  onStartOrder,
+  onCreateTreatment,
+}: {
+  onBackToHome?: () => void;
+  onScheduleClick: () => void;
+  onStartOrder: () => void;
+  onCreateTreatment: () => void;
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
-      <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-        <button
-          type="button"
-          onClick={onBackToHome}
+    <div
+      style={{
+        backgroundColor: 'var(--ads-bg-surface)',
+        borderBottom: '1px solid var(--ads-border-subtle)',
+        padding: '20px 32px',
+      }}
+    >
+      <button
+        type="button"
+        onClick={onBackToHome}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: 'none',
+          border: 'none',
+          cursor: onBackToHome ? 'pointer' : 'default',
+          padding: 0,
+          marginBottom: '16px',
+          color: 'var(--ads-text-primary)',
+          fontFamily: 'var(--ads-font-sans)',
+          fontSize: '14px',
+          lineHeight: '20px',
+        }}
+      >
+        <Icon name="chevron-left" size={20} color="var(--ads-text-primary)" />
+        <span>Home</span>
+      </button>
+
+      {/* Same patient header used in the Info page (option 5). Right side:
+          edit patient + the "Start new order" split menu (Treatment / Canvas). */}
+      <PatientHeaderBar
+        patient={HEADER_PATIENT}
+        actions={
+          <>
+            <SecondaryButton
+              size={44}
+              aria-label="Edit patient info"
+              title="Edit patient info"
+              style={{ width: 44, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <EditPatientIcon />
+            </SecondaryButton>
+            <StartOrderMenu
+              onStartOrder={onStartOrder}
+              onCreateTreatment={onCreateTreatment}
+              onCanvas={onScheduleClick}
+            />
+          </>
+        }
+      />
+    </div>
+  );
+}
+
+/* Split "Start new order" button: primary action + chevron that opens a menu
+   of secondary options (Treatment, Canvas). */
+function StartOrderMenu({
+  onStartOrder,
+  onCreateTreatment,
+  onCanvas,
+}: {
+  onStartOrder: () => void;
+  onCreateTreatment: () => void;
+  onCanvas: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const select = (fn: () => void) => { setOpen(false); fn(); };
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'stretch' }}>
+        <PrimaryButton
+          size={44}
+          onClick={onStartOrder}
+          style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+        >
+          <Icon name="plus" size={18} color="var(--ads-icon-on-color-primary)" />
+          Start new order
+        </PrimaryButton>
+        <PrimaryButton
+          size={44}
+          aria-label="More order options"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
           style={{
+            width: 40,
+            padding: 0,
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            background: 'none',
-            border: 'none',
-            cursor: onBackToHome ? 'pointer' : 'default',
-            padding: 0,
-            marginBottom: '8px',
-            color: 'var(--ads-text-primary)',
-            fontFamily: 'var(--ads-font-sans)',
-            fontSize: '14px',
-            lineHeight: '20px',
+            justifyContent: 'center',
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+            marginLeft: '1px',
           }}
         >
-          <Icon name="chevron-left" size={20} color="var(--ads-text-primary)" />
-          <span>Home</span>
-        </button>
-        <h1
-          style={{
-            fontFamily: 'var(--ads-font-sans)',
-            fontWeight: 500,
-            fontSize: '28px',
-            lineHeight: '36px',
-            letterSpacing: '-0.01em',
-            color: 'var(--ads-text-primary)',
-            margin: 0,
-          }}
-        >
-          DS Core, Demo
-        </h1>
-        <p
-          style={{
-            fontFamily: 'var(--ads-font-sans)',
-            fontSize: '14px',
-            lineHeight: '20px',
-            color: 'var(--ads-text-muted)',
-            margin: '6px 0 0',
-          }}
-        >
-          September 01, 1985 — ID DentsplySironaR2
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-        <SecondaryButton size={44}>
-          <CanvasIcon />
-          Canvas
-        </SecondaryButton>
-        <SecondaryButton size={44} onClick={onCreateTreatment}>
-          <CreateTreatmentIcon />
-          Create Treatment
-        </SecondaryButton>
-        <PrimaryButton size={44} onClick={onScheduleClick}>
-          <CalendarPlusIcon />
-          Schedule appointment
+          <Icon name="chevron-down" size={18} color="var(--ads-icon-on-color-primary)" />
         </PrimaryButton>
       </div>
+
+      {open && (
+        <div
+          role="menu"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 6px)',
+            right: 0,
+            minWidth: 200,
+            backgroundColor: 'var(--ads-bg-surface)',
+            border: '1px solid var(--ads-border-subtle)',
+            borderRadius: 'var(--ads-radius-md)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+            padding: '6px',
+            zIndex: 50,
+          }}
+        >
+          <OrderMenuItem icon={<CreateTreatmentIcon />} label="Treatment" onClick={() => select(onCreateTreatment)} />
+          <OrderMenuItem icon={<CanvasIcon />} label="Canvas" onClick={() => select(onCanvas)} />
+        </div>
+      )}
     </div>
+  );
+}
+
+function OrderMenuItem({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        width: '100%',
+        padding: '10px 12px',
+        border: 'none',
+        borderRadius: 'var(--ads-radius-sm)',
+        background: hover ? 'var(--ads-background-subtle-hover)' : 'transparent',
+        cursor: 'pointer',
+        textAlign: 'left',
+        fontFamily: 'var(--ads-font-sans)',
+        fontSize: '14px',
+        lineHeight: '20px',
+        color: 'var(--ads-text-primary)',
+      }}
+    >
+      <span style={{ display: 'inline-flex', flexShrink: 0 }}>{icon}</span>
+      {label}
+    </button>
+  );
+}
+
+function EditPatientIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M22.5 19.5H1.5V21H22.5V19.5Z" fill="currentColor" />
+      <path d="M19.05 6.75C19.65 6.15 19.65 5.25 19.05 4.65L16.35 1.95C15.75 1.35 14.85 1.35 14.25 1.95L3 13.2V18H7.8L19.05 6.75ZM15.3 3L18 5.7L15.75 7.95L13.05 5.25L15.3 3ZM4.5 16.5V13.8L12 6.3L14.7 9L7.2 16.5H4.5Z" fill="currentColor" />
+    </svg>
   );
 }
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "./design-system/ThemeProvider";
+import { NotificationHost } from "./design-system/notify";
 import App from "./App.tsx";
 import "./design-system/theme.css";
 import "./index.css";
@@ -49,6 +50,7 @@ if (!root) {
     <ErrorBoundary>
       <ThemeProvider>
         <App />
+        <NotificationHost />
       </ThemeProvider>
     </ErrorBoundary>
   );

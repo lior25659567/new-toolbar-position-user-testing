@@ -1259,7 +1259,13 @@ html, body {
 .nav-group-chev { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 16px; color: var(--ads-text-tertiary); transform: rotate(-90deg); transition: transform var(--ads-duration-base) var(--ads-ease-standard); }
 .nav-group-chev.open { transform: rotate(0deg); }
 .nav-group-chev svg { display: block; }
-.nav-sub { display: flex; flex-direction: column; gap: 0; padding-bottom: 4px; }
+/* Sub-items are indented with a subtle vertical guide so the parent→child
+   hierarchy reads at a glance. The guide aligns under the group icon. */
+.nav-sub { display: flex; flex-direction: column; gap: 0; padding: 2px 0 4px 11px; margin: 0 8px 0 21px; border-left: 1px solid var(--ads-border-subtle); }
+.nav-sub-item { margin: 2px 0; width: auto; }
+/* Parent group containing the active page: weight up the label as a "you are here" cue. */
+.nav-group.has-active > .nav-group-head .nav-group-label { font-weight: 600; }
+.nav-group.has-active > .nav-group-head .nav-group-icon { color: var(--ads-blue-550); }
 .left-rail.collapsed .nav-group-head { padding: 10px; justify-content: center; gap: 0; width: 40px; margin: 2px auto; }
 .left-rail.collapsed .nav-group-label,
 .left-rail.collapsed .nav-group-chev { display: none; }

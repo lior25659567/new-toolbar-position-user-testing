@@ -46,7 +46,9 @@ export function ToolButton({
 
   const animationProps = microAnimations
     ? {
-        animate: { scale: active ? 1.05 : 1 },
+        // Selected state is shown via the blue background — don't keep the
+        // button scaled up, which made the toolbar look like it expands.
+        animate: { scale: 1 },
         whileHover: { scale: 1.05 },
         whileTap: { scale: 0.9, transition: { type: "spring" as const, stiffness: 600, damping: 15 } },
         transition: { type: "spring" as const, stiffness: 500, damping: 10 },

@@ -163,7 +163,7 @@ export function ToothSpecCard({ specs, expanded, onToggle, dispatch }: ToothSpec
                       height: "32px",
                       padding: "0 10px",
                       borderRadius: "var(--ads-radius-md)",
-                      border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? pColor : isHovered ? "var(--ads-text-muted)" : "var(--ads-border-subtle)"}`,
+                      border: `1px solid ${isSelected ? "var(--ads-btn-secondary-border-pressed)" : isHovered ? "var(--ads-text-muted)" : "var(--ads-border-subtle)"}`,
                       backgroundColor: "var(--ads-background-subtle-01)",
                       color: "var(--ads-text-primary)",
                       fontSize: "11px",

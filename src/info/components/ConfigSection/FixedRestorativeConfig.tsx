@@ -37,7 +37,7 @@ const d = (s: number, unified: boolean): React.CSSProperties => ({
 export function FixedRestorativeConfig({ state, toothColorMap, dispatch, hideNotesAndAttachments, unified }: Props) {
   const u = !!unified;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: u ? "24px" : "16px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <div style={{ ...d(0.12, u), overflow: "visible", position: "relative", zIndex: 10 }}>
         <DueDateSendTo dueDate={state.dueDate} sendTo={state.sendTo} dispatch={dispatch} />
       </div>

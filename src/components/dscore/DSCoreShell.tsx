@@ -23,10 +23,12 @@ export interface DSCoreShellProps {
   active: DSCoreNavId;
   onNavigate: (id: DSCoreNavId) => void;
   unread?: number;
+  /** Hide the left navigation rail (keeps the top header bar). */
+  hideNav?: boolean;
   children: React.ReactNode;
 }
 
-export function DSCoreShell({ active, onNavigate, unread = 0, children }: DSCoreShellProps) {
+export function DSCoreShell({ active, onNavigate, unread = 0, hideNav = false, children }: DSCoreShellProps) {
   return (
     <div
       style={{
@@ -39,7 +41,7 @@ export function DSCoreShell({ active, onNavigate, unread = 0, children }: DSCore
         overflow: 'hidden',
       }}
     >
-      <DSCoreLeftRail active={active} onSelect={onNavigate} />
+      {!hideNav && <DSCoreLeftRail active={active} onSelect={onNavigate} />}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <DSCoreTopBar unread={unread} />
         <div style={{ flex: 1, overflowY: 'auto' }}>{children}</div>

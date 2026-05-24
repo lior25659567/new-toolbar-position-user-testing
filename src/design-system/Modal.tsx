@@ -2,6 +2,7 @@ import * as React from "react";
 import { Icon } from "./Icon";
 import { PrimaryButton } from "./PrimaryButton";
 import { SecondaryButton } from "./SecondaryButton";
+import { useFocusTrap } from "./useFocusTrap";
 
 /**
  * Modal — back-compat shim using ADS .modal-* styles.
@@ -25,19 +26,22 @@ const SIZE_TO_WIDTH: Record<ModalSize, number> = { sm: 432, md: 656, lg: 880 };
 
 export function Modal({ open, onClose, title, children, footer, width, size = "sm" }: ModalProps) {
   const resolvedWidth = width ?? SIZE_TO_WIDTH[size];
+  const cardRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+  useFocusTrap(cardRef, open);
 
   if (!open) return null;
 
   return (
     <div className="modal-root">
-      <div className="modal-scrim" onClick={onClose} />
+      <div className="modal-scrim" onClick={onClose} aria-hidden="true" />
       <div
+        ref={cardRef}
         className="modal"
         role="dialog"
         aria-modal="true"

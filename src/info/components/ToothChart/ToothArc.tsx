@@ -33,12 +33,12 @@ export function ToothArc({ teeth, selectedTeeth, toothSpecs, toothColorMap, expa
   };
   return (
     <div style={{ display: "flex", alignItems: "stretch" }}>
-      <div style={{ flex: 1, display: "flex", gap: "8px" }}>
+      <div style={{ flex: 1, display: "flex", gap: "7px" }}>
         {teeth.slice(0, mid).map(renderTooth)}
       </div>
       {/* Midline spacer (divider line removed). */}
-      <div style={{ width: "49px", flexShrink: 0 }} />
-      <div style={{ flex: 1, display: "flex", gap: "8px" }}>
+      <div style={{ width: "42px", flexShrink: 0 }} />
+      <div style={{ flex: 1, display: "flex", gap: "7px" }}>
         {teeth.slice(mid).map(renderTooth)}
       </div>
     </div>

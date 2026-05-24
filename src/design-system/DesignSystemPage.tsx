@@ -1892,8 +1892,6 @@ function TemplatesSection() {
 export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
   const mainRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState("colors");
-  // Color-section preview mode: scoped to the swatch wrapper only, doesn't affect the rest of the page.
-  const [colorPreviewMode, setColorPreviewMode] = useState<"light" | "dark">("light");
   const [railCollapsed, setRailCollapsed] = useState(false);
   // Default: every group expanded. The group that contains the active section also stays open.
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set(NAV.map((g) => g.id)));
@@ -2044,21 +2042,10 @@ export function DesignSystemPage({ onBack }: DesignSystemPageProps) {
               <SectionHeading
                 id="colors"
                 title="Colors"
-                description="Align DS v2.0 (Deisgn-system 2.0/Design-System 2.0.md). Tokens resolve through CSS custom properties so light/dark modes are handled automatically. Use the toggle to preview dark mode on these swatches without flipping the rest of the page."
+                description="Aligned with DS v2.0 (Deisgn-system 2.0/Design-System 2.0.md). Tokens resolve through CSS custom properties, so light and dark modes are handled automatically."
               />
-              <div style={{ display: "flex", alignItems: "center", gap: space[3], marginBottom: space[6] }}>
-                <code style={{ fontFamily: font.mono, fontSize: font.size.xs, color: color.textLabel }}>
-                  Preview mode:
-                </code>
-                <SecondaryButton size={36} onClick={() => setColorPreviewMode(colorPreviewMode === "dark" ? "light" : "dark")}>
-                  {colorPreviewMode === "dark" ? "Switch to Light" : "Switch to Dark"}
-                </SecondaryButton>
-                <span style={{ fontSize: font.size["2xs"], color: color.textPlaceholder }}>
-                  Currently showing: <b>{colorPreviewMode}</b>
-                </span>
-              </div>
 
-              <div data-theme={colorPreviewMode === "dark" ? "align-dark" : "align-light"} style={{ background: "var(--ads-background-subtle-00)", padding: space[4], borderRadius: radius.md, border: `1px solid var(--ads-border-subtle)` }}>
+              <div data-theme="align-light" style={{ background: "var(--ads-background-subtle-00)", padding: space[4], borderRadius: radius.md, border: `1px solid var(--ads-border-subtle)` }}>
                 {/* Background tokens — 27 v2.0 */}
                 <ColorGroup title="Background" items={[
                   { token: "background-subtle-00",     value: "var(--ads-background-subtle-00)",     usage: "Page / canvas" },

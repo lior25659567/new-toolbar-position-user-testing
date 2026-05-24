@@ -1,4 +1,5 @@
 import React from 'react';
+import { Lock, BatteryFull as BatteryFullIcon, Bell, Settings as SettingsIcon } from 'lucide-react';
 import svgPaths from '@/imports/svg-tl25ixc7nv';
 import ViewLayersPanel from './ViewLayersPanel';
 import JawSelector from './JawSelector';
@@ -255,13 +256,7 @@ function WizardTopbarSwitcher({ currentStep, onStepChange }: { currentStep: Wiza
 // ============================================================================
 
 function Locked() {
-  return (
-    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
-      <g id="Locked">
-        <path d={svgPaths.p215dc800} fill="black" fillOpacity="0.63" id="Vector" />
-      </g>
-    </svg>
-  );
+  return <Lock className="block" size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />;
 }
 
 function Icon() {
@@ -273,16 +268,7 @@ function Icon() {
 }
 
 function BatteryFull() {
-  return (
-    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
-      <g id="Battery full">
-        <g id="Vector">
-          <path d={svgPaths.p117a6a00} fill="black" fillOpacity="0.63" />
-          <path d="M22 20V12H8V20H22Z" fill="black" fillOpacity="0.63" />
-        </g>
-      </g>
-    </svg>
-  );
+  return <BatteryFullIcon className="block" size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />;
 }
 
 function Icon1() {
@@ -294,13 +280,7 @@ function Icon1() {
 }
 
 function NotificationOutline() {
-  return (
-    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
-      <g id="Notification outline">
-        <path d={svgPaths.p3ab1f880} fill="black" fillOpacity="0.63" id="Vector" />
-      </g>
-    </svg>
-  );
+  return <Bell className="block" size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />;
 }
 
 function Icon2() {
@@ -312,16 +292,7 @@ function Icon2() {
 }
 
 function Settings() {
-  return (
-    <svg className="block size-[24px]" fill="none" viewBox="0 0 32 32">
-      <g id="Settings">
-        <g id="Vector">
-          <path d={svgPaths.p289c8d00} fill="black" fillOpacity="0.63" />
-          <path d={svgPaths.p2be96b00} fill="black" fillOpacity="0.63" />
-        </g>
-      </g>
-    </svg>
-  );
+  return <SettingsIcon className="block" size={24} color="var(--ads-icon-secondary)" strokeWidth={1.5} />;
 }
 
 function Icon3() {

@@ -90,7 +90,7 @@ export function ToothDetailPanel({ toothNumbers, specs, dispatch }: ToothDetailP
                   height: "36px",
                   padding: "0 12px",
                   borderRadius: "var(--ads-radius-sm)",
-                  border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? color : isHovered ? "var(--ads-text-muted)" : "var(--ads-border-subtle)"}`,
+                  border: `1px solid ${isSelected ? "var(--ads-btn-secondary-border-pressed)" : isHovered ? "var(--ads-text-muted)" : "var(--ads-border-subtle)"}`,
                   backgroundColor: "var(--ads-background-subtle-01)",
                   color: "var(--ads-text-primary)",
                   fontSize: "13px",

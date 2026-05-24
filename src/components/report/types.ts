@@ -60,7 +60,10 @@ export interface TreatmentBlock extends BaseBlock {
 
 export interface CostSummaryBlock extends BaseBlock {
   type: 'cost-summary';
-  items: CostItem[];
+  /** Free-text summary content. */
+  content: string;
+  /** @deprecated legacy itemized list — kept optional for back-compat. */
+  items?: CostItem[];
 }
 
 export interface CostItem {
@@ -198,7 +201,7 @@ export function createTreatmentBlock(): TreatmentBlock {
 }
 
 export function createCostSummaryBlock(): CostSummaryBlock {
-  return { id: uid(), type: 'cost-summary', collapsed: false, items: [{ id: uid(), description: '', amount: '' }] };
+  return { id: uid(), type: 'cost-summary', collapsed: false, content: '' };
 }
 
 export function createComparisonBlock(): ComparisonBlock {
@@ -256,7 +259,7 @@ export const BLOCK_CATALOG: { type: BlockType; label: string; description: strin
   { type: 'section-title', label: 'Section Title',    description: 'Section heading divider' },
   { type: 'diagnosis',     label: 'Diagnosis',        description: 'Diagnosis with tooth reference' },
   { type: 'treatment',     label: 'Treatment',        description: 'Treatment plan and cost' },
-  { type: 'cost-summary',  label: 'Cost Summary',     description: 'Itemized cost table' },
+  { type: 'cost-summary',  label: 'Cost Summary',     description: 'Free-text cost summary' },
   { type: 'comparison',    label: 'Before / After',   description: 'Side-by-side comparison' },
   { type: 'rx',              label: 'Prescription',     description: 'Medication & dosage details' },
   { type: 'next-appointment', label: 'Next Appointment', description: 'Schedule follow-up visit' },
@@ -283,7 +286,7 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     blocks: [
       { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Pre-operative scan', notes: '', teeth: [19], diagnosis: 'Missing tooth', treatment: 'Implant placement', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: true },
       { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Implant planning view', notes: '', teeth: [19], diagnosis: '', treatment: '', estimatedCost: '', treatmentDate: '', annotations: [], showClinicalFields: false },
-      { type: 'cost-summary', collapsed: false, items: [{ id: 'tpl-1', description: 'Implant placement', amount: '$2,500' }, { id: 'tpl-2', description: 'Abutment', amount: '$800' }, { id: 'tpl-3', description: 'Crown', amount: '$1,200' }] },
+      { type: 'cost-summary', collapsed: false, content: 'Implant placement — $2,500\nAbutment — $800\nCrown — $1,200' },
       { type: 'rx', collapsed: false, notes: '', items: [{ id: 'tpl-rx1', medication: 'Amoxicillin', dosage: '500mg', frequency: '3x daily', duration: '7 days' }, { id: 'tpl-rx2', medication: 'Ibuprofen', dosage: '600mg', frequency: 'Every 6 hours as needed', duration: '5 days' }] },
       { type: 'patient-instructions', collapsed: false, title: 'Post-Surgical Instructions', items: [{ id: 'tpl-pi1', text: 'Apply ice packs for 20 min on / 20 min off for the first 24 hours' }, { id: 'tpl-pi2', text: 'Eat soft foods for the first 48 hours' }, { id: 'tpl-pi3', text: 'Do not rinse, spit, or use a straw for 24 hours' }, { id: 'tpl-pi4', text: 'Take prescribed antibiotics as directed' }] },
       { type: 'next-appointment', collapsed: false, date: '', time: '', procedure: 'Post-op check & suture removal', instructions: 'Bring any medications you are currently taking' },
@@ -296,7 +299,7 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     blocks: [
       { type: 'image', collapsed: false, file: null, previewUrl: '', title: 'Initial tooth condition', notes: '', teeth: [5], diagnosis: 'Fractured cusp', treatment: 'Full crown restoration', estimatedCost: '$1,200', treatmentDate: '', annotations: [], showClinicalFields: true },
       { type: 'comparison', collapsed: false, labelA: 'Before prep', labelB: 'After prep', notes: '', imageA: { file: null, previewUrl: '' }, imageB: { file: null, previewUrl: '' } },
-      { type: 'cost-summary', collapsed: false, items: [{ id: 'tpl-c1', description: 'Crown preparation', amount: '$400' }, { id: 'tpl-c2', description: 'Ceramic crown', amount: '$1,200' }] },
+      { type: 'cost-summary', collapsed: false, content: 'Crown preparation — $400\nCeramic crown — $1,200' },
       { type: 'patient-instructions', collapsed: false, title: 'Temporary Crown Care', items: [{ id: 'tpl-ci1', text: 'Avoid sticky or hard foods on the temporary crown' }, { id: 'tpl-ci2', text: 'Brush gently around the temporary crown' }, { id: 'tpl-ci3', text: 'Call the office if the temporary crown comes loose' }] },
       { type: 'next-appointment', collapsed: false, date: '', time: '', procedure: 'Permanent crown cementation', instructions: 'Appointment takes approximately 30 minutes' },
     ],
