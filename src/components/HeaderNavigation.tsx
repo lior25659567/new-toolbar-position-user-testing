@@ -30,6 +30,11 @@ interface HeaderNavigationProps {
    *  in the same centre slot instead. Used by the Info-page wizard variants
    *  so their step indicator lives in the global top header. */
   customCenterSlot?: React.ReactNode;
+  /** Currently selected jaw, driving which 3D model is shown. */
+  selectedJaw?: 'upper' | 'lower' | 'both';
+  /** Fired when the user changes the jaw via the scan Jaw Selector or the
+   *  view-mode Layers panel. */
+  onJawChange?: (jaw: 'upper' | 'lower' | 'both') => void;
 }
 
 // ============================================================================
@@ -422,6 +427,8 @@ export default function HeaderNavigation({
   onModelVisibilityChange,
   hideWizardTopbar = false,
   customCenterSlot,
+  selectedJaw = 'lower',
+  onJawChange,
 }: HeaderNavigationProps) {
   const isViewMode = currentStep === 'view';
   const isInfoMode = currentStep === 'info';
@@ -452,9 +459,18 @@ export default function HeaderNavigation({
           style={{ top: `${72 + jawImageOffset}px`, zIndex: 20 }}
         >
           {isViewMode && scanTabs ? (
-            <ViewLayersPanel scanTabs={scanTabs} onOpacityChange={onModelOpacityChange} onVisibilityChange={onModelVisibilityChange} />
+            <ViewLayersPanel
+              scanTabs={scanTabs}
+              onOpacityChange={onModelOpacityChange}
+              onVisibilityChange={onModelVisibilityChange}
+              jawSelection={selectedJaw}
+              onJawSelectionChange={onJawChange}
+            />
           ) : (
-            <JawSelector defaultValue="lower" />
+            <JawSelector
+              value={selectedJaw === 'both' ? 'bite' : selectedJaw}
+              onChange={(v) => onJawChange?.(v === 'bite' ? 'both' : v)}
+            />
           )}
         </div>
       )}

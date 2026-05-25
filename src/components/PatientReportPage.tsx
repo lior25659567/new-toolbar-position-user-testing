@@ -814,9 +814,19 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
   const [previewOpen, setPreviewOpen] = useState(false);
   const [signatureOpen, setSignatureOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  // When the user tries to share before signing, we open the signature modal
+  // first and remember to continue to Share once they save.
+  const [shareAfterSign, setShareAfterSign] = useState(false);
 
   const handleExportOrShare = (action: 'share' | 'export') => {
     if (action === 'share') {
+      // A signature is required before a report can be shared.
+      if (!settings.signatureUrl) {
+        notify.info('Please sign the report before sharing.');
+        setShareAfterSign(true);
+        setSignatureOpen(true);
+        return;
+      }
       setShareOpen(true);
     } else {
       notify.success('Report exported as PDF');
@@ -1269,11 +1279,13 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
 
       <SignatureModal
         open={signatureOpen}
-        onClose={() => setSignatureOpen(false)}
+        onClose={() => { setSignatureOpen(false); setShareAfterSign(false); }}
         onSave={(url, method) => {
           setSettings((s) => ({ ...s, signatureUrl: url, signatureMethod: method }));
           setSaved(false); setTimeout(() => setSaved(true), 1500);
           notify.success('Signature saved');
+          // If the user reached signing by trying to share, continue to Share.
+          if (shareAfterSign) { setShareAfterSign(false); setShareOpen(true); }
         }}
       />
 

@@ -23,6 +23,11 @@ interface ViewLayersPanelProps {
   scanTabs: ScanTab[];
   onOpacityChange?: (opacity: number) => void;
   onVisibilityChange?: (layerVisibility: Record<string, boolean>) => void;
+  /** Controlled jaw selection. When provided, the panel reflects this value
+   *  instead of its own internal state (used to drive the shared 3D model). */
+  jawSelection?: JawSelection;
+  /** Fired when the user picks a different jaw. */
+  onJawSelectionChange?: (jaw: JawSelection) => void;
 }
 
 const makeInitialState = (): LayerState => ({
@@ -35,9 +40,15 @@ const makeInitialState = (): LayerState => ({
 
 const isLayerVisible = (s: LayerState) => s.visibleUpper || s.visibleLower;
 
-export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilityChange }: ViewLayersPanelProps) {
+export default function ViewLayersPanel({ scanTabs, onOpacityChange, onVisibilityChange, jawSelection: jawSelectionProp, onJawSelectionChange }: ViewLayersPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [jawSelection, setJawSelection] = useState<JawSelection>('both');
+  const [internalJawSelection, setInternalJawSelection] = useState<JawSelection>('both');
+  // Controlled when a jawSelection prop is supplied; otherwise self-managed.
+  const jawSelection = jawSelectionProp ?? internalJawSelection;
+  const setJawSelection = (jaw: JawSelection) => {
+    if (jawSelectionProp === undefined) setInternalJawSelection(jaw);
+    onJawSelectionChange?.(jaw);
+  };
   const [layerStates, setLayerStates] = useState<Record<string, LayerState>>(() => {
     const initial: Record<string, LayerState> = {};
     scanTabs.forEach((tab) => {

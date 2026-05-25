@@ -68,6 +68,7 @@
     },
     server: {
       port: 3000,
+      strictPort: true, // fail loudly instead of drifting to 5173/other ports
       host: true, // Allow access from network IP addresses (0.0.0.0)
       open: true,
     },

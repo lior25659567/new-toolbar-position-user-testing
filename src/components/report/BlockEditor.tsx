@@ -417,10 +417,12 @@ const GALLERY_IMAGES: GalleryImage[] = [
 
 // ─── Image Upload Zone (change image within a card) ─────────────────────────
 
-function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate, isAnnotated }: {
+function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onGalleryMultiSelect, onAnnotate, isAnnotated }: {
   previewUrl: string;
   onFileSelect: (file: File, url: string) => void;
   onGallerySelect: (url: string) => void;
+  /** When provided, the gallery allows picking several images at once. */
+  onGalleryMultiSelect?: (urls: string[]) => void;
   onAnnotate?: () => void;
   isAnnotated?: boolean;
 }) {
@@ -513,6 +515,8 @@ function ImageUploadZone({ previewUrl, onFileSelect, onGallerySelect, onAnnotate
       {showGallery && ReactDOM.createPortal(
         <GalleryOverlayModal
           onSelect={(url) => { onGallerySelect(url); setShowGallery(false); }}
+          multiSelect={!!onGalleryMultiSelect}
+          onMultiSelect={onGalleryMultiSelect ? (urls) => { onGalleryMultiSelect(urls); setShowGallery(false); } : undefined}
           onClose={() => setShowGallery(false)}
         />,
         document.body
@@ -1454,9 +1458,11 @@ const TREATMENT_ITEMS = [
 
 // ─── Block Editors ──────────────────────────────────────────────────────────
 
-function ImageCardEditor({ block, onUpdate }: {
+function ImageCardEditor({ block, onUpdate, onGalleryMulti }: {
   block: ImageBlock;
   onUpdate: (updates: Partial<ImageBlock>) => void;
+  /** Apply several gallery images: the first fills this block, the rest become new image blocks. */
+  onGalleryMulti?: (urls: string[]) => void;
 }) {
   const [showAnnotation, setShowAnnotation] = useState(false);
   const [isAnnotated, setIsAnnotated] = useState(false);
@@ -1471,6 +1477,14 @@ function ImageCardEditor({ block, onUpdate }: {
         previewUrl={block.previewUrl}
         onFileSelect={(file, url) => { onUpdate({ file, previewUrl: url }); setIsAnnotated(false); originalUrlRef.current = url; }}
         onGallerySelect={(url) => { onUpdate({ file: null, previewUrl: url }); setIsAnnotated(false); originalUrlRef.current = url; }}
+        onGalleryMultiSelect={onGalleryMulti ? (urls) => {
+          if (urls.length === 0) return;
+          // Reset annotation state for the image that fills this block (urls[0]);
+          // the parent applies urls[0] here and appends the rest as new blocks.
+          setIsAnnotated(false);
+          originalUrlRef.current = urls[0];
+          onGalleryMulti(urls);
+        } : undefined}
         onAnnotate={block.previewUrl ? () => setShowAnnotation(true) : undefined}
         isAnnotated={isAnnotated}
       />
@@ -2079,6 +2093,29 @@ export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onB
     onBlockAdded?.(created.id);
   };
 
+  // Multi-select from within an image block's gallery: the first picked image
+  // fills the originating block, the rest are inserted as new image blocks
+  // right after it. Done in one onBlocksChange so the first-image update and
+  // the inserts aren't built from a stale `blocks` closure.
+  const applyGalleryMulti = (blockId: string, urls: string[]) => {
+    if (urls.length === 0) return;
+    const idx = blocks.findIndex((b) => b.id === blockId);
+    if (idx === -1) return;
+    const [first, ...rest] = urls;
+    const base = Date.now();
+    const created = rest.map((url, k) => ({
+      ...(createBlock('image') as ImageBlock),
+      id: `block-${base}-${k}`,
+      previewUrl: url,
+    }) as SupportedBlock);
+    const next = blocks.map((b) =>
+      b.id === blockId ? ({ ...b, file: null, previewUrl: first } as SupportedBlock) : b
+    );
+    next.splice(idx + 1, 0, ...created);
+    onBlocksChange(next);
+    if (created.length > 0) onBlockAdded?.(created[created.length - 1].id);
+  };
+
   // Drag and drop
   const handleDragStart = (i: number) => setDragIndex(i);
   const handleDragOver = (e: React.DragEvent, i: number) => { e.preventDefault(); setDragOverIndex(i); };
@@ -2111,7 +2148,7 @@ export default function BlockEditor({ blocks, onBlocksChange, activeBlockId, onB
   const renderBlockContent = (block: SupportedBlock) => {
     switch (block.type) {
       case 'image':
-        return <ImageCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
+        return <ImageCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} onGalleryMulti={(urls) => applyGalleryMulti(block.id, urls)} />;
       case 'comparison':
         return <ComparisonCardEditor block={block} onUpdate={(u) => updateBlock(block.id, u)} />;
       case 'cost-summary':

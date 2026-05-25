@@ -4,6 +4,16 @@ import svgPaths from "./svg-vyw91xr0mn";
 import imgScreenshot20240318At1457BackgroundRemoved from "figma:asset/a1dfc57a055d32f098369f51df6fd0791a341b87.png";
 import TeethModel3D from "../components/TeethModel3D";
 import upperJawModel from "@/assets/3d-models/upper-jaw.ply?url";
+import lowerJawModel from "@/assets/3d-models/lower-jaw.ply?url";
+import bothJawsModel from "@/assets/3d-models/both-jaws.ply?url";
+
+type JawType = "upper" | "lower" | "both";
+const JAW_MODEL: Record<JawType, string> = {
+  // Swapped: the "upper" selection loads the lower-jaw model and vice versa.
+  upper: lowerJawModel,
+  lower: upperJawModel,
+  both: bothJawsModel,
+};
 import imgScreenshot20240318At1457BackgroundRemovedGrayscale from "figma:asset/d986e19df0e9c14222abc9c62ff49e0276238d2a.png";
 import imgScreenshot20240318At1457BackgroundRemovedFeedback from "figma:asset/7235f98944aa9efc68796aee3f4ed01c409cbea7.png";
 import imgScreenshot20240318At1457BackgroundRemovedGrayscaleFeedback from "figma:asset/d8e804204d336774af7dc7e2a6b5aeb59aa2b508.png";
@@ -94,7 +104,7 @@ function Component3DModelView({ activeButtons }: { activeButtons: Set<number> })
 }
 
 // Shared 3D model component that stays mounted across page switches
-function Component3DModelShared({ activeButtons, isViewPage, opacity = 100, visible = true }: { activeButtons: Set<number>; isViewPage: boolean; opacity?: number; visible?: boolean }) {
+function Component3DModelShared({ activeButtons, isViewPage, opacity = 100, visible = true, jaw = "lower" }: { activeButtons: Set<number>; isViewPage: boolean; opacity?: number; visible?: boolean; jaw?: JawType }) {
   // Check if monochrome button (index 0) is active
   const isMonochrome = activeButtons.has(0);
   // Check if feedback button (index 1) is active - only for scan page
@@ -116,7 +126,7 @@ function Component3DModelShared({ activeButtons, isViewPage, opacity = 100, visi
       }}
     >
       <TeethModel3D
-        modelUrl={upperJawModel}
+        modelUrl={JAW_MODEL[jaw]}
         width="100%"
         height="100%"
         backgroundColor="transparent"
@@ -2458,6 +2468,9 @@ export default function ScreenTemplate({
   const [patientName, setPatientName] = useState<string>('Mina Y.');
   const [modelOpacity, setModelOpacity] = useState<number>(100);
   const [modelVisible, setModelVisible] = useState<boolean>(true);
+  // Which jaw the shared 3D model shows — driven by the scan Jaw Selector and
+  // the view-mode Layers panel (both wired through HeaderNavigation).
+  const [selectedJaw, setSelectedJaw] = useState<JawType>('lower');
   
   // Use external state if provided, otherwise fall back to local state
   // When using external state, use initialPage prop (which contains currentPage from App.tsx)
@@ -2607,6 +2620,7 @@ export default function ScreenTemplate({
           isViewPage={currentPage === 'view'}
           opacity={modelOpacity}
           visible={modelVisible}
+          jaw={selectedJaw}
         />
       )}
       {currentPage === 'scan' && activeButtons.has(2) && (
@@ -2641,6 +2655,8 @@ export default function ScreenTemplate({
           const allVisible = Object.values(layerVis).every(Boolean);
           setModelVisible(allVisible);
         }}
+        selectedJaw={selectedJaw}
+        onJawChange={setSelectedJaw}
       />
 
       {/* Scan Tabs - only shown when showScanTabs is true (DedicatedTopToolbarPage) */}

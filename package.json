@@ -47,6 +47,7 @@
     "react-hook-form": "^7.55.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.2",
+    "rollup": "^4.60.4",
     "sonner": "^2.0.3",
     "tailwind-merge": "*",
     "three": "^0.152.2",
@@ -58,8 +59,8 @@
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^3.10.2",
-    "vite": "6.3.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "6.3.5"
   },
   "scripts": {
     "dev": "vite",

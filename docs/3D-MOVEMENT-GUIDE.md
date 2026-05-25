@@ -43,15 +43,16 @@ App.tsx
 
 ## 2. What moves when you use Scan/View
 
-On Scan and View there are **three** kinds of motion:
+On Scan and View there are **two** kinds of motion:
 
 | Kind | What moves | How you trigger it |
 |------|------------|-------------------|
 | **Orbit / zoom / pan** | Camera | Mouse or trackpad on the model |
 | **Margin line zoom** | Camera position (animated) | View toolbar — Margin Line button (index `3`) |
-| **Idle sway** | Model mesh (tiny rotation) | Automatic — always on while the scene runs |
 
-There is **no** mouse-follow rotation on Scan/View (that exists only on the separate Scan Guidance demo page).
+> **No idle sway on Scan/View.** The PLY model (`PLYModel`) used here is **static** — it has no `useFrame` animation. A small idle sway *is* coded in `STLModel`, `GLTFModel`, and `PlaceholderTeeth`, so you only see it if you swap in an STL/GLB model (see [§6](#6-idle-sway-only-applies-to-stlgltf-models)).
+
+There is also **no** mouse-follow rotation on Scan/View (that exists only on the separate Scan Guidance demo page).
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -60,7 +61,7 @@ There is **no** mouse-follow rotation on Scan/View (that exists only on the sepa
 │   Camera  ◄──── OrbitControls (your mouse)   │
 │   Camera  ◄──── CameraController (margin line) │
 │                                               │
-│   Group + Mesh  ◄── fixed tilt + subtle sway   │
+│   Group + Mesh  ◄── fixed tilt (PLY, no sway)  │
 │     upper-jaw.ply                             │
 └──────────────────────────────────────────────┘
 ```
@@ -172,24 +173,26 @@ To change how close margin line feels, edit `zoomedPosition` / `defaultPosition`
 
 ---
 
-## 6. Subtle model sway (`useFrame`)
+## 6. Idle sway only applies to STL/GLTF models
 
-The arch has a very small automatic rotation so it doesn’t look frozen:
+> **Common misconception.** The `upper-jaw.ply` model shown on Scan/View is rendered by `PLYModel`, which has **no `useFrame`** — so it does **not** sway on its own. On Scan/View the model only moves when *you* orbit it or when margin-line zoom animates the camera.
+
+A small idle rotation *is* implemented in the **other** loaders, in case you swap the model format:
 
 ```tsx
-// PLYModel in TeethModel3D.tsx
+// STLModel / GLTFModel / PlaceholderTeeth in TeethModel3D.tsx
 useFrame((state) => {
-  if (meshRef.current) {
+  if (meshRef.current) {            // modelRef in GLTFModel
     meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.2) * 0.05;
   }
 });
 ```
 
 - Runs every frame (~60fps) via React Three Fiber  
-- Only affects the **mesh**, not the camera  
-- Amplitude `0.05` is intentionally tiny  
+- Only affects the **mesh/group**, not the camera  
+- Amplitude `0.05` is intentionally tiny (`PlaceholderTeeth` uses `0.1` at speed `0.3`)  
 
-To disable sway on Scan/View, remove or gate this `useFrame` block in `PLYModel`.
+So if you replace `upper-jaw.ply` with an `.stl` or `.glb`, the model **will** start swaying. To add the same sway to the PLY path, give the `<mesh>` in `PLYModel` a ref and add a matching `useFrame`.
 
 ---
 
@@ -275,9 +278,9 @@ In `TeethModel3D.tsx` → `OrbitControls`:
 
 Drop a new `.ply` / `.stl` / `.glb` in `src/assets/3d-models/` and change the import URL in `ScreenTemplate.tsx` (and horizontal template if needed). You may need to retune `scale` and `rotation` for a good first frame.
 
-### Turn off auto-sway
+### Idle sway (STL/GLB models only)
 
-Comment out the `useFrame` rotation in `PLYModel` inside `TeethModel3D.tsx`.
+The Scan/View PLY model has no sway, so there is nothing to turn off there. If you swap to an `.stl` / `.glb` model and want to stop its idle sway, comment out the `useFrame` rotation in `STLModel` / `GLTFModel` inside `TeethModel3D.tsx`. To *add* sway to the PLY path instead, give its `<mesh>` a ref and add a `useFrame`.
 
 ---
 
@@ -312,8 +315,7 @@ flowchart TB
   subgraph three [TeethModel3D]
     OC[OrbitControls - mouse]
     CC[CameraController - margin line]
-    Sway[useFrame - subtle sway]
-    PLY[upper-jaw.ply mesh]
+    PLY[upper-jaw.ply mesh - static, no useFrame]
   end
 
   Scan --> Shared
@@ -321,7 +323,6 @@ flowchart TB
   Shared --> three
   OC --> Camera[Camera position / angle]
   CC --> Camera
-  Sway --> PLY
 ```
 
 ---
