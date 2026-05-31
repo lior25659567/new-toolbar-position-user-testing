@@ -1899,7 +1899,7 @@ export function AddBlockMenu({ onAdd, renderTrigger, onOpenChange, onAddImageGal
             fullWidth
             selected={open}
             onClick={handleOpen}
-            style={{ backgroundColor: color.bgSurface, boxShadow: shadow.sm }}
+            style={{ backgroundColor: color.bgSurface, boxShadow: 'none' }}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <line x1="7" y1="3" x2="7" y2="11" /><line x1="3" y1="7" x2="11" y2="7" />

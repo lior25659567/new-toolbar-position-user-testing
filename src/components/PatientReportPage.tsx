@@ -1057,7 +1057,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
           padding: `${space[4]} ${space[3]}`,
           display: 'flex',
           flexDirection: 'column',
-          gap: space[4],
+          gap: space[2],
           zIndex: 2,
         }}>
           {/* Templates — disclosure styled as a section-family row */}
@@ -1074,7 +1074,7 @@ const PatientReportPage = forwardRef<PatientReportPageHandle, PatientReportPageP
                 borderRadius: radius.md, cursor: 'pointer',
                 background: color.bgSurface,
                 border: `1px solid ${color.borderDefault}`,
-                boxShadow: shadow.sm,
+                boxShadow: 'none',
                 transition: `border-color ${transition.fast}`,
                 width: '100%', textAlign: 'left', fontFamily: font.family,
               }}

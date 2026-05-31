@@ -122,7 +122,7 @@ export default function BlockNavList({ blocks, activeBlockId, onSelect, onReorde
       })}
       {onAdd && (
         <div style={{
-          marginTop: blocks.length ? space[2] : 0,
+          marginTop: blocks.length ? space[6] : 0,
         }}>
           <AddBlockMenu onAdd={onAdd} onAddImageGallery={onAddImageGallery} />
         </div>
@@ -236,7 +236,7 @@ function NavRow({
         cursor: "pointer",
         background: color.bgSurface,
         border: `1px solid ${borderColor}`,
-        boxShadow: shadow.sm,
+        boxShadow: "none",
         transition: `border-color ${transition.fast}`,
         userSelect: "none",
       }}
