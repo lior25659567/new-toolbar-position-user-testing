@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/**)",
+      "Read(//Users/lywrbwm/.nvm/versions/**)"
+    ]
+  }
+}
