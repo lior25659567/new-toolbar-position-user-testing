@@ -24,12 +24,14 @@ interface Props {
   /** 0 = idle. Any non-zero value (re)starts the demo; changing it restarts. */
   runId: number;
   onDone: () => void;
+  /** Live playback rate (1× = authored pace). Picked up on the next wait. */
+  speedRef?: React.MutableRefObject<number>;
 }
 
 const ABORT = Symbol('demo-abort');
 const PATIENT = { patientName: 'Sarah Chen', birthDate: '03/15/1985', chartNumber: 'A-2048' };
 
-export default function ReportDemoOverlay({ pageRef, runId, onDone }: Props) {
+export default function ReportDemoOverlay({ pageRef, runId, onDone, speedRef }: Props) {
   const [cursor, setCursor] = useState<XY>({ x: -200, y: -200 });
   const [cursorVisible, setCursorVisible] = useState(false);
   const [clicking, setClicking] = useState(false);
@@ -56,7 +58,7 @@ export default function ReportDemoOverlay({ pageRef, runId, onDone }: Props) {
         const id = window.setTimeout(() => {
           timers.delete(id);
           aborted ? reject(ABORT) : resolve();
-        }, ms * SPEED);
+        }, ms * SPEED / (speedRef?.current ?? 1));
         timers.add(id);
       });
     const ensure = () => {

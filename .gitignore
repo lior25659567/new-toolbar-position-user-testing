@@ -34,3 +34,6 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Local demo screen recordings
+recordings/

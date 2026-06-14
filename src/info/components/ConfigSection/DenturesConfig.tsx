@@ -30,12 +30,12 @@ export function DenturesConfig({ state, dispatch, hideNotesAndAttachments, unifi
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: unified ? "24px" : "16px" }}>
-      <div style={{ ...cs, overflow: "visible", position: "relative", zIndex: 10 }}>
+      <div data-demo="due-send" style={{ ...cs, overflow: "visible", position: "relative", zIndex: 10 }}>
         <DueDateSendTo dueDate={state.dueDate} sendTo={state.sendTo} dispatch={dispatch} />
       </div>
 
       <div style={cs}>
-        <div style={{ marginBottom: "16px" }}>
+        <div data-demo="dentures-arch" style={{ marginBottom: "16px" }}>
           <div style={{ fontSize: "12px", fontWeight: 400, color: "var(--ads-text-muted)", fontFamily: "var(--ads-font-sans)", marginBottom: "8px" }}>
             Arch
           </div>
@@ -51,62 +51,74 @@ export function DenturesConfig({ state, dispatch, hideNotesAndAttachments, unifi
           </RadioGroup>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-          <DropdownList
-            label="Denture type"
-            required
-            fullWidth
-            placeholder="Select type"
-            options={DENTURE_TYPES}
-            value={state.dentureType}
-            onChange={(v) => dispatch({ type: "SET_DENTURE_TYPE", value: v })}
-          />
-          <DropdownList
-            label="Stage"
-            required
-            fullWidth
-            placeholder="Select stage"
-            options={DENTURE_STAGES}
-            value={state.dentureStage}
-            onChange={(v) => dispatch({ type: "SET_DENTURE_STAGE", value: v })}
-          />
-          <DropdownList
-            label="Mould"
-            fullWidth
-            placeholder="Select mould"
-            options={DENTURE_MOULDS}
-            value={state.dentureMould}
-            onChange={(v) => dispatch({ type: "SET_DENTURE_MOULD", value: v })}
-          />
-          <DropdownList
-            label="Shade system"
-            fullWidth
-            placeholder="Select"
-            options={SHADE_SYSTEMS}
-            value={state.dentureShadeSystem}
-            onChange={(v) => dispatch({ type: "SET_DENTURE_SHADE_SYSTEM", value: v })}
-          />
-          <DropdownList
-            label="Teeth shade"
-            fullWidth
-            placeholder={state.dentureShadeSystem ? "Select" : "Select system first"}
-            options={shadeOptions}
-            value={state.dentureTeethShade}
-            disabled={!state.dentureShadeSystem}
-            onChange={(v) => dispatch({ type: "SET_DENTURE_TEETH_SHADE", value: v })}
-          />
-          <DropdownList
-            label="Gingival shade"
-            fullWidth
-            placeholder="Select"
-            options={[
-              { value: "light", label: "Light Pink" },
-              { value: "medium", label: "Medium Pink" },
-              { value: "dark", label: "Dark Pink" },
-              { value: "natural", label: "Natural" },
-            ]}
-            value={state.dentureGingival}
-            onChange={(v) => dispatch({ type: "SET_DENTURE_GINGIVAL", value: v })}
-          />
+          <div data-demo="dent-type">
+            <DropdownList
+              label="Denture type"
+              required
+              fullWidth
+              placeholder="Select type"
+              options={DENTURE_TYPES}
+              value={state.dentureType}
+              onChange={(v) => dispatch({ type: "SET_DENTURE_TYPE", value: v })}
+            />
+          </div>
+          <div data-demo="dent-stage">
+            <DropdownList
+              label="Stage"
+              required
+              fullWidth
+              placeholder="Select stage"
+              options={DENTURE_STAGES}
+              value={state.dentureStage}
+              onChange={(v) => dispatch({ type: "SET_DENTURE_STAGE", value: v })}
+            />
+          </div>
+          <div data-demo="dent-mould">
+            <DropdownList
+              label="Mould"
+              fullWidth
+              placeholder="Select mould"
+              options={DENTURE_MOULDS}
+              value={state.dentureMould}
+              onChange={(v) => dispatch({ type: "SET_DENTURE_MOULD", value: v })}
+            />
+          </div>
+          <div data-demo="dent-shade-system">
+            <DropdownList
+              label="Shade system"
+              fullWidth
+              placeholder="Select"
+              options={SHADE_SYSTEMS}
+              value={state.dentureShadeSystem}
+              onChange={(v) => dispatch({ type: "SET_DENTURE_SHADE_SYSTEM", value: v })}
+            />
+          </div>
+          <div data-demo="dent-teeth-shade">
+            <DropdownList
+              label="Teeth shade"
+              fullWidth
+              placeholder={state.dentureShadeSystem ? "Select" : "Select system first"}
+              options={shadeOptions}
+              value={state.dentureTeethShade}
+              disabled={!state.dentureShadeSystem}
+              onChange={(v) => dispatch({ type: "SET_DENTURE_TEETH_SHADE", value: v })}
+            />
+          </div>
+          <div data-demo="dent-gingival">
+            <DropdownList
+              label="Gingival shade"
+              fullWidth
+              placeholder="Select"
+              options={[
+                { value: "light", label: "Light Pink" },
+                { value: "medium", label: "Medium Pink" },
+                { value: "dark", label: "Dark Pink" },
+                { value: "natural", label: "Natural" },
+              ]}
+              value={state.dentureGingival}
+              onChange={(v) => dispatch({ type: "SET_DENTURE_GINGIVAL", value: v })}
+            />
+          </div>
         </div>
       </div>
 

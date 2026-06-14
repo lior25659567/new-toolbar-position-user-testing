@@ -46,7 +46,11 @@ type ViewId =
   | 'automation' | 'multi-location' | 'reports';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<ViewId>('home');
+  // Deep-link support (used by scripts/record-demo.mjs and shareable links):
+  // `?view=demo` opens straight into the demo hub.
+  const [currentView, setCurrentView] = useState<ViewId>(() =>
+    new URLSearchParams(window.location.search).get('view') === 'demo' ? 'demo' : 'home',
+  );
 
   // Self-driving demo on the Patient Report page.
   const reportRef = useRef<PatientReportPageHandle | null>(null);

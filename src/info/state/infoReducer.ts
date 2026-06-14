@@ -72,7 +72,7 @@ export const initialInfoState: InfoState = {
   invisalignType: "",
   treatmentStage: "",
 
-  archSelection: "both",
+  archSelection: "upper",
   dentureType: "",
   dentureStage: "",
   dentureMould: "",
@@ -115,7 +115,7 @@ export function infoReducer(state: InfoState, action: InfoAction): InfoState {
         toothSpecs: [],
         invisalignType: "",
         treatmentStage: "",
-        archSelection: "both",
+        archSelection: "upper",
         dentureType: "",
         dentureStage: "",
         dentureMould: "",

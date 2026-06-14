@@ -22,6 +22,190 @@ import { ToolbarDensityContext } from '../ToolbarDensityContext';
 
 type DemoBlock = ImageBlock | ComparisonBlock | CostSummaryBlock | NotesBlock | RxBlock | NextAppointmentBlock | PatientInstructionsBlock;
 
+// ─── Playback speed control (shared by every demo) ──────────────────────────
+//
+// Demos pace themselves by multiplying their authored waits by a base constant.
+// `useDemoSpeed` exposes a live rate (1× = the authored pace) via a ref so the
+// running script picks up changes on its next wait, and `SpeedControl` is the
+// YouTube-style rate selector rendered in each transport bar.
+
+const SPEED_OPTIONS = [0.5, 1, 1.5, 2];
+
+function useDemoSpeed(initial = 1) {
+  const [speed, setSpeedState] = useState(initial);
+  const speedRef = useRef(initial);
+  const setSpeed = useCallback((s: number) => { speedRef.current = s; setSpeedState(s); }, []);
+  return { speed, setSpeed, speedRef };
+}
+
+function SpeedControl({ speed, onChange }: { speed: number; onChange: (s: number) => void }) {
+  return (
+    <div role="group" aria-label="Playback speed" style={{
+      display: 'flex', alignItems: 'center', gap: 2, padding: 2,
+      backgroundColor: color.neutral100, borderRadius: radius.full, flexShrink: 0,
+    }}>
+      {SPEED_OPTIONS.map((s) => {
+        const active = s === speed;
+        return (
+          <button
+            key={s}
+            type="button"
+            aria-label={`${s}× speed`}
+            aria-pressed={active}
+            onClick={() => onChange(s)}
+            style={{
+              border: 'none', cursor: 'pointer', fontFamily: font.family,
+              fontSize: font.size['2xs'], fontWeight: font.weight.medium, fontVariantNumeric: 'tabular-nums',
+              padding: `${space[1]} ${space[2]}`, borderRadius: radius.full, lineHeight: 1,
+              backgroundColor: active ? color.white : 'transparent',
+              color: active ? color.primary : color.textSubtle,
+              boxShadow: active ? shadow.sm : 'none', transition: `all ${transition.fast}`,
+            }}
+          >
+            {s}×
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── In-app screen recorder (shared by every demo) ──────────────────────────
+//
+// Captures the current tab via getDisplayMedia + MediaRecorder and downloads a
+// .webm. There's a one-time "share this tab" confirm (browsers don't allow
+// silent capture). For a polished .mp4 use `npm run record:demo` instead.
+
+function useDemoRecorder() {
+  const [recording, setRecording] = useState(false);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const pollRef = useRef<number | null>(null);
+  const teardownRef = useRef<(() => void) | null>(null);
+  const supported =
+    typeof window !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia && 'MediaRecorder' in window;
+
+  const clearPoll = () => { if (pollRef.current != null) { window.clearInterval(pollRef.current); pollRef.current = null; } };
+
+  const stop = useCallback(() => {
+    clearPoll();
+    const rec = recRef.current;
+    if (rec && rec.state !== 'inactive') rec.stop();
+  }, []);
+
+  const start = useCallback(async (filename: string, onStart?: () => void) => {
+    if (!supported || recording) return;
+    let display: MediaStream;
+    try {
+      // preferCurrentTab nudges Chrome to pre-select this tab in the picker.
+      display = await navigator.mediaDevices.getDisplayMedia(
+        { video: { frameRate: 30 }, audio: false, preferCurrentTab: true } as MediaStreamConstraints,
+      );
+    } catch { return; } // user dismissed the picker
+
+    // Pipe the tab capture through a <canvas> so we can crop off the demo's
+    // control header — only the content below the transport bar is recorded.
+    const video = document.createElement('video');
+    video.muted = true;
+    video.srcObject = display;
+    try { await video.play(); } catch { /* autoplay guard */ }
+    await new Promise<void>((res) => {
+      if (video.videoWidth) return res();
+      video.onloadedmetadata = () => res();
+      window.setTimeout(res, 600);
+    });
+
+    const vW = video.videoWidth || window.innerWidth;
+    const vH = video.videoHeight || window.innerHeight;
+    const scaleY = vH / Math.max(1, window.innerHeight);
+    // The transport bar is the Rec button's parent; crop everything above its bottom.
+    const recBtn = document.querySelector('[aria-label="Record demo"], [aria-label="Stop recording"]');
+    const bar = recBtn?.parentElement as HTMLElement | null;
+    const cropTop = bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom * scaleY)) : 0;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = vW;
+    canvas.height = Math.max(1, vH - cropTop);
+    const ctx = canvas.getContext('2d');
+    let raf = 0;
+    const draw = () => {
+      ctx?.drawImage(video, 0, cropTop, vW, vH - cropTop, 0, 0, canvas.width, canvas.height);
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    teardownRef.current = () => {
+      cancelAnimationFrame(raf);
+      display.getTracks().forEach((t) => t.stop());
+      video.srcObject = null;
+    };
+
+    chunksRef.current = [];
+    const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+      .find((m) => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+    const rec = new MediaRecorder(canvas.captureStream(30), { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+    recRef.current = rec;
+    rec.ondataavailable = (e) => { if (e.data.size) chunksRef.current.push(e.data); };
+    rec.onstop = () => {
+      clearPoll();
+      teardownRef.current?.();
+      teardownRef.current = null;
+      setRecording(false);
+      const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${filename}.webm`;
+      document.body.appendChild(a); a.click(); a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+    };
+    // Stop cleanly if the user ends the share via the browser's own bar.
+    display.getVideoTracks()[0]?.addEventListener('ended', stop);
+    rec.start();
+    setRecording(true);
+    onStart?.(); // replay the demo from the top so the clip starts clean
+
+    // Auto-stop once the demo signals completion (same cues the recorder script uses).
+    const startedAt = Date.now();
+    pollRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed > 6 * 60 * 1000) { stop(); return; } // 6-min hard cap
+      if (elapsed < 3000) return; // ignore the pre-replay "Done" state
+      const txt = document.body.innerText || '';
+      const doneSpan = Array.from(document.querySelectorAll('span')).some((s) => (s.textContent || '').trim() === 'Done');
+      const m = txt.match(/\b(\d+)\/(\d+)\b/);
+      const countDone = !!m && m[2] !== '0' && m[1] === m[2];
+      if (/Flow complete/i.test(txt) || doneSpan || countDone) { clearPoll(); window.setTimeout(stop, 1400); }
+    }, 500);
+  }, [supported, recording, stop]);
+
+  const toggle = useCallback((filename: string, onStart?: () => void) => {
+    if (recording) stop(); else void start(filename, onStart);
+  }, [recording, start, stop]);
+
+  return { recording, toggle, supported };
+}
+
+function RecordButton({ recording, supported, onClick }: { recording: boolean; supported: boolean; onClick: () => void }) {
+  if (!supported) return null;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={recording ? 'Stop recording' : 'Record demo'}
+      title={recording ? 'Stop & download .webm' : 'Record this demo to .webm'}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: space[1], border: 'none', cursor: 'pointer',
+        fontFamily: font.family, fontSize: font.size['2xs'], fontWeight: font.weight.medium, lineHeight: 1,
+        padding: `${space[1]} ${space[2]}`, borderRadius: radius.full, flexShrink: 0,
+        backgroundColor: recording ? 'var(--ads-background-highlight-blue)' : color.neutral100,
+        color: recording ? color.primary : color.textSubtle, transition: `all ${transition.fast}`,
+      }}
+    >
+      <span style={{ width: 8, height: 8, borderRadius: recording ? 2 : '50%', backgroundColor: '#e5484d', display: 'inline-block' }} />
+      {recording ? 'Stop' : 'Rec'}
+    </button>
+  );
+}
+
 // ─── Animated Full Report Demo ──────────────────────────────────────────────
 
 type DemoStep = {
@@ -275,6 +459,7 @@ function buildDemoSteps(): { steps: DemoStep[]; initialSettings: ReportSettings;
 }
 
 function FullReportDemo({ onBack }: { onBack: () => void }) {
+  const recName = 'patient-report';
   const { steps, initialSettings, initialPatient } = useMemo(() => buildDemoSteps(), []);
   const pageRef = useRef<PatientReportPageHandle>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -285,6 +470,8 @@ function FullReportDemo({ onBack }: { onBack: () => void }) {
   const [cursor, setCursor] = useState({ x: 50, y: 50 });
   const [cursorVisible, setCursorVisible] = useState(false);
   const timeoutRef = useRef<number | null>(null);
+  const { speed, setSpeed, speedRef } = useDemoSpeed();
+  const { recording, toggle: recToggle, supported: recSupported } = useDemoRecorder();
 
   const cleanup = useCallback(() => {
     if (timeoutRef.current !== null) { window.clearTimeout(timeoutRef.current); timeoutRef.current = null; }
@@ -324,10 +511,10 @@ function FullReportDemo({ onBack }: { onBack: () => void }) {
         }, 200);
       }
       setStepIndex(nextIdx);
-    }, step.delay);
+    }, step.delay / speedRef.current);
 
     return cleanup;
-  }, [playing, stepIndex, steps, cleanup]);
+  }, [playing, stepIndex, steps, cleanup, speedRef]);
 
   const play = () => {
     if (stepIndex >= steps.length - 1) {
@@ -409,6 +596,8 @@ function FullReportDemo({ onBack }: { onBack: () => void }) {
           {Math.max(0, stepIndex + 1)}/{steps.length}
         </span>
         <span style={{ fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>{currentLabel}</span>
+        <RecordButton recording={recording} supported={recSupported} onClick={() => recToggle(recName, restart)} />
+        <SpeedControl speed={speed} onChange={setSpeed} />
       </div>
 
       {/* The REAL PatientReportPage — single instance, driven via ref */}
@@ -436,8 +625,11 @@ type XY = { x: number; y: number };
 const INFO_ABORT = Symbol('info-demo-abort');
 
 function InfoFlowDemo({ onBack }: { onBack: () => void }) {
+  const recName = 'fixed-restorative';
   const { state, dispatch, canProceed, toothColorMap } = useInfoState();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { speed, setSpeed, speedRef } = useDemoSpeed();
+  const { recording, toggle: recToggle, supported: recSupported } = useDemoRecorder();
 
   const [cursor, setCursor] = useState<XY>({ x: -200, y: -200 });
   const [cursorVisible, setCursorVisible] = useState(false);
@@ -456,7 +648,7 @@ function InfoFlowDemo({ onBack }: { onBack: () => void }) {
     const SPEED = 0.85;
     const sleep = (ms: number) =>
       new Promise<void>((resolve, reject) => {
-        const id = window.setTimeout(() => { timers.delete(id); aborted ? reject(INFO_ABORT) : resolve(); }, ms * SPEED);
+        const id = window.setTimeout(() => { timers.delete(id); aborted ? reject(INFO_ABORT) : resolve(); }, ms * SPEED / speedRef.current);
         timers.add(id);
       });
     const ensure = () => { if (aborted) throw INFO_ABORT; };
@@ -744,6 +936,328 @@ function InfoFlowDemo({ onBack }: { onBack: () => void }) {
         </IconButton>
         <span style={{ fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>{label}</span>
         <div style={{ flex: 1 }} />
+        <RecordButton recording={recording} supported={recSupported} onClick={() => recToggle(recName, restart)} />
+        <SpeedControl speed={speed} onChange={setSpeed} />
+        <span style={{ fontSize: font.size['2xs'], color: color.textSubtle }}>{playing ? 'Playing…' : 'Done'}</span>
+      </div>
+
+      {/* The REAL Option-5 layout — summary hidden — driven by the cursor below */}
+      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+        <InfoStickyLayout
+          state={state}
+          dispatch={dispatch}
+          canProceed={canProceed}
+          toothColorMap={toothColorMap}
+          onContinue={onBack}
+          showSummary={false}
+          openPickerOnMount
+          onEditPatient={() => dispatch({ type: 'CLEAR_PATIENT' })}
+          scrollRef={scrollRef}
+        />
+
+        {/* Fake cursor overlay — never intercepts pointer events */}
+        <div aria-hidden style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 100000, overflow: 'hidden' }}>
+          <style>{`@keyframes infoDemoRipple { 0% { transform: translate(-50%,-50%) scale(0.3); opacity: .45 } 100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0 } }`}</style>
+          {clicking && (
+            <span key={clickKey} style={{ position: 'absolute', left: cursor.x, top: cursor.y, width: 24, height: 24, borderRadius: '50%', border: '1.5px solid rgba(37,99,235,.9)', background: 'rgba(37,99,235,.12)', transform: 'translate(-50%,-50%)', animation: 'infoDemoRipple .42s ease-out forwards' }} />
+          )}
+          <div style={{
+            position: 'absolute', left: cursor.x, top: cursor.y, width: 16, height: 20,
+            transform: `translate(-0.9px,-0.9px) scale(${clicking ? 0.85 : 1})`, transformOrigin: 'top left',
+            transition: 'left .26s cubic-bezier(.45,.05,.2,1), top .26s cubic-bezier(.45,.05,.2,1), opacity .3s, transform .12s ease',
+            opacity: cursorVisible ? 1 : 0, filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,.4))',
+          }}>
+            <svg width="16" height="20" viewBox="0 0 18 22" fill="none">
+              <path d="M1 1L1 16L5.5 12L9 20L12 19L8.5 11L14 11L1 1Z" fill="#000" stroke="#fff" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Dentures flow demo (real Option-5 info layout, summary hidden) ─────────
+//
+// Same self-driving opening as InfoFlowDemo (search & create the patient), but
+// the procedure sequence browses Fixed Restorative → Implant Planning and then
+// settles on Dentures, which is fully configured (arch, type, stage, mould,
+// shades), scanned and noted. Every step is a real interaction on a real
+// component, driven by a fake cursor + synthetic DOM events.
+
+function InfoDenturesDemo({ onBack }: { onBack: () => void }) {
+  const recName = 'dentures';
+  const { state, dispatch, canProceed, toothColorMap } = useInfoState();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { speed, setSpeed, speedRef } = useDemoSpeed();
+  const { recording, toggle: recToggle, supported: recSupported } = useDemoRecorder();
+
+  const [cursor, setCursor] = useState<XY>({ x: -200, y: -200 });
+  const [cursorVisible, setCursorVisible] = useState(false);
+  const [clicking, setClicking] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const [label, setLabel] = useState('Starting…');
+  const [playing, setPlaying] = useState(false);
+  const [runId, setRunId] = useState(1); // bump to (re)start; auto-runs on mount
+
+  useEffect(() => {
+    if (runId === 0) return;
+    let aborted = false;
+    const timers = new Set<number>();
+    setPlaying(true);
+
+    const SPEED = 0.85;
+    const sleep = (ms: number) =>
+      new Promise<void>((resolve, reject) => {
+        const id = window.setTimeout(() => { timers.delete(id); aborted ? reject(INFO_ABORT) : resolve(); }, ms * SPEED / speedRef.current);
+        timers.add(id);
+      });
+    const ensure = () => { if (aborted) throw INFO_ABORT; };
+
+    // ── DOM helpers ──
+    const $ = (sel: string) => document.querySelector(sel) as HTMLElement | null;
+    const $$ = (sel: string) => Array.from(document.querySelectorAll(sel)) as HTMLElement[];
+    const byText = (sel: string, text: string) =>
+      $$(sel).find((e) => (e.textContent || '').includes(text)) ?? null;
+    const centerOf = (el: Element): XY => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    const fire = (el: Element | null, type: string) => {
+      if (el) el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+    };
+    let lastHover: Element | null = null;
+    const setHover = (el: Element | null) => {
+      if (lastHover && lastHover !== el) {
+        lastHover.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, cancelable: true, view: window, relatedTarget: el ?? document.body }));
+      }
+      if (el && el !== lastHover) fire(el, 'mouseover');
+      if (el) fire(el, 'mousemove');
+      lastHover = el;
+    };
+    const realClick = (el: Element | null) => {
+      if (!el) return;
+      fire(el, 'mousedown');
+      fire(el, 'mouseup');
+      const anyEl = el as unknown as { click?: () => void };
+      if (typeof anyEl.click === 'function') anyEl.click();
+      else fire(el, 'click');
+    };
+    const scrollTo = (el: Element | null) => el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // ── Cursor motion ──
+    const moveTo = async (xy: XY, dur = 420) => { ensure(); setCursorVisible(true); setCursor(xy); await sleep(dur); };
+    const moveToEl = async (el: Element | null, dur?: number) => {
+      if (!el) { await sleep(120); return; }
+      await moveTo(centerOf(el), dur);
+      setHover(el);
+    };
+    const clickPulse = async () => { setClickKey((k) => k + 1); setClicking(true); await sleep(170); setClicking(false); await sleep(60); };
+    const clickEl = async (el: Element | null, settle = 400) => {
+      if (!el) { await sleep(150); return; }
+      await moveToEl(el);
+      await clickPulse();
+      realClick(el);
+      await sleep(settle);
+    };
+    const pollFor = async (sel: string, tries = 40): Promise<HTMLElement | null> => {
+      for (let k = 0; k < tries; k++) { ensure(); const el = $(sel); if (el) return el; await sleep(80); }
+      return null;
+    };
+    const pollText = async (sel: string, text: string, tries = 40): Promise<HTMLElement | null> => {
+      for (let k = 0; k < tries; k++) { ensure(); const el = byText(sel, text); if (el) return el; await sleep(80); }
+      return null;
+    };
+
+    // Type into a REAL input via the native value setter so React's own
+    // onChange fires (i.e. the component's live state updates).
+    const nativeSet = (el: HTMLInputElement | HTMLTextAreaElement, value: string) => {
+      const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+      desc?.set?.call(el, value);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    const typeInto = async (el: Element | null, text: string, perChar = 55) => {
+      if (!el) return;
+      const input = el as HTMLInputElement;
+      input.focus?.();
+      await sleep(180);
+      nativeSet(input, '');
+      await sleep(120);
+      for (let i = 1; i <= text.length; i++) {
+        ensure();
+        nativeSet(input, text.slice(0, i));
+        const ch = text[i - 1];
+        await sleep((ch === ' ' || ch === '-' ? perChar + 30 : perChar) + ((i * 23) % 26));
+      }
+      await sleep(240);
+    };
+
+    // Open a real DropdownList trigger and click the option matching `text`.
+    const pickDropdown = async (trigger: Element | null, optionText: string) => {
+      if (!trigger) return;
+      scrollTo(trigger); await sleep(200);
+      await clickEl(trigger, 250);
+      await clickEl(await pollText('li[role="option"]', optionText, 25), 420);
+    };
+    // The DropdownList trigger inside a `[data-demo="…"]` field wrapper.
+    const fieldTrigger = (sel: string) => $(`${sel} button[aria-haspopup="listbox"]`);
+    // Click a procedure card by name in the (collapsible) procedure picker,
+    // re-expanding the grid via "Change" first when another one is selected.
+    const showProcedure = async (name: string) => {
+      if (!byText('button', name)) await clickEl(byText('button', 'Change'), 450);
+      await clickEl(await pollText('button', name, 25), 650);
+    };
+    // Type + send a single note into the real notes input.
+    const addNote = async (text: string) => {
+      const input = $('input[placeholder="Progress notes here"]');
+      if (!input) return;
+      scrollTo(input); await sleep(250);
+      await moveToEl(input, 420); await clickPulse(); realClick(input);
+      await typeInto(input, text, 24);
+      await clickEl($('button[aria-label="Send note"]'), 500);
+    };
+
+    // ── Script — every step is a real interaction on a real component ──
+    const run = async () => {
+      dispatch({ type: 'RESET' }); // clean slate
+      setCursorVisible(true);
+      await moveTo({ x: window.innerWidth / 2, y: window.innerHeight * 0.4 }, 280);
+      await sleep(400);
+
+      // 1 · PATIENT — sort + search the list, pick the wrong person, reopen the
+      //     picker, then create the correct patient (same opening as the
+      //     Fixed Restorative demo).
+      setLabel('Sorting the patient list by date of birth');
+      const search = await pollFor('input[placeholder="Search"]', 40);
+      await pickDropdown($('button[aria-haspopup="listbox"]'), 'Date of birth');
+      await sleep(500);
+      setLabel('Searching: "Smith"…');
+      await moveToEl(search, 520); await clickPulse(); realClick(search);
+      await typeInto(search, 'Smith', 70);
+      await sleep(600);
+      setLabel('Picking John Smith from the list…');
+      await clickEl(await pollText('button', 'John Smith', 30), 750);
+      setLabel('Not the right patient — reopening the picker');
+      await clickEl(await pollFor('button[aria-label="Edit patient"]', 30), 700);
+
+      // 2 · CREATE the correct patient via the real form
+      setLabel('Adding the correct patient…');
+      await clickEl(await pollText('button', '+ New patient', 30), 500);
+      const fn = await pollFor('[data-demo="patient-form"] input[placeholder="First name"]', 30);
+      await moveToEl(fn, 460); await clickPulse(); realClick(fn);
+      await typeInto(fn, 'Maya', 55);
+      const ln = $('[data-demo="patient-form"] input[placeholder="Last name"]');
+      await moveToEl(ln, 420); await clickPulse(); realClick(ln);
+      await typeInto(ln, 'Okafor', 55);
+      setLabel('Choosing gender…');
+      const fem = $('[data-demo="patient-form"] input[type="radio"][value="female"]');
+      if (fem) { await moveToEl(fem.closest('label') ?? fem, 420); await clickPulse(); realClick(fem); await sleep(300); }
+      setLabel('Picking the date of birth…');
+      const dob = $('[data-demo="new-patient-dob"] button');
+      if (dob) {
+        await clickEl(dob, 250);
+        await pollFor('[aria-label="Previous month"]', 20);
+        await clickEl(await pollFor('[data-demo="cal-day-12"]', 20), 400);
+      }
+      setLabel('Saving the new patient');
+      await clickEl(await pollText('[data-demo="patient-form"] button', 'Save Patient', 25), 700);
+
+      // 3 · PROCEDURES — browse Fixed Restorative → Implant Planning, then Dentures
+      const procGrid = await pollText('button', 'Dentures', 40);
+      scrollTo(procGrid); await sleep(500);
+      setLabel('Opening Fixed Restorative…');
+      await showProcedure('Fixed Restorative');
+      setLabel('Trying Implant Planning…');
+      await showProcedure('Implant Planning');
+      setLabel('Choosing Dentures');
+      await showProcedure('Dentures');
+
+      // 4 · DUE / SEND — drive the real dropdown + date picker
+      setLabel('Selecting the lab…');
+      const sendTrigger = await pollFor('[data-demo="due-send"] button[aria-haspopup="listbox"]', 40);
+      scrollTo(sendTrigger); await sleep(300);
+      await pickDropdown(sendTrigger, 'Premier Dental Lab');
+      setLabel('Setting the due date…');
+      const dateBtn = $('[data-demo="due-send"] button:not([aria-haspopup="listbox"])');
+      if (dateBtn) {
+        await clickEl(dateBtn, 250);
+        await pollFor('[aria-label="Next month"]', 25);
+        await clickEl($('[aria-label="Next month"]'), 300);
+        await clickEl(await pollFor('[data-demo="cal-day-20"]', 20), 450);
+      }
+
+      // 5 · ARCH — pick Both
+      setLabel('Arch → Both');
+      const archBoth = await pollFor('[data-demo="dentures-arch"] input[type="radio"][value="both"]', 30);
+      if (archBoth) {
+        scrollTo(archBoth); await sleep(250);
+        await moveToEl(archBoth.closest('label') ?? archBoth, 420); await clickPulse(); realClick(archBoth); await sleep(350);
+      }
+
+      // 6 · DENTURE SPEC — drive each real dropdown in turn
+      setLabel('Denture type → Complete Denture');
+      await pickDropdown(fieldTrigger('[data-demo="dent-type"]'), 'Complete Denture');
+      setLabel('Stage → Final');
+      await pickDropdown(fieldTrigger('[data-demo="dent-stage"]'), 'Final');
+      setLabel('Mould → Ovoid');
+      await pickDropdown(fieldTrigger('[data-demo="dent-mould"]'), 'Ovoid');
+      setLabel('Shade system → VITA Classical');
+      await pickDropdown(fieldTrigger('[data-demo="dent-shade-system"]'), 'VITA Classical');
+      setLabel('Teeth shade → A2');
+      await pickDropdown(fieldTrigger('[data-demo="dent-teeth-shade"]'), 'A2');
+      setLabel('Gingival shade → Medium Pink');
+      await pickDropdown(fieldTrigger('[data-demo="dent-gingival"]'), 'Medium Pink');
+
+      // 7 · SCAN OPTIONS — three real toggles
+      setLabel('Enabling scan options…');
+      for (const t of ['NIRI capture', 'Sleeve attached', 'Denture copy']) {
+        const lab = byText('label', t);
+        if (lab) { scrollTo(lab); await sleep(250); await moveToEl(lab, 420); await clickPulse(); realClick(lab.querySelector('input')); await sleep(350); }
+      }
+
+      // 8 · NOTES — add a couple, each typed + sent on the real input
+      setLabel('Adding notes…');
+      await addNote('Complete denture, both arches — final stage.');
+      await addNote('Mould ovoid; teeth shade A2, gingival medium pink.');
+
+      setLabel('Flow complete — ready to scan.');
+      await moveTo({ x: window.innerWidth / 2, y: window.innerHeight * 0.45 }, 500);
+      await sleep(300);
+      setCursorVisible(false);
+    };
+
+    run()
+      .then(() => { if (!aborted) setPlaying(false); })
+      .catch((e) => { if (e !== INFO_ABORT) console.error('[DenturesDemo]', e); });
+
+    return () => { aborted = true; timers.forEach((id) => window.clearTimeout(id)); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runId]);
+
+  const restart = () => { setCursorVisible(false); setRunId((n) => n + 1); };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+      {/* Transport bar */}
+      <div style={{
+        padding: `${space[2]} ${space[6]}`, borderBottom: `1px solid ${color.borderDefault}`,
+        backgroundColor: color.white, display: 'flex', alignItems: 'center', gap: space[3], flexShrink: 0, zIndex: 20,
+      }}>
+        <IconButton size="sm" aria-label="Back to demos" onClick={onBack}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
+        </IconButton>
+        <IconButton size="sm" aria-label="Restart" onClick={restart}>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 7a5 5 0 1 0 1.5-3.5" /><path d="M2 2v3h3" />
+          </svg>
+        </IconButton>
+        <span style={{ fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>{label}</span>
+        <div style={{ flex: 1 }} />
+        <RecordButton recording={recording} supported={recSupported} onClick={() => recToggle(recName, restart)} />
+        <SpeedControl speed={speed} onChange={setSpeed} />
         <span style={{ fontSize: font.size['2xs'], color: color.textSubtle }}>{playing ? 'Playing…' : 'Done'}</span>
       </div>
 
@@ -791,6 +1305,7 @@ function InfoFlowDemo({ onBack }: { onBack: () => void }) {
 // Scan and switch to View mid-script.
 
 function ScanViewDemo({ onBack }: { onBack: () => void }) {
+  const recName = 'scan-view';
   const [currentPage, setCurrentPage] = useState<string>('scan');
   const [activeButtons, setActiveButtons] = useState<Set<number>>(new Set());
   const [viewActiveButtons, setViewActiveButtons] = useState<Set<number>>(new Set());
@@ -805,6 +1320,8 @@ function ScanViewDemo({ onBack }: { onBack: () => void }) {
   const [label, setLabel] = useState('Starting…');
   const [playing, setPlaying] = useState(false);
   const [runId, setRunId] = useState(1);
+  const { speed, setSpeed, speedRef } = useDemoSpeed();
+  const { recording, toggle: recToggle, supported: recSupported } = useDemoRecorder();
 
   // Scan tool toggle (skip index 3 — in the app it navigates away to Undercut).
   const handleButtonClick = (index: number) => {
@@ -841,7 +1358,7 @@ function ScanViewDemo({ onBack }: { onBack: () => void }) {
     const SPEED = 0.9;
     const sleep = (ms: number) =>
       new Promise<void>((resolve, reject) => {
-        const id = window.setTimeout(() => { timers.delete(id); aborted ? reject(INFO_ABORT) : resolve(); }, ms * SPEED);
+        const id = window.setTimeout(() => { timers.delete(id); aborted ? reject(INFO_ABORT) : resolve(); }, ms * SPEED / speedRef.current);
         timers.add(id);
       });
     const ensure = () => { if (aborted) throw INFO_ABORT; };
@@ -1067,6 +1584,8 @@ function ScanViewDemo({ onBack }: { onBack: () => void }) {
         </IconButton>
         <span style={{ fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>{label}</span>
         <div style={{ flex: 1 }} />
+        <RecordButton recording={recording} supported={recSupported} onClick={() => recToggle(recName, restart)} />
+        <SpeedControl speed={speed} onChange={setSpeed} />
         <span style={{ fontSize: font.size['2xs'], color: color.textSubtle }}>{playing ? 'Playing…' : 'Done'}</span>
       </div>
 
@@ -1127,12 +1646,16 @@ type ReportOverlayProps = {
   pageRef: React.RefObject<PatientReportPageHandle | null>;
   runId: number;
   onDone: () => void;
+  speedRef?: React.MutableRefObject<number>;
 };
 
 function PatientReportOverlayDemo({ onBack, title, Overlay }: { onBack: () => void; title: string; Overlay: React.ComponentType<ReportOverlayProps> }) {
+  const recName = title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'report';
   const ref = useRef<PatientReportPageHandle | null>(null);
   const [runId, setRunId] = useState(0);
   const [done, setDone] = useState(false);
+  const { speed, setSpeed, speedRef } = useDemoSpeed();
+  const { recording, toggle: recToggle, supported: recSupported } = useDemoRecorder();
 
   // Start once the page (and its ref) is mounted; the overlays bail early if
   // pageRef.current is null, so we defer the first run by a tick.
@@ -1157,11 +1680,13 @@ function PatientReportOverlayDemo({ onBack, title, Overlay }: { onBack: () => vo
         </IconButton>
         <span style={{ fontSize: font.size.xs, color: color.textSubtle, fontWeight: font.weight.medium }}>{title}</span>
         <div style={{ flex: 1 }} />
+        <RecordButton recording={recording} supported={recSupported} onClick={() => recToggle(recName, restart)} />
+        <SpeedControl speed={speed} onChange={setSpeed} />
         <span style={{ fontSize: font.size['2xs'], color: color.textSubtle }}>{done ? 'Done' : 'Playing…'}</span>
       </div>
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <PatientReportPage ref={ref} onBackToHome={onBack} />
-        <Overlay pageRef={ref} runId={runId} onDone={() => setDone(true)} />
+        <Overlay pageRef={ref} runId={runId} onDone={() => setDone(true)} speedRef={speedRef} />
       </div>
     </div>
   );
@@ -1169,7 +1694,7 @@ function PatientReportOverlayDemo({ onBack, title, Overlay }: { onBack: () => vo
 
 // ─── Demo catalog ────────────────────────────────────────────────────────────
 
-type DemoId = 'patient-report' | 'info-fixed-restorative' | 'scan-view' | 'report-flow' | 'report-annotation';
+type DemoId = 'patient-report' | 'info-fixed-restorative' | 'info-dentures' | 'scan-view' | 'report-flow' | 'report-annotation';
 
 type DemoMeta = {
   id: DemoId;
@@ -1204,6 +1729,19 @@ const DEMOS: DemoMeta[] = [
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 5.5c-2-2-5.5-2-7 0-1.6 2 0 5 0.7 8 0.4 1.7 0.6 4.5 2 4.5 1.3 0 1.3-3 2.3-3s1 3 2.3 3c1.4 0 1.6-2.8 2-4.5 0.7-3 2.3-6 0.7-8-1.5-2-5-2-7 0Z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'info-dentures',
+    title: 'Dentures Flow',
+    description:
+      'Info page Option 5 with the summary panel hidden: the same patient search & create opening, browsing Fixed Restorative → Implant Planning, then a fully configured Dentures case — arch, type, stage, mould, shade system, teeth & gingival shades, scan options and notes.',
+    badge: 'Implant → Dentures',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 9c0-2 1.5-3.5 4-3.5 1.6 0 2.4 0.8 4 0.8s2.4-0.8 4-0.8c2.5 0 4 1.5 4 3.5 0 3-1.2 4.2-2.2 6.6-0.7 1.7-1 3.4-2.3 3.4-1.2 0-1.2-2.5-2.2-2.5h-2.6c-1 0-1 2.5-2.2 2.5-1.3 0-1.6-1.7-2.3-3.4C5.2 13.2 4 12 4 9Z" />
+        <path d="M8 9.5h8" />
       </svg>
     ),
   },
@@ -1346,7 +1884,12 @@ function PatientReportDemo({ onBackToHub }: { onBackToHub: () => void }) {
 // ─── Hub ─────────────────────────────────────────────────────────────────────
 
 export default function DemoPage({ onBackToHome }: { onBackToHome: () => void }) {
-  const [activeDemo, setActiveDemo] = useState<DemoId | null>(null);
+  // Deep-link: `?demo=<id>` opens straight into that demo (used by the MP4
+  // recorder script and shareable links). Falls back to the hub.
+  const [activeDemo, setActiveDemo] = useState<DemoId | null>(() => {
+    const d = new URLSearchParams(window.location.search).get('demo');
+    return DEMOS.some((x) => x.id === d) ? (d as DemoId) : null;
+  });
 
   if (activeDemo === 'patient-report') {
     return <PatientReportDemo onBackToHub={() => setActiveDemo(null)} />;
@@ -1363,6 +1906,21 @@ export default function DemoPage({ onBackToHome }: { onBackToHome: () => void })
         fontFamily: font.family,
       }}>
         <InfoFlowDemo onBack={() => setActiveDemo(null)} />
+      </div>
+    );
+  }
+
+  if (activeDemo === 'info-dentures') {
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: color.bgPage,
+        fontFamily: font.family,
+      }}>
+        <InfoDenturesDemo onBack={() => setActiveDemo(null)} />
       </div>
     );
   }

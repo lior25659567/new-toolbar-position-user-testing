@@ -80,6 +80,7 @@
     "dev:clean": "vite --force",
     "dev:host": "vite --host",
     "build": "vite build",
+    "record:demo": "node scripts/record-demo.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   }

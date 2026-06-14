@@ -19,11 +19,13 @@ interface Props {
   pageRef: React.RefObject<PatientReportPageHandle | null>;
   runId: number;
   onDone: () => void;
+  /** Live playback rate (1× = authored pace). Picked up on the next wait. */
+  speedRef?: React.MutableRefObject<number>;
 }
 
 const ABORT = Symbol('annot-demo-abort');
 
-export default function AnnotationDemoOverlay({ pageRef, runId, onDone }: Props) {
+export default function AnnotationDemoOverlay({ pageRef, runId, onDone, speedRef }: Props) {
   const [cursor, setCursor] = useState<XY>({ x: -200, y: -200 });
   const [cursorVisible, setCursorVisible] = useState(false);
   const [clicking, setClicking] = useState(false);
@@ -47,7 +49,7 @@ export default function AnnotationDemoOverlay({ pageRef, runId, onDone }: Props)
         const id = window.setTimeout(() => {
           timers.delete(id);
           aborted ? reject(ABORT) : resolve();
-        }, ms * SPEED);
+        }, ms * SPEED / (speedRef?.current ?? 1));
         timers.add(id);
       });
     const ensure = () => { if (aborted) throw ABORT; };
